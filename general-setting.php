@@ -8,7 +8,7 @@
 
     $page_access = $api->check_role_permissions($username, 1);
     $add_permission = $api->check_role_permissions($username, 8);
-	$delete_permission = $api->check_role_permissions($username, 10);
+	$delete_permission = $api->check_role_permissions($username, 9);
     
     $check_user_account_status = $api->check_user_account_status($username);
 
