@@ -13,7 +13,7 @@
     $check_user_account_status = $api->check_user_account_status($username);
 
     if($check_user_account_status){
-        if($page_access != 0){
+        if($page_access == 0){
             header('location: 404-page.php');
         }
     }
