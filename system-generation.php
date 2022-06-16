@@ -308,7 +308,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                             <div class="row mb-3">
                                 <label for="email" class="col-sm-3 col-form-label">Email</label>
                                 <div class="col-sm-9">
-                                    <input id="email" name="email" class="form-control form-maxlength" maxlength="100" autocomplete="off">
+                                    <input type="email" id="email" name="email" class="form-control form-maxlength" maxlength="100" autocomplete="off">
                                 </div>
                             </div>
                             <div class="row mb-3">
@@ -443,6 +443,56 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                     <tr>
                                         <th scope="row">Number :</th>
                                         <td id="parameter_number"></td>
+                                    </tr>
+                                </tbody>
+                            </table>';
+            }
+            else if($element_type == 'company details'){
+                $element = '<table class="table table-nowrap mb-0">
+                                <tbody>
+                                    <tr>
+                                        <th scope="row">Company Logo :</th>
+                                        <td id="company_logo"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Company Name :</th>
+                                        <td id="company_name"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Street 1 :</th>
+                                        <td id="street_1"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Street 2 :</th>
+                                        <td id="street_2"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">City :</th>
+                                        <td id="city"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">State :</th>
+                                        <td id="state"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Zip Code :</th>
+                                        <td id="zip_code"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Email :</th>
+                                        <td id="email"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Telephone :</th>
+                                        <td id="telephone"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Mobile :</th>
+                                        <td id="mobile"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Website :</th>
+                                        <td id="website"></td>
                                     </tr>
                                 </tbody>
                             </table>';
@@ -1157,6 +1207,9 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                         'COMPANY_ID' => $company_id,
                         'COMPANY_NAME' => $company_name,
                         'ACTION' => '<div class="d-flex gap-2">
+                                            <button type="button" class="btn btn-primary waves-effect waves-light view-company" data-company-id="'. $company_id .'" title="View Company">
+                                                <i class="bx bx-show font-size-16 align-middle"></i>
+                                            </button>
                                             '. $update .'
                                             '. $transaction_log .'
                                             '. $delete .'

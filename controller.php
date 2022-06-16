@@ -420,8 +420,8 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     }
     # -------------------------------------------------------------
 
-    # Submit company management
-    else if($transaction == 'submit company management'){
+    # Submit company
+    else if($transaction == 'submit company'){
         if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['company_id']) && isset($_POST['company_name']) && !empty($_POST['company_name']) && isset($_POST['street_1']) && isset($_POST['street_2']) && isset($_POST['city']) && isset($_POST['state']) && isset($_POST['zip_code']) && isset($_POST['tax_id']) && isset($_POST['email']) && isset($_POST['mobile']) && isset($_POST['telephone']) && isset($_POST['website'])){
             $file_type = '';
             $username = $_POST['username'];
@@ -472,13 +472,13 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                                 $update_company_logo = $api->update_company_logo($company_logo_tmp_name, $company_logo_actual_ext, $company_id, $username);
         
                                 if($update_company_logo){
-                                    $update_company_details = $api->update_company_details($company_id, $company_name, $email, $telephone, $mobile, $website, $tax_id, $street_1, $street_2, $country_id, $state, $city, $zip_code, $username);
+                                    $update_company = $api->update_company($company_id, $company_name, $email, $telephone, $mobile, $website, $tax_id, $street_1, $street_2, $country_id, $state, $city, $zip_code, $username);
 
-                                    if($update_company_details){
+                                    if($update_company){
                                         echo 'Updated';
                                     }
                                     else{
-                                        echo $update_company_details;
+                                        echo $update_company;
                                     }
                                 }
                                 else{
@@ -498,13 +498,13 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                     }
                 }
                 else{
-                    $update_company_details = $api->update_company_details($company_id, $company_name, $email, $telephone, $mobile, $website, $tax_id, $street_1, $street_2, $country_id, $state, $city, $zip_code, $username);
+                    $update_company = $api->update_company($company_id, $company_name, $email, $telephone, $mobile, $website, $tax_id, $street_1, $street_2, $country_id, $state, $city, $zip_code, $username);
 
-                    if($update_company_details){
+                    if($update_company){
                         echo 'Updated';
                     }
                     else{
-                        echo $update_company_details;
+                        echo $update_company;
                     }
                 }
             }
@@ -1001,6 +1001,62 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     }
     # -------------------------------------------------------------
 
+    # Delete company
+    else if($transaction == 'delete company'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['company_id']) && !empty($_POST['company_id'])){
+            $username = $_POST['username'];
+            $company_id = $_POST['company_id'];
+
+            $check_company_exist = $api->check_company_exist($company_id);
+
+            if($check_company_exist > 0){
+                $delete_company = $api->delete_company($company_id, $username);
+                                    
+                if($delete_company){
+                    echo 'Deleted';
+                }
+                else{
+                    echo $delete_company;
+                }
+            }
+            else{
+                echo 'Not Found';
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Delete multiple company
+    else if($transaction == 'delete multiple company'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['company_id'])){
+            $username = $_POST['username'];
+            $company_ids = $_POST['company_id'];
+
+            foreach($company_ids as $company_id){
+                $check_company_exist = $api->check_company_exist($company_id);
+
+                if($check_company_exist > 0){
+                    $delete_company = $api->delete_company($company_id, $username);
+                                    
+                    if(!$delete_company){
+                        $error = $delete_company;
+                    }
+                }
+                else{
+                    $error = 'Not Found';
+                }
+            }
+
+            if(empty($error)){
+                echo 'Deleted';
+            }
+            else{
+                echo $error;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
     # Delete country
     else if($transaction == 'delete country'){
         if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['country_id']) && !empty($_POST['country_id'])){
@@ -1110,62 +1166,6 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                                     
                     if(!$delete_state){
                         $error = $delete_state;
-                    }
-                }
-                else{
-                    $error = 'Not Found';
-                }
-            }
-
-            if(empty($error)){
-                echo 'Deleted';
-            }
-            else{
-                echo $error;
-            }
-        }
-    }
-    # -------------------------------------------------------------
-
-    # Delete company
-    else if($transaction == 'delete company'){
-        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['company_id']) && !empty($_POST['company_id'])){
-            $username = $_POST['username'];
-            $company_id = $_POST['company_id'];
-
-            $check_company_exist = $api->check_company_exist($company_id);
-
-            if($check_company_exist > 0){
-                $delete_company = $api->delete_company($company_id, $username);
-                                    
-                if($delete_company){
-                    echo 'Deleted';
-                }
-                else{
-                    echo $delete_company;
-                }
-            }
-            else{
-                echo 'Not Found';
-            }
-        }
-    }
-    # -------------------------------------------------------------
-
-    # Delete multiple company
-    else if($transaction == 'delete multiple company'){
-        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['company_id'])){
-            $username = $_POST['username'];
-            $company_ids = $_POST['company_id'];
-
-            foreach($company_ids as $company_id){
-                $check_company_exist = $api->check_company_exist($company_id);
-
-                if($check_company_exist > 0){
-                    $delete_company = $api->delete_company($company_id, $username);
-                                    
-                    if(!$delete_company){
-                        $error = $delete_company;
                     }
                 }
                 else{
@@ -1630,6 +1630,74 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                 'STREET_1' => $company_details[0]['STREET_1'],
                 'STREET_2' => $company_details[0]['STREET_2'],
                 'STATE_ID' => $company_details[0]['STATE_ID'],
+                'CITY' => $company_details[0]['CITY'],
+                'ZIP_CODE' => $company_details[0]['ZIP_CODE']
+            );
+
+            echo json_encode($response);
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Company summary details
+    else if($transaction == 'company summary details'){
+        if(isset($_POST['company_id']) && !empty($_POST['company_id'])){
+            $company_id = $_POST['company_id'];
+            
+            $company_details = $api->get_company_details($company_id);
+            $company_logo_file_path = $company_details[0]['COMPANY_LOGO'];
+            $email = $company_details[0]['EMAIL'] ?? null;
+            $telephone = $company_details[0]['TELEPHONE'] ?? null;
+            $mobile = $company_details[0]['MOBILE'] ?? null;
+            $website = $company_details[0]['WEBSITE'] ?? null;
+            $state_id = $company_details[0]['STATE_ID'] ?? '--';
+
+            $state_details = $api->get_state_details($state_id);
+            $state_name = $state_details[0]['STATE_NAME'] ?? '--';
+
+            if(empty($company_logo)){
+                $company_logo_file_path = $api->check_image($company_logo_file_path ?? null, 'company logo');
+            }
+
+            if(!empty($email)){
+                $email = '<a href="mailto:'. $email .'">'. $email .'</a>';
+            }
+            else{
+                $email = '--';
+            }
+
+            if(!empty($telephone)){
+                $telephone = '<a href="tel:'. $telephone .'">'. $telephone .'</a>';
+            }
+            else{
+                $telephone = '--';
+            }
+
+            if(!empty($mobile)){
+                $mobile = '<a href="tel:'. $mobile .'">'. $mobile .'</a>';
+            }
+            else{
+                $mobile = '--';
+            }
+
+            if(!empty($website)){
+                $website = '<a href="'. $website .'" target="_blank">'. $website .'</a>';
+            }
+            else{
+                $website = '--';
+            }
+
+            $response[] = array(
+                'COMPANY_LOGO' => '<img class="img-thumbnail" alt="company logo" width="200" src="'. $company_logo_file_path .'" data-holder-rendered="true">',
+                'COMPANY_NAME' => $company_details[0]['COMPANY_NAME'],
+                'EMAIL' => $email,
+                'TELEPHONE' => $telephone,
+                'MOBILE' => $mobile,
+                'WEBSITE' => $website,
+                'TAX_ID' => $company_details[0]['TAX_ID'],
+                'STREET_1' => $company_details[0]['STREET_1'],
+                'STREET_2' => $company_details[0]['STREET_2'],
+                'STATE_ID' => $state_name,
                 'CITY' => $company_details[0]['CITY'],
                 'ZIP_CODE' => $company_details[0]['ZIP_CODE']
             );

@@ -1212,6 +1212,60 @@ function display_form_details(form_type){
             }
         });
     }
+    else if(form_type == 'company form'){
+        transaction = 'company details';
+
+        var company_id = sessionStorage.getItem('company_id');
+
+        $.ajax({
+            url: 'controller.php',
+            method: 'POST',
+            dataType: 'JSON',
+            data: {company_id : company_id, transaction : transaction},
+            success: function(response) {
+                $('#company_name').val(response[0].COMPANY_NAME);
+                $('#street_1').val(response[0].STREET_1);
+                $('#street_2').val(response[0].STREET_2);
+                $('#city').val(response[0].CITY);
+                $('#zip_code').val(response[0].ZIP_CODE);
+                $('#tax_id').val(response[0].TAX_ID);
+                $('#email').val(response[0].EMAIL);
+                $('#mobile').val(response[0].MOBILE);
+                $('#telephone').val(response[0].TELEPHONE);
+                $('#website').val(response[0].WEBSITE);
+                $('#company_id').val(company_id);
+
+                check_option_exist('#state', response[0].STATE_ID, '');
+            }
+        });
+    }
+    else if(form_type == 'company details'){
+        transaction = 'company summary details';
+
+        var company_id = sessionStorage.getItem('company_id');
+
+        $.ajax({
+            url: 'controller.php',
+            method: 'POST',
+            dataType: 'JSON',
+            data: {company_id : company_id, transaction : transaction},
+            success: function(response) {
+                $('#company_name').text(response[0].COMPANY_NAME);
+                $('#street_1').text(response[0].STREET_1);
+                $('#street_2').text(response[0].STREET_2);
+                $('#city').text(response[0].CITY);
+                $('#state').text(response[0].STATE_ID);
+                $('#zip_code').text(response[0].ZIP_CODE);
+                $('#tax_id').text(response[0].TAX_ID);
+
+                document.getElementById('company_logo').innerHTML = response[0].COMPANY_LOGO;
+                document.getElementById('email').innerHTML = response[0].EMAIL;
+                document.getElementById('telephone').innerHTML = response[0].TELEPHONE;
+                document.getElementById('mobile').innerHTML = response[0].MOBILE;
+                document.getElementById('website').innerHTML = response[0].WEBSITE;
+            }
+        });
+    }
     else if(form_type == 'country form'){
         transaction = 'country details';
 
@@ -1497,7 +1551,7 @@ function generate_element(element_type, value, container, modal, username){
             if(modal == '1'){
                 $('#System-Modal').modal('show');
 
-                if(element_type == 'user account details' || element_type == 'system parameter details'){
+                if(element_type == 'user account details' || element_type == 'system parameter details' || element_type == 'company details'){
                     display_form_details(element_type);
                 }
                 else if(element_type == 'transaction log'){

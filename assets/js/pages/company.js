@@ -105,6 +105,14 @@ function initialize_company_table(datatable_name, buttons = false, show_all = fa
 function initialize_click_events(){
     var username = $('#username').text();
 
+    $(document).on('click','.view-company',function() {
+        var company_id = $(this).data('company-id');
+
+        sessionStorage.setItem('company_id', company_id);
+
+        generate_modal('company details', 'Company Details', 'R' , '1', '0', 'element', '', '0', username);
+    });
+
     $(document).on('click','#add-company',function() {
         generate_modal('company form', 'Company', 'XL' , '1', '1', 'form', 'company-form', '1', username);
     });

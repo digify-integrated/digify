@@ -1390,19 +1390,19 @@ class Api{
 
     # -------------------------------------------------------------
     #
-    # Name       : update_company_details
+    # Name       : update_company
     # Purpose    : Updates company.
     #
     # Returns    : Number/String
     #
     # -------------------------------------------------------------
-    public function update_company_details($company_id, $company_name, $email, $telephone, $mobile, $website, $tax_id, $street_1, $street_2, $country_id, $state, $city, $zip_code, $username){
+    public function update_company($company_id, $company_name, $email, $telephone, $mobile, $website, $tax_id, $street_1, $street_2, $country_id, $state, $city, $zip_code, $username){
         if ($this->databaseConnection()) {
             $record_log = 'UPD->' . $username . '->' . date('Y-m-d h:i:s');
-            $country_details = $this->get_country_details($country_id);
+            $company_details = $this->get_company_details($company_id);
             
-            if(!empty($country_details[0]['TRANSACTION_LOG_ID'])){
-                $transaction_log_id = $country_details[0]['TRANSACTION_LOG_ID'];
+            if(!empty($company_details[0]['TRANSACTION_LOG_ID'])){
+                $transaction_log_id = $company_details[0]['TRANSACTION_LOG_ID'];
             }
             else{
                 # Get transaction log id
@@ -1411,7 +1411,7 @@ class Api{
                 $transaction_log_id = $transaction_log_system_parameter[0]['ID'];
             }
 
-            $sql = $this->db_connection->prepare('CALL update_company_details(:company_id, :company_name, :email, :telephone, :mobile, :website, :tax_id, :street_1, :street_2, :country_id, :state, :city, :zip_code, :transaction_log_id, :record_log)');
+            $sql = $this->db_connection->prepare('CALL update_company(:company_id, :company_name, :email, :telephone, :mobile, :website, :tax_id, :street_1, :street_2, :country_id, :state, :city, :zip_code, :transaction_log_id, :record_log)');
             $sql->bindValue(':company_id', $company_id);
             $sql->bindValue(':company_name', $company_name);
             $sql->bindValue(':email', $email);
@@ -1429,7 +1429,7 @@ class Api{
             $sql->bindValue(':record_log', $record_log);
         
             if($sql->execute()){
-                if(!empty($country_details[0]['TRANSACTION_LOG_ID'])){
+                if(!empty($company_details[0]['TRANSACTION_LOG_ID'])){
                     $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated company.');
                                     
                     if($insert_transaction_log){
@@ -1460,6 +1460,93 @@ class Api{
             }
             else{
                 return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : update_company_logo
+    # Purpose    : Updates company logo.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function update_company_logo($company_logo_tmp_name, $company_logo_actual_ext, $company_id, $username){
+        if ($this->databaseConnection()) {
+            $record_log = 'UPD->' . $username . '->' . date('Y-m-d h:i:s');
+
+            if(!empty($company_logo_tmp_name)){ 
+                $file_name = $this->generate_file_name(10);
+                $file_new = $file_name . '.' . $company_logo_actual_ext;
+                $file_destination = $_SERVER['DOCUMENT_ROOT'] . '/digify/company/logo/' . $file_new;
+                $file_path = './company/logo/' . $file_new;
+                
+                $company_details = $this->get_company_details($company_id);
+                $company_logo = $company_details[0]['COMPANY_LOGO'];
+                $transaction_log_id = $company_details[0]['TRANSACTION_LOG_ID'];
+
+                if(file_exists($company_logo)){
+                    if (unlink($company_logo)) {
+                        if(move_uploaded_file($company_logo_tmp_name, $file_destination)){
+                            $sql = $this->db_connection->prepare('CALL update_company_logo(:company_id, :file_path, :transaction_log_id, :record_log)');
+                            $sql->bindValue(':company_id', $company_id);
+                            $sql->bindValue(':file_path', $file_path);
+                            $sql->bindValue(':transaction_log_id', $transaction_log_id);
+                            $sql->bindValue(':record_log', $record_log);
+                        
+                            if($sql->execute()){
+                                $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated company logo.');
+                                    
+                                if($insert_transaction_log){
+                                    return true;
+                                }
+                                else{
+                                    return $insert_transaction_log;
+                                }
+                            }
+                            else{
+                                return $sql->errorInfo()[2];
+                            }
+                        }
+                        else{
+                            return 'There was an error uploading your file.';
+                        }
+                    }
+                    else {
+                        return $company_logo . ' cannot be deleted due to an error.';
+                    }
+                }
+                else{
+                    if(move_uploaded_file($company_logo_tmp_name, $file_destination)){
+                        $sql = $this->db_connection->prepare('CALL update_company_logo(:company_id, :file_path, :transaction_log_id, :record_log)');
+                        $sql->bindValue(':company_id', $company_id);
+                        $sql->bindValue(':file_path', $file_path);
+                        $sql->bindValue(':transaction_log_id', $transaction_log_id);
+                        $sql->bindValue(':record_log', $record_log);
+                    
+                        if($sql->execute()){
+                            $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated company logo.');
+                                
+                            if($insert_transaction_log){
+                                return true;
+                            }
+                            else{
+                                return $insert_transaction_log;
+                            }
+                        }
+                        else{
+                            return $sql->errorInfo()[2];
+                        }
+                    }
+                    else{
+                        return 'There was an error uploading your file.';
+                    }
+                }
+            }
+            else{
+                return true;
             }
         }
     }
@@ -2137,6 +2224,90 @@ class Api{
 
     # -------------------------------------------------------------
     #
+    # Name       : insert_company
+    # Purpose    : Insert company.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function insert_company($company_logo_tmp_name, $company_logo_actual_ext, $company_name, $email, $telephone, $mobile, $website, $tax_id, $street_1, $street_2, $country_id, $state, $city, $zip_code, $username){
+        if ($this->databaseConnection()) {
+            $record_log = 'INS->' . $username . '->' . date('Y-m-d h:i:s');
+
+            # Get system parameter id
+            $system_parameter = $this->get_system_parameter(7, 1);
+            $parameter_number = $system_parameter[0]['PARAMETER_NUMBER'];
+            $id = $system_parameter[0]['ID'];
+
+            # Get transaction log id
+            $transaction_log_system_parameter = $this->get_system_parameter(2, 1);
+            $transaction_log_parameter_number = $transaction_log_system_parameter[0]['PARAMETER_NUMBER'];
+            $transaction_log_id = $transaction_log_system_parameter[0]['ID'];
+
+            $sql = $this->db_connection->prepare('CALL insert_company(:id, :company_name, :email, :telephone, :mobile, :website, :tax_id, :street_1, :street_2, :country_id, :state, :city, :zip_code, :transaction_log_id, :record_log)');
+            $sql->bindValue(':id', $id);
+            $sql->bindValue(':company_name', $company_name);
+            $sql->bindValue(':email', $email);
+            $sql->bindValue(':telephone', $telephone);
+            $sql->bindValue(':mobile', $mobile);
+            $sql->bindValue(':website', $website);
+            $sql->bindValue(':tax_id', $tax_id);
+            $sql->bindValue(':street_1', $street_1);
+            $sql->bindValue(':street_2', $street_2);
+            $sql->bindValue(':country_id', $country_id);
+            $sql->bindValue(':state', $state);
+            $sql->bindValue(':city', $city);
+            $sql->bindValue(':zip_code', $zip_code);
+            $sql->bindValue(':transaction_log_id', $transaction_log_id);
+            $sql->bindValue(':record_log', $record_log); 
+        
+            if($sql->execute()){
+                # Update system parameter value
+                $update_system_parameter_value = $this->update_system_parameter_value($parameter_number, 7, $username);
+
+                if($update_system_parameter_value){
+                    # Update transaction log value
+                    $update_system_parameter_value = $this->update_system_parameter_value($transaction_log_parameter_number, 2, $username);
+
+                    if($update_system_parameter_value){
+                        $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Insert', 'User ' . $username . ' inserted company.');
+                                    
+                        if($insert_transaction_log){
+                            if(!empty($company_logo_tmp_name) && !empty($company_logo_actual_ext)){
+                                $update_company_logo = $this->update_company_logo($company_logo_tmp_name, $company_logo_actual_ext, $id, $username);
+        
+                                if($update_company_logo){
+                                    return true;
+                                }
+                                else{
+                                    return $update_company_logo;
+                                }
+                            }
+                            else{
+                                return true;
+                            }
+                        }
+                        else{
+                            return $insert_transaction_log;
+                        }
+                    }
+                    else{
+                        return $update_system_parameter_value;
+                    }
+                }
+                else{
+                    return $update_system_parameter_value;
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
     # Name       : insert_country
     # Purpose    : Insert country.
     #
@@ -2485,6 +2656,42 @@ class Api{
         
             if($sql->execute()){
                 return true;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : delete_company
+    # Purpose    : Delete company.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function delete_company($company_id, $username){
+        if ($this->databaseConnection()) {
+            $company_details = $this->get_company_details($company_id);
+            $company_logo = $company_details[0]['COMPANY_LOGO'];
+
+            $sql = $this->db_connection->prepare('CALL delete_company(:company_id)');
+            $sql->bindValue(':company_id', $company_id);
+        
+            if($sql->execute()){ 
+                if(!empty($company_logo)){
+                    if (unlink($company_logo)) {
+                        return true;
+                    }
+                    else {
+                        return $company_logo . ' cannot be deleted due to an error.';
+                    }
+                }
+                else{
+                    return true;
+                }
             }
             else{
                 return $sql->errorInfo()[2];
@@ -2895,6 +3102,51 @@ class Api{
                 while($row = $sql->fetch()){
                     $response[] = array(
                         'FILE_TYPE' => $row['FILE_TYPE'],
+                        'RECORD_LOG' => $row['RECORD_LOG']
+                    );
+                }
+
+                return $response;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : get_company_details
+    # Purpose    : Gets the company details.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_company_details($company_id){
+        if ($this->databaseConnection()) {
+            $response = array();
+
+            $sql = $this->db_connection->prepare('CALL get_company_details(:company_id)');
+            $sql->bindValue(':company_id', $company_id);
+
+            if($sql->execute()){
+                while($row = $sql->fetch()){
+                    $response[] = array(
+                        'COMPANY_NAME' => $row['COMPANY_NAME'],
+                        'COMPANY_LOGO' => $row['COMPANY_LOGO'],
+                        'EMAIL' => $row['EMAIL'],
+                        'TELEPHONE' => $row['TELEPHONE'],
+                        'MOBILE' => $row['MOBILE'],
+                        'WEBSITE' => $row['WEBSITE'],
+                        'TAX_ID' => $row['TAX_ID'],
+                        'STREET_1' => $row['STREET_1'],
+                        'STREET_2' => $row['STREET_2'],
+                        'COUNTRY_ID' => $row['COUNTRY_ID'],
+                        'STATE_ID' => $row['STATE_ID'],
+                        'CITY' => $row['CITY'],
+                        'ZIP_CODE' => $row['ZIP_CODE'],
+                        'TRANSACTION_LOG_ID' => $row['TRANSACTION_LOG_ID'],
                         'RECORD_LOG' => $row['RECORD_LOG']
                     );
                 }
@@ -3385,7 +3637,7 @@ class Api{
                     return './assets/images/default/default-logo-icon-light.png';
                 break;
                 case 'company logo':
-                    return './assets/images/default/default-logo-dark-horizontal.png';
+                    return './assets/images/default/default-company-logo.png';
                 break;
                 default:
                     return './assets/images/default/default-image-placeholder.png';
