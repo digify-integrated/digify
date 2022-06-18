@@ -616,6 +616,139 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     }
     # -------------------------------------------------------------
 
+    # Submit notification setting
+    else if($transaction == 'submit notification setting'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['notification_setting_id']) && isset($_POST['notification_setting']) && !empty($_POST['notification_setting']) && isset($_POST['notification_setting_description']) && !empty($_POST['notification_setting_description'])){
+            $username = $_POST['username'];
+            $notification_setting_id = $_POST['notification_setting_id'];
+            $notification_setting = $_POST['notification_setting'];
+            $notification_setting_description = $_POST['notification_setting_description'];
+
+            $check_notification_setting_exist = $api->check_notification_setting_exist($notification_setting_id);
+
+            if($check_notification_setting_exist > 0){
+                $update_notification_setting = $api->update_notification_setting($notification_setting_id, $notification_setting, $notification_setting_description, $username);
+
+                if($update_notification_setting){
+                    echo 'Updated';
+                }
+                else{
+                    echo $update_notification_setting;
+                }
+            }
+            else{
+                $insert_notification_setting = $api->insert_notification_setting($notification_setting, $notification_setting_description, $username);
+
+                if($insert_notification_setting){
+                    echo 'Inserted';
+                }
+                else{
+                    echo $insert_notification_setting;
+                }
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Submit notification template
+    else if($transaction == 'submit notification template'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['notification_setting_id']) && isset($_POST['notification_title']) && !empty($_POST['notification_title']) && isset($_POST['notification_message']) && !empty($_POST['notification_message']) && isset($_POST['system_link']) && !empty($_POST['system_link']) && isset($_POST['email_link']) && !empty($_POST['email_link']) && isset($_POST['role_recipient']) && isset($_POST['user_account_recipient'])){
+            $username = $_POST['username'];
+            $notification_setting_id = $_POST['notification_setting_id'];
+            $notification_title = $_POST['notification_title'];
+            $notification_message = $_POST['notification_message'];
+            $system_link = $_POST['system_link'];
+            $email_link = $_POST['email_link'];
+
+            $role_recipients = explode(',', $_POST['role_recipient']);
+            $user_account_recipients = explode(',', $_POST['user_account_recipient']);
+
+            $check_notification_template_exist = $api->check_notification_template_exist($notification_setting_id);
+
+            if($check_notification_template_exist > 0){
+                $update_notification_template = $api->update_notification_template($notification_setting_id, $notification_title, $notification_message, $system_link, $email_link, $username);
+
+                if($update_notification_template){
+                    $delete_all_notification_user_account_recipient = $api->delete_all_notification_user_account_recipient($notification_setting_id, $username);
+                                    
+                    if($delete_all_notification_user_account_recipient){
+                        $delete_all_notification_role_recipient = $api->delete_all_notification_role_recipient($notification_setting_id, $username);
+                                    
+                        if($delete_all_notification_role_recipient){
+                            foreach($role_recipients as $role_id){
+                                $insert_notification_role_recipient = $api->insert_notification_role_recipient($notification_setting_id, $role_id, $username);
+        
+                                if(!$insert_notification_role_recipient){
+                                    $error = $insert_notification_role_recipient;
+                                    break;
+                                }
+                            }
+        
+                            foreach($user_account_recipients as $user_account){
+                                $insert_notification_user_account_recipient = $api->insert_notification_user_account_recipient($notification_setting_id, $user_account, $username);
+        
+                                if(!$insert_notification_user_account_recipient){
+                                    $error = $insert_notification_user_account_recipient;
+                                    break;
+                                }
+                            }
+                        }
+                        else{
+                            $error = $delete_all_notification_role_recipient;
+                        }
+                    }
+                    else{
+                        $error = $delete_all_notification_user_account_recipient;
+                    }
+                }
+                else{
+                    $error = $update_notification_template;
+                }
+
+                if(empty($error)){
+                    echo 'Updated';
+                }
+                else{
+                    echo $error;
+                }
+            }
+            else{
+                $insert_notification_template = $api->insert_notification_template($notification_setting_id, $notification_title, $notification_message, $system_link, $email_link, $username);
+
+                if($insert_notification_template){
+                    foreach($role_recipients as $role_id){
+                        $insert_notification_role_recipient = $api->insert_notification_role_recipient($notification_setting_id, $role_id, $username);
+
+                        if(!$insert_notification_role_recipient){
+                            $error = $insert_notification_role_recipient;
+                            break;
+                        }
+                    }
+
+                    foreach($user_account_recipients as $user_account){
+                        $insert_notification_user_account_recipient = $api->insert_notification_user_account_recipient($notification_setting_id, $user_account, $username);
+
+                        if(!$insert_notification_user_account_recipient){
+                            $error = $insert_notification_user_account_recipient;
+                            break;
+                        }
+                    }
+                }
+                else{
+                    $error = $insert_notification_template;
+                }
+
+                if(empty($error)){
+                    echo 'Inserted';
+                }
+                else{
+                    echo $error;
+                }
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
     # -------------------------------------------------------------
     #   Delete transactions
     # -------------------------------------------------------------
@@ -1183,6 +1316,104 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     }
     # -------------------------------------------------------------
 
+    # Delete notification setting
+    else if($transaction == 'delete notification setting'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['notification_setting_id']) && !empty($_POST['notification_setting_id'])){
+            $username = $_POST['username'];
+            $notification_setting_id = $_POST['notification_setting_id'];
+
+            $check_notification_setting_exist = $api->check_notification_setting_exist($notification_setting_id);
+
+            if($check_notification_setting_exist > 0){
+                $delete_all_notification_template = $api->delete_all_notification_template($notification_setting_id, $username);
+                                    
+                if($delete_all_notification_template){
+                    $delete_all_notification_user_account_recipient = $api->delete_all_notification_user_account_recipient($notification_setting_id, $username);
+                                    
+                    if($delete_all_notification_user_account_recipient){
+                        $delete_all_notification_role_recipient = $api->delete_all_notification_role_recipient($notification_setting_id, $username);
+                                    
+                        if($delete_all_notification_role_recipient){
+                            $delete_notification_setting = $api->delete_notification_setting($notification_setting_id, $username);
+                                            
+                            if($delete_notification_setting){
+                                echo 'Deleted';
+                            }
+                            else{
+                                echo $delete_notification_setting;
+                            }
+                        }
+                        else{
+                            echo $delete_all_notification_role_recipient;
+                        }
+                    }
+                    else{
+                        echo $delete_all_notification_user_account_recipient;
+                    }
+                }
+                else{
+                    echo $delete_all_notification_template;
+                }
+            }
+            else{
+                echo 'Not Found';
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Delete multiple notification setting
+    else if($transaction == 'delete multiple notification setting'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['notification_setting_id'])){
+            $username = $_POST['username'];
+            $notification_setting_ids = $_POST['notification_setting_id'];
+
+            foreach($notification_setting_ids as $notification_setting_id){
+                $check_notification_setting_exist = $api->check_notification_setting_exist($notification_setting_id);
+
+                if($check_notification_setting_exist > 0){
+                    $delete_notification_setting = $api->delete_notification_setting($notification_setting_id, $username);
+                                    
+                    if($delete_notification_setting){
+                        $delete_all_notification_template = $api->delete_all_notification_template($notification_setting_id, $username);
+                                        
+                        if($delete_all_notification_template){
+                            $delete_all_notification_user_account_recipient = $api->delete_all_notification_user_account_recipient($notification_setting_id, $username);
+                                        
+                            if($delete_all_notification_user_account_recipient){
+                                $delete_all_notification_role_recipient = $api->delete_all_notification_role_recipient($notification_setting_id, $username);
+                                            
+                                if(!$delete_all_notification_role_recipient){
+                                    $error = $delete_all_notification_role_recipient;
+                                }
+                            }
+                            else{
+                                $error = $delete_all_notification_user_account_recipient;
+                            }
+                        }
+                        else{
+                            $error = $delete_all_notification_template;
+                        }
+                    }
+                    else{
+                        $error = $delete_notification_setting;
+                    }
+                }
+                else{
+                    $error = 'Not Found';
+                }
+            }
+
+            if(empty($error)){
+                echo 'Deleted';
+            }
+            else{
+                echo $error;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
     # -------------------------------------------------------------
     #   Unlock transactions
     # -------------------------------------------------------------
@@ -1731,6 +1962,62 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
             $response[] = array(
                 'STATE_NAME' => $state_details[0]['STATE_NAME'],
                 'COUNTRY_ID' => $state_details[0]['COUNTRY_ID']
+            );
+
+            echo json_encode($response);
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Notification setting details
+    else if($transaction == 'notification setting details'){
+        if(isset($_POST['notification_setting_id']) && !empty($_POST['notification_setting_id'])){
+            $notification_setting_id = $_POST['notification_setting_id'];
+            $notification_setting_details = $api->get_notification_setting_details($notification_setting_id);
+
+            $response[] = array(
+                'NOTIFICATION_SETTING' => $notification_setting_details[0]['NOTIFICATION_SETTING'],
+                'NOTIFICATION_SETTING_DESCRIPTION' => $notification_setting_details[0]['NOTIFICATION_SETTING_DESCRIPTION']
+            );
+
+            echo json_encode($response);
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Notification template details
+    else if($transaction == 'notification template details'){
+        if(isset($_POST['notification_setting_id']) && !empty($_POST['notification_setting_id'])){
+            $user_acount_recipient = '';
+            $role_recipient = '';
+            $notification_setting_id = $_POST['notification_setting_id'];
+            $notification_template_details = $api->get_notification_template_details($notification_setting_id);
+            $notification_role_recipient_details = $api->get_notification_role_recipient_details($notification_setting_id);
+            $notification_user_account_recipient_details = $api->get_notification_user_account_recipient_details($notification_setting_id);
+
+            for($i = 0; $i < count($notification_role_recipient_details); $i++) {
+                $role_recipient .= $notification_role_recipient_details[$i]['ROLE_ID'];
+
+                if($i != (count($notification_role_recipient_details) - 1)){
+                    $role_recipient .= ',';
+                }
+            }
+
+            for($i = 0; $i < count($notification_user_account_recipient_details); $i++) {
+                $user_acount_recipient .= $notification_user_account_recipient_details[$i]['USERNAME'];
+
+                if($i != (count($notification_user_account_recipient_details) - 1)){
+                    $user_acount_recipient .= ',';
+                }
+            }
+
+            $response[] = array(
+                'NOTIFICATION_TITLE' => $notification_template_details[0]['NOTIFICATION_TITLE'] ?? null,
+                'NOTIFICATION_MESSAGE' => $notification_template_details[0]['NOTIFICATION_MESSAGE'] ?? null,
+                'SYSTEM_LINK' => $notification_template_details[0]['SYSTEM_LINK'] ?? null,
+                'EMAIL_LINK' => $notification_template_details[0]['EMAIL_LINK'] ?? null,
+                'ROLE_RECIPIENT' => $role_recipient,
+                'USER_ACCOUNT_RECIPIENT' => $user_acount_recipient
             );
 
             echo json_encode($response);

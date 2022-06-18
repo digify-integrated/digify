@@ -5,19 +5,10 @@
 
     $api = new Api;
     $page_title = 'General Setting';
-
-    $page_access = $api->check_role_permissions($username, 1);
-    $add_permission = $api->check_role_permissions($username, 8);
-	$delete_permission = $api->check_role_permissions($username, 9);
     
     $check_user_account_status = $api->check_user_account_status($username);
 
-    if($check_user_account_status){
-        if($page_access == 0){
-            header('location: 404-page.php');
-        }
-    }
-    else{
+    if(!$check_user_account_status){
         header('location: logout.php?logout');
     }
 ?>

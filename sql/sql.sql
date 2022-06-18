@@ -122,6 +122,35 @@ CREATE TABLE global_state(
 	RECORD_LOG VARCHAR(100)
 );
 
+CREATE TABLE global_notification_setting(
+	NOTIFICATION_SETTING_ID INT(50) PRIMARY KEY,
+	NOTIFICATION_SETTING VARCHAR(100) NOT NULL,
+	NOTIFICATION_SETTING_DESCRIPTION VARCHAR(200) NOT NULL,
+    TRANSACTION_LOG_ID VARCHAR(100),
+	RECORD_LOG VARCHAR(100)
+);
+
+CREATE TABLE global_notification_template(
+	NOTIFICATION_SETTING_ID INT(50) PRIMARY KEY,
+	NOTIFICATION_TITLE VARCHAR(500),
+	NOTIFICATION_MESSAGE VARCHAR(500),
+	SYSTEM_LINK VARCHAR(200),
+	EMAIL_LINK VARCHAR(200),
+	RECORD_LOG VARCHAR(100)
+);
+
+CREATE TABLE global_notification_user_account_recipient(
+	NOTIFICATION_SETTING_ID INT(50),
+	USERNAME VARCHAR(50) NOT NULL,
+	RECORD_LOG VARCHAR(100)
+);
+
+CREATE TABLE global_notification_role_recipient(
+	NOTIFICATION_SETTING_ID INT(50),
+	ROLE_ID VARCHAR(50) NOT NULL,
+	RECORD_LOG VARCHAR(100)
+);
+
 /* Index */
 CREATE INDEX global_user_account_index ON global_user_account(USERNAME);
 CREATE INDEX global_system_parameter_index ON global_system_parameters(PARAMETER_ID);
@@ -133,6 +162,8 @@ CREATE INDEX global_upload_setting_index ON global_upload_setting(UPLOAD_SETTING
 CREATE INDEX global_company_index ON global_company(COMPANY_ID);
 CREATE INDEX global_country_index ON global_country(COUNTRY_ID);
 CREATE INDEX global_state_index ON global_state(STATE_ID);
+CREATE INDEX global_notification_setting_index ON global_notification_setting(NOTIFICATION_SETTING_ID);
+CREATE INDEX global_notification_template_index ON global_notification_template(NOTIFICATION_SETTING_ID);
 
 /* Stored Procedure */
 
@@ -589,6 +620,15 @@ END //
 CREATE PROCEDURE generate_role_options()
 BEGIN
 	SET @query = 'SELECT ROLE_ID, ROLE FROM global_role ORDER BY ROLE';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE generate_user_account_options()
+BEGIN
+	SET @query = 'SELECT USERNAME FROM global_user_account ORDER BY USERNAME';
 
 	PREPARE stmt FROM @query;
 	EXECUTE stmt;
@@ -1074,6 +1114,204 @@ BEGIN
 	SET @country_id = country_id;
 
 	SET @query = 'DELETE FROM global_country WHERE COUNTRY_ID = @country_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE check_notification_setting_exist(IN notification_setting_id INT)
+BEGIN
+	SET @notification_setting_id = notification_setting_id;
+
+	SET @query = 'SELECT COUNT(1) AS TOTAL FROM global_notification_setting WHERE NOTIFICATION_SETTING_ID = @notification_setting_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE update_notification_setting(IN notification_setting_id INT, IN notification_setting VARCHAR(100), IN notification_setting_description VARCHAR(200), IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
+BEGIN
+	SET @notification_setting_id = notification_setting_id;
+	SET @notification_setting = notification_setting;
+	SET @notification_setting_description = notification_setting_description;
+	SET @transaction_log_id = transaction_log_id;
+	SET @record_log = record_log;
+
+	SET @query = 'UPDATE global_notification_setting SET NOTIFICATION_SETTING = @notification_setting, NOTIFICATION_SETTING_DESCRIPTION = @notification_setting_description, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE NOTIFICATION_SETTING_ID = @notification_setting_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE insert_notification_setting(IN notification_setting_id INT, IN notification_setting VARCHAR(100), IN notification_setting_description VARCHAR(200), IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
+BEGIN
+	SET @notification_setting_id = notification_setting_id;
+	SET @notification_setting = notification_setting;
+	SET @notification_setting_description = notification_setting_description;
+	SET @transaction_log_id = transaction_log_id;
+	SET @record_log = record_log;
+
+	SET @query = 'INSERT INTO global_notification_setting (NOTIFICATION_SETTING_ID, NOTIFICATION_SETTING, NOTIFICATION_SETTING_DESCRIPTION, TRANSACTION_LOG_ID, RECORD_LOG) VALUES(@notification_setting_id, @notification_setting, @notification_setting_description, @transaction_log_id, @record_log)';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE get_notification_setting_details(IN notification_setting_id INT)
+BEGIN
+	SET @notification_setting_id = notification_setting_id;
+
+	SET @query = 'SELECT NOTIFICATION_SETTING, NOTIFICATION_SETTING_DESCRIPTION, TRANSACTION_LOG_ID, RECORD_LOG FROM global_notification_setting WHERE NOTIFICATION_SETTING_ID = @notification_setting_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE delete_notification_setting(IN notification_setting_id INT)
+BEGIN
+	SET @notification_setting_id = notification_setting_id;
+
+	SET @query = 'DELETE FROM global_notification_setting WHERE NOTIFICATION_SETTING_ID = @notification_setting_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE delete_all_notification_template(IN notification_setting_id INT)
+BEGIN
+	SET @notification_setting_id = notification_setting_id;
+
+	SET @query = 'DELETE FROM global_notification_template WHERE NOTIFICATION_SETTING_ID = @notification_setting_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE delete_all_notification_user_account_recipient(IN notification_setting_id INT)
+BEGIN
+	SET @notification_setting_id = notification_setting_id;
+
+	SET @query = 'DELETE FROM global_notification_user_account_recipient WHERE NOTIFICATION_SETTING_ID = @notification_setting_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE delete_all_notification_role_recipient(IN notification_setting_id INT)
+BEGIN
+	SET @notification_setting_id = notification_setting_id;
+
+	SET @query = 'DELETE FROM global_notification_role_recipient WHERE NOTIFICATION_SETTING_ID = @notification_setting_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE check_notification_template_exist(IN notification_setting_id INT)
+BEGIN
+	SET @notification_setting_id = notification_setting_id;
+
+	SET @query = 'SELECT COUNT(1) AS TOTAL FROM global_notification_template WHERE NOTIFICATION_SETTING_ID = @notification_setting_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE update_notification_template(IN notification_setting_id INT, IN notification_title VARCHAR(500), IN notificate_message VARCHAR(500), IN system_link VARCHAR(200), IN email_link VARCHAR(200), IN record_log VARCHAR(100))
+BEGIN
+	SET @notification_setting_id = notification_setting_id;
+	SET @notification_title = notification_title;
+	SET @notificate_message = notificate_message;
+	SET @system_link = system_link;
+	SET @email_link = email_link;
+	SET @record_log = record_log;
+
+	SET @query = 'UPDATE global_notification_template SET NOTIFICATION_TITLE = @notification_title, NOTIFICATION_MESSAGE = @notificate_message, SYSTEM_LINK = @system_link, EMAIL_LINK = @email_link, RECORD_LOG = @record_log WHERE NOTIFICATION_SETTING_ID = @notification_setting_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE insert_notification_template(IN notification_setting_id INT, IN notification_title VARCHAR(500), IN notificate_message VARCHAR(500), IN system_link VARCHAR(200), IN email_link VARCHAR(200), IN record_log VARCHAR(100))
+BEGIN
+	SET @notification_setting_id = notification_setting_id;
+	SET @notification_title = notification_title;
+	SET @notificate_message = notificate_message;
+	SET @system_link = system_link;
+	SET @email_link = email_link;
+	SET @record_log = record_log;
+
+	SET @query = 'INSERT INTO global_notification_template (NOTIFICATION_SETTING_ID, NOTIFICATION_TITLE, NOTIFICATION_MESSAGE, SYSTEM_LINK, EMAIL_LINK, RECORD_LOG) VALUES(@notification_setting_id, @notification_title, @notificate_message, @system_link, @email_link, @record_log)';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE get_notification_template_details(IN notification_setting_id INT)
+BEGIN
+	SET @notification_setting_id = notification_setting_id;
+
+	SET @query = 'SELECT NOTIFICATION_TITLE, NOTIFICATION_MESSAGE, SYSTEM_LINK, EMAIL_LINK, RECORD_LOG FROM global_notification_template WHERE NOTIFICATION_SETTING_ID = @notification_setting_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE insert_notification_role_recipient(IN notification_setting_id INT, IN role_id VARCHAR(50), IN record_log VARCHAR(100))
+BEGIN
+	SET @notification_setting_id = notification_setting_id;
+	SET @role_id = role_id;
+	SET @record_log = record_log;
+
+	SET @query = 'INSERT INTO global_notification_role_recipient (NOTIFICATION_SETTING_ID, ROLE_ID, RECORD_LOG) VALUES(@notification_setting_id, @role_id, @record_log)';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE insert_notification_user_account_recipient(IN notification_setting_id INT, IN username VARCHAR(50), IN record_log VARCHAR(100))
+BEGIN
+	SET @notification_setting_id = notification_setting_id;
+	SET @username = username;
+	SET @record_log = record_log;
+
+	SET @query = 'INSERT INTO global_notification_user_account_recipient (NOTIFICATION_SETTING_ID, USERNAME, RECORD_LOG) VALUES(@notification_setting_id, @username, @record_log)';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE get_notification_user_account_recipient_details(IN notification_setting_id INT)
+BEGIN
+	SET @notification_setting_id = notification_setting_id;
+
+	SET @query = 'SELECT USERNAME, RECORD_LOG FROM global_notification_user_account_recipient WHERE NOTIFICATION_SETTING_ID = @notification_setting_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE get_notification_role_recipient_details(IN notification_setting_id INT)
+BEGIN
+	SET @notification_setting_id = notification_setting_id;
+
+	SET @query = 'SELECT ROLE_ID, RECORD_LOG FROM global_notification_role_recipient WHERE NOTIFICATION_SETTING_ID = @notification_setting_id';
 
 	PREPARE stmt FROM @query;
 	EXECUTE stmt;

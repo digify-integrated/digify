@@ -363,6 +363,78 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                             </div>
                         </div>';
             }
+            else if($form_type == 'notification setting form'){
+                $form .= '<div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <input type="hidden" id="notification_setting_id" name="notification_setting_id">
+                                    <label for="notification_setting" class="form-label">Notification Setting <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control form-maxlength" autocomplete="off" id="notification_setting" name="notification_setting" maxlength="100">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label for="notification_setting_description" class="form-label">Notification Setting Description <span class="text-danger">*</span></label>
+                                    <textarea class="form-control form-maxlength" id="notification_setting_description" name="notification_setting_description" maxlength="200" rows="5"></textarea>
+                                </div>
+                            </div>
+                        </div>';
+            }
+            else if($form_type == 'notification template form'){
+                $form .= '<div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <input type="hidden" id="notification_setting_id" name="notification_setting_id">
+                                    <label for="notification_title" class="form-label">Notification Title <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control form-maxlength" autocomplete="off" id="notification_title" name="notification_title" maxlength="500">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label for="notification_message" class="form-label">Notification Message <span class="text-danger">*</span></label>
+                                    <textarea class="form-control form-maxlength" id="notification_message" name="notification_message" maxlength="500" rows="5"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="system_link" class="form-label">System Link <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control form-maxlength" autocomplete="off" id="system_link" name="system_link" maxlength="200">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="email_link" class="form-label">Email Link <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control form-maxlength" autocomplete="off" id="email_link" name="email_link" maxlength="200">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <label for="role_recipient" class="form-label">Role Recipient</label>
+                                        <select class="form-control form-select2" multiple="multiple" id="role_recipient" name="role_recipient">
+                                            '. $api->generate_role_options() .'
+                                        </select>
+                                    </div>
+                                </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <label for="user_account_recipient" class="form-label">User Account Recipient</label>
+                                        <select class="form-control form-select2" multiple="multiple" id="user_account_recipient" name="user_account_recipient">
+                                            '. $api->generate_user_account_options() .'
+                                        </select>
+                                    </div>
+                                </div>
+                        </div>';
+            }
 
             $form .= '</form>';
 
@@ -1318,6 +1390,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                         $state_id = $row['STATE_ID'];
                         $state_name = $row['STATE_NAME'];
                         $country_id = $row['COUNTRY_ID'];
+                        $transaction_log_id = $row['TRANSACTION_LOG_ID'];
 
                         $country_details = $api->get_country_details($country_id);
                         $country_name = $country_details[0]['COUNTRY_NAME'];
@@ -1367,6 +1440,82 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                 else{
                     echo $sql->errorInfo()[2];
                 }
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Notification setting table
+    else if($type == 'notification setting table'){
+        if ($api->databaseConnection()) {
+            # Get permission
+            $update_notification_setting = $api->check_role_permissions($username, 57);
+            $update_notification_template = $api->check_role_permissions($username, 58);
+            $delete_notification_setting = $api->check_role_permissions($username, 59);
+            $view_transaction_log = $api->check_role_permissions($username, 60);
+
+            $sql = $api->db_connection->prepare('SELECT NOTIFICATION_SETTING_ID, NOTIFICATION_SETTING, NOTIFICATION_SETTING_DESCRIPTION, TRANSACTION_LOG_ID FROM global_notification_setting');
+
+            if($sql->execute()){
+                while($row = $sql->fetch()){
+                    $notification_setting_id = $row['NOTIFICATION_SETTING_ID'];
+                    $notification_setting = $row['NOTIFICATION_SETTING'];
+                    $notification_setting_description = $row['NOTIFICATION_SETTING_DESCRIPTION'];
+                    $transaction_log_id = $row['TRANSACTION_LOG_ID'];
+
+                    if($update_notification_setting > 0){
+                        $update = '<button type="button" class="btn btn-info waves-effect waves-light update-notification-setting" data-notification-setting-id="'. $notification_setting_id .'" title="Edit Notification Setting">
+                                        <i class="bx bx-pencil font-size-16 align-middle"></i>
+                                    </button>';
+                    }
+                    else{
+                        $update = '';
+                    }
+
+                    if($update_notification_template > 0){
+                        $template = '<button type="button" class="btn btn-success waves-effect waves-light update-notification-template" data-notification-setting-id="'. $notification_setting_id .'" title="Edit Notification Template">
+                                        <i class="bx bx-file font-size-16 align-middle"></i>
+                                    </button>';
+                    }
+                    else{
+                        $template = '';
+                    }
+
+                    if($delete_notification_setting > 0){
+                        $delete = '<button type="button" class="btn btn-danger waves-effect waves-light delete-notification-setting" data-notification-setting-id="'. $notification_setting_id .'" title="Delete Notification Setting">
+                            <i class="bx bx-trash font-size-16 align-middle"></i>
+                        </button>';
+                    }
+                    else{
+                        $delete = '';
+                    }
+
+                    if($view_transaction_log > 0 && !empty($transaction_log_id)){
+                        $transaction_log = '<button type="button" class="btn btn-dark waves-effect waves-light view-transaction-log" data-transaction-log-id="'. $transaction_log_id .'" title="View Transaction Log">
+                                                <i class="bx bx-detail font-size-16 align-middle"></i>
+                                            </button>';
+                    }
+                    else{
+                        $transaction_log = '';
+                    }
+
+                    $response[] = array(
+                        'CHECK_BOX' => '<input class="form-check-input datatable-checkbox-children" type="checkbox" value="'. $notification_setting_id .'">',
+                        'NOTIFICATION_SETTING_ID' => $notification_setting_id,
+                        'NOTIFICATION_SETTING' => $notification_setting . '<p class="text-muted mb-0">'. $notification_setting_description .'</p>',
+                        'ACTION' => '<div class="d-flex gap-2">
+                                            '. $update .'
+                                            '. $template .'
+                                            '. $transaction_log .'
+                                            '. $delete .'
+                                        </div>'
+                    );
+                }
+
+                echo json_encode($response);
+            }
+            else{
+                echo $sql->errorInfo()[2];
             }
         }
     }
