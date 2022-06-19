@@ -54,9 +54,6 @@
                                                     <input type="text" class="form-control" id="username" name="username" autocomplete="off">
                                                 </div>
                                                 <div class="mb-3">
-                                                    <div class="float-end">
-                                                        <a href="forgot-password.php" class="text-muted">Forgot password?</a>
-                                                    </div>
                                                     <label class="form-label">Password</label>
                                                     <div class="input-group auth-pass-inputgroup">
                                                         <input type="password" id="password" name="password" class="form-control" aria-label="Password" aria-describedby="password-addon">

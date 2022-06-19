@@ -75,6 +75,15 @@ function initialize_global_functions(){
             dropdownParent: $('#filter-off-canvas')
         });
     }
+
+    if ($('.form-maxlength').length) {
+        $('.form-maxlength').maxlength({
+            alwaysShow: true,
+            warningClass: 'badge mt-1 bg-info',
+            limitReachedClass: 'badge mt-1 bg-danger',
+            validate: true
+        });
+    }
 }
 
 function initialize_elements(){
