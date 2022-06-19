@@ -6,7 +6,7 @@
 	$api = new Api;
     $page_title = 'Digify Integrated Solutions';
 
-    #require('views/_application_settings.php');
+    require('views/_interface_settings.php');
 ?>
 
 <!doctype html>
@@ -26,7 +26,7 @@
                     <div class="col-xl-8">
                         <div class="auth-full-bg pt-lg-5 p-4">
                             <div class="w-100">
-                                <div class="bg-overlay" style="background:url('assets/images/default/default-bg.jpg'); background-size:cover;background-repeat:no-repeat;background-position:center"></div>
+                                <div class="bg-overlay" style="background:url('<?php echo $login_background; ?>'); background-size:cover;background-repeat:no-repeat;background-position:center"></div>
                             </div>
                         </div>
                     </div>
@@ -36,10 +36,9 @@
                             <div class="w-100">
 
                                 <div class="d-flex flex-column h-100">
-                                    <div class="mb-4 mb-md-0">
+                                    <div class="mb-0 mb-md-0">
                                         <a href="index.php" class="d-block auth-logo">
-                                            <img src="assets/images/default/default-logo-dark-horizontal.png" alt="logo" style="max-height: 80px" class="auth-logo-dark">
-                                            <img src="assets/images/default/default-logo-light-horizontal.png" alt="logo" style="max-height: 80px" class="auth-logo-light">
+                                            <img src="<?php echo $login_logo; ?>" alt="logo" style="max-height: 150px" class="auth-logo-dark">
                                         </a>
                                     </div>
                                     <div class="my-auto">

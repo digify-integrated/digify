@@ -36,46 +36,46 @@ if($view_user_interface_setting > 0  || $view_email_setup > 0 || $view_applicati
                             </div>
                             <div class="row">
                                 <div class="col-md-12">
-                                    <form class="cmxform" id="user-interface-setting-form" method="post" action="#">
+                                    <form class="cmxform" id="interface-setting-form" method="post" action="#">
                                     <div class="row mb-4">
-                                        <label for="login_bg" class="col-sm-3 col-form-label">Login Background</label>
+                                        <label for="login_background" class="col-sm-3 col-form-label">Login Background</label>
                                         <div class="col-sm-9">
                                             <img class="rounded mr-2 mb-4" alt="login bg" width="150" src="./assets/images/default/default-bg.jpg" id="login-bg" data-holder-rendered="true">
-                                            <input class="form-control" type="file" name="login_bg" id="login_bg">
+                                            <input class="form-control" type="file" name="login_background" id="login_background">
                                         </div>
                                     </div>
                                     <div class="row mb-4">
                                         <label for="login_logo" class="col-sm-3 col-form-label">Login Logo</label>
                                         <div class="col-sm-9">
-                                            <img class="rounded mr-2 mb-4" alt="logo-light" width="150" src="./assets/images/default/default-logo-light-horizontal.png" id="login-logo" data-holder-rendered="true">
+                                            <img class="rounded mr-2 mb-4" alt="login logo" width="150" src="./assets/images/default/default-login-logo.png" id="login-logo" data-holder-rendered="true">
                                             <input class="form-control" type="file" name="login_logo" id="login_logo">
                                         </div>
                                     </div>
                                     <div class="row mb-4">
                                         <label for="menu_logo" class="col-sm-3 col-form-label">Menu Logo</label>
                                         <div class="col-sm-9">
-                                            <img class="rounded mr-2 mb-4" alt="logo dark" width="150" src="./assets/images/default/default-logo-dark-horizontal.png" id="menu-logo" data-holder-rendered="true">
+                                            <img class="rounded mr-2 mb-4" alt="menu logo" width="150" src="./assets/images/default/default-menu-logo.png" id="menu-logo" data-holder-rendered="true">
                                             <input class="form-control" type="file" name="menu_logo" id="menu_logo">
                                         </div>
                                     </div>
                                     <div class="row mb-4">
                                         <label for="menu_icon" class="col-sm-3 col-form-label">Menu Icon</label>
                                         <div class="col-sm-9">
-                                            <img class="rounded mr-2 mb-4" alt="logo icon light" width="150" src="./assets/images/default/default-logo-icon-light.png" id="menu-icon" data-holder-rendered="true">
+                                            <img class="rounded mr-2 mb-4" alt="menu icon" width="150" src="./assets/images/default/default-menu-icon.png" id="menu-icon" data-holder-rendered="true">
                                             <input class="form-control" type="file" name="menu_icon" id="menu_icon">
                                         </div>
                                     </div>
                                     <div class="row mb-4">
-                                        <label for="favicon_image" class="col-sm-3 col-form-label">Favicon Image</label>
+                                        <label for="favicon" class="col-sm-3 col-form-label">Favicon</label>
                                         <div class="col-sm-9">
-                                            <img class="rounded mr-2 mb-4" alt="favicon image" width="150" src="./assets/images/default/default-logo-icon-light.png" id="favicon-image" data-holder-rendered="true">
-                                            <input class="form-control" type="file" name="favicon_image" id="favicon_image">
+                                            <img class="rounded mr-2 mb-4" alt="favicon" width="150" src="./assets/images/default/default-favicon.png" id="favicon-image" data-holder-rendered="true">
+                                            <input class="form-control" type="file" name="favicon" id="favicon">
                                         </div>
                                     </div>
                                     <div class="row justify-content-end">
                                         <div class="col-sm-9">
                                             <div>
-                                                <button type="submit" class="btn btn-primary w-md">Submit</button>
+                                                <button type="submit" class="btn btn-primary w-md" id="submit-interface-setting-form">Submit</button>
                                             </div>
                                         </div>
                                     </div>

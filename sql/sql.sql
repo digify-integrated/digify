@@ -151,6 +151,17 @@ CREATE TABLE global_notification_role_recipient(
 	RECORD_LOG VARCHAR(100)
 );
 
+CREATE TABLE global_interface_setting(
+	INTERFACE_SETTING_ID INT(50) PRIMARY KEY,
+	LOGIN_BACKGROUND VARCHAR(500),
+	LOGIN_LOGO VARCHAR(500),
+	MENU_LOGO VARCHAR(500),
+	MENU_ICON VARCHAR(500),
+	FAVICON VARCHAR(500),
+    TRANSACTION_LOG_ID VARCHAR(100),
+	RECORD_LOG VARCHAR(100)
+);
+
 /* Index */
 CREATE INDEX global_user_account_index ON global_user_account(USERNAME);
 CREATE INDEX global_system_parameter_index ON global_system_parameters(PARAMETER_ID);
@@ -164,6 +175,7 @@ CREATE INDEX global_country_index ON global_country(COUNTRY_ID);
 CREATE INDEX global_state_index ON global_state(STATE_ID);
 CREATE INDEX global_notification_setting_index ON global_notification_setting(NOTIFICATION_SETTING_ID);
 CREATE INDEX global_notification_template_index ON global_notification_template(NOTIFICATION_SETTING_ID);
+CREATE INDEX global_interface_setting_index ON global_interface_setting(INTERFACE_SETTING_ID);
 
 /* Stored Procedure */
 
@@ -1312,6 +1324,66 @@ BEGIN
 	SET @notification_setting_id = notification_setting_id;
 
 	SET @query = 'SELECT ROLE_ID, RECORD_LOG FROM global_notification_role_recipient WHERE NOTIFICATION_SETTING_ID = @notification_setting_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE check_interface_settings_exist(IN interface_setting_id INT)
+BEGIN
+	SET @interface_setting_id = interface_setting_id;
+
+	SET @query = 'SELECT COUNT(1) AS TOTAL FROM global_interface_setting WHERE INTERFACE_SETTING_ID = @interface_setting_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE insert_interface_settings(IN interface_setting_id INT, IN transaction_log_id VARCHAR(500), IN record_log VARCHAR(100))
+BEGIN
+	SET @interface_setting_id = interface_setting_id;
+	SET @transaction_log_id = transaction_log_id;
+	SET @record_log = record_log;
+
+	SET @query = 'INSERT INTO global_interface_setting (INTERFACE_SETTING_ID, TRANSACTION_LOG_ID, RECORD_LOG) VALUES(@interface_setting_id, @transaction_log_id, @record_log)';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE update_interface_settings_images(IN interface_setting_id INT, IN file_path VARCHAR(500), IN transaction_log_id VARCHAR(500), IN record_log VARCHAR(100), IN request_type VARCHAR(20))
+BEGIN
+	SET @interface_setting_id = interface_setting_id;
+	SET @file_path = file_path;
+	SET @transaction_log_id = transaction_log_id;
+	SET @record_log = record_log;
+	SET @request_type = request_type;
+
+	IF @request_type = 'login background' THEN
+		SET @query = 'UPDATE global_interface_setting SET LOGIN_BACKGROUND = @file_path, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE INTERFACE_SETTING_ID = @interface_setting_id';
+	ELSEIF @request_type = 'login logo' THEN
+		SET @query = 'UPDATE global_interface_setting SET LOGIN_LOGO = @file_path, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE INTERFACE_SETTING_ID = @interface_setting_id';
+	ELSEIF @request_type = 'menu logo' THEN
+		SET @query = 'UPDATE global_interface_setting SET MENU_LOGO = @file_path, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE INTERFACE_SETTING_ID = @interface_setting_id';
+	ELSEIF @request_type = 'menu icon' THEN
+		SET @query = 'UPDATE global_interface_setting SET MENU_ICON = @file_path, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE INTERFACE_SETTING_ID = @interface_setting_id';
+	ELSE
+		SET @query = 'UPDATE global_interface_setting SET FAVICON = @file_path, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE INTERFACE_SETTING_ID = @interface_setting_id';
+    END IF;
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE get_interface_settings_details(IN interface_setting_id INT)
+BEGIN
+	SET @interface_setting_id = interface_setting_id;
+
+	SET @query = 'SELECT LOGIN_BACKGROUND, LOGIN_LOGO, MENU_LOGO, MENU_ICON, FAVICON, TRANSACTION_LOG_ID, RECORD_LOG FROM global_interface_setting WHERE INTERFACE_SETTING_ID = @interface_setting_id';
 
 	PREPARE stmt FROM @query;
 	EXECUTE stmt;

@@ -12,6 +12,8 @@
     if(!$check_user_account_status){
         header('location: logout.php?logout');
     }
+
+    require('views/_interface_settings.php');
 ?>
 
 <!doctype html>

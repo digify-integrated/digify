@@ -1510,6 +1510,23 @@ function display_form_details(form_type){
             }
         });
     }
+    else if(form_type == 'interface setting form'){
+        transaction = 'interface settings details';
+
+        $.ajax({
+            url: 'controller.php',
+            method: 'POST',
+            dataType: 'JSON',
+            data: {transaction : transaction},
+            success: function(response) {
+                $('#login-bg').attr('src', response[0].LOGIN_BACKGROUND + '?' + d.getMilliseconds());
+                $('#login-logo').attr('src', response[0].LOGIN_LOGO + '?' + d.getMilliseconds());
+                $('#menu-logo').attr('src', response[0].MENU_LOGO + '?' + d.getMilliseconds());
+                $('#menu-icon').attr('src', response[0].MENU_ICON + '?' + d.getMilliseconds());
+                $('#favicon-image').attr('src', response[0].FAVICON + '?' + d.getMilliseconds());
+            }
+        });
+    }
 }
 
 function initialize_transaction_log_table(datatable_name, buttons = false, show_all = false){

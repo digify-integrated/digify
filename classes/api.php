@@ -783,6 +783,31 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : check_interface_settings_exist
+    # Purpose    : Checks if the interface setting exists.
+    #
+    # Returns    : Number
+    #
+    # -------------------------------------------------------------
+    public function check_interface_settings_exist($interface_setting_id){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL check_interface_settings_exist(:interface_setting_id)');
+            $sql->bindValue(':interface_setting_id', $interface_setting_id);
+
+            if($sql->execute()){
+                $row = $sql->fetch();
+
+                return $row['TOTAL'];
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Update methods
     # -------------------------------------------------------------
     
@@ -1841,6 +1866,166 @@ class Api{
     }
     # -------------------------------------------------------------
 
+    #
+    # Name       : update_interface_settings_images
+    # Purpose    : Updates interface setting images
+    #
+    # Returns    : String
+    #
+    # -------------------------------------------------------------
+    public function update_interface_settings_images($file_tmp_name, $file_actual_ext, $request_type, $interface_setting_id, $username){
+        if ($this->databaseConnection()) {
+            if(!empty($file_tmp_name)){
+                $record_log = 'UPD->' . $username . '->' . date('Y-m-d h:i:s');
+                $interface_settings_details = $this->get_interface_settings_details($interface_setting_id);
+
+                if(!empty($interface_settings_details[0]['TRANSACTION_LOG_ID'])){
+                    $transaction_log_id = $interface_settings_details[0]['TRANSACTION_LOG_ID'];
+                }
+                else{
+                    # Get transaction log id
+                    $transaction_log_system_parameter = $this->get_system_parameter(2, 1);
+                    $transaction_log_parameter_number = $transaction_log_system_parameter[0]['PARAMETER_NUMBER'];
+                    $transaction_log_id = $transaction_log_system_parameter[0]['ID'];
+                }
+
+                switch ($request_type) {
+                    case 'login background':
+                        $file_new = 'login-bg.' . $file_actual_ext;
+                        $image = $interface_settings_details[0]['LOGIN_BACKGROUND'] ?? null;
+                        $log = 'User ' . $username . ' updated login background.';
+                        break;
+                    case 'login logo':
+                        $file_new = 'login-logo.' . $file_actual_ext;
+                        $image = $interface_settings_details[0]['LOGIN_LOGO'] ?? null;
+                        $log = 'User ' . $username . ' updated login logo.';
+                        break;
+                    case 'menu logo':
+                        $file_new = 'menu-logo.' . $file_actual_ext;
+                        $image = $interface_settings_details[0]['MENU_LOGO'] ?? null;
+                        $log = 'User ' . $username . ' updated menu logo.';
+                        break;
+                    case 'menu icon':
+                        $file_new = 'logo-icon-light.' . $file_actual_ext;
+                        $image = $interface_settings_details[0]['MENU_ICON'] ?? null;
+                        $log = 'User ' . $username . ' updated menu icon.';
+                        break;
+                    default:
+                        $file_new = 'favicon.' . $file_actual_ext;
+                        $image = $interface_settings_details[0]['FAVICON'] ?? null;
+                        $log = 'User ' . $username . ' updated favicon.';
+                }
+
+                $file_destination = $_SERVER['DOCUMENT_ROOT'] . '/digify/assets/images/application_settings/' . $file_new;
+                $file_path = './assets/images/application_settings/' . $file_new;
+                
+                if(file_exists($image)){
+                    if (unlink($image)) {
+                        if(move_uploaded_file($file_tmp_name, $file_destination)){
+                            $sql = $this->db_connection->prepare('CALL update_interface_settings_images(:interface_setting_id, :file_path, :transaction_log_id, :record_log, :request_type)');
+                            $sql->bindValue(':interface_setting_id', $interface_setting_id);
+                            $sql->bindValue(':file_path', $file_path);
+                            $sql->bindValue(':transaction_log_id', $transaction_log_id);
+                            $sql->bindValue(':record_log', $record_log);
+                            $sql->bindValue(':request_type', $request_type);
+                        
+                            if($sql->execute()){
+                                if(!empty($interface_settings_details[0]['TRANSACTION_LOG_ID'])){
+                                    $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', $log);
+                                
+                                    if($insert_transaction_log){
+                                        return true;
+                                    }
+                                    else{
+                                        return $insert_transaction_log;
+                                    }
+                                }
+                                else{
+                                    # Update transaction log value
+                                    $update_system_parameter_value = $this->update_system_parameter_value($transaction_log_parameter_number, 2, $username);
+                
+                                    if($update_system_parameter_value){
+                                        $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', $log);
+                                
+                                        if($insert_transaction_log){
+                                            return true;
+                                        }
+                                        else{
+                                            return $insert_transaction_log;
+                                        }
+                                    }
+                                    else{
+                                        return $update_system_parameter_value;
+                                    }
+                                }
+                            }
+                            else{
+                                return $sql->errorInfo()[2];
+                            }
+                        }
+                        else{
+                            return 'There was an error uploading your image.';
+                        }
+                    }
+                    else {
+                        return $profile_image . ' cannot be deleted due to an error.';
+                    }
+                }
+                else{
+                    if(move_uploaded_file($file_tmp_name, $file_destination)){
+                        $sql = $this->db_connection->prepare('CALL update_interface_settings_images(:interface_setting_id, :file_path, :transaction_log_id, :record_log, :request_type)');
+                        $sql->bindValue(':interface_setting_id', $interface_setting_id);
+                        $sql->bindValue(':file_path', $file_path);
+                        $sql->bindValue(':transaction_log_id', $transaction_log_id);
+                        $sql->bindValue(':record_log', $record_log);
+                        $sql->bindValue(':request_type', $request_type);
+                    
+                        if($sql->execute()){
+                            if(!empty($interface_settings_details[0]['TRANSACTION_LOG_ID'])){
+                                $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', $log);
+                            
+                                if($insert_transaction_log){
+                                    return true;
+                                }
+                                else{
+                                    return $insert_transaction_log;
+                                }
+                            }
+                            else{
+                                # Update transaction log value
+                                $update_system_parameter_value = $this->update_system_parameter_value($transaction_log_parameter_number, 2, $username);
+            
+                                if($update_system_parameter_value){
+                                    $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', $log);
+                            
+                                    if($insert_transaction_log){
+                                        return true;
+                                    }
+                                    else{
+                                        return $insert_transaction_log;
+                                    }
+                                }
+                                else{
+                                    return $update_system_parameter_value;
+                                }
+                            }
+                        }
+                        else{
+                            return $sql->errorInfo()[2];
+                        }
+                    }
+                    else{
+                        return 'There was an error uploading your image.';
+                    }
+                }
+            }
+            else{
+                return true;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
     # -------------------------------------------------------------
     #   Insert methods
     # -------------------------------------------------------------
@@ -2699,9 +2884,6 @@ class Api{
         if ($this->databaseConnection()) {
             $record_log = 'INS->' . $username . '->' . date('Y-m-d h:i:s');
 
-            $notification_setting_details = $this->get_notification_setting_details($notification_setting_id);
-            $transaction_log_id = $notification_setting_details[0]['TRANSACTION_LOG_ID'] ?? null;
-
             $sql = $this->db_connection->prepare('CALL insert_notification_role_recipient(:notification_setting_id, :role_id, :record_log)');
             $sql->bindValue(':notification_setting_id', $notification_setting_id);
             $sql->bindValue(':role_id', $role_id);
@@ -2729,9 +2911,6 @@ class Api{
         if ($this->databaseConnection()) {
             $record_log = 'INS->' . $username . '->' . date('Y-m-d h:i:s');
 
-            $notification_setting_details = $this->get_notification_setting_details($notification_setting_id);
-            $transaction_log_id = $notification_setting_details[0]['TRANSACTION_LOG_ID'] ?? null;
-
             $sql = $this->db_connection->prepare('CALL insert_notification_user_account_recipient(:notification_setting_id, :user_account, :record_log)');
             $sql->bindValue(':notification_setting_id', $notification_setting_id);
             $sql->bindValue(':user_account', $user_account);
@@ -2739,6 +2918,53 @@ class Api{
         
             if($sql->execute()){
                 return true;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : insert_interface_settings
+    # Purpose    : Insert interface settings.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function insert_interface_settings($interface_setting_id, $username){
+        if ($this->databaseConnection()) {
+            $record_log = 'INS->' . $username . '->' . date('Y-m-d h:i:s');
+
+            # Get transaction log id
+            $transaction_log_system_parameter = $this->get_system_parameter(2, 1);
+            $transaction_log_parameter_number = $transaction_log_system_parameter[0]['PARAMETER_NUMBER'];
+            $transaction_log_id = $transaction_log_system_parameter[0]['ID'];
+
+            $sql = $this->db_connection->prepare('CALL insert_interface_settings(:interface_setting_id, :transaction_log_id, :record_log)');
+            $sql->bindValue(':interface_setting_id', $interface_setting_id);
+            $sql->bindValue(':transaction_log_id', $transaction_log_id); 
+            $sql->bindValue(':record_log', $record_log); 
+        
+            if($sql->execute()){
+                # Update transaction log value
+                $update_system_parameter_value = $this->update_system_parameter_value($transaction_log_parameter_number, 2, $username);
+
+                if($update_system_parameter_value){
+                    $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Insert', 'User ' . $username . ' inserted interface setting.');
+                                
+                    if($insert_transaction_log){
+                        return true;
+                    }
+                    else{
+                        return $insert_transaction_log;
+                    }
+                }
+                else{
+                    return $update_system_parameter_value;
+                }
             }
             else{
                 return $sql->errorInfo()[2];
@@ -3771,6 +3997,43 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : get_interface_settings_details
+    # Purpose    : Gets the interface settings details.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_interface_settings_details($interface_setting_id){
+        if ($this->databaseConnection()) {
+            $response = array();
+
+            $sql = $this->db_connection->prepare('CALL get_interface_settings_details(:interface_setting_id)');
+            $sql->bindValue(':interface_setting_id', $interface_setting_id);
+
+            if($sql->execute()){
+                while($row = $sql->fetch()){
+                    $response[] = array(
+                        'LOGIN_BACKGROUND' => $row['LOGIN_BACKGROUND'],
+                        'LOGIN_LOGO' => $row['LOGIN_LOGO'],
+                        'MENU_LOGO' => $row['MENU_LOGO'],
+                        'MENU_ICON' => $row['MENU_ICON'],
+                        'FAVICON' => $row['FAVICON'],
+                        'TRANSACTION_LOG_ID' => $row['TRANSACTION_LOG_ID'],
+                        'RECORD_LOG' => $row['RECORD_LOG']
+                    );
+                }
+
+                return $response;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Get methods
     # -------------------------------------------------------------
 
@@ -4161,23 +4424,20 @@ class Api{
                 case 'profile':
                     return './assets/images/default/default-avatar.png';
                 break;
-                case 'login bg':
+                case 'login background':
                     return './assets/images/default/default-bg.jpg';
                 break;
-                case 'logo light':
-                    return './assets/images/default/default-logo-light-horizontal.png';
+                case 'login logo':
+                    return './assets/images/default/default-login-logo.png';
                 break;
-                case 'logo dark':
-                    return './assets/images/default/default-logo-dark-horizontal.png';
+                case 'menu logo':
+                    return './assets/images/default/default-menu-logo.png';
                 break;
-                case 'logo icon light':
-                    return './assets/images/default/default-logo-icon-light.png';
-                break;
-                case 'logo icon dark':
-                    return './assets/images/default/default-logo-icon-dark.png';
+                case 'menu icon':
+                    return './assets/images/default/default-menu-icon.png';
                 break;
                 case 'favicon':
-                    return './assets/images/default/default-logo-icon-light.png';
+                    return './assets/images/default/default-favicon.png';
                 break;
                 case 'company logo':
                     return './assets/images/default/default-company-logo.png';
@@ -4212,6 +4472,95 @@ class Api{
             else{
                 return false;
             }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : check_interface_upload
+    # Purpose    : Checks the interface upload.
+    #
+    # Returns    : Number
+    #
+    # -------------------------------------------------------------
+    public function check_interface_upload($file, $request, $interface_setting_id, $username){
+        $file_type = '';
+        $file_name = $file['name'];
+        $file_size = $file['size'];
+        $file_error = $file['error'];
+        $file_tmp_name = $file['tmp_name'];
+        $file_ext = explode('.', $file_name);
+        $file_actual_ext = strtolower(end($file_ext));
+
+        if(!empty($file_name)){
+            switch ($request) {
+                case 'login background':
+                    $file_size_error = 'The file uploaded for login background exceeds the maximum file size.';
+                    $file_type_error = 'The file uploaded for login background is not supported.';
+                    $upload_setting_id = 2;
+                    break;
+                case 'login logo':
+                    $file_size_error = 'The file uploaded for login logo exceeds the maximum file size.';
+                    $file_type_error = 'The file uploaded for login logo is not supported.';
+                    $upload_setting_id = 3;
+                    break;
+                case 'menu logo':
+                    $file_size_error = 'The file uploaded for menu logo exceeds the maximum file size.';
+                    $file_type_error = 'The file uploaded for menu logo is not supported.';
+                    $upload_setting_id = 4;
+                    break;
+                case 'menu icon':
+                    $file_size_error = 'The file uploaded for menu icon exceeds the maximum file size.';
+                    $file_type_error = 'The file uploaded for menu icon is not supported.';
+                    $upload_setting_id = 5;
+                    break;
+                default:
+                    $file_size_error = 'The file uploaded for favicon exceeds the maximum file size.';
+                    $file_type_error = 'The file uploaded for favicon is not supported.';
+                    $upload_setting_id = 6;
+            }
+
+            $upload_setting_details = $this->get_upload_setting_details($upload_setting_id);
+            $upload_file_type_details = $this->get_upload_file_type_details($upload_setting_id);
+            $file_max_size = $upload_setting_details[0]['MAX_FILE_SIZE'] * 1048576;
+
+            for($i = 0; $i < count($upload_file_type_details); $i++) {
+                $file_type .= $upload_file_type_details[$i]['FILE_TYPE'];
+
+                if($i != (count($upload_file_type_details) - 1)){
+                    $file_type .= ',';
+                }
+            }
+
+            $allowed_ext = explode(',', $file_type);
+
+            if(in_array($file_actual_ext, $allowed_ext)){
+                if(!$file_error){
+                    if($file_size < $file_max_size){
+                        $update_interface_settings_images = $this->update_interface_settings_images($file_tmp_name, $file_actual_ext, $request, $interface_setting_id, $username);
+
+                        if($update_interface_settings_images){
+                            return true;
+                        }
+                        else{
+                            return $update_interface_settings_images;
+                        }
+                    }
+                    else{
+                        return $file_size_error;
+                    }
+                }
+                else{
+                    return 'There was an error uploading the file.';
+                }
+            }
+            else {
+                return $file_type_error;
+            }
+        }
+        else{
+            return true;
         }
     }
     # -------------------------------------------------------------
