@@ -749,6 +749,101 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     }
     # -------------------------------------------------------------
 
+    # Submit interface setting
+    else if($transaction == 'submit interface setting'){
+        if(isset($_POST['username']) && !empty($_POST['username'])){
+            $username = $_POST['username'];
+            $interface_setting_id = 1;
+
+            $check_interface_settings_exist = $api->check_interface_settings_exist($interface_setting_id);
+
+            if($check_interface_settings_exist > 0){
+                $login_background_upload = $api->check_interface_upload($_FILES['login_background'], 'login background', $interface_setting_id, $username);
+
+                if($login_background_upload){
+                    $login_logo_upload = $api->check_interface_upload($_FILES['login_logo'], 'login logo', $interface_setting_id, $username);
+
+                    if($login_logo_upload){
+                        $menu_logo_upload = $api->check_interface_upload($_FILES['menu_logo'], 'menu logo', $interface_setting_id, $username);
+
+                        if($menu_logo_upload){
+                            $menu_icon_upload = $api->check_interface_upload($_FILES['menu_icon'], 'menu icon', $interface_setting_id, $username);
+
+                            if($menu_icon_upload){
+                                $favicon_upload = $api->check_interface_upload($_FILES['favicon'], 'favicon', $interface_setting_id, $username);
+
+                                if($favicon_upload){
+                                    echo 'Updated';
+                                }
+                                else{
+                                    echo $favicon_upload;
+                                }
+                            }
+                            else{
+                                echo $menu_icon_upload;
+                            }
+                        }
+                        else{
+                            echo $menu_logo_upload;
+                        }
+                    }
+                    else{
+                        echo $login_logo_upload;
+                    }
+                }
+                else{
+                    echo $login_background_upload;
+                }
+            }
+            else{
+                $insert_interface_settings = $api->insert_interface_settings($interface_setting_id, $username);
+
+                if($insert_interface_settings){
+                    $login_background_upload = $api->check_interface_upload($_FILES['login_background'], 'login background', $interface_setting_id, $username);
+
+                    if($login_background_upload){
+                        $login_logo_upload = $api->check_interface_upload($_FILES['login_logo'], 'login logo', $interface_setting_id, $username);
+
+                        if($login_logo_upload){
+                            $menu_logo_upload = $api->check_interface_upload($_FILES['menu_logo'], 'menu logo', $interface_setting_id, $username);
+
+                            if($menu_logo_upload){
+                                $menu_icon_upload = $api->check_interface_upload($_FILES['menu_icon'], 'menu icon', $interface_setting_id, $username);
+
+                                if($menu_icon_upload){
+                                    $favicon_upload = $api->check_interface_upload($_FILES['favicon'], 'logo icon dark', $interface_setting_id, $username);
+
+                                    if($favicon_upload){
+                                        echo 'Updated';
+                                    }
+                                    else{
+                                        echo $favicon_upload;
+                                    }
+                                }
+                                else{
+                                    echo $menu_icon_upload;
+                                }
+                            }
+                            else{
+                                echo $menu_logo_upload;
+                            }
+                        }
+                        else{
+                            echo $login_logo_upload;
+                        }
+                    }
+                    else{
+                        echo $login_background_upload;
+                    }
+                }
+                else{
+                    echo $insert_interface_settings;
+                }
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
     # -------------------------------------------------------------
     #   Delete transactions
     # -------------------------------------------------------------
@@ -2022,6 +2117,23 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
             echo json_encode($response);
         }
+    }
+    # -------------------------------------------------------------
+
+    # Interface setting details
+    else if($transaction == 'interface settings details'){
+        $interface_setting_id = 1; 
+        $interface_settings_details = $api->get_interface_settings_details($interface_setting_id);
+
+        $response[] = array(
+            'LOGIN_BACKGROUND' => $api->check_image($interface_settings_details[0]['LOGIN_BACKGROUND'] ?? null, 'login background'),
+            'LOGIN_LOGO' => $api->check_image($interface_settings_details[0]['LOGIN_LOGO'] ?? null, 'login logo'),
+            'MENU_LOGO' => $api->check_image($interface_settings_details[0]['MENU_LOGO'] ?? null, 'menu logo'),
+            'MENU_ICON' => $api->check_image($interface_settings_details[0]['MENU_ICON'] ?? null, 'menu icon'),
+            'FAVICON' => $api->check_image($interface_settings_details[0]['FAVICON'] ?? null, 'favicon'),
+        );
+
+        echo json_encode($response);
     }
     # -------------------------------------------------------------
 
