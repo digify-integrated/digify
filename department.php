@@ -4,11 +4,11 @@
     require('classes/api.php');
 
     $api = new Api;
-    $page_title = 'Role';
+    $page_title = 'Department';
 
-    $page_access = $api->check_role_permissions($username, 11);
-    $add_role = $api->check_role_permissions($username, 12);
-	$delete_role = $api->check_role_permissions($username, 14);
+    $page_access = $api->check_role_permissions($username, 70);
+    $add_department = $api->check_role_permissions($username, 71);
+	$delete_department = $api->check_role_permissions($username, 72);
     
     $check_user_account_status = $api->check_user_account_status($username);
 
@@ -41,7 +41,7 @@
 
             <?php 
                 require('views/_top_bar.php');
-                require('views/menu/_settings_menu.php');
+                require('views/menu/_employee_menu.php');
             ?>
 
             <div class="main-content">
@@ -54,7 +54,8 @@
                                     <div class="page-title-right">
                                         <ol class="breadcrumb m-0">
                                             <li class="breadcrumb-item"><a href="apps.php">Apps</a></li>
-                                            <li class="breadcrumb-item"><a href="javascript: void(0);">Settings</a></li>
+                                            <li class="breadcrumb-item"><a href="javascript: void(0);">Employees</a></li>
+                                            <li class="breadcrumb-item"><a href="javascript: void(0);">Configurations</a></li>
                                             <li class="breadcrumb-item active"><?php echo $page_title; ?></li>
                                         </ol>
                                     </div>
@@ -70,20 +71,20 @@
                                             <div class="col-md-12">
                                                 <div class="d-flex align-items-start">
                                                     <div class="flex-grow-1 align-self-center">
-                                                        <h4 class="card-title">Role List</h4>
+                                                        <h4 class="card-title">Department List</h4>
                                                     </div>
                                                     <?php
-                                                        if($add_role > 0 || $delete_role > 0){
+                                                        if($add_department > 0 || $delete_department > 0){
 
-                                                            if($add_role > 0){
-                                                                $add = '<button type="button" class="btn btn-primary waves-effect btn-label waves-light" id="add-role"><i class="bx bx-plus label-icon"></i> Add</button>';
+                                                            if($add_department > 0){
+                                                                $add = '<button type="button" class="btn btn-primary waves-effect btn-label waves-light" id="add-department"><i class="bx bx-plus label-icon"></i> Add</button>';
                                                             }
                                                             else{
                                                                 $add = '';
                                                             }
 
-                                                            if($delete_role > 0){
-                                                                $delete = '<button type="button" class="btn btn-danger waves-effect btn-label waves-light d-none multiple" id="delete-role"><i class="bx bx-trash label-icon"></i> Delete</button>';
+                                                            if($delete_department > 0){
+                                                                $delete = '<button type="button" class="btn btn-danger waves-effect btn-label waves-light d-none multiple" id="delete-department"><i class="bx bx-trash label-icon"></i> Delete</button>';
                                                             }
                                                             else{
                                                                 $delete = '';
@@ -100,7 +101,7 @@
                                         </div>
                                         <div class="row mt-4">
                                             <div class="col-md-12">
-                                                <table id="role-datatable" class="table table-bordered align-middle mb-0 table-hover table-striped dt-responsive nowrap w-100">
+                                                <table id="department-datatable" class="table table-bordered align-middle mb-0 table-hover table-striped dt-responsive nowrap w-100">
                                                     <thead>
                                                         <tr>
                                                             <th class="all">
@@ -108,7 +109,10 @@
                                                                     <input class="form-check-input" id="datatable-checkbox" type="checkbox">
                                                                 </div>
                                                             </th>
-                                                            <th class="all">Role</th>
+                                                            <th class="all">Department</th>
+                                                            <th class="all">Manager</th>
+                                                            <th class="all">Employees</th>
+                                                            <th class="all">Parent Department</th>
                                                             <th class="all">Action</th>
                                                         </tr>
                                                     </thead>
@@ -137,6 +141,6 @@
         <script src="assets/libs/jquery-validation/js/jquery.validate.min.js"></script>
         <script src="assets/libs/sweetalert2/sweetalert2.min.js"></script>
         <script src="assets/js/system.js?v=<?php echo rand(); ?>"></script>
-        <script src="assets/js/pages/role.js?v=<?php echo rand(); ?>"></script>
+        <script src="assets/js/pages/department.js?v=<?php echo rand(); ?>"></script>
     </body>
 </html>

@@ -41,7 +41,7 @@
 
             <?php 
                 require('views/_top_bar.php');
-                require('views/_settings_menu.php');
+                require('views/menu/_settings_menu.php');
             ?>
 
             <div class="main-content">

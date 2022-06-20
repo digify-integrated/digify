@@ -1005,10 +1005,12 @@ function initialize_form_validation(form_type){
             submitHandler: function (form) {
                 transaction = 'submit notification setting';
 
+                var notification_channel = $('#notification_channel').val();
+
                 $.ajax({
                     type: 'POST',
                     url: 'controller.php',
-                    data: $(form).serialize() + '&username=' + username + '&transaction=' + transaction,
+                    data: $(form).serialize() + '&username=' + username + '&notification_channel=' + notification_channel + '&transaction=' + transaction,
                     beforeSend: function(){
                         document.getElementById('submit-form').disabled = true;
                         $('#submit-form').html('<div class="spinner-border spinner-border-sm text-light" role="status"><span rclass="sr-only"></span></div>');
@@ -1485,6 +1487,8 @@ function display_form_details(form_type){
                 $('#notification_setting').val(response[0].NOTIFICATION_SETTING);
                 $('#notification_setting_description').val(response[0].NOTIFICATION_SETTING_DESCRIPTION);
                 $('#notification_setting_id').val(notification_setting_id);
+
+                check_empty(response[0].CHANNEL.split(','), '#notification_channel', 'select');
             }
         });
     }
@@ -1524,6 +1528,42 @@ function display_form_details(form_type){
                 $('#menu-logo').attr('src', response[0].MENU_LOGO + '?' + d.getMilliseconds());
                 $('#menu-icon').attr('src', response[0].MENU_ICON + '?' + d.getMilliseconds());
                 $('#favicon-image').attr('src', response[0].FAVICON + '?' + d.getMilliseconds());
+            }
+        });
+    }
+    else if(form_type == 'mail configuration form'){
+        transaction = 'mail configuration details';
+  
+        $.ajax({
+            url: 'controller.php',
+            method: 'POST',
+            dataType: 'JSON',
+            data: {transaction : transaction},
+            success: function(response) {
+                $('#mail_host').val(response[0].MAIL_HOST);
+                $('#port').val(response[0].PORT);
+                $('#mail_user').val(response[0].USERNAME);
+                $('#mail_password').val(response[0].PASSWORD);
+                $('#mail_from_name').val(response[0].MAIL_FROM_NAME);
+                $('#mail_from_email').val(response[0].MAIL_FROM_EMAIL);
+
+                check_empty(response[0].MAIL_ENCRYPTION, '#mail_encryption', 'select');
+                check_empty(response[0].SMTP_AUTH, '#smtp_auth', 'select');
+                check_empty(response[0].SMTP_AUTO_TLS, '#smtp_auto_tls', 'select');
+            }
+        });
+    }
+    else if(form_type == 'zoom integration form'){
+        transaction = 'zoom integration details';
+  
+        $.ajax({
+            url: 'controller.php',
+            method: 'POST',
+            dataType: 'JSON',
+            data: {transaction : transaction},
+            success: function(response) {
+                $('#api_key').val(response[0].API_KEY);
+                $('#api_secret').val(response[0].API_SECRET);
             }
         });
     }

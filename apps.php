@@ -33,7 +33,6 @@
 
             <?php 
                 require('views/_top_bar.php');
-                require('views/_menu.php');
             ?>
 
             <div class="main-content">
@@ -42,92 +41,100 @@
                         <div class="row">
                             <div class="col-12">
                                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                                    <h4 class="mb-sm-0 font-size-18">Apps</h4>
+                                    <h3 class="mb-sm-0">Apps</h3>
                                 </div>
                             </div>
                         </div>
 
                         <div class="row">
-                            <div class="col-sm-3">
-                                <a class="dropdown-icon-item" href="#">
+                            <div class="col-12">
+                                <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+                                    <h4 class="mb-sm-0 font-size-20">Human Resource</h4>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-2">
+                                <a class="dropdown-icon-item" href="department.php">
                                     <div class="card text-center">
                                         <div class="card-body">
                                             <div class="font-size-24 text-primary mb-2">
                                                 <i class="bx bx-user-circle"></i>
                                             </div>
-                                            <h5>Employees</h5>
+                                            <h6>Employees</h6>
                                         </div>
                                     </div>
                                 </a>
                             </div>
-                            <div class="col-sm-3">
+                            <div class="col-sm-2">
                                 <a class="dropdown-icon-item" href="#">
                                     <div class="card text-center">
                                         <div class="card-body">
                                             <div class="font-size-24 text-primary mb-2">
                                                 <i class="bx bx-user-plus"></i>
                                             </div>
-                                            <h5>Recruitment</h5>
+                                            <h6>Recruitment</h6>
                                         </div>
                                     </div>
                                 </a>
                             </div>
-                            <div class="col-sm-3">
+                            <div class="col-sm-2">
                                 <a class="dropdown-icon-item" href="#">
                                     <div class="card text-center">
                                         <div class="card-body">
                                             <div class="font-size-24 text-primary mb-2">
                                                 <i class="bx bx-money"></i>
                                             </div>
-                                            <h5>Payroll</h5>
+                                            <h6>Payroll</h6>
                                         </div>
                                     </div>
                                 </a>
                             </div>
-                            <div class="col-sm-3">
+                            <div class="col-sm-2">
                                 <a class="dropdown-icon-item" href="#">
                                     <div class="card text-center">
                                         <div class="card-body">
                                             <div class="font-size-24 text-primary mb-2">
                                                 <i class="bx bx-time"></i>
                                             </div>
-                                            <h5>Attendance</h5>
+                                            <h6>Attendance</h6>
                                         </div>
                                     </div>
                                 </a>
                             </div>
-                            <div class="col-sm-3">
+                            <div class="col-sm-2">
                                 <a class="dropdown-icon-item" href="#">
                                     <div class="card text-center">
                                         <div class="card-body">
                                             <div class="font-size-24 text-primary mb-2">
                                                 <i class="bx bx-receipt"></i>
                                             </div>
-                                            <h5>Expense</h5>
+                                            <h6>Expense</h6>
                                         </div>
                                     </div>
                                 </a>
                             </div>
-                            <div class="col-sm-3">
+                            <div class="col-sm-2">
                                 <a class="dropdown-icon-item" href="#">
                                     <div class="card text-center">
                                         <div class="card-body">
                                             <div class="font-size-24 text-primary mb-2">
                                                 <i class="bx bx-car"></i>
                                             </div>
-                                            <h5>Fleet</h5>
+                                            <h6>Fleet</h6>
                                         </div>
                                     </div>
                                 </a>
                             </div>
-                            <div class="col-sm-3">
+                            <div class="col-sm-2">
                                 <a class="dropdown-icon-item" href="general-setting.php">
                                     <div class="card text-center">
                                         <div class="card-body">
                                             <div class="font-size-24 text-primary mb-2">
                                                 <i class="bx bx-wrench"></i>
                                             </div>
-                                            <h5>Settings</h5>
+                                            <h6>Settings</h6>
                                         </div>
                                     </div>
                                 </a>

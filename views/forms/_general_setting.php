@@ -10,13 +10,10 @@ $update_user_interface_setting = $api->check_role_permissions($username, 62);
 $view_email_setup = $api->check_role_permissions($username, 64);
 $update_email_setup = $api->check_role_permissions($username, 65);
 
-$view_application_notification = $api->check_role_permissions($username, 67);
-$update_application_notification = $api->check_role_permissions($username, 68);
+$view_zoom_integration = $api->check_role_permissions($username, 67);
+$update_zoom_integration = $api->check_role_permissions($username, 68);
 
-$view_zoom_integration = $api->check_role_permissions($username, 70);
-$update_zoom_integration = $api->check_role_permissions($username, 71);
-
-if($view_user_interface_setting > 0  || $view_email_setup > 0 || $view_application_notification > 0 || $view_zoom_integration > 0){
+if($view_user_interface_setting > 0  || $view_email_setup > 0 || $view_zoom_integration > 0){
 
     if($view_user_interface_setting > 0){
         $tab .= '<a class="nav-link active" id="v-interface-setting-tab" data-bs-toggle="pill" href="#v-interface-setting" role="tab" aria-controls="v-interface-setting" aria-selected="true">
@@ -25,7 +22,7 @@ if($view_user_interface_setting > 0  || $view_email_setup > 0 || $view_applicati
                 </a>';
 
         $tab_content .= '<div class="tab-pane fade show active" id="v-interface-setting" role="tabpanel" aria-labelledby="v-interface-setting-tab">
-                            <div class="row">
+                            <div class="row mb-4">
                                 <div class="col-md-12">
                                     <div class="d-flex align-items-start">
                                         <div class="flex-grow-1 align-self-center">
@@ -92,7 +89,7 @@ if($view_user_interface_setting > 0  || $view_email_setup > 0 || $view_applicati
                 </a>';
 
         $tab_content .= '<div class="tab-pane fade" id="v-email-setup" role="tabpanel" aria-labelledby="v-email-setup-tab">
-                            <div class="row">
+                            <div class="row mb-4">
                                 <div class="col-md-12">
                                     <div class="d-flex align-items-start">
                                         <div class="flex-grow-1 align-self-center">
@@ -183,34 +180,11 @@ if($view_user_interface_setting > 0  || $view_email_setup > 0 || $view_applicati
                                         <div class="row justify-content-end">
                                             <div class="col-sm-9">
                                                 <div>
-                                                    <button type="submit" class="btn btn-primary w-md">Submit</button>
+                                                    <button type="submit" class="btn btn-primary w-md" id="submit-email-setup-form">Submit</button>
                                                 </div>
                                             </div>
                                         </div>
                                     </form>
-                                </div>
-                            </div>
-                        </div>';
-    }
-
-    if($view_application_notification > 0){
-        $tab .= '<a class="nav-link" id="v-application-notification-tab" data-bs-toggle="pill" href="#v-application-notification" role="tab" aria-controls="v-application-notification" aria-selected="true">
-                    <i class= "bx bx-bell d-block check-nav-icon mt-4 mb-2"></i>
-                    <p class="fw-bold mb-4">Application Notification</p>
-                </a>';
-
-        $tab_content .= '<div class="tab-pane fade" id="v-application-notification" role="tabpanel" aria-labelledby="v-application-notification-tab">
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="d-flex align-items-start">
-                                        <div class="flex-grow-1 align-self-center">
-                                            <h4 class="card-title">Application Notification</h4>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-12">
                                 </div>
                             </div>
                         </div>';
@@ -234,7 +208,7 @@ if($view_user_interface_setting > 0  || $view_email_setup > 0 || $view_applicati
                             </div>
                             <div class="row">
                                 <div class="col-md-12">
-                                    <form class="cmxform" id="email-setup-form" method="post" action="#">
+                                    <form class="cmxform" id="zoom-integration-form" method="post" action="#">
                                         <div class="row mb-4">
                                             <label for="api_key" class="col-sm-3 col-form-label">API Key <span class="text-danger">*</span></label>
                                             <div class="col-sm-9">
@@ -253,7 +227,7 @@ if($view_user_interface_setting > 0  || $view_email_setup > 0 || $view_applicati
                                         <div class="row justify-content-end">
                                             <div class="col-sm-9">
                                                 <div>
-                                                    <button type="submit" class="btn btn-primary w-md">Submit</button>
+                                                    <button type="submit" class="btn btn-primary w-md" id="submit-zoom-integration-form">Submit</button>
                                                 </div>
                                             </div>
                                         </div>

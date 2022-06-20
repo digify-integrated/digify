@@ -623,6 +623,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
             $notification_setting_id = $_POST['notification_setting_id'];
             $notification_setting = $_POST['notification_setting'];
             $notification_setting_description = $_POST['notification_setting_description'];
+            $notification_channels = explode(',', $_POST['notification_channel']);
 
             $check_notification_setting_exist = $api->check_notification_setting_exist($notification_setting_id);
 
@@ -630,14 +631,35 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                 $update_notification_setting = $api->update_notification_setting($notification_setting_id, $notification_setting, $notification_setting_description, $username);
 
                 if($update_notification_setting){
-                    echo 'Updated';
+                    $delete_all_notification_channel = $api->delete_all_notification_channel($notification_setting_id, $username);
+                                    
+                    if($delete_all_notification_channel){
+                        foreach($notification_channels as $notification_channel){
+                            $insert_notification_channel = $api->insert_notification_channel($notification_setting_id, $notification_channel, $username);
+        
+                            if(!$insert_notification_channel){
+                                $error = $insert_notification_channel;
+                                break;
+                            }
+                        }
+                    }
+                    else{
+                        $error = $delete_all_notification_channel;
+                    }
+
+                    if(empty($error)){
+                        echo 'Updated';
+                    }
+                    else{
+                        echo $error;
+                    }
                 }
                 else{
                     echo $update_notification_setting;
                 }
             }
             else{
-                $insert_notification_setting = $api->insert_notification_setting($notification_setting, $notification_setting_description, $username);
+                $insert_notification_setting = $api->insert_notification_setting($notification_setting, $notification_setting_description, $notification_channels, $username);
 
                 if($insert_notification_setting){
                     echo 'Inserted';
@@ -838,6 +860,81 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                 }
                 else{
                     echo $insert_interface_settings;
+                }
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Submit mail configuration
+    else if($transaction == 'submit mail configuration'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['mail_host']) && !empty($_POST['mail_host']) && isset($_POST['port']) && !empty($_POST['port']) && isset($_POST['smtp_auth']) && isset($_POST['smtp_auto_tls']) && isset($_POST['mail_user']) && !empty($_POST['mail_user']) && isset($_POST['mail_password']) && isset($_POST['mail_encryption']) && !empty($_POST['mail_encryption']) && isset($_POST['mail_from_name']) && !empty($_POST['mail_from_name']) && isset($_POST['mail_from_email']) && !empty($_POST['mail_from_email'])){
+            $username = $_POST['username'];
+            $mail_configuration_id = 1;
+            $mail_host = $_POST['mail_host'];
+            $port = $_POST['port'];
+            $smtp_auth = $_POST['smtp_auth'];
+            $smtp_auto_tls = $_POST['smtp_auto_tls'];
+            $mail_user = $_POST['mail_user'];
+            $mail_password = $api->encrypt_data($_POST['mail_password']);
+            $mail_encryption = $_POST['mail_encryption'];
+            $mail_from_name = $_POST['mail_from_name'];
+            $mail_from_email = $_POST['mail_from_email'];
+
+            $check_mail_configuration_exist = $api->check_mail_configuration_exist($mail_configuration_id);
+
+            if($check_mail_configuration_exist > 0){
+                $update_mail_configuration = $api->update_mail_configuration($mail_configuration_id, $mail_host, $port, $smtp_auth, $smtp_auto_tls, $mail_user, $mail_password, $mail_encryption, $mail_from_name, $mail_from_email, $username);
+
+                if($update_mail_configuration){
+                    echo 'Updated';
+                }
+                else{
+                    echo $update_mail_configuration;
+                }
+            }
+            else{
+                $insert_mail_configuration = $api->insert_mail_configuration($mail_configuration_id, $mail_host, $port, $smtp_auth, $smtp_auto_tls, $mail_user, $mail_password, $mail_encryption, $mail_from_name, $mail_from_email, $username);
+
+                if($insert_mail_configuration){
+                    echo 'Updated';
+                }
+                else{
+                    echo $insert_mail_configuration;
+                }
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Submit zoom integration
+    else if($transaction == 'submit zoom integration'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['api_key']) && !empty($_POST['api_key']) && isset($_POST['api_secret']) && !empty($_POST['api_secret'])){
+            $username = $_POST['username'];
+            $zoom_integration_id = 1;
+            $api_key = $_POST['api_key'];
+            $api_secret = $_POST['api_secret'];
+
+            $check_zoom_integration_exist = $api->check_zoom_integration_exist($zoom_integration_id);
+
+            if($check_zoom_integration_exist > 0){
+                $update_zoom_integration = $api->update_zoom_integration($zoom_integration_id, $api_key, $api_secret, $username);
+
+                if($update_zoom_integration){
+                    echo 'Updated';
+                }
+                else{
+                    echo $update_zoom_integration;
+                }
+            }
+            else{
+                $insert_zoom_integration = $api->insert_zoom_integration($zoom_integration_id, $api_key, $api_secret, $username);
+
+                if($insert_zoom_integration){
+                    echo 'Updated';
+                }
+                else{
+                    echo $insert_zoom_integration;
                 }
             }
         }
@@ -1429,13 +1526,20 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                         $delete_all_notification_role_recipient = $api->delete_all_notification_role_recipient($notification_setting_id, $username);
                                     
                         if($delete_all_notification_role_recipient){
-                            $delete_notification_setting = $api->delete_notification_setting($notification_setting_id, $username);
-                                            
-                            if($delete_notification_setting){
-                                echo 'Deleted';
+                            $delete_all_notification_channel = $api->delete_all_notification_channel($notification_setting_id, $username);
+                                    
+                            if($delete_all_notification_channel){
+                                $delete_notification_setting = $api->delete_notification_setting($notification_setting_id, $username);
+                                                
+                                if($delete_notification_setting){
+                                    echo 'Deleted';
+                                }
+                                else{
+                                    echo $delete_notification_setting;
+                                }
                             }
                             else{
-                                echo $delete_notification_setting;
+                                echo $delete_all_notification_channel;
                             }
                         }
                         else{
@@ -2067,12 +2171,24 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     # Notification setting details
     else if($transaction == 'notification setting details'){
         if(isset($_POST['notification_setting_id']) && !empty($_POST['notification_setting_id'])){
+            $channel = '';
+
             $notification_setting_id = $_POST['notification_setting_id'];
             $notification_setting_details = $api->get_notification_setting_details($notification_setting_id);
+            $notification_channel_details = $api->get_notification_channel_details($notification_setting_id);
+
+            for($i = 0; $i < count($notification_channel_details); $i++) {
+                $channel .= $notification_channel_details[$i]['CHANNEL'];
+
+                if($i != (count($notification_channel_details) - 1)){
+                    $channel .= ',';
+                }
+            }
 
             $response[] = array(
                 'NOTIFICATION_SETTING' => $notification_setting_details[0]['NOTIFICATION_SETTING'],
-                'NOTIFICATION_SETTING_DESCRIPTION' => $notification_setting_details[0]['NOTIFICATION_SETTING_DESCRIPTION']
+                'NOTIFICATION_SETTING_DESCRIPTION' => $notification_setting_details[0]['NOTIFICATION_SETTING_DESCRIPTION'],
+                'CHANNEL' => $channel
             );
 
             echo json_encode($response);
@@ -2131,6 +2247,38 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
             'MENU_LOGO' => $api->check_image($interface_settings_details[0]['MENU_LOGO'] ?? null, 'menu logo'),
             'MENU_ICON' => $api->check_image($interface_settings_details[0]['MENU_ICON'] ?? null, 'menu icon'),
             'FAVICON' => $api->check_image($interface_settings_details[0]['FAVICON'] ?? null, 'favicon'),
+        );
+
+        echo json_encode($response);
+    }
+    # -------------------------------------------------------------
+
+    # Mail configuration details
+    else if($transaction == 'mail configuration details'){
+        $mail_configuration_details = $api->get_mail_configuration_details(1);
+
+        $response[] = array(
+            'MAIL_HOST' => $mail_configuration_details[0]['MAIL_HOST'] ?? null,
+            'PORT' => $mail_configuration_details[0]['PORT'] ?? null,
+            'SMTP_AUTH' => $mail_configuration_details[0]['SMTP_AUTH'] ?? null,
+            'SMTP_AUTO_TLS' => $mail_configuration_details[0]['SMTP_AUTO_TLS'] ?? null,
+            'USERNAME' => $mail_configuration_details[0]['USERNAME'] ?? null,
+            'MAIL_ENCRYPTION' => $mail_configuration_details[0]['MAIL_ENCRYPTION'] ?? null,
+            'MAIL_FROM_NAME' => $mail_configuration_details[0]['MAIL_FROM_NAME'] ?? null,
+            'MAIL_FROM_EMAIL' => $mail_configuration_details[0]['MAIL_FROM_EMAIL'] ?? null
+        );
+
+        echo json_encode($response);
+    }
+    # -------------------------------------------------------------
+
+    # Zoom integration details
+    else if($transaction == 'zoom integration details'){
+        $zoom_integration_details = $api->get_zoom_integration_details(1);
+
+        $response[] = array(
+            'API_KEY' => $zoom_integration_details[0]['API_KEY'] ?? null,
+            'API_SECRET' => $zoom_integration_details[0]['API_SECRET'] ?? null
         );
 
         echo json_encode($response);

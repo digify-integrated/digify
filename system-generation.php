@@ -375,6 +375,16 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                         </div>
                         <div class="row">
                             <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <label for="notification_channel" class="form-label">Notification Channel</label>
+                                        <select class="form-control form-select2" multiple="multiple" id="notification_channel" name="notification_channel">
+                                            '. $api->generate_system_code_options('NOTIFICATIONCHANNEL') .'
+                                        </select>
+                                    </div>
+                                </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
                                 <div class="mb-3">
                                     <label for="notification_setting_description" class="form-label">Notification Setting Description <span class="text-danger">*</span></label>
                                     <textarea class="form-control form-maxlength" id="notification_setting_description" name="notification_setting_description" maxlength="200" rows="5"></textarea>

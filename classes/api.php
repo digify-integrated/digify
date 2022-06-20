@@ -808,6 +808,56 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : check_mail_configuration_exist
+    # Purpose    : Checks if the mail configuration exists.
+    #
+    # Returns    : Number
+    #
+    # -------------------------------------------------------------
+    public function check_mail_configuration_exist($mail_configuration_id){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL check_mail_configuration_exist(:mail_configuration_id)');
+            $sql->bindValue(':mail_configuration_id', $mail_configuration_id);
+
+            if($sql->execute()){
+                $row = $sql->fetch();
+
+                return $row['TOTAL'];
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : check_zoom_integration_exist
+    # Purpose    : Checks if the zoom integration exists.
+    #
+    # Returns    : Number
+    #
+    # -------------------------------------------------------------
+    public function check_zoom_integration_exist($zoom_integration_id){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL check_zoom_integration_exist(:zoom_integration_id)');
+            $sql->bindValue(':zoom_integration_id', $zoom_integration_id);
+
+            if($sql->execute()){
+                $row = $sql->fetch();
+
+                return $row['TOTAL'];
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Update methods
     # -------------------------------------------------------------
     
@@ -1866,7 +1916,7 @@ class Api{
     }
     # -------------------------------------------------------------
 
-    #
+    # -------------------------------------------------------------
     # Name       : update_interface_settings_images
     # Purpose    : Updates interface setting images
     #
@@ -2021,6 +2071,149 @@ class Api{
             }
             else{
                 return true;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : update_mail_configuration
+    # Purpose    : Updates mail configuration.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function update_mail_configuration($mail_configuration_id, $mail_host, $port, $smtp_auth, $smtp_auto_tls, $mail_user, $mail_password, $mail_encryption, $mail_from_name, $mail_from_email, $username){
+        if ($this->databaseConnection()) {
+            $record_log = 'UPD->' . $username . '->' . date('Y-m-d h:i:s');
+
+            $mail_configuration_details = $this->get_mail_configuration_details($mail_configuration_id);
+
+            if(!empty($mail_configuration_details[0]['TRANSACTION_LOG_ID'])){
+                $transaction_log_id = $mail_configuration_details[0]['TRANSACTION_LOG_ID'];
+            }
+            else{
+                # Get transaction log id
+                $transaction_log_system_parameter = $this->get_system_parameter(2, 1);
+                $transaction_log_parameter_number = $transaction_log_system_parameter[0]['PARAMETER_NUMBER'];
+                $transaction_log_id = $transaction_log_system_parameter[0]['ID'];
+            }
+
+            $sql = $this->db_connection->prepare('CALL update_mail_configuration(:mail_configuration_id, :mail_host, :port, :smtp_auth, :smtp_auto_tls, :mail_user, :mail_password, :mail_encryption, :mail_from_name, :mail_from_email, :transaction_log_id, :record_log)');
+            $sql->bindValue(':mail_configuration_id', $mail_configuration_id);
+            $sql->bindValue(':mail_host', $mail_host);
+            $sql->bindValue(':port', $port);
+            $sql->bindValue(':smtp_auth', $smtp_auth);
+            $sql->bindValue(':smtp_auto_tls', $smtp_auto_tls);
+            $sql->bindValue(':mail_user', $mail_user);
+            $sql->bindValue(':mail_password', $mail_password);
+            $sql->bindValue(':mail_encryption', $mail_encryption);
+            $sql->bindValue(':mail_from_name', $mail_from_name);
+            $sql->bindValue(':mail_from_email', $mail_from_email);
+            $sql->bindValue(':transaction_log_id', $transaction_log_id);
+            $sql->bindValue(':record_log', $record_log);
+        
+            if($sql->execute()){
+                if(!empty($mail_configuration_details[0]['TRANSACTION_LOG_ID'])){
+                    $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated mail configuration.');
+                                    
+                    if($insert_transaction_log){
+                        return true;
+                    }
+                    else{
+                        return $insert_transaction_log;
+                    }
+                }
+                else{
+                    # Update transaction log value
+                    $update_system_parameter_value = $this->update_system_parameter_value($transaction_log_parameter_number, 2, $username);
+
+                    if($update_system_parameter_value){
+                        $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated mail configuration.');
+                                    
+                        if($insert_transaction_log){
+                            return true;
+                        }
+                        else{
+                            return $insert_transaction_log;
+                        }
+                    }
+                    else{
+                        return $update_system_parameter_value;
+                    }
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : update_zoom_integration
+    # Purpose    : Updates zoom integration.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function update_zoom_integration($zoom_integration_id, $api_key, $api_secret, $username){
+        if ($this->databaseConnection()) {
+            $record_log = 'UPD->' . $username . '->' . date('Y-m-d h:i:s');
+
+            $zoom_integration_details = $this->get_zoom_integration_details($mail_configuration_id);
+
+            if(!empty($zoom_integration_details[0]['TRANSACTION_LOG_ID'])){
+                $transaction_log_id = $zoom_integration_details[0]['TRANSACTION_LOG_ID'];
+            }
+            else{
+                # Get transaction log id
+                $transaction_log_system_parameter = $this->get_system_parameter(2, 1);
+                $transaction_log_parameter_number = $transaction_log_system_parameter[0]['PARAMETER_NUMBER'];
+                $transaction_log_id = $transaction_log_system_parameter[0]['ID'];
+            }
+
+            $sql = $this->db_connection->prepare('CALL update_zoom_integration(:zoom_integration_id, :api_key, :api_secret, :transaction_log_id, :record_log)');
+            $sql->bindValue(':zoom_integration_id', $zoom_integration_id);
+            $sql->bindValue(':api_key', $api_key);
+            $sql->bindValue(':api_secret', $api_secret);
+            $sql->bindValue(':transaction_log_id', $transaction_log_id);
+            $sql->bindValue(':record_log', $record_log);
+        
+            if($sql->execute()){
+                if(!empty($zoom_integration_details[0]['TRANSACTION_LOG_ID'])){
+                    $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated zoom integration.');
+                                    
+                    if($insert_transaction_log){
+                        return true;
+                    }
+                    else{
+                        return $insert_transaction_log;
+                    }
+                }
+                else{
+                    # Update transaction log value
+                    $update_system_parameter_value = $this->update_system_parameter_value($transaction_log_parameter_number, 2, $username);
+
+                    if($update_system_parameter_value){
+                        $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated zoom integration.');
+                                    
+                        if($insert_transaction_log){
+                            return true;
+                        }
+                        else{
+                            return $insert_transaction_log;
+                        }
+                    }
+                    else{
+                        return $update_system_parameter_value;
+                    }
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
             }
         }
     }
@@ -2778,8 +2971,9 @@ class Api{
     # Returns    : Number/String
     #
     # -------------------------------------------------------------
-    public function insert_notification_setting($notification_setting, $notification_setting_description, $username){
+    public function insert_notification_setting($notification_setting, $notification_setting_description, $notification_channels, $username){
         if ($this->databaseConnection()) {
+            $error = '';
             $record_log = 'INS->' . $username . '->' . date('Y-m-d h:i:s');
 
             # Get system parameter id
@@ -2811,7 +3005,21 @@ class Api{
                         $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Insert', 'User ' . $username . ' inserted notification setting.');
                                     
                         if($insert_transaction_log){
-                            return true;
+                            foreach($notification_channels as $notification_channel){
+                                $insert_notification_channel = $this->insert_notification_channel($id, $notification_channel, $username);
+            
+                                if(!$insert_notification_channel){
+                                    $error = $insert_notification_channel;
+                                    break;
+                                }
+                            }
+
+                            if(empty($error)){
+                               return true;
+                            }
+                            else{
+                                return $error;
+                            }
                         }
                         else{
                             return $insert_transaction_log;
@@ -2928,6 +3136,33 @@ class Api{
 
     # -------------------------------------------------------------
     #
+    # Name       : insert_notification_channel
+    # Purpose    : Insert notification channel.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function insert_notification_channel($notification_setting_id, $notification_channel, $username){
+        if ($this->databaseConnection()) {
+            $record_log = 'INS->' . $username . '->' . date('Y-m-d h:i:s');
+
+            $sql = $this->db_connection->prepare('CALL insert_notification_channel(:notification_setting_id, :notification_channel, :record_log)');
+            $sql->bindValue(':notification_setting_id', $notification_setting_id);
+            $sql->bindValue(':notification_channel', $notification_channel);
+            $sql->bindValue(':record_log', $record_log); 
+        
+            if($sql->execute()){
+                return true;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
     # Name       : insert_interface_settings
     # Purpose    : Insert interface settings.
     #
@@ -2955,6 +3190,111 @@ class Api{
                 if($update_system_parameter_value){
                     $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Insert', 'User ' . $username . ' inserted interface setting.');
                                 
+                    if($insert_transaction_log){
+                        return true;
+                    }
+                    else{
+                        return $insert_transaction_log;
+                    }
+                }
+                else{
+                    return $update_system_parameter_value;
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : insert_mail_configuration
+    # Purpose    : Insert mail configuration.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function insert_mail_configuration($mail_configuration_id, $mail_host, $port, $smtp_auth, $smtp_auto_tls, $mail_user, $mail_password, $mail_encryption, $mail_from_name, $mail_from_email, $username){
+        if ($this->databaseConnection()) {
+            $record_log = 'INS->' . $username . '->' . date('Y-m-d h:i:s');
+
+            # Get transaction log id
+            $transaction_log_system_parameter = $this->get_system_parameter(2, 1);
+            $transaction_log_parameter_number = $transaction_log_system_parameter[0]['PARAMETER_NUMBER'];
+            $transaction_log_id = $transaction_log_system_parameter[0]['ID'];
+
+            $sql = $this->db_connection->prepare('CALL insert_mail_configuration(:mail_configuration_id, :mail_host, :port, :smtp_auth, :smtp_auto_tls, :mail_user, :mail_password, :mail_encryption, :mail_from_name, :mail_from_email, :transaction_log_id, :record_log)');
+            $sql->bindValue(':mail_configuration_id', $mail_configuration_id);
+            $sql->bindValue(':mail_host', $mail_host);
+            $sql->bindValue(':port', $port);
+            $sql->bindValue(':smtp_auth', $smtp_auth);
+            $sql->bindValue(':smtp_auto_tls', $smtp_auto_tls);
+            $sql->bindValue(':mail_user', $mail_user);
+            $sql->bindValue(':mail_password', $mail_password);
+            $sql->bindValue(':mail_encryption', $mail_encryption);
+            $sql->bindValue(':mail_from_name', $mail_from_name);
+            $sql->bindValue(':mail_from_email', $mail_from_email);
+            $sql->bindValue(':transaction_log_id', $transaction_log_id);
+            $sql->bindValue(':record_log', $record_log); 
+        
+            if($sql->execute()){
+                # Update transaction log value
+                $update_system_parameter_value = $this->update_system_parameter_value($transaction_log_parameter_number, 2, $username);
+
+                if($update_system_parameter_value){
+                    $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Insert', 'User ' . $username . ' inserted mail configuration.');
+                                    
+                    if($insert_transaction_log){
+                        return true;
+                    }
+                    else{
+                        return $insert_transaction_log;
+                    }
+                }
+                else{
+                    return $update_system_parameter_value;
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : insert_zoom_integration
+    # Purpose    : Insert zoom integration.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function insert_zoom_integration($zoom_integration_id, $api_key, $api_secret, $username){
+        if ($this->databaseConnection()) {
+            $record_log = 'INS->' . $username . '->' . date('Y-m-d h:i:s');
+
+            # Get transaction log id
+            $transaction_log_system_parameter = $this->get_system_parameter(2, 1);
+            $transaction_log_parameter_number = $transaction_log_system_parameter[0]['PARAMETER_NUMBER'];
+            $transaction_log_id = $transaction_log_system_parameter[0]['ID'];
+
+            $sql = $this->db_connection->prepare('CALL insert_zoom_integration(:zoom_integration_id, :api_key, :api_secret, :transaction_log_id, :record_log)');
+            $sql->bindValue(':zoom_integration_id', $zoom_integration_id);
+            $sql->bindValue(':api_key', $api_key);
+            $sql->bindValue(':api_secret', $api_secret);
+            $sql->bindValue(':transaction_log_id', $transaction_log_id);
+            $sql->bindValue(':record_log', $record_log); 
+        
+            if($sql->execute()){
+                # Update transaction log value
+                $update_system_parameter_value = $this->update_system_parameter_value($transaction_log_parameter_number, 2, $username);
+
+                if($update_system_parameter_value){
+                    $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Insert', 'User ' . $username . ' inserted zoom integration.');
+                                    
                     if($insert_transaction_log){
                         return true;
                     }
@@ -3393,6 +3733,29 @@ class Api{
     public function delete_all_notification_role_recipient($notification_setting_id, $username){
         if ($this->databaseConnection()) {
             $sql = $this->db_connection->prepare('CALL delete_all_notification_role_recipient(:notification_setting_id)');
+            $sql->bindValue(':notification_setting_id', $notification_setting_id);
+        
+            if($sql->execute()){
+                return true;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : delete_all_notification_channel
+    # Purpose    : Delete all notification channel linked to notification setting.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function delete_all_notification_channel($notification_setting_id, $username){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL delete_all_notification_channel(:notification_setting_id)');
             $sql->bindValue(':notification_setting_id', $notification_setting_id);
         
             if($sql->execute()){
@@ -3998,6 +4361,39 @@ class Api{
 
     # -------------------------------------------------------------
     #
+    # Name       : get_notification_channel_details
+    # Purpose    : Gets the notification channel details.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_notification_channel_details($notification_setting_id){
+        if ($this->databaseConnection()) {
+            $response = array();
+
+            $sql = $this->db_connection->prepare('CALL get_notification_channel_details(:notification_setting_id)');
+            $sql->bindValue(':notification_setting_id', $notification_setting_id);
+
+            if($sql->execute()){
+                while($row = $sql->fetch()){
+                    $response[] = array(
+                        'CHANNEL' => $row['CHANNEL'],
+                        'RECORD_LOG' => $row['RECORD_LOG']
+                    );
+                }
+
+                return $response;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+
+    # -------------------------------------------------------------
+    #
     # Name       : get_interface_settings_details
     # Purpose    : Gets the interface settings details.
     #
@@ -4019,6 +4415,81 @@ class Api{
                         'MENU_LOGO' => $row['MENU_LOGO'],
                         'MENU_ICON' => $row['MENU_ICON'],
                         'FAVICON' => $row['FAVICON'],
+                        'TRANSACTION_LOG_ID' => $row['TRANSACTION_LOG_ID'],
+                        'RECORD_LOG' => $row['RECORD_LOG']
+                    );
+                }
+
+                return $response;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : get_mail_configuration_details
+    # Purpose    : Gets the mail cofiguration details.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_mail_configuration_details($mail_configuration_id){
+        if ($this->databaseConnection()) {
+            $response = array();
+
+            $sql = $this->db_connection->prepare('CALL get_mail_configuration_details(:mail_configuration_id)');
+            $sql->bindValue(':mail_configuration_id', $mail_configuration_id);
+
+            if($sql->execute()){
+                while($row = $sql->fetch()){
+                    $response[] = array(
+                        'MAIL_HOST' => $row['MAIL_HOST'],
+                        'PORT' => $row['PORT'],
+                        'SMTP_AUTH' => $row['SMTP_AUTH'],
+                        'SMTP_AUTO_TLS' => $row['SMTP_AUTO_TLS'],
+                        'USERNAME' => $row['USERNAME'],
+                        'PASSWORD' => $row['PASSWORD'],
+                        'MAIL_ENCRYPTION' => $row['MAIL_ENCRYPTION'],
+                        'MAIL_FROM_NAME' => $row['MAIL_FROM_NAME'],
+                        'MAIL_FROM_EMAIL' => $row['MAIL_FROM_EMAIL'],
+                        'TRANSACTION_LOG_ID' => $row['TRANSACTION_LOG_ID'],
+                        'RECORD_LOG' => $row['RECORD_LOG']
+                    );
+                }
+
+                return $response;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : get_zoom_integration_details
+    # Purpose    : Gets the zoom integration details.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_zoom_integration_details($zoom_integration_id){
+        if ($this->databaseConnection()) {
+            $response = array();
+
+            $sql = $this->db_connection->prepare('CALL get_zoom_integration_details(:zoom_integration_id)');
+            $sql->bindValue(':zoom_integration_id', $zoom_integration_id);
+
+            if($sql->execute()){
+                while($row = $sql->fetch()){
+                    $response[] = array(
+                        'API_KEY' => $row['API_KEY'],
+                        'API_SECRET' => $row['API_SECRET'],
                         'TRANSACTION_LOG_ID' => $row['TRANSACTION_LOG_ID'],
                         'RECORD_LOG' => $row['RECORD_LOG']
                     );

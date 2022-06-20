@@ -34,7 +34,7 @@
 
             <?php 
                 require('views/_top_bar.php');
-                require('views/_settings_menu.php');
+                require('views/menu/_settings_menu.php');
             ?>
 
             <div class="main-content">
@@ -55,7 +55,7 @@
                             </div>
                         </div>
 
-                        <?php require('views/_general_setting.php'); ?>
+                        <?php require('views/forms/_general_setting.php'); ?>
                     </div>
                 </div>
 

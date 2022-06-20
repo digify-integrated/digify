@@ -151,6 +151,12 @@ CREATE TABLE global_notification_role_recipient(
 	RECORD_LOG VARCHAR(100)
 );
 
+CREATE TABLE global_notification_channel(
+	NOTIFICATION_SETTING_ID INT(50),
+	CHANNEL VARCHAR(20) NOT NULL,
+	RECORD_LOG VARCHAR(100)
+);
+
 CREATE TABLE global_interface_setting(
 	INTERFACE_SETTING_ID INT(50) PRIMARY KEY,
 	LOGIN_BACKGROUND VARCHAR(500),
@@ -159,6 +165,38 @@ CREATE TABLE global_interface_setting(
 	MENU_ICON VARCHAR(500),
 	FAVICON VARCHAR(500),
     TRANSACTION_LOG_ID VARCHAR(100),
+	RECORD_LOG VARCHAR(100)
+);
+
+CREATE TABLE global_mail_configuration(
+	MAIL_CONFIGURATION_ID INT PRIMARY KEY,
+	MAIL_HOST VARCHAR(100) NOT NULL,
+	PORT INT NOT NULL,
+	SMTP_AUTH INT(1) NOT NULL,
+	SMTP_AUTO_TLS INT(1) NOT NULL,
+	USERNAME VARCHAR(200) NOT NULL,
+	PASSWORD VARCHAR(200) NOT NULL,
+	MAIL_ENCRYPTION VARCHAR(20),
+	MAIL_FROM_NAME VARCHAR(200),
+	MAIL_FROM_EMAIL VARCHAR(200),
+    TRANSACTION_LOG_ID VARCHAR(100),
+	RECORD_LOG VARCHAR(100)
+);
+
+CREATE TABLE global_zoom_integration(
+	ZOOM_INTEGRATION_ID INT PRIMARY KEY,
+	API_KEY VARCHAR(1000) NOT NULL,
+	API_SECRET VARCHAR(1000) NOT NULL,
+    TRANSACTION_LOG_ID VARCHAR(100),
+	RECORD_LOG VARCHAR(100)
+);
+
+CREATE TABLE employee_department(
+	DEPARTMENT_ID VARCHAR(50) PRIMARY KEY,
+	DEPARTMENT VARCHAR(100) NOT NULL,
+	PARENT_DEPARTMENT VARCHAR(50),
+	MANAGER VARCHAR(100),
+	TRANSACTION_LOG_ID VARCHAR(100),
 	RECORD_LOG VARCHAR(100)
 );
 
@@ -176,6 +214,9 @@ CREATE INDEX global_state_index ON global_state(STATE_ID);
 CREATE INDEX global_notification_setting_index ON global_notification_setting(NOTIFICATION_SETTING_ID);
 CREATE INDEX global_notification_template_index ON global_notification_template(NOTIFICATION_SETTING_ID);
 CREATE INDEX global_interface_setting_index ON global_interface_setting(INTERFACE_SETTING_ID);
+CREATE INDEX global_mail_configuration_index ON global_mail_configuration(MAIL_CONFIGURATION_ID);
+CREATE INDEX global_zoom_integration_index ON global_zoom_integration(ZOOM_INTEGRATION_ID);
+CREATE INDEX employee_department_index ON employee_department(DEPARTMENT_ID);
 
 /* Stored Procedure */
 
@@ -974,7 +1015,7 @@ BEGIN
 	DROP PREPARE stmt;
 END //
 
-CREATE PROCEDURE update_company_logo(IN company_id VARCHAR(50), IN company_logo VARCHAR(500), IN transaction_log_id VARCHAR(500), IN record_log VARCHAR(100))
+CREATE PROCEDURE update_company_logo(IN company_id VARCHAR(50), IN company_logo VARCHAR(500), IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
 BEGIN
 	SET @company_id = company_id;
 	SET @company_logo = company_logo;
@@ -1228,6 +1269,17 @@ BEGIN
 	DROP PREPARE stmt;
 END //
 
+CREATE PROCEDURE delete_all_notification_channel(IN notification_setting_id INT)
+BEGIN
+	SET @notification_setting_id = notification_setting_id;
+
+	SET @query = 'DELETE FROM global_notification_channel WHERE NOTIFICATION_SETTING_ID = @notification_setting_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
 CREATE PROCEDURE check_notification_template_exist(IN notification_setting_id INT)
 BEGIN
 	SET @notification_setting_id = notification_setting_id;
@@ -1308,6 +1360,19 @@ BEGIN
 	DROP PREPARE stmt;
 END //
 
+CREATE PROCEDURE insert_notification_channel(IN notification_setting_id INT, IN channel VARCHAR(20), IN record_log VARCHAR(100))
+BEGIN
+	SET @notification_setting_id = notification_setting_id;
+	SET @channel = channel;
+	SET @record_log = record_log;
+
+	SET @query = 'INSERT INTO global_notification_channel (NOTIFICATION_SETTING_ID, CHANNEL, RECORD_LOG) VALUES(@notification_setting_id, @channel, @record_log)';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
 CREATE PROCEDURE get_notification_user_account_recipient_details(IN notification_setting_id INT)
 BEGIN
 	SET @notification_setting_id = notification_setting_id;
@@ -1330,6 +1395,17 @@ BEGIN
 	DROP PREPARE stmt;
 END //
 
+CREATE PROCEDURE get_notification_channel_details(IN notification_setting_id INT)
+BEGIN
+	SET @notification_setting_id = notification_setting_id;
+
+	SET @query = 'SELECT CHANNEL, RECORD_LOG FROM global_notification_channel WHERE NOTIFICATION_SETTING_ID = @notification_setting_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
 CREATE PROCEDURE check_interface_settings_exist(IN interface_setting_id INT)
 BEGIN
 	SET @interface_setting_id = interface_setting_id;
@@ -1341,7 +1417,7 @@ BEGIN
 	DROP PREPARE stmt;
 END //
 
-CREATE PROCEDURE insert_interface_settings(IN interface_setting_id INT, IN transaction_log_id VARCHAR(500), IN record_log VARCHAR(100))
+CREATE PROCEDURE insert_interface_settings(IN interface_setting_id INT, IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
 BEGIN
 	SET @interface_setting_id = interface_setting_id;
 	SET @transaction_log_id = transaction_log_id;
@@ -1354,7 +1430,7 @@ BEGIN
 	DROP PREPARE stmt;
 END //
 
-CREATE PROCEDURE update_interface_settings_images(IN interface_setting_id INT, IN file_path VARCHAR(500), IN transaction_log_id VARCHAR(500), IN record_log VARCHAR(100), IN request_type VARCHAR(20))
+CREATE PROCEDURE update_interface_settings_images(IN interface_setting_id INT, IN file_path VARCHAR(500), IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100), IN request_type VARCHAR(20))
 BEGIN
 	SET @interface_setting_id = interface_setting_id;
 	SET @file_path = file_path;
@@ -1384,6 +1460,133 @@ BEGIN
 	SET @interface_setting_id = interface_setting_id;
 
 	SET @query = 'SELECT LOGIN_BACKGROUND, LOGIN_LOGO, MENU_LOGO, MENU_ICON, FAVICON, TRANSACTION_LOG_ID, RECORD_LOG FROM global_interface_setting WHERE INTERFACE_SETTING_ID = @interface_setting_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE check_mail_configuration_exist(IN mail_configuration_id INT)
+BEGIN
+	SET @mail_configuration_id = mail_configuration_id;
+
+	SET @query = 'SELECT COUNT(1) AS TOTAL FROM global_mail_configuration WHERE MAIL_CONFIGURATION_ID = @mail_configuration_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE insert_mail_configuration(IN mail_configuration_id INT, IN mail_host VARCHAR(100), IN port INT, IN smtp_auth INT(1), IN smtp_auto_tls INT(1), IN username VARCHAR(200), IN password VARCHAR(200), IN mail_encryption VARCHAR(20), IN mail_from_name VARCHAR(200), IN mail_from_email VARCHAR(200), IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
+BEGIN
+	SET @mail_configuration_id = mail_configuration_id;
+	SET @mail_host = mail_host;
+	SET @port = port;
+	SET @smtp_auth = smtp_auth;
+	SET @smtp_auto_tls = smtp_auto_tls;
+	SET @username = username;
+	SET @password = password;
+	SET @mail_encryption = mail_encryption;
+	SET @mail_from_name = mail_from_name;
+	SET @mail_from_email = mail_from_email;
+	SET @transaction_log_id = transaction_log_id;
+	SET @record_log = record_log;
+
+
+	SET @query = 'INSERT INTO global_mail_configuration (MAIL_CONFIGURATION_ID, MAIL_HOST, PORT, SMTP_AUTH, SMTP_AUTO_TLS, USERNAME, PASSWORD, MAIL_ENCRYPTION, MAIL_FROM_NAME, MAIL_FROM_EMAIL, TRANSACTION_LOG_ID, RECORD_LOG) VALUES(@mail_configuration_id, @mail_host, @port, @smtp_auth, @smtp_auto_tls, @username, @password, @mail_encryption, @mail_from_name, @mail_from_email, @transaction_log_id, @record_log)';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE update_mail_configuration(IN mail_configuration_id INT, IN mail_host VARCHAR(100), IN port INT, IN smtp_auth INT(1), IN smtp_auto_tls INT(1), IN username VARCHAR(200), IN password VARCHAR(200), IN mail_encryption VARCHAR(20), IN mail_from_name VARCHAR(200), IN mail_from_email VARCHAR(200), IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
+BEGIN
+	SET @mail_configuration_id = mail_configuration_id;
+	SET @mail_host = mail_host;
+	SET @port = port;
+	SET @smtp_auth = smtp_auth;
+	SET @smtp_auto_tls = smtp_auto_tls;
+	SET @username = username;
+	SET @password = password;
+	SET @mail_encryption = mail_encryption;
+	SET @mail_from_name = mail_from_name;
+	SET @mail_from_email = mail_from_email;
+	SET @transaction_log_id = transaction_log_id;
+	SET @record_log = record_log;
+
+	IF @password IS NULL OR @password = '' THEN
+		SET @query = 'UPDATE global_mail_configuration SET MAIL_HOST = @mail_host, PORT = @port, SMTP_AUTH = @smtp_auth, SMTP_AUTO_TLS = @smtp_auto_tls, USERNAME = @username, MAIL_ENCRYPTION = @mail_encryption, MAIL_FROM_NAME = @mail_from_name, MAIL_FROM_EMAIL = @mail_from_email, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE MAIL_CONFIGURATION_ID = @mail_configuration_id';
+	ELSE
+		SET @query = 'UPDATE global_mail_configuration SET MAIL_HOST = @mail_host, PORT = @port, SMTP_AUTH = @smtp_auth, SMTP_AUTO_TLS = @smtp_auto_tls, USERNAME = @username, PASSWORD = @password, MAIL_ENCRYPTION = @mail_encryption, MAIL_FROM_NAME = @mail_from_name, MAIL_FROM_EMAIL = @mail_from_email, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE MAIL_CONFIGURATION_ID = @mail_configuration_id';
+    END IF;
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE get_mail_configuration_details(IN mail_configuration_id INT)
+BEGIN
+	SET @mail_configuration_id = mail_configuration_id;
+
+	SET @query = 'SELECT MAIL_HOST, PORT, SMTP_AUTH, SMTP_AUTO_TLS, USERNAME, PASSWORD, MAIL_ENCRYPTION, MAIL_FROM_NAME, MAIL_FROM_EMAIL, TRANSACTION_LOG_ID, RECORD_LOG FROM global_mail_configuration WHERE MAIL_CONFIGURATION_ID = @mail_configuration_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE check_zoom_integration_exist(IN zoom_integration_id INT)
+BEGIN
+	SET @zoom_integration_id = zoom_integration_id;
+
+	SET @query = 'SELECT COUNT(1) AS TOTAL FROM global_zoom_integration WHERE ZOOM_INTEGRATION_ID = @zoom_integration_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE insert_zoom_integration(IN zoom_integration_id INT, IN api_key VARCHAR(1000), IN api_secret VARCHAR(1000), IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
+BEGIN
+	SET @zoom_integration_id = zoom_integration_id;
+	SET @api_key = api_key;
+	SET @api_secret = api_secret;
+	SET @transaction_log_id = transaction_log_id;
+	SET @record_log = record_log;
+
+	SET @query = 'INSERT INTO global_zoom_integration (ZOOM_INTEGRATION_ID, API_KEY, API_SECRET, TRANSACTION_LOG_ID, RECORD_LOG) VALUES(@zoom_integration_id, @api_key, @api_secret, @transaction_log_id, @record_log)';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE update_zoom_integration(IN zoom_integration_id INT, IN api_key VARCHAR(1000), IN api_secret VARCHAR(1000), IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
+BEGIN
+	SET @zoom_integration_id = zoom_integration_id;
+	SET @api_key = api_key;
+	SET @api_secret = api_secret;
+	SET @transaction_log_id = transaction_log_id;
+	SET @record_log = record_log;
+
+	IF @api_secret IS NULL OR @api_secret = '' THEN
+		SET @query = 'UPDATE global_zoom_integration SET API_KEY = @api_key, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE ZOOM_INTEGRATION_ID = @zoom_integration_id';
+	ELSE
+		SET @query = 'UPDATE global_zoom_integration SET API_KEY = @api_key, API_SECRET = @api_secret, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE ZOOM_INTEGRATION_ID = @zoom_integration_id';
+    END IF;	
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE get_zoom_integration_details(IN zoom_integration_id INT)
+BEGIN
+	SET @zoom_integration_id = zoom_integration_id;
+
+	SET @query = 'SELECT API_KEY, API_SECRET, TRANSACTION_LOG_ID, RECORD_LOG FROM global_zoom_integration WHERE ZOOM_INTEGRATION_ID = @zoom_integration_id';
 
 	PREPARE stmt FROM @query;
 	EXECUTE stmt;
