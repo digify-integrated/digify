@@ -478,6 +478,25 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : directory_checker
+    # Purpose    : Checks the directory if it exists and create if not exist
+    #
+    # Returns    : String
+    #
+    # -------------------------------------------------------------
+    public function directory_checker($directory) {
+        if(!file_exists($directory)) {
+            mkdir($directory, 0777);
+            return true;
+        } 
+        else {
+            return true;
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Check data exist methods
     # -------------------------------------------------------------
     
@@ -858,6 +877,56 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : check_department_exist
+    # Purpose    : Checks if the department exists.
+    #
+    # Returns    : Number
+    #
+    # -------------------------------------------------------------
+    public function check_department_exist($department_id){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL check_department_exist(:department_id)');
+            $sql->bindValue(':department_id', $department_id);
+
+            if($sql->execute()){
+                $row = $sql->fetch();
+
+                return $row['TOTAL'];
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : check_job_position_exist
+    # Purpose    : Checks if the job position exists.
+    #
+    # Returns    : Number
+    #
+    # -------------------------------------------------------------
+    public function check_job_position_exist($job_position_id){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL check_job_position_exist(:job_position_id)');
+            $sql->bindValue(':job_position_id', $job_position_id);
+
+            if($sql->execute()){
+                $row = $sql->fetch();
+
+                return $row['TOTAL'];
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Update methods
     # -------------------------------------------------------------
     
@@ -956,7 +1025,7 @@ class Api{
     # Returns    : Number/String
     #
     # -------------------------------------------------------------
-    public function update_policy($policy, $policy_id, $policy_description, $username){
+    public function update_policy($policy_id, $policy, $policy_description, $username){
         if ($this->databaseConnection()) {
             $record_log = 'UPD->' . $username . '->' . date('Y-m-d h:i:s');
             $policy_details = $this->get_policy_details($policy_id);
@@ -1605,15 +1674,50 @@ class Api{
             if(!empty($company_logo_tmp_name)){ 
                 $file_name = $this->generate_file_name(10);
                 $file_new = $file_name . '.' . $company_logo_actual_ext;
-                $file_destination = $_SERVER['DOCUMENT_ROOT'] . '/digify/company/logo/' . $file_new;
-                $file_path = './company/logo/' . $file_new;
-                
-                $company_details = $this->get_company_details($company_id);
-                $company_logo = $company_details[0]['COMPANY_LOGO'];
-                $transaction_log_id = $company_details[0]['TRANSACTION_LOG_ID'];
 
-                if(file_exists($company_logo)){
-                    if (unlink($company_logo)) {
+                $directory = './company/logo/';
+                $file_destination = $_SERVER['DOCUMENT_ROOT'] . '/digify/company/logo/' . $file_new;
+                $file_path = $directory . $file_new;
+
+                $directory_checker = $this->directory_checker($directory);
+
+                if($directory_checker){
+                    $company_details = $this->get_company_details($company_id);
+                    $company_logo = $company_details[0]['COMPANY_LOGO'];
+                    $transaction_log_id = $company_details[0]['TRANSACTION_LOG_ID'];
+    
+                    if(file_exists($company_logo)){
+                        if (unlink($company_logo)) {
+                            if(move_uploaded_file($company_logo_tmp_name, $file_destination)){
+                                $sql = $this->db_connection->prepare('CALL update_company_logo(:company_id, :file_path, :transaction_log_id, :record_log)');
+                                $sql->bindValue(':company_id', $company_id);
+                                $sql->bindValue(':file_path', $file_path);
+                                $sql->bindValue(':transaction_log_id', $transaction_log_id);
+                                $sql->bindValue(':record_log', $record_log);
+                            
+                                if($sql->execute()){
+                                    $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated company logo.');
+                                        
+                                    if($insert_transaction_log){
+                                        return true;
+                                    }
+                                    else{
+                                        return $insert_transaction_log;
+                                    }
+                                }
+                                else{
+                                    return $sql->errorInfo()[2];
+                                }
+                            }
+                            else{
+                                return 'There was an error uploading your file.';
+                            }
+                        }
+                        else {
+                            return $company_logo . ' cannot be deleted due to an error.';
+                        }
+                    }
+                    else{
                         if(move_uploaded_file($company_logo_tmp_name, $file_destination)){
                             $sql = $this->db_connection->prepare('CALL update_company_logo(:company_id, :file_path, :transaction_log_id, :record_log)');
                             $sql->bindValue(':company_id', $company_id);
@@ -1639,35 +1743,9 @@ class Api{
                             return 'There was an error uploading your file.';
                         }
                     }
-                    else {
-                        return $company_logo . ' cannot be deleted due to an error.';
-                    }
                 }
                 else{
-                    if(move_uploaded_file($company_logo_tmp_name, $file_destination)){
-                        $sql = $this->db_connection->prepare('CALL update_company_logo(:company_id, :file_path, :transaction_log_id, :record_log)');
-                        $sql->bindValue(':company_id', $company_id);
-                        $sql->bindValue(':file_path', $file_path);
-                        $sql->bindValue(':transaction_log_id', $transaction_log_id);
-                        $sql->bindValue(':record_log', $record_log);
-                    
-                        if($sql->execute()){
-                            $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated company logo.');
-                                
-                            if($insert_transaction_log){
-                                return true;
-                            }
-                            else{
-                                return $insert_transaction_log;
-                            }
-                        }
-                        else{
-                            return $sql->errorInfo()[2];
-                        }
-                    }
-                    else{
-                        return 'There was an error uploading your file.';
-                    }
+                    return $directory_checker;
                 }
             }
             else{
@@ -1966,11 +2044,66 @@ class Api{
                         $log = 'User ' . $username . ' updated favicon.';
                 }
 
+                $directory = './assets/images/application_settings/';
                 $file_destination = $_SERVER['DOCUMENT_ROOT'] . '/digify/assets/images/application_settings/' . $file_new;
-                $file_path = './assets/images/application_settings/' . $file_new;
-                
-                if(file_exists($image)){
-                    if (unlink($image)) {
+                $file_path = $directory . $file_new;
+
+                $directory_checker = $this->directory_checker($directory);
+
+                if($directory_checker){
+                    if(file_exists($image)){
+                        if (unlink($image)) {
+                            if(move_uploaded_file($file_tmp_name, $file_destination)){
+                                $sql = $this->db_connection->prepare('CALL update_interface_settings_images(:interface_setting_id, :file_path, :transaction_log_id, :record_log, :request_type)');
+                                $sql->bindValue(':interface_setting_id', $interface_setting_id);
+                                $sql->bindValue(':file_path', $file_path);
+                                $sql->bindValue(':transaction_log_id', $transaction_log_id);
+                                $sql->bindValue(':record_log', $record_log);
+                                $sql->bindValue(':request_type', $request_type);
+                            
+                                if($sql->execute()){
+                                    if(!empty($interface_settings_details[0]['TRANSACTION_LOG_ID'])){
+                                        $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', $log);
+                                    
+                                        if($insert_transaction_log){
+                                            return true;
+                                        }
+                                        else{
+                                            return $insert_transaction_log;
+                                        }
+                                    }
+                                    else{
+                                        # Update transaction log value
+                                        $update_system_parameter_value = $this->update_system_parameter_value($transaction_log_parameter_number, 2, $username);
+                    
+                                        if($update_system_parameter_value){
+                                            $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', $log);
+                                    
+                                            if($insert_transaction_log){
+                                                return true;
+                                            }
+                                            else{
+                                                return $insert_transaction_log;
+                                            }
+                                        }
+                                        else{
+                                            return $update_system_parameter_value;
+                                        }
+                                    }
+                                }
+                                else{
+                                    return $sql->errorInfo()[2];
+                                }
+                            }
+                            else{
+                                return 'There was an error uploading your image.';
+                            }
+                        }
+                        else {
+                            return $profile_image . ' cannot be deleted due to an error.';
+                        }
+                    }
+                    else{
                         if(move_uploaded_file($file_tmp_name, $file_destination)){
                             $sql = $this->db_connection->prepare('CALL update_interface_settings_images(:interface_setting_id, :file_path, :transaction_log_id, :record_log, :request_type)');
                             $sql->bindValue(':interface_setting_id', $interface_setting_id);
@@ -2017,56 +2150,9 @@ class Api{
                             return 'There was an error uploading your image.';
                         }
                     }
-                    else {
-                        return $profile_image . ' cannot be deleted due to an error.';
-                    }
                 }
                 else{
-                    if(move_uploaded_file($file_tmp_name, $file_destination)){
-                        $sql = $this->db_connection->prepare('CALL update_interface_settings_images(:interface_setting_id, :file_path, :transaction_log_id, :record_log, :request_type)');
-                        $sql->bindValue(':interface_setting_id', $interface_setting_id);
-                        $sql->bindValue(':file_path', $file_path);
-                        $sql->bindValue(':transaction_log_id', $transaction_log_id);
-                        $sql->bindValue(':record_log', $record_log);
-                        $sql->bindValue(':request_type', $request_type);
-                    
-                        if($sql->execute()){
-                            if(!empty($interface_settings_details[0]['TRANSACTION_LOG_ID'])){
-                                $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', $log);
-                            
-                                if($insert_transaction_log){
-                                    return true;
-                                }
-                                else{
-                                    return $insert_transaction_log;
-                                }
-                            }
-                            else{
-                                # Update transaction log value
-                                $update_system_parameter_value = $this->update_system_parameter_value($transaction_log_parameter_number, 2, $username);
-            
-                                if($update_system_parameter_value){
-                                    $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', $log);
-                            
-                                    if($insert_transaction_log){
-                                        return true;
-                                    }
-                                    else{
-                                        return $insert_transaction_log;
-                                    }
-                                }
-                                else{
-                                    return $update_system_parameter_value;
-                                }
-                            }
-                        }
-                        else{
-                            return $sql->errorInfo()[2];
-                        }
-                    }
-                    else{
-                        return 'There was an error uploading your image.';
-                    }
+                    return $directory_checker;
                 }
             }
             else{
@@ -2214,6 +2300,234 @@ class Api{
             }
             else{
                 return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : update_department
+    # Purpose    : Updates department.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function update_department($department_id, $department, $parent_department, $manager, $username){
+        if ($this->databaseConnection()) {
+            $record_log = 'UPD->' . $username . '->' . date('Y-m-d h:i:s');
+            $department_details = $this->get_department_details($department_id);
+            
+            if(!empty($department_details[0]['TRANSACTION_LOG_ID'])){
+                $transaction_log_id = $department_details[0]['TRANSACTION_LOG_ID'];
+            }
+            else{
+                # Get transaction log id
+                $transaction_log_system_parameter = $this->get_system_parameter(2, 1);
+                $transaction_log_parameter_number = $transaction_log_system_parameter[0]['PARAMETER_NUMBER'];
+                $transaction_log_id = $transaction_log_system_parameter[0]['ID'];
+            }
+
+            $sql = $this->db_connection->prepare('CALL update_department(:department_id, :department, :parent_department, :manager, :transaction_log_id, :record_log)');
+            $sql->bindValue(':department_id', $department_id);
+            $sql->bindValue(':department', $department);
+            $sql->bindValue(':parent_department', $parent_department);
+            $sql->bindValue(':manager', $manager);
+            $sql->bindValue(':transaction_log_id', $transaction_log_id);
+            $sql->bindValue(':record_log', $record_log);
+        
+            if($sql->execute()){
+                if(!empty($department_details[0]['TRANSACTION_LOG_ID'])){
+                    $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated department.');
+                                    
+                    if($insert_transaction_log){
+                        return true;
+                    }
+                    else{
+                        return $insert_transaction_log;
+                    }
+                }
+                else{
+                    # Update transaction log value
+                    $update_system_parameter_value = $this->update_system_parameter_value($transaction_log_parameter_number, 2, $username);
+
+                    if($update_system_parameter_value){
+                        $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated department.');
+                                    
+                        if($insert_transaction_log){
+                            return true;
+                        }
+                        else{
+                            return $insert_transaction_log;
+                        }
+                    }
+                    else{
+                        return $update_system_parameter_value;
+                    }
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : update_job_position
+    # Purpose    : Updates company.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function update_job_position($job_position_id, $job_position, $username){
+        if ($this->databaseConnection()) {
+            $record_log = 'UPD->' . $username . '->' . date('Y-m-d h:i:s');
+            $job_position_details = $this->get_job_position_details($job_position_id);
+            
+            if(!empty($job_position_details[0]['TRANSACTION_LOG_ID'])){
+                $transaction_log_id = $job_position_details[0]['TRANSACTION_LOG_ID'];
+            }
+            else{
+                # Get transaction log id
+                $transaction_log_system_parameter = $this->get_system_parameter(2, 1);
+                $transaction_log_parameter_number = $transaction_log_system_parameter[0]['PARAMETER_NUMBER'];
+                $transaction_log_id = $transaction_log_system_parameter[0]['ID'];
+            }
+
+            $sql = $this->db_connection->prepare('CALL update_job_position(:job_position_id, :job_position, :transaction_log_id, :record_log)');
+            $sql->bindValue(':job_position_id', $job_position_id);
+            $sql->bindValue(':job_position', $job_position);
+            $sql->bindValue(':transaction_log_id', $transaction_log_id);
+            $sql->bindValue(':record_log', $record_log);
+        
+            if($sql->execute()){
+                if(!empty($job_position_details[0]['TRANSACTION_LOG_ID'])){
+                    $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated job position.');
+                                    
+                    if($insert_transaction_log){
+                        return true;
+                    }
+                    else{
+                        return $insert_transaction_log;
+                    }
+                }
+                else{
+                    # Update transaction log value
+                    $update_system_parameter_value = $this->update_system_parameter_value($transaction_log_parameter_number, 2, $username);
+
+                    if($update_system_parameter_value){
+                        $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated job position.');
+                                    
+                        if($insert_transaction_log){
+                            return true;
+                        }
+                        else{
+                            return $insert_transaction_log;
+                        }
+                    }
+                    else{
+                        return $update_system_parameter_value;
+                    }
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : update_job_description
+    # Purpose    : Updates job description.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function update_job_description($job_description_tmp_name, $job_description_actual_ext, $job_position_id, $username){
+        if ($this->databaseConnection()) {
+            $record_log = 'UPD->' . $username . '->' . date('Y-m-d h:i:s');
+
+            if(!empty($job_description_tmp_name)){ 
+                $file_name = $this->generate_file_name(10);
+                $file_new = $file_name . '.' . $job_description_actual_ext;
+
+                $directory = './company/job_description/';
+                $file_destination = $_SERVER['DOCUMENT_ROOT'] . '/digify/company/job_description/' . $file_new;
+                $file_path = $directory . $file_new;
+
+                $directory_checker = $this->directory_checker($directory);
+
+                if($directory_checker){
+                    $job_position_details = $this->get_job_position_details($job_position_id);
+                    $job_description = $job_position_details[0]['JOB_DESCRIPTION'];
+                    $transaction_log_id = $job_position_details[0]['TRANSACTION_LOG_ID'];
+    
+                    if(file_exists($job_description)){
+                        if (unlink($job_description)) {
+                            if(move_uploaded_file($job_description_tmp_name, $file_destination)){
+                                $sql = $this->db_connection->prepare('CALL update_job_description(:job_position_id, :file_path, :record_log)');
+                                $sql->bindValue(':job_position_id', $job_position_id);
+                                $sql->bindValue(':file_path', $file_path);
+                                $sql->bindValue(':record_log', $record_log);
+                            
+                                if($sql->execute()){
+                                    $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated job description.');
+                                        
+                                    if($insert_transaction_log){
+                                        return true;
+                                    }
+                                    else{
+                                        return $insert_transaction_log;
+                                    }
+                                }
+                                else{
+                                    return $sql->errorInfo()[2];
+                                }
+                            }
+                            else{
+                                return 'There was an error uploading your file.';
+                            }
+                        }
+                        else {
+                            return $job_description . ' cannot be deleted due to an error.';
+                        }
+                    }
+                    else{
+                        if(move_uploaded_file($job_description_tmp_name, $file_destination)){
+                            $sql = $this->db_connection->prepare('CALL update_job_description(:job_position_id, :file_path, :record_log)');
+                            $sql->bindValue(':job_position_id', $job_position_id);
+                            $sql->bindValue(':file_path', $file_path);
+                            $sql->bindValue(':record_log', $record_log);
+                        
+                            if($sql->execute()){
+                                $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated job description.');
+                                    
+                                if($insert_transaction_log){
+                                    return true;
+                                }
+                                else{
+                                    return $insert_transaction_log;
+                                }
+                            }
+                            else{
+                                return $sql->errorInfo()[2];
+                            }
+                        }
+                        else{
+                            return 'There was an error uploading your file.';
+                        }
+                    }
+                }
+                else{
+                    return $directory_checker;
+                }
+            }
+            else{
+                return true;
             }
         }
     }
@@ -3314,6 +3628,142 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : insert_department
+    # Purpose    : Insert department.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function insert_department($department, $parent_department, $manager, $username){
+        if ($this->databaseConnection()) {
+            $record_log = 'INS->' . $username . '->' . date('Y-m-d h:i:s');
+
+            # Get system parameter id
+            $system_parameter = $this->get_system_parameter(11, 1);
+            $parameter_number = $system_parameter[0]['PARAMETER_NUMBER'];
+            $id = $system_parameter[0]['ID'];
+
+            # Get transaction log id
+            $transaction_log_system_parameter = $this->get_system_parameter(2, 1);
+            $transaction_log_parameter_number = $transaction_log_system_parameter[0]['PARAMETER_NUMBER'];
+            $transaction_log_id = $transaction_log_system_parameter[0]['ID'];
+
+            $sql = $this->db_connection->prepare('CALL insert_department(:id, :department, :parent_department, :manager, :transaction_log_id, :record_log)');
+            $sql->bindValue(':id', $id);
+            $sql->bindValue(':department', $department);
+            $sql->bindValue(':parent_department', $parent_department);
+            $sql->bindValue(':manager', $manager);
+            $sql->bindValue(':transaction_log_id', $transaction_log_id);
+            $sql->bindValue(':record_log', $record_log); 
+        
+            if($sql->execute()){
+                # Update system parameter value
+                $update_system_parameter_value = $this->update_system_parameter_value($parameter_number, 11, $username);
+
+                if($update_system_parameter_value){
+                    # Update transaction log value
+                    $update_system_parameter_value = $this->update_system_parameter_value($transaction_log_parameter_number, 2, $username);
+
+                    if($update_system_parameter_value){
+                        $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Insert', 'User ' . $username . ' inserted department.');
+                                    
+                        if($insert_transaction_log){
+                            return true;
+                        }
+                        else{
+                            return $insert_transaction_log;
+                        }
+                    }
+                    else{
+                        return $update_system_parameter_value;
+                    }
+                }
+                else{
+                    return $update_system_parameter_value;
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : insert_job_position
+    # Purpose    : Insert job position.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function insert_job_position($job_description_tmp_name, $job_description_actual_ext, $job_position, $username){
+        if ($this->databaseConnection()) {
+            $record_log = 'INS->' . $username . '->' . date('Y-m-d h:i:s');
+
+            # Get system parameter id
+            $system_parameter = $this->get_system_parameter(12, 1);
+            $parameter_number = $system_parameter[0]['PARAMETER_NUMBER'];
+            $id = $system_parameter[0]['ID'];
+
+            # Get transaction log id
+            $transaction_log_system_parameter = $this->get_system_parameter(2, 1);
+            $transaction_log_parameter_number = $transaction_log_system_parameter[0]['PARAMETER_NUMBER'];
+            $transaction_log_id = $transaction_log_system_parameter[0]['ID'];
+
+            $sql = $this->db_connection->prepare('CALL insert_job_position(:id, :job_position, :transaction_log_id, :record_log)');
+            $sql->bindValue(':id', $id);
+            $sql->bindValue(':job_position', $job_position);
+            $sql->bindValue(':transaction_log_id', $transaction_log_id);
+            $sql->bindValue(':record_log', $record_log); 
+        
+            if($sql->execute()){
+                # Update system parameter value
+                $update_system_parameter_value = $this->update_system_parameter_value($parameter_number, 12, $username);
+
+                if($update_system_parameter_value){
+                    # Update transaction log value
+                    $update_system_parameter_value = $this->update_system_parameter_value($transaction_log_parameter_number, 2, $username);
+
+                    if($update_system_parameter_value){
+                        $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Insert', 'User ' . $username . ' inserted job position.');
+                                    
+                        if($insert_transaction_log){
+                            if(!empty($job_description_tmp_name) && !empty($job_description_actual_ext)){
+                                $update_job_description = $this->update_job_description($job_description_tmp_name, $job_description_actual_ext, $id, $username);
+        
+                                if($update_job_description){
+                                    return true;
+                                }
+                                else{
+                                    return $update_job_description;
+                                }
+                            }
+                            else{
+                                return true;
+                            }
+                        }
+                        else{
+                            return $insert_transaction_log;
+                        }
+                    }
+                    else{
+                        return $update_system_parameter_value;
+                    }
+                }
+                else{
+                    return $update_system_parameter_value;
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Delete methods
     # -------------------------------------------------------------
 
@@ -3566,11 +4016,16 @@ class Api{
         
             if($sql->execute()){ 
                 if(!empty($company_logo)){
-                    if (unlink($company_logo)) {
-                        return true;
+                    if(file_exists($company_logo)){
+                        if (unlink($company_logo)) {
+                            return true;
+                        }
+                        else {
+                            return $company_logo . ' cannot be deleted due to an error.';
+                        }
                     }
-                    else {
-                        return $company_logo . ' cannot be deleted due to an error.';
+                    else{
+                        return true;
                     }
                 }
                 else{
@@ -3760,6 +4215,70 @@ class Api{
         
             if($sql->execute()){
                 return true;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : delete_department
+    # Purpose    : Delete department.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function delete_department($department_id, $username){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL delete_department(:department_id)');
+            $sql->bindValue(':department_id', $department_id);
+        
+            if($sql->execute()){
+                return true;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : delete_job_position
+    # Purpose    : Delete job position.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function delete_job_position($job_position_id, $username){
+        if ($this->databaseConnection()) {
+            $job_position_details = $this->get_job_position_details($job_position_id);
+            $job_description = $job_position_details[0]['JOB_DESCRIPTION'];
+
+            $sql = $this->db_connection->prepare('CALL delete_job_position(:job_position_id)');
+            $sql->bindValue(':job_position_id', $job_position_id);
+        
+            if($sql->execute()){ 
+                if(!empty($job_description)){
+                    if(file_exists($job_description)){
+                        if (unlink($job_description)) {
+                            return true;
+                        }
+                        else {
+                            return $job_description . ' cannot be deleted due to an error.';
+                        }
+                    }
+                    else{
+                        return true;
+                    }
+                }
+                else{
+                    return true;
+                }
             }
             else{
                 return $sql->errorInfo()[2];
@@ -4490,6 +5009,75 @@ class Api{
                     $response[] = array(
                         'API_KEY' => $row['API_KEY'],
                         'API_SECRET' => $row['API_SECRET'],
+                        'TRANSACTION_LOG_ID' => $row['TRANSACTION_LOG_ID'],
+                        'RECORD_LOG' => $row['RECORD_LOG']
+                    );
+                }
+
+                return $response;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : get_department_details
+    # Purpose    : Gets the department details.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_department_details($department_id){
+        if ($this->databaseConnection()) {
+            $response = array();
+
+            $sql = $this->db_connection->prepare('CALL get_department_details(:department_id)');
+            $sql->bindValue(':department_id', $department_id);
+
+            if($sql->execute()){
+                while($row = $sql->fetch()){
+                    $response[] = array(
+                        'DEPARTMENT' => $row['DEPARTMENT'],
+                        'PARENT_DEPARTMENT' => $row['PARENT_DEPARTMENT'],
+                        'MANAGER' => $row['MANAGER'],
+                        'TRANSACTION_LOG_ID' => $row['TRANSACTION_LOG_ID'],
+                        'RECORD_LOG' => $row['RECORD_LOG']
+                    );
+                }
+
+                return $response;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : get_job_position_details
+    # Purpose    : Gets the job position details.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_job_position_details($job_position_id){
+        if ($this->databaseConnection()) {
+            $response = array();
+
+            $sql = $this->db_connection->prepare('CALL get_job_position_details(:job_position_id)');
+            $sql->bindValue(':job_position_id', $job_position_id);
+
+            if($sql->execute()){
+                while($row = $sql->fetch()){
+                    $response[] = array(
+                        'JOB_POSITION' => $row['JOB_POSITION'],
+                        'JOB_DESCRIPTION' => $row['JOB_DESCRIPTION'],
                         'TRANSACTION_LOG_ID' => $row['TRANSACTION_LOG_ID'],
                         'RECORD_LOG' => $row['RECORD_LOG']
                     );

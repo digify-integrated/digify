@@ -1164,6 +1164,155 @@ function initialize_form_validation(form_type){
             }
         });
     }
+    else if(form_type == 'department form'){
+        $('#department-form').validate({
+            submitHandler: function (form) {
+                transaction = 'submit department';
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'controller.php',
+                    data: $(form).serialize() + '&username=' + username + '&transaction=' + transaction,
+                    beforeSend: function(){
+                        document.getElementById('submit-form').disabled = true;
+                        $('#submit-form').html('<div class="spinner-border spinner-border-sm text-light" role="status"><span rclass="sr-only"></span></div>');
+                    },
+                    success: function (response) {
+                        if(response === 'Updated' || response === 'Inserted'){
+                            if(response === 'Inserted'){
+                                show_alert('Insert Department Success', 'The department has been inserted.', 'success');
+                            }
+                            else{
+                                show_alert('Update Department Success', 'The department has been updated.', 'success');
+                            }
+
+                            $('#System-Modal').modal('hide');
+                            reload_datatable('#department-datatable');
+                        }
+                        else{
+                            show_alert('Department Error', response, 'error');
+                        }
+                    },
+                    complete: function(){
+                        document.getElementById('submit-form').disabled = false;
+                        $('#submit-form').html('Submit');
+                    }
+                });
+                return false;
+            },
+            rules: {
+                department: {
+                    required: true         
+                }
+            },
+            messages: {
+                department: {
+                    required: 'Please enter the department',
+                }
+            },
+            errorPlacement: function(label, element) {
+                if((element.hasClass('select2') || element.hasClass('form-select2')) && element.next('.select2-container').length) {
+                    label.insertAfter(element.next('.select2-container'));
+                }
+                else if(element.parent('.input-group').length){
+                    label.insertAfter(element.parent());
+                }
+                else{
+                    label.insertAfter(element);
+                }
+            },
+            highlight: function(element) {
+                $(element).parent().addClass('has-danger');
+                $(element).addClass('form-control-danger');
+            },
+            success: function(label,element) {
+                $(element).parent().removeClass('has-danger')
+                $(element).removeClass('form-control-danger')
+                label.remove();
+            }
+        });
+    }
+    else if(form_type == 'job position form'){
+        $('#job-position-form').validate({
+            submitHandler: function (form) {
+                var transaction = 'submit job position';
+                var username = $('#username').text();
+                
+                var formData = new FormData(form);
+                formData.append('username', username);
+                formData.append('transaction', transaction);
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'controller.php',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    beforeSend: function(){
+                        document.getElementById('submit-form').disabled = true;
+                        $('#submit-form').html('<div class="spinner-border spinner-border-sm text-light" role="status"><span rclass="sr-only"></span></div>');
+                    },
+                    success: function (response) {
+                        if(response === 'Updated' || response === 'Inserted'){
+                            if(response === 'Inserted'){
+                                show_alert('Insert Job Position Success', 'The job position has been inserted.', 'success');
+                            }
+                            else{
+                                show_alert('Update Job Position Success', 'The job position has been updated.', 'success');
+                            }
+
+                            $('#System-Modal').modal('hide');
+                            reload_datatable('#job-position-datatable');
+                        }
+                        else if(response === 'File Size'){
+                            show_alert('Job Position Error', 'The file uploaded exceeds the maximum file size.', 'error');
+                        }
+                        else if(response === 'File Type'){
+                            show_alert('Job Position Error', 'The file uploaded is not supported.', 'error');
+                        }
+                        else{
+                            show_alert('Job Position Error', response, 'error');
+                        }
+                    },
+                    complete: function(){
+                        document.getElementById('submit-form').disabled = false;
+                        $('#submit-form').html('Submit');
+                    }
+                });
+                return false;
+            },
+            rules: {
+                job_position: {
+                    required: true
+                },
+            },
+            messages: {
+                job_position: {
+                    required: 'Please enter the job position',
+                },
+            },
+            errorPlacement: function(label, element) {
+                if((element.hasClass('select2') || element.hasClass('form-select2')) && element.next('.select2-container').length) {
+                    label.insertAfter(element.next('.select2-container'));
+                }
+                else if(element.parent('.input-group').length){
+                    label.insertAfter(element.parent());
+                }
+                else{
+                    label.insertAfter(element);
+                }
+            },
+            highlight: function(element) {
+                $(element).parent().addClass('has-danger');
+                $(element).addClass('form-control-danger');
+            },
+            success: function(label,element) {
+                $(element).parent().removeClass('has-danger')
+                $(element).removeClass('form-control-danger')
+                label.remove();
+            }
+        });
+    }
 }
 
 // Display functions
@@ -1567,6 +1716,58 @@ function display_form_details(form_type){
             }
         });
     }
+    else if(form_type == 'department form'){
+        transaction = 'department details';
+        
+        var department_id = sessionStorage.getItem('department_id');
+
+        $.ajax({
+            url: 'controller.php',
+            method: 'POST',
+            dataType: 'JSON',
+            data: {department_id : department_id, transaction : transaction},
+            success: function(response) {
+                $('#department').val(response[0].DEPARTMENT);
+                $('#department_id').val(department_id);
+
+                check_option_exist('#parent_department', response[0].PARENT_DEPARTMENT, '');
+                check_option_exist('#manager', response[0].MANAGER, '');
+            }
+        });
+    }
+    else if(form_type == 'job position form'){
+        transaction = 'job position details';
+
+        var job_position_id = sessionStorage.getItem('job_position_id');
+
+        $.ajax({
+            url: 'controller.php',
+            method: 'POST',
+            dataType: 'JSON',
+            data: {job_position_id : job_position_id, transaction : transaction},
+            success: function(response) {
+                $('#job_position').val(response[0].JOB_POSITION);
+                $('#job_position_id').val(job_position_id);
+            }
+        });
+    }
+    else if(form_type == 'job position details'){
+        transaction = 'job position summary details';
+
+        var job_position_id = sessionStorage.getItem('job_position_id');
+
+        $.ajax({
+            url: 'controller.php',
+            method: 'POST',
+            dataType: 'JSON',
+            data: {job_position_id : job_position_id, transaction : transaction},
+            success: function(response) {
+                $('#job_position').text(response[0].JOB_POSITION);
+
+                document.getElementById('job_description').innerHTML = response[0].JOB_DESCRIPTION;
+            }
+        });
+    }
 }
 
 function initialize_transaction_log_table(datatable_name, buttons = false, show_all = false){
@@ -1818,7 +2019,7 @@ function generate_element(element_type, value, container, modal, username){
             if(modal == '1'){
                 $('#System-Modal').modal('show');
 
-                if(element_type == 'user account details' || element_type == 'system parameter details' || element_type == 'company details'){
+                if(element_type == 'user account details' || element_type == 'system parameter details' || element_type == 'company details' || element_type == 'job position details'){
                     display_form_details(element_type);
                 }
                 else if(element_type == 'transaction log'){

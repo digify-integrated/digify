@@ -4,11 +4,11 @@
     require('classes/api.php');
 
     $api = new Api;
-    $page_title = 'Department';
+    $page_title = 'Job Position';
 
-    $page_access = $api->check_role_permissions($username, 70);
-    $add_department = $api->check_role_permissions($username, 71);
-	$delete_department = $api->check_role_permissions($username, 72);
+    $page_access = $api->check_role_permissions($username, 75);
+    $add_job_position = $api->check_role_permissions($username, 76);
+	$delete_job_position = $api->check_role_permissions($username, 78);
     
     $check_user_account_status = $api->check_user_account_status($username);
 
@@ -28,7 +28,6 @@
 <html lang="en">
     <head>
         <?php require('views/_head.php'); ?>
-        <link href="assets/libs/select2/css/select2.min.css" rel="stylesheet" type="text/css" />
         <link rel="stylesheet" href="assets/libs/sweetalert2/sweetalert2.min.css">
         <link href="assets/libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css" rel="stylesheet" type="text/css" />
         <?php require('views/_required_css.php'); ?>
@@ -42,7 +41,7 @@
 
             <?php 
                 require('views/_top_bar.php');
-                require('views/menu/_employee_menu.php');
+                require('views/menu/_settings_menu.php');
             ?>
 
             <div class="main-content">
@@ -72,20 +71,20 @@
                                             <div class="col-md-12">
                                                 <div class="d-flex align-items-start">
                                                     <div class="flex-grow-1 align-self-center">
-                                                        <h4 class="card-title">Department List</h4>
+                                                        <h4 class="card-title">Job Position List</h4>
                                                     </div>
                                                     <?php
-                                                        if($add_department > 0 || $delete_department > 0){
+                                                        if($add_job_position > 0 || $delete_job_position > 0){
 
-                                                            if($add_department > 0){
-                                                                $add = '<button type="button" class="btn btn-primary waves-effect btn-label waves-light" id="add-department"><i class="bx bx-plus label-icon"></i> Add</button>';
+                                                            if($add_job_position > 0){
+                                                                $add = '<button type="button" class="btn btn-primary waves-effect btn-label waves-light" id="add-job-position"><i class="bx bx-plus label-icon"></i> Add</button>';
                                                             }
                                                             else{
                                                                 $add = '';
                                                             }
 
-                                                            if($delete_department > 0){
-                                                                $delete = '<button type="button" class="btn btn-danger waves-effect btn-label waves-light d-none multiple" id="delete-department"><i class="bx bx-trash label-icon"></i> Delete</button>';
+                                                            if($delete_job_position > 0){
+                                                                $delete = '<button type="button" class="btn btn-danger waves-effect btn-label waves-light d-none multiple" id="delete-job-position"><i class="bx bx-trash label-icon"></i> Delete</button>';
                                                             }
                                                             else{
                                                                 $delete = '';
@@ -102,7 +101,7 @@
                                         </div>
                                         <div class="row mt-4">
                                             <div class="col-md-12">
-                                                <table id="department-datatable" class="table table-bordered align-middle mb-0 table-hover table-striped dt-responsive nowrap w-100">
+                                                <table id="job-position-datatable" class="table table-bordered align-middle mb-0 table-hover table-striped dt-responsive nowrap w-100">
                                                     <thead>
                                                         <tr>
                                                             <th class="all">
@@ -110,10 +109,7 @@
                                                                     <input class="form-check-input" id="datatable-checkbox" type="checkbox">
                                                                 </div>
                                                             </th>
-                                                            <th class="all">Department</th>
-                                                            <th class="all">Manager</th>
-                                                            <th class="all">Employees</th>
-                                                            <th class="all">Parent Department</th>
+                                                            <th class="all">Job Position</th>
                                                             <th class="all">Action</th>
                                                         </tr>
                                                     </thead>
@@ -141,8 +137,7 @@
         <script src="assets/libs/datatables.net-responsive-bs4/js/responsive.bootstrap4.min.js"></script>
         <script src="assets/libs/jquery-validation/js/jquery.validate.min.js"></script>
         <script src="assets/libs/sweetalert2/sweetalert2.min.js"></script>
-        <script src="assets/libs/select2/js/select2.min.js"></script>
         <script src="assets/js/system.js?v=<?php echo rand(); ?>"></script>
-        <script src="assets/js/pages/department.js?v=<?php echo rand(); ?>"></script>
+        <script src="assets/js/pages/job-position.js?v=<?php echo rand(); ?>"></script>
     </body>
 </html>

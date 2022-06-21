@@ -445,6 +445,56 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                 </div>
                         </div>';
             }
+            else if($form_type == 'department form'){
+                $form .= '<div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <input type="hidden" id="department_id" name="department_id">
+                                    <label for="department" class="form-label">Department <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control form-maxlength" autocomplete="off" id="department" name="department" maxlength="100">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Parent Department</label>
+                                    <select class="form-control form-select2" id="parent_department" name="parent_department">
+                                    <option value="">--</option>';
+                                    $form .= $api->generate_system_code_options('SYSTYPE');
+                                    $form .='</select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Manager</label>
+                                    <select class="form-control form-select2" id="manager" name="manager">
+                                    <option value="">--</option>';
+                                    $form .= $api->generate_system_code_options('SYSTYPE');
+                                    $form .='</select>
+                                </div>
+                            </div>
+                        </div>';
+            }
+            else if($form_type == 'job position form'){
+                $form .= '<div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <input type="hidden" id="job_position_id" name="job_position_id">
+                                    <label for="job_position" class="form-label">Job Position <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control form-maxlength" autocomplete="off" id="job_position" name="job_position" maxlength="100">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label for="job_description" class="form-label">Job Description</label><br/>
+                                    <input class="form-control" type="file" name="job_description" id="job_description">
+                                </div>
+                            </div>
+                        </div>';
+            }
 
             $form .= '</form>';
 
@@ -575,6 +625,20 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                     <tr>
                                         <th scope="row">Website :</th>
                                         <td id="website"></td>
+                                    </tr>
+                                </tbody>
+                            </table>';
+            }
+            else if($element_type == 'job position details'){
+                $element = '<table class="table table-nowrap mb-0">
+                                <tbody>
+                                    <tr>
+                                        <th scope="row">Job Position :</th>
+                                        <td id="job_position"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Job Description :</th>
+                                        <td id="job_description"></td>
                                     </tr>
                                 </tbody>
                             </table>';
@@ -1516,6 +1580,143 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                         'ACTION' => '<div class="d-flex gap-2">
                                             '. $update .'
                                             '. $template .'
+                                            '. $transaction_log .'
+                                            '. $delete .'
+                                        </div>'
+                    );
+                }
+
+                echo json_encode($response);
+            }
+            else{
+                echo $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Department table
+    else if($type == 'department table'){
+        if ($api->databaseConnection()) {
+            # Get permission
+            $update_department = $api->check_role_permissions($username, 72);
+            $delete_department = $api->check_role_permissions($username, 73);
+            $view_transaction_log = $api->check_role_permissions($username, 74);
+
+            $sql = $api->db_connection->prepare('SELECT DEPARTMENT_ID, DEPARTMENT, PARENT_DEPARTMENT, MANAGER, TRANSACTION_LOG_ID FROM employee_department');
+
+            if($sql->execute()){
+                while($row = $sql->fetch()){
+                    $department_id = $row['DEPARTMENT_ID'];
+                    $department = $row['DEPARTMENT'];
+                    $parent_department = $row['PARENT_DEPARTMENT'];
+                    $manager = $row['MANAGER'];
+                    $transaction_log_id = $row['TRANSACTION_LOG_ID'];
+
+                    $parent_department_details = $api->get_department_details($parent_department);
+                    $parent_department_name = $parent_department_details[0]['DEPARTMENT'] ?? null;
+
+                    if($update_department > 0){
+                        $update = '<button type="button" class="btn btn-info waves-effect waves-light update-department" data-department-id="'. $department_id .'" title="Edit Department">
+                                        <i class="bx bx-pencil font-size-16 align-middle"></i>
+                                    </button>';
+                    }
+                    else{
+                        $update = '';
+                    }
+
+                    if($delete_department > 0){
+                        $delete = '<button type="button" class="btn btn-danger waves-effect waves-light delete-department" data-department-id="'. $department_id .'" title="Delete Department">
+                            <i class="bx bx-trash font-size-16 align-middle"></i>
+                        </button>';
+                    }
+                    else{
+                        $delete = '';
+                    }
+
+                    if($view_transaction_log > 0 && !empty($transaction_log_id)){
+                        $transaction_log = '<button type="button" class="btn btn-dark waves-effect waves-light view-transaction-log" data-transaction-log-id="'. $transaction_log_id .'" title="View Transaction Log">
+                                                <i class="bx bx-detail font-size-16 align-middle"></i>
+                                            </button>';
+                    }
+                    else{
+                        $transaction_log = '';
+                    }
+
+                    $response[] = array(
+                        'CHECK_BOX' => '<input class="form-check-input datatable-checkbox-children" type="checkbox" value="'. $department_id .'">',
+                        'DEPARTMENT' => $department,
+                        'MANAGER' => '',
+                        'EMPLOYEES' => 0,
+                        'PARENT_DEPARTMENT' => $parent_department_name,
+                        'ACTION' => '<div class="d-flex gap-2">
+                                            '. $update .'
+                                            '. $transaction_log .'
+                                            '. $delete .'
+                                        </div>'
+                    );
+                }
+
+                echo json_encode($response);
+            }
+            else{
+                echo $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Job position table
+    else if($type == 'job position table'){
+        if ($api->databaseConnection()) {
+            # Get permission
+            $update_job_position = $api->check_role_permissions($username, 77);
+            $delete_job_position = $api->check_role_permissions($username, 78);
+            $view_transaction_log = $api->check_role_permissions($username, 79);
+
+            $sql = $api->db_connection->prepare('SELECT JOB_POSITION_ID, JOB_POSITION, TRANSACTION_LOG_ID FROM employee_job_position');
+
+            if($sql->execute()){
+                while($row = $sql->fetch()){
+                    $job_position_id = $row['JOB_POSITION_ID'];
+                    $job_position = $row['JOB_POSITION'];
+                    $transaction_log_id = $row['TRANSACTION_LOG_ID'];
+
+                    if($update_job_position > 0){
+                        $update = '<button type="button" class="btn btn-info waves-effect waves-light update-job-position" data-job-position-id="'. $job_position_id .'" title="Edit Job Position">
+                                        <i class="bx bx-pencil font-size-16 align-middle"></i>
+                                    </button>';
+                    }
+                    else{
+                        $update = '';
+                    }
+
+                    if($delete_job_position > 0){
+                        $delete = '<button type="button" class="btn btn-danger waves-effect waves-light delete-job-position" data-job-position-id="'. $job_position_id .'" title="Delete Job Position">
+                            <i class="bx bx-trash font-size-16 align-middle"></i>
+                        </button>';
+                    }
+                    else{
+                        $delete = '';
+                    }
+
+                    if($view_transaction_log > 0 && !empty($transaction_log_id)){
+                        $transaction_log = '<button type="button" class="btn btn-dark waves-effect waves-light view-transaction-log" data-transaction-log-id="'. $transaction_log_id .'" title="View Transaction Log">
+                                                <i class="bx bx-detail font-size-16 align-middle"></i>
+                                            </button>';
+                    }
+                    else{
+                        $transaction_log = '';
+                    }
+
+                    $response[] = array(
+                        'CHECK_BOX' => '<input class="form-check-input datatable-checkbox-children" type="checkbox" value="'. $job_position_id .'">',
+                        'JOB_POSITION' => $job_position,
+                        'ACTION' => '<div class="d-flex gap-2">
+                                            <button type="button" class="btn btn-primary waves-effect waves-light view-job-position" data-job-position-id="'. $job_position_id .'" title="View Job Position">
+                                                <i class="bx bx-show font-size-16 align-middle"></i>
+                                            </button>
+                                            '. $update .'
                                             '. $transaction_log .'
                                             '. $delete .'
                                         </div>'

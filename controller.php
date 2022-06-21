@@ -79,7 +79,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
             $check_policy_exist = $api->check_policy_exist($policy_id);
 
             if($check_policy_exist > 0){
-                $update_policy = $api->update_policy($policy, $policy_id, $policy_description, $username);
+                $update_policy = $api->update_policy($policy_id, $policy, $policy_description, $username);
 
                 if($update_policy){
                     echo 'Updated';
@@ -941,6 +941,157 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     }
     # -------------------------------------------------------------
 
+    # Submit department
+    else if($transaction == 'submit department'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['department_id']) && isset($_POST['department']) && !empty($_POST['department']) && isset($_POST['parent_department']) && isset($_POST['manager'])){
+            $username = $_POST['username'];
+            $department_id = $_POST['department_id'];
+            $department = $_POST['department'];
+            $parent_department = $_POST['parent_department'];
+            $manager = $_POST['manager'];
+
+            $check_department_exist = $api->check_department_exist($department_id);
+
+            if($check_department_exist > 0){
+                $update_department = $api->update_department($department_id, $department, $parent_department, $manager, $username);
+
+                if($update_department){
+                    echo 'Updated';
+                }
+                else{
+                    echo $update_department;
+                }
+            }
+            else{
+                $insert_department = $api->insert_department($department, $parent_department, $manager, $username);
+
+                if($insert_department){
+                    echo 'Inserted';
+                }
+                else{
+                    echo $insert_department;
+                }
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Submit job position
+    else if($transaction == 'submit job position'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['job_position_id']) && isset($_POST['job_position']) && !empty($_POST['job_position'])){
+            $file_type = '';
+            $username = $_POST['username'];
+            $job_position_id = $_POST['job_position_id'];
+            $job_position = $_POST['job_position'];
+
+            $job_description_name = $_FILES['job_description']['name'];
+            $job_description_size = $_FILES['job_description']['size'];
+            $job_description_error = $_FILES['job_description']['error'];
+            $job_description_tmp_name = $_FILES['job_description']['tmp_name'];
+            $job_description_ext = explode('.', $job_description_name);
+            $job_description_actual_ext = strtolower(end($job_description_ext));
+
+            $upload_setting_details = $api->get_upload_setting_details(7);
+            $upload_file_type_details = $api->get_upload_file_type_details(7);
+            $file_max_size = $upload_setting_details[0]['MAX_FILE_SIZE'] * 1048576;
+
+            for($i = 0; $i < count($upload_file_type_details); $i++) {
+                $file_type .= $upload_file_type_details[$i]['FILE_TYPE'];
+
+                if($i != (count($upload_file_type_details) - 1)){
+                    $file_type .= ',';
+                }
+            }
+
+            $allowed_ext = explode(',', $file_type);
+
+            $check_job_position_exist = $api->check_job_position_exist($job_position_id);
+ 
+            if($check_job_position_exist > 0){
+                if(!empty($job_description_tmp_name)){
+                    if(in_array($job_description_actual_ext, $allowed_ext)){
+                        if(!$job_description_error){
+                            if($job_description_size < $file_max_size){
+                                $update_job_description = $api->update_job_description($job_description_tmp_name, $job_description_actual_ext, $job_position_id, $username);
+        
+                                if($update_job_description){
+                                    $update_job_position = $api->update_job_position($job_position_id, $job_position, $username);
+
+                                    if($update_job_position){
+                                        echo 'Updated';
+                                    }
+                                    else{
+                                        echo $update_job_position;
+                                    }
+                                }
+                                else{
+                                    echo $update_job_description;
+                                }
+                            }
+                            else{
+                                echo 'File Size';
+                            }
+                        }
+                        else{
+                            echo 'There was an error uploading the file.';
+                        }
+                    }
+                    else{
+                        echo 'File Type';
+                    }
+                }
+                else{
+                    $update_job_position = $api->update_job_position($job_position_id, $job_position, $username);
+
+                    if($update_job_position){
+                        echo 'Updated';
+                    }
+                    else{
+                        echo $update_job_position;
+                    }
+                }
+            }
+            else{
+                if(!empty($job_description_tmp_name)){
+                    if(in_array($job_description_actual_ext, $allowed_ext)){
+                        if(!$job_description_error){
+                            if($job_description_size < $file_max_size){
+                                $insert_job_position = $api->insert_job_position($job_description_tmp_name, $job_description_actual_ext, $job_position, $username);
+    
+                                if($insert_job_position){
+                                    echo 'Inserted';
+                                }
+                                else{
+                                    echo $insert_job_position;
+                                }
+                            }
+                            else{
+                                echo 'File Size';
+                            }
+                        }
+                        else{
+                            echo 'There was an error uploading the file.';
+                        }
+                    }
+                    else{
+                        echo 'File Type';
+                    }
+                }
+                else{
+                    $insert_job_position = $api->insert_job_position(null, null, $job_position, $username);
+    
+                    if($insert_job_position){
+                        echo 'Inserted';
+                    }
+                    else{
+                        echo $insert_job_position;
+                    }
+                }
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
     # -------------------------------------------------------------
     #   Delete transactions
     # -------------------------------------------------------------
@@ -1613,6 +1764,118 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     }
     # -------------------------------------------------------------
 
+    # Delete department
+    else if($transaction == 'delete department'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['department_id']) && !empty($_POST['department_id'])){
+            $username = $_POST['username'];
+            $department_id = $_POST['department_id'];
+
+            $check_department_exist = $api->check_department_exist($department_id);
+
+            if($check_department_exist > 0){
+                $delete_department = $api->delete_department($department_id, $username);
+                                    
+                if($delete_department){
+                    echo 'Deleted';
+                }
+                else{
+                    echo $delete_department;
+                }
+            }
+            else{
+                echo 'Not Found';
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Delete multiple department
+    else if($transaction == 'delete multiple department'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['department_id'])){
+            $username = $_POST['username'];
+            $department_ids = $_POST['department_id'];
+
+            foreach($department_ids as $department_id){
+                $check_department_exist = $api->check_department_exist($department_id);
+
+                if($check_department_exist > 0){
+                    $delete_department = $api->delete_department($department_id, $username);
+                                    
+                    if(!$delete_department){
+                        $error = $delete_department;
+                    }
+                }
+                else{
+                    $error = 'Not Found';
+                }
+            }
+
+            if(empty($error)){
+                echo 'Deleted';
+            }
+            else{
+                echo $error;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Delete job position
+    else if($transaction == 'delete job position'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['job_position_id']) && !empty($_POST['job_position_id'])){
+            $username = $_POST['username'];
+            $job_position_id = $_POST['job_position_id'];
+
+            $check_job_position_exist = $api->check_job_position_exist($job_position_id);
+
+            if($check_job_position_exist > 0){
+                $delete_job_position = $api->delete_job_position($job_position_id, $username);
+                                    
+                if($delete_job_position){
+                    echo 'Deleted';
+                }
+                else{
+                    echo $delete_job_position;
+                }
+            }
+            else{
+                echo 'Not Found';
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Delete multiple job position
+    else if($transaction == 'delete multiple job position'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['job_position_id'])){
+            $username = $_POST['username'];
+            $job_position_ids = $_POST['job_position_id'];
+
+            foreach($job_position_ids as $job_position_id){
+                $check_job_position_exist = $api->check_job_position_exist($job_position_id);
+
+                if($check_job_position_exist > 0){
+                    $delete_job_position = $api->delete_job_position($job_position_id, $username);
+                                    
+                    if(!$delete_job_position){
+                        $error = $delete_job_position;
+                    }
+                }
+                else{
+                    $error = 'Not Found';
+                }
+            }
+
+            if(empty($error)){
+                echo 'Deleted';
+            }
+            else{
+                echo $error;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
     # -------------------------------------------------------------
     #   Unlock transactions
     # -------------------------------------------------------------
@@ -2085,7 +2348,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
             $state_details = $api->get_state_details($state_id);
             $state_name = $state_details[0]['STATE_NAME'] ?? '--';
 
-            if(empty($company_logo)){
+            if(empty($company_logo_file_path)){
                 $company_logo_file_path = $api->check_image($company_logo_file_path ?? null, 'company logo');
             }
 
@@ -2282,6 +2545,63 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
         );
 
         echo json_encode($response);
+    }
+    # -------------------------------------------------------------
+
+    # Department details
+    else if($transaction == 'department details'){
+        if(isset($_POST['department_id']) && !empty($_POST['department_id'])){
+            $department_id = $_POST['department_id'];
+            $department_details = $api->get_department_details($department_id);
+
+            $response[] = array(
+                'DEPARTMENT' => $department_details[0]['DEPARTMENT'],
+                'PARENT_DEPARTMENT' => $department_details[0]['PARENT_DEPARTMENT'],
+                'MANAGER' => $department_details[0]['MANAGER']
+            );
+
+            echo json_encode($response);
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Job position details
+    else if($transaction == 'job position details'){
+        if(isset($_POST['job_position_id']) && !empty($_POST['job_position_id'])){
+            $job_position_id = $_POST['job_position_id'];
+            $job_position_details = $api->get_job_position_details($job_position_id);
+
+            $response[] = array(
+                'JOB_POSITION' => $job_position_details[0]['JOB_POSITION']
+            );
+
+            echo json_encode($response);
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Company summary details
+    else if($transaction == 'job position summary details'){
+        if(isset($_POST['job_position_id']) && !empty($_POST['job_position_id'])){
+            $job_position_id = $_POST['job_position_id'];
+            
+            $job_position_details = $api->get_job_position_details($job_position_id);
+            $job_description_file_path = $job_position_details[0]['JOB_DESCRIPTION'];
+
+            if(!empty($job_description_file_path)){
+                $job_description_file_path = '<a href="'. $job_description_file_path .'" target="_blank">View Job Description</a>';
+            }
+            else{
+                $job_description_file_path = '';
+            }
+
+            $response[] = array(
+                'JOB_POSITION' => $job_position_details[0]['JOB_POSITION'],
+                'JOB_DESCRIPTION' =>  $job_description_file_path
+            );
+
+            echo json_encode($response);
+        }
     }
     # -------------------------------------------------------------
 
