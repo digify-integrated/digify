@@ -200,6 +200,33 @@ CREATE TABLE employee_department(
 	RECORD_LOG VARCHAR(100)
 );
 
+CREATE TABLE employee_job_position(
+	JOB_POSITION_ID VARCHAR(50) PRIMARY KEY,
+	JOB_POSITION VARCHAR(100) NOT NULL,
+	JOB_DESCRIPTION VARCHAR(500),
+	TRANSACTION_LOG_ID VARCHAR(100),
+	RECORD_LOG VARCHAR(100)
+);
+
+CREATE TABLE employee_work_location(
+	WORK_LOCATION_ID VARCHAR(50) PRIMARY KEY,
+	WORK_LOCATION VARCHAR(100) NOT NULL,
+	EMAIL VARCHAR(50),
+	TELEPHONE VARCHAR(20),
+	MOBILE VARCHAR(20),
+	WEBSITE VARCHAR(100),
+	TAX_ID VARCHAR(100),
+	STREET_1 VARCHAR(200),
+	STREET_2 VARCHAR(200),
+	COUNTRY_ID INT,
+	STATE_ID INT,
+	CITY VARCHAR(100),
+	ZIP_CODE VARCHAR(10),
+	TRANSACTION_LOG_ID VARCHAR(100),
+	RECORD_LOG VARCHAR(100)
+);
+CREATE INDEX employee_job_position_index ON employee_job_position(JOB_POSITION_ID);
+
 /* Index */
 CREATE INDEX global_user_account_index ON global_user_account(USERNAME);
 CREATE INDEX global_system_parameter_index ON global_system_parameters(PARAMETER_ID);
@@ -217,6 +244,7 @@ CREATE INDEX global_interface_setting_index ON global_interface_setting(INTERFAC
 CREATE INDEX global_mail_configuration_index ON global_mail_configuration(MAIL_CONFIGURATION_ID);
 CREATE INDEX global_zoom_integration_index ON global_zoom_integration(ZOOM_INTEGRATION_ID);
 CREATE INDEX employee_department_index ON employee_department(DEPARTMENT_ID);
+CREATE INDEX employee_job_position_index ON employee_job_position(JOB_POSITION_ID);
 
 /* Stored Procedure */
 
@@ -1587,6 +1615,145 @@ BEGIN
 	SET @zoom_integration_id = zoom_integration_id;
 
 	SET @query = 'SELECT API_KEY, API_SECRET, TRANSACTION_LOG_ID, RECORD_LOG FROM global_zoom_integration WHERE ZOOM_INTEGRATION_ID = @zoom_integration_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE check_department_exist(IN department_id VARCHAR(50))
+BEGIN
+	SET @department_id = department_id;
+
+	SET @query = 'SELECT COUNT(1) AS TOTAL FROM employee_department WHERE DEPARTMENT_ID = @department_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE update_department(IN department_id VARCHAR(50), IN department VARCHAR(100), IN parent_department VARCHAR(50), IN manager VARCHAR(100), IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
+BEGIN
+	SET @department_id = department_id;
+	SET @department = department;
+	SET @parent_department = parent_department;
+	SET @manager = manager;
+	SET @transaction_log_id = transaction_log_id;
+	SET @record_log = record_log;
+
+	SET @query = 'UPDATE employee_department SET DEPARTMENT = @department, PARENT_DEPARTMENT = @parent_department, MANAGER = @manager, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE DEPARTMENT_ID = @department_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE insert_department(IN department_id VARCHAR(50), IN department VARCHAR(100), IN parent_department VARCHAR(50), IN manager VARCHAR(100), IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
+BEGIN
+	SET @department_id = department_id;
+	SET @department = department;
+	SET @parent_department = parent_department;
+	SET @manager = manager;
+	SET @transaction_log_id = transaction_log_id;
+	SET @record_log = record_log;
+
+	SET @query = 'INSERT INTO employee_department (DEPARTMENT_ID, DEPARTMENT, PARENT_DEPARTMENT, MANAGER, TRANSACTION_LOG_ID, RECORD_LOG) VALUES(@department_id, @department, @parent_department, @manager, @transaction_log_id, @record_log)';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE get_department_details(IN department_id VARCHAR(50))
+BEGIN
+	SET @department_id = department_id;
+
+	SET @query = 'SELECT DEPARTMENT, PARENT_DEPARTMENT, MANAGER, TRANSACTION_LOG_ID, RECORD_LOG FROM employee_department WHERE DEPARTMENT_ID = @department_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE delete_department(IN department_id VARCHAR(50))
+BEGIN
+	SET @department_id = department_id;
+
+	SET @query = 'DELETE FROM employee_department WHERE DEPARTMENT_ID = @department_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE check_job_position_exist(IN job_position_id VARCHAR(50))
+BEGIN
+	SET @job_position_id = job_position_id;
+
+	SET @query = 'SELECT COUNT(1) AS TOTAL FROM employee_job_position WHERE JOB_POSITION_ID = @job_position_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE update_job_position(IN job_position_id VARCHAR(50), IN job_position VARCHAR(100), IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
+BEGIN
+	SET @job_position_id = job_position_id;
+	SET @job_position = job_position;
+	SET @transaction_log_id = transaction_log_id;
+	SET @record_log = record_log;
+
+	SET @query = 'UPDATE employee_job_position SET JOB_POSITION = @job_position, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE JOB_POSITION_ID = @job_position_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE insert_job_position(IN job_position_id VARCHAR(50), IN job_position VARCHAR(100), IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
+BEGIN
+	SET @job_position_id = job_position_id;
+	SET @job_position = job_position;
+	SET @transaction_log_id = transaction_log_id;
+	SET @record_log = record_log;
+
+	SET @query = 'INSERT INTO employee_job_position (JOB_POSITION_ID, JOB_POSITION, TRANSACTION_LOG_ID, RECORD_LOG) VALUES(@job_position_id, @job_position, @transaction_log_id, @record_log)';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE get_job_position_details(IN job_position_id VARCHAR(50))
+BEGIN
+	SET @job_position_id = job_position_id;
+
+	SET @query = 'SELECT JOB_POSITION, JOB_DESCRIPTION, TRANSACTION_LOG_ID, RECORD_LOG FROM employee_job_position WHERE JOB_POSITION_ID = @job_position_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE delete_job_position(IN job_position_id VARCHAR(50))
+BEGIN
+	SET @job_position_id = job_position_id;
+
+	SET @query = 'DELETE FROM employee_job_position WHERE JOB_POSITION_ID = @job_position_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE update_job_description(IN job_position_id VARCHAR(50), IN job_description VARCHAR(500), IN record_log VARCHAR(100))
+BEGIN
+	SET @job_position_id = job_position_id;
+	SET @job_description = job_description;
+	SET @record_log = record_log;
+
+	SET @query = 'UPDATE employee_job_position SET JOB_DESCRIPTION = @job_description, RECORD_LOG = @record_log WHERE JOB_POSITION_ID = @job_position_id';
 
 	PREPARE stmt FROM @query;
 	EXECUTE stmt;
