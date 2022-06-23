@@ -426,6 +426,7 @@ function initialize_form_validation(form_type){
                     success: function (response) {
                         if(response === 'Updated'){
                             show_alert_event('Role Permission Update Success', 'The permission has been updated.', 'success', 'reload');
+                            $('#System-Modal').modal('hide');
                         }
                         else if(response === 'Not Found'){
                             show_alert('Role Permission Update Error', 'The role does not exist.', 'error');
@@ -1313,6 +1314,142 @@ function initialize_form_validation(form_type){
             }
         });
     }
+    else if(form_type == 'work location form'){
+        $('#work-location-form').validate({
+            submitHandler: function (form) {
+                transaction = 'submit work location';
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'controller.php',
+                    data: $(form).serialize() + '&username=' + username + '&transaction=' + transaction,
+                    beforeSend: function(){
+                        document.getElementById('submit-form').disabled = true;
+                        $('#submit-form').html('<div class="spinner-border spinner-border-sm text-light" role="status"><span rclass="sr-only"></span></div>');
+                    },
+                    success: function (response) {
+                        if(response === 'Updated' || response === 'Inserted'){
+                            if(response === 'Inserted'){
+                                show_alert('Insert Work Location Success', 'The work location has been inserted.', 'success');
+                            }
+                            else{
+                                show_alert('Update Work Location Success', 'The work location has been updated.', 'success');
+                            }
+
+                            $('#System-Modal').modal('hide');
+                            reload_datatable('#work-location-datatable');
+                        }
+                        else{
+                            show_alert('Work Location Error', response, 'error');
+                        }
+                    },
+                    complete: function(){
+                        document.getElementById('submit-form').disabled = false;
+                        $('#submit-form').html('Submit');
+                    }
+                });
+                return false;
+            },
+            rules: {
+                work_location: {
+                    required: true         
+                }
+            },
+            messages: {
+                work_location: {
+                    required: 'Please enter the work location',
+                }
+            },
+            errorPlacement: function(label, element) {
+                if((element.hasClass('select2') || element.hasClass('form-select2')) && element.next('.select2-container').length) {
+                    label.insertAfter(element.next('.select2-container'));
+                }
+                else if(element.parent('.input-group').length){
+                    label.insertAfter(element.parent());
+                }
+                else{
+                    label.insertAfter(element);
+                }
+            },
+            highlight: function(element) {
+                $(element).parent().addClass('has-danger');
+                $(element).addClass('form-control-danger');
+            },
+            success: function(label,element) {
+                $(element).parent().removeClass('has-danger')
+                $(element).removeClass('form-control-danger')
+                label.remove();
+            }
+        });
+    }
+    else if(form_type == 'departure reason form'){
+        $('#departure-reason-form').validate({
+            submitHandler: function (form) {
+                transaction = 'submit departure reason';
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'controller.php',
+                    data: $(form).serialize() + '&username=' + username + '&transaction=' + transaction,
+                    beforeSend: function(){
+                        document.getElementById('submit-form').disabled = true;
+                        $('#submit-form').html('<div class="spinner-border spinner-border-sm text-light" role="status"><span rclass="sr-only"></span></div>');
+                    },
+                    success: function (response) {
+                        if(response === 'Updated' || response === 'Inserted'){
+                            if(response === 'Inserted'){
+                                show_alert('Insert Depature Reason Success', 'The departure reason has been inserted.', 'success');
+                            }
+                            else{
+                                show_alert('Update Depature Reason Success', 'The departure reason has been updated.', 'success');
+                            }
+
+                            $('#System-Modal').modal('hide');
+                            reload_datatable('#departure-reason-datatable');
+                        }
+                        else{
+                            show_alert('Depature Reason Error', response, 'error');
+                        }
+                    },
+                    complete: function(){
+                        document.getElementById('submit-form').disabled = false;
+                        $('#submit-form').html('Submit');
+                    }
+                });
+                return false;
+            },
+            rules: {
+                departure_reason: {
+                    required: true         
+                }
+            },
+            messages: {
+                departure_reason: {
+                    required: 'Please enter the departure reason',
+                }
+            },
+            errorPlacement: function(label, element) {
+                if((element.hasClass('select2') || element.hasClass('form-select2')) && element.next('.select2-container').length) {
+                    label.insertAfter(element.next('.select2-container'));
+                }
+                else if(element.parent('.input-group').length){
+                    label.insertAfter(element.parent());
+                }
+                else{
+                    label.insertAfter(element);
+                }
+            },
+            highlight: function(element) {
+                $(element).parent().addClass('has-danger');
+                $(element).addClass('form-control-danger');
+            },
+            success: function(label,element) {
+                $(element).parent().removeClass('has-danger')
+                $(element).removeClass('form-control-danger')
+                label.remove();
+            }
+        });
+    }
 }
 
 // Display functions
@@ -1768,6 +1905,72 @@ function display_form_details(form_type){
             }
         });
     }
+    else if(form_type == 'work location form'){
+        transaction = 'work location details';
+
+        var work_location_id = sessionStorage.getItem('work_location_id');
+
+        $.ajax({
+            url: 'controller.php',
+            method: 'POST',
+            dataType: 'JSON',
+            data: {work_location_id : work_location_id, transaction : transaction},
+            success: function(response) {
+                $('#work_location').val(response[0].WORK_LOCATION);
+                $('#street_1').val(response[0].STREET_1);
+                $('#street_2').val(response[0].STREET_2);
+                $('#city').val(response[0].CITY);
+                $('#zip_code').val(response[0].ZIP_CODE);
+                $('#email').val(response[0].EMAIL);
+                $('#mobile').val(response[0].MOBILE);
+                $('#telephone').val(response[0].TELEPHONE);
+                $('#work_location_id').val(work_location_id);
+
+                check_option_exist('#state', response[0].STATE_ID, '');
+            }
+        });
+    }
+    else if(form_type == 'work location details'){
+        transaction = 'work location summary details';
+
+        var work_location_id = sessionStorage.getItem('work_location_id');
+
+        $.ajax({
+            url: 'controller.php',
+            method: 'POST',
+            dataType: 'JSON',
+            data: {work_location_id : work_location_id, transaction : transaction},
+            success: function(response) {
+                $('#work_location').text(response[0].WORK_LOCATION);
+                $('#street_1').text(response[0].STREET_1);
+                $('#street_2').text(response[0].STREET_2);
+                $('#city').text(response[0].CITY);
+                $('#state').text(response[0].STATE_ID);
+                $('#zip_code').text(response[0].ZIP_CODE);
+                $('#work_location_id').text(work_location_id);
+
+                document.getElementById('email').innerHTML = response[0].EMAIL;
+                document.getElementById('telephone').innerHTML = response[0].TELEPHONE;
+                document.getElementById('mobile').innerHTML = response[0].MOBILE;
+            }
+        });
+    }
+    else if(form_type == 'departure reason form'){
+        transaction = 'departure reason details';
+
+        var departure_reason_id = sessionStorage.getItem('departure_reason_id');
+
+        $.ajax({
+            url: 'controller.php',
+            method: 'POST',
+            dataType: 'JSON',
+            data: {departure_reason_id : departure_reason_id, transaction : transaction},
+            success: function(response) {
+                $('#departure_reason').val(response[0].DEPARTURE_REASON);
+                $('#departure_reason_id').val(departure_reason_id);
+            }
+        });
+    }
 }
 
 function initialize_transaction_log_table(datatable_name, buttons = false, show_all = false){
@@ -2019,7 +2222,7 @@ function generate_element(element_type, value, container, modal, username){
             if(modal == '1'){
                 $('#System-Modal').modal('show');
 
-                if(element_type == 'user account details' || element_type == 'system parameter details' || element_type == 'company details' || element_type == 'job position details'){
+                if(element_type == 'user account details' || element_type == 'system parameter details' || element_type == 'company details' || element_type == 'job position details' || element_type == 'work location details'){
                     display_form_details(element_type);
                 }
                 else if(element_type == 'transaction log'){

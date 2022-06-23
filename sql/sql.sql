@@ -214,8 +214,6 @@ CREATE TABLE employee_work_location(
 	EMAIL VARCHAR(50),
 	TELEPHONE VARCHAR(20),
 	MOBILE VARCHAR(20),
-	WEBSITE VARCHAR(100),
-	TAX_ID VARCHAR(100),
 	STREET_1 VARCHAR(200),
 	STREET_2 VARCHAR(200),
 	COUNTRY_ID INT,
@@ -225,7 +223,59 @@ CREATE TABLE employee_work_location(
 	TRANSACTION_LOG_ID VARCHAR(100),
 	RECORD_LOG VARCHAR(100)
 );
-CREATE INDEX employee_job_position_index ON employee_job_position(JOB_POSITION_ID);
+
+CREATE TABLE employee_departure_reason(
+	DEPARTURE_REASON_ID VARCHAR(50) PRIMARY KEY,
+	DEPARTURE_REASON VARCHAR(100) NOT NULL,
+	TRANSACTION_LOG_ID VARCHAR(100),
+	RECORD_LOG VARCHAR(100)
+);
+
+CREATE TABLE employee_details(
+	EMPLOYEE_ID VARCHAR(100) PRIMARY KEY,
+	USERNAME VARCHAR(50),
+	BADGE_ID VARCHAR(100),
+	FILE_AS VARCHAR(350) NOT NULL,
+	FIRST_NAME VARCHAR(100) NOT NULL,
+	MIDDLE_NAME VARCHAR(100) NOT NULL,
+	LAST_NAME VARCHAR(100) NOT NULL,
+	SUFFIX VARCHAR(5),
+	COMPANY VARCHAR(50),
+	JOB_POSITION VARCHAR(50),
+	DEPARTMENT VARCHAR(50),
+	WORK_LOCATION VARCHAR(50),
+	MANAGER VARCHAR(100),
+	COACH VARCHAR(100),
+	EMPLOYEE_TYPE VARCHAR(100),
+	ONBOARD_DATE DATE,
+	OFFBOARD_DATE DATE,
+	DEPARTURE_REASON VARCHAR(50),
+	EMAIL VARCHAR(50),
+	TELEPHONE VARCHAR(20),
+	MOBILE VARCHAR(20),
+	TRANSACTION_LOG_ID VARCHAR(100),
+	RECORD_LOG VARCHAR(100)
+);
+
+CREATE TABLE employee_plan(
+	PLAN_ID VARCHAR(100) PRIMARY KEY,
+	PLAN VARCHAR(200) NOT NULL,
+	TRANSACTION_LOG_ID VARCHAR(100),
+	RECORD_LOG VARCHAR(100)
+);
+
+CREATE TABLE employee_plan_activities(
+	ACTIVITY_ID VARCHAR(100) PRIMARY KEY,
+	PLAN_ID VARCHAR(100),
+	ACTIVITY_TYPE VARCHAR(20) NOT NULL,
+	SUMMARY VARCHAR(200) NOT NULL,
+	RESPONSIBLE VARCHAR(20) NOT NULL,
+	RESPONSIBLE_PERSON VARCHAR(100),
+	DAYS_DUE VARCHAR(100),
+	NOTE VARCHAR(500),
+	TRANSACTION_LOG_ID VARCHAR(100),
+	RECORD_LOG VARCHAR(100)
+);
 
 /* Index */
 CREATE INDEX global_user_account_index ON global_user_account(USERNAME);
@@ -245,6 +295,10 @@ CREATE INDEX global_mail_configuration_index ON global_mail_configuration(MAIL_C
 CREATE INDEX global_zoom_integration_index ON global_zoom_integration(ZOOM_INTEGRATION_ID);
 CREATE INDEX employee_department_index ON employee_department(DEPARTMENT_ID);
 CREATE INDEX employee_job_position_index ON employee_job_position(JOB_POSITION_ID);
+CREATE INDEX employee_work_location_index ON employee_work_location(WORK_LOCATION_ID);
+CREATE INDEX employee_departure_reason_index ON employee_departure_reason(DEPARTURE_REASON_ID);
+CREATE INDEX employee_plan_index ON employee_plan(PLAN_ID);
+CREATE INDEX employee_plan_activities_index ON employee_plan_activities(ACTIVITY_ID);
 
 /* Stored Procedure */
 
@@ -1754,6 +1808,146 @@ BEGIN
 	SET @record_log = record_log;
 
 	SET @query = 'UPDATE employee_job_position SET JOB_DESCRIPTION = @job_description, RECORD_LOG = @record_log WHERE JOB_POSITION_ID = @job_position_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE check_work_location_exist(IN work_location_id VARCHAR(50))
+BEGIN
+	SET @work_location_id = work_location_id;
+
+	SET @query = 'SELECT COUNT(1) AS TOTAL FROM employee_work_location WHERE WORK_LOCATION_ID = @work_location_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE update_work_location(IN work_location_id VARCHAR(50), IN work_location VARCHAR(100), IN email VARCHAR(50), IN telephone VARCHAR(20), IN mobile VARCHAR(20), IN street_1 VARCHAR(200), IN street_2 VARCHAR(200), IN country_id INT, IN state_id INT, IN city VARCHAR(100), IN zip_code VARCHAR(10), IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
+BEGIN
+	SET @work_location_id = work_location_id;
+	SET @work_location = work_location;
+	SET @email = email;
+	SET @telephone = telephone;
+	SET @mobile = mobile;
+	SET @street_1 = street_1;
+	SET @street_2 = street_2;
+	SET @country_id = country_id;
+	SET @state_id = state_id;
+	SET @city = city;
+	SET @zip_code = zip_code;
+	SET @transaction_log_id = transaction_log_id;
+	SET @record_log = record_log;
+
+	SET @query = 'UPDATE employee_work_location SET WORK_LOCATION = @work_location, EMAIL = @email, TELEPHONE = @telephone, MOBILE = @mobile, STREET_1 = @street_1, STREET_2 = @street_2, COUNTRY_ID = @country_id, STATE_ID = @state_id, CITY = @city, ZIP_CODE = @zip_code, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE WORK_LOCATION_ID = @work_location_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE insert_work_location(IN work_location_id VARCHAR(50), IN work_location VARCHAR(100), IN email VARCHAR(50), IN telephone VARCHAR(20), IN mobile VARCHAR(20), IN street_1 VARCHAR(200), IN street_2 VARCHAR(200), IN country_id INT, IN state_id INT, IN city VARCHAR(100), IN zip_code VARCHAR(10), IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
+BEGIN
+	SET @work_location_id = work_location_id;
+	SET @work_location = work_location;
+	SET @email = email;
+	SET @telephone = telephone;
+	SET @mobile = mobile;
+	SET @street_1 = street_1;
+	SET @street_2 = street_2;
+	SET @country_id = country_id;
+	SET @state_id = state_id;
+	SET @city = city;
+	SET @zip_code = zip_code;
+	SET @transaction_log_id = transaction_log_id;
+	SET @record_log = record_log;
+
+	SET @query = 'INSERT INTO employee_work_location (WORK_LOCATION_ID, WORK_LOCATION, EMAIL, TELEPHONE, MOBILE, STREET_1, STREET_2, COUNTRY_ID, STATE_ID, CITY, ZIP_CODE, TRANSACTION_LOG_ID, RECORD_LOG) VALUES(@work_location_id, @work_location, @email, @telephone, @mobile, @street_1, @street_2, @country_id, @state_id, @city, @zip_code, @transaction_log_id, @record_log)';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE get_work_location_details(IN work_location_id VARCHAR(50))
+BEGIN
+	SET @work_location_id = work_location_id;
+
+	SET @query = 'SELECT WORK_LOCATION, EMAIL, TELEPHONE, MOBILE, STREET_1, STREET_2, COUNTRY_ID, STATE_ID, CITY, ZIP_CODE, TRANSACTION_LOG_ID, RECORD_LOG FROM employee_work_location WHERE WORK_LOCATION_ID = @work_location_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE delete_work_location(IN work_location_id VARCHAR(50))
+BEGIN
+	SET @work_location_id = work_location_id;
+
+	SET @query = 'DELETE FROM employee_work_location WHERE WORK_LOCATION_ID = @work_location_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE check_departure_reason_exist(IN departure_reason_id VARCHAR(50))
+BEGIN
+	SET @departure_reason_id = departure_reason_id;
+
+	SET @query = 'SELECT COUNT(1) AS TOTAL FROM employee_departure_reason WHERE DEPARTURE_REASON_ID = @departure_reason_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE update_departure_reason(IN departure_reason_id VARCHAR(50), IN departure_reason VARCHAR(100), IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
+BEGIN
+	SET @departure_reason_id = departure_reason_id;
+	SET @departure_reason = departure_reason;
+	SET @transaction_log_id = transaction_log_id;
+	SET @record_log = record_log;
+
+	SET @query = 'UPDATE employee_departure_reason SET DEPARTURE_REASON = @departure_reason, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE DEPARTURE_REASON_ID = @departure_reason_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE insert_departure_reason(IN departure_reason_id VARCHAR(50), IN departure_reason VARCHAR(100), IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
+BEGIN
+	SET @departure_reason_id = departure_reason_id;
+	SET @departure_reason = departure_reason;
+	SET @transaction_log_id = transaction_log_id;
+	SET @record_log = record_log;
+
+	SET @query = 'INSERT INTO employee_departure_reason (DEPARTURE_REASON_ID, DEPARTURE_REASON, TRANSACTION_LOG_ID, RECORD_LOG) VALUES(@departure_reason_id, @departure_reason, @transaction_log_id, @record_log)';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE get_departure_reason_details(IN departure_reason_id VARCHAR(50))
+BEGIN
+	SET @departure_reason_id = departure_reason_id;
+
+	SET @query = 'SELECT DEPARTURE_REASON, TRANSACTION_LOG_ID, RECORD_LOG FROM employee_departure_reason WHERE DEPARTURE_REASON_ID = @departure_reason_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE delete_departure_reason(IN departure_reason_id VARCHAR(50))
+BEGIN
+	SET @departure_reason_id = departure_reason_id;
+
+	SET @query = 'DELETE FROM employee_departure_reason WHERE DEPARTURE_REASON_ID = @departure_reason_id';
 
 	PREPARE stmt FROM @query;
 	EXECUTE stmt;

@@ -495,6 +495,71 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                             </div>
                         </div>';
             }
+            else if($form_type == 'work location form'){
+                $form .= '<div class="row mb-3">
+                                <input type="hidden" id="work_location_id" name="work_location_id">
+                                <label for="work_location" class="col-sm-3 col-form-label">Work Location <span class="text-danger">*</span></label>
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control form-maxlength" autocomplete="off" id="work_location" name="work_location" maxlength="100">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label for="street_1" class="col-sm-3 col-form-label">Address</label>
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control form-maxlength" autocomplete="off" id="street_1" name="street_1" placeholder="Street" maxlength="200">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-3"></div>
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control form-maxlength" autocomplete="off" id="street_2" name="street_2" placeholder="Street 2" maxlength="200">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-3"></div>
+                                <div class="col-sm-3">
+                                    <input type="text" class="form-control form-maxlength" autocomplete="off" id="city" name="city" placeholder="City" maxlength="100">
+                                </div>
+                                <div class="col-sm-3">
+                                    <select class="form-control form-select2" id="state" name="state">
+                                    <option value="">State</option>';
+                                    $form .= $api->generate_state_options();
+                                    $form .='</select>
+                                </div>
+                                <div class="col-sm-3">
+                                    <input type="text" class="form-control form-maxlength" autocomplete="off" id="zip_code" name="zip_code" placeholder="Zip Code" maxlength="10">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label for="email" class="col-sm-3 col-form-label">Email</label>
+                                <div class="col-sm-9">
+                                    <input type="email" id="email" name="email" class="form-control form-maxlength" maxlength="100" autocomplete="off">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label for="email" class="col-sm-3 col-form-label">Mobile Number</label>
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control form-maxlength" autocomplete="off" id="mobile" name="mobile" maxlength="30">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label for="telephone" class="col-sm-3 col-form-label">Telephone</label>
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control form-maxlength" autocomplete="off" id="telephone" name="telephone" maxlength="30">
+                                </div>
+                            </div>';
+            }
+            else if($form_type == 'departure reason form'){
+                $form .= '<div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <input type="hidden" id="departure_reason_id" name="departure_reason_id">
+                                    <label for="departure_reason" class="form-label">Departure Reason <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control form-maxlength" autocomplete="off" id="departure_reason" name="departure_reason" maxlength="200">
+                                </div>
+                            </div>
+                        </div>';
+            }
 
             $form .= '</form>';
 
@@ -591,6 +656,10 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                         <td id="company_name"></td>
                                     </tr>
                                     <tr>
+                                        <th scope="row">Tax ID :</th>
+                                        <td id="tax_id"></td>
+                                    </tr>
+                                    <tr>
                                         <th scope="row">Street 1 :</th>
                                         <td id="street_1"></td>
                                     </tr>
@@ -639,6 +708,48 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                     <tr>
                                         <th scope="row">Job Description :</th>
                                         <td id="job_description"></td>
+                                    </tr>
+                                </tbody>
+                            </table>';
+            }
+            else if($element_type == 'work location details'){
+                $element = '<table class="table table-nowrap mb-0">
+                                <tbody>
+                                    <tr>
+                                        <th scope="row">Work Location :</th>
+                                        <td id="work_location"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Street 1 :</th>
+                                        <td id="street_1"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Street 2 :</th>
+                                        <td id="street_2"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">City :</th>
+                                        <td id="city"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">State :</th>
+                                        <td id="state"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Zip Code :</th>
+                                        <td id="zip_code"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Email :</th>
+                                        <td id="email"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Telephone :</th>
+                                        <td id="telephone"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Mobile :</th>
+                                        <td id="mobile"></td>
                                     </tr>
                                 </tbody>
                             </table>';
@@ -1716,6 +1827,135 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                             <button type="button" class="btn btn-primary waves-effect waves-light view-job-position" data-job-position-id="'. $job_position_id .'" title="View Job Position">
                                                 <i class="bx bx-show font-size-16 align-middle"></i>
                                             </button>
+                                            '. $update .'
+                                            '. $transaction_log .'
+                                            '. $delete .'
+                                        </div>'
+                    );
+                }
+
+                echo json_encode($response);
+            }
+            else{
+                echo $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Work location table
+    else if($type == 'work location table'){
+        if ($api->databaseConnection()) {
+            # Get permission
+            $update_work_location = $api->check_role_permissions($username, 82);
+            $delete_work_location = $api->check_role_permissions($username, 83);
+            $view_transaction_log = $api->check_role_permissions($username, 84);
+
+            $sql = $api->db_connection->prepare('SELECT WORK_LOCATION_ID, WORK_LOCATION, TRANSACTION_LOG_ID FROM employee_work_location');
+
+            if($sql->execute()){
+                while($row = $sql->fetch()){
+                    $work_location_id = $row['WORK_LOCATION_ID'];
+                    $work_location = $row['WORK_LOCATION'];
+                    $transaction_log_id = $row['TRANSACTION_LOG_ID'];
+
+                    if($update_work_location > 0){
+                        $update = '<button type="button" class="btn btn-info waves-effect waves-light update-work-location" data-work-location-id="'. $work_location_id .'" title="Edit Work Location">
+                                        <i class="bx bx-pencil font-size-16 align-middle"></i>
+                                    </button>';
+                    }
+                    else{
+                        $update = '';
+                    }
+
+                    if($delete_work_location > 0){
+                        $delete = '<button type="button" class="btn btn-danger waves-effect waves-light delete-work-location" data-work-location-id="'. $work_location_id .'" title="Delete Work Location">
+                            <i class="bx bx-trash font-size-16 align-middle"></i>
+                        </button>';
+                    }
+                    else{
+                        $delete = '';
+                    }
+
+                    if($view_transaction_log > 0 && !empty($transaction_log_id)){
+                        $transaction_log = '<button type="button" class="btn btn-dark waves-effect waves-light view-transaction-log" data-transaction-log-id="'. $transaction_log_id .'" title="View Transaction Log">
+                                                <i class="bx bx-detail font-size-16 align-middle"></i>
+                                            </button>';
+                    }
+                    else{
+                        $transaction_log = '';
+                    }
+
+                    $response[] = array(
+                        'CHECK_BOX' => '<input class="form-check-input datatable-checkbox-children" type="checkbox" value="'. $work_location_id .'">',
+                        'WORK_LOCATION' => $work_location,
+                        'ACTION' => '<div class="d-flex gap-2">
+                                            <button type="button" class="btn btn-primary waves-effect waves-light view-work-location" data-work-location-id="'. $work_location_id .'" title="View Work Location">
+                                                <i class="bx bx-show font-size-16 align-middle"></i>
+                                            </button>
+                                            '. $update .'
+                                            '. $transaction_log .'
+                                            '. $delete .'
+                                        </div>'
+                    );
+                }
+
+                echo json_encode($response);
+            }
+            else{
+                echo $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Departure reason table
+    else if($type == 'departure reason table'){
+        if ($api->databaseConnection()) {
+            # Get permission
+            $update_departure_reason = $api->check_role_permissions($username, 87);
+            $delete_departure_reason = $api->check_role_permissions($username, 88);
+            $view_transaction_log = $api->check_role_permissions($username, 89);
+
+            $sql = $api->db_connection->prepare('SELECT DEPARTURE_REASON_ID, DEPARTURE_REASON, TRANSACTION_LOG_ID FROM employee_departure_reason');
+
+            if($sql->execute()){
+                while($row = $sql->fetch()){
+                    $departure_reason_id = $row['DEPARTURE_REASON_ID'];
+                    $departure_reason = $row['DEPARTURE_REASON'];
+                    $transaction_log_id = $row['TRANSACTION_LOG_ID'];
+
+                    if($update_departure_reason > 0){
+                        $update = '<button type="button" class="btn btn-info waves-effect waves-light update-departure-reason" data-departure-reason-id="'. $departure_reason_id .'" title="Edit Departure Reason">
+                                        <i class="bx bx-pencil font-size-16 align-middle"></i>
+                                    </button>';
+                    }
+                    else{
+                        $update = '';
+                    }
+
+                    if($delete_departure_reason > 0){
+                        $delete = '<button type="button" class="btn btn-danger waves-effect waves-light delete-departure-reason" data-departure-reason-id="'. $departure_reason_id .'" title="Delete Departure Reason">
+                            <i class="bx bx-trash font-size-16 align-middle"></i>
+                        </button>';
+                    }
+                    else{
+                        $delete = '';
+                    }
+
+                    if($view_transaction_log > 0 && !empty($transaction_log_id)){
+                        $transaction_log = '<button type="button" class="btn btn-dark waves-effect waves-light view-transaction-log" data-transaction-log-id="'. $transaction_log_id .'" title="View Transaction Log">
+                                                <i class="bx bx-detail font-size-16 align-middle"></i>
+                                            </button>';
+                    }
+                    else{
+                        $transaction_log = '';
+                    }
+
+                    $response[] = array(
+                        'CHECK_BOX' => '<input class="form-check-input datatable-checkbox-children" type="checkbox" value="'. $departure_reason_id .'">',
+                        'DEPARTURE_REASON' => $departure_reason,
+                        'ACTION' => '<div class="d-flex gap-2">
                                             '. $update .'
                                             '. $transaction_log .'
                                             '. $delete .'

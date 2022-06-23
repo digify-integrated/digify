@@ -4,9 +4,12 @@
     
     $department_page = $api->check_role_permissions($username, 70);
     $job_position_page = $api->check_role_permissions($username, 75);
+    $work_location_page = $api->check_role_permissions($username, 80);
+    $departure_reason_page = $api->check_role_permissions($username, 85);
+    $plan_page = $api->check_role_permissions($username, 90);
 
-    if($department_page > 0 || $job_position_page > 0){
-        if($department_page > 0 || $job_position_page > 0){
+    if($department_page > 0 || $job_position_page > 0 || $work_location_page > 0 || $departure_reason_page > 0 || $plan_page > 0){
+        if($department_page > 0 || $job_position_page > 0 || $work_location_page > 0 || $departure_reason_page > 0 || $plan_page > 0){
             $menu .= '<li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle arrow-none" href="javascript: void(0);" id="topnav-configurations" role="button">
                             <span key="t-configurations">Configurations</span> <div class="arrow-down"></div>
@@ -17,8 +20,20 @@
                                 $menu .= '<a href="department.php" class="dropdown-item" key="t-department">Department</a>';
                             }
 
+                            if($departure_reason_page > 0){
+                                $menu .= '<a href="departure-reason.php" class="dropdown-item" key="t-departure-reason">Departure Reason</a>';
+                            }
+
                             if($job_position_page > 0){
                                 $menu .= '<a href="job-position.php" class="dropdown-item" key="t-job-position">Job Position</a>';
+                            }
+
+                            if($plan_page > 0){
+                                $menu .= '<a href="plan.php" class="dropdown-item" key="t-plan">Plan</a>';
+                            }
+
+                            if($work_location_page > 0){
+                                $menu .= '<a href="work-location.php" class="dropdown-item" key="t-work-location">Work Location</a>';
                             }
 
                 $menu .= '</div>

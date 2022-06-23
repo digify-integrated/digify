@@ -1092,6 +1092,85 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     }
     # -------------------------------------------------------------
 
+    # Submit work location
+    else if($transaction == 'submit work location'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['work_location_id']) && isset($_POST['work_location']) && !empty($_POST['work_location']) && isset($_POST['street_1']) && isset($_POST['street_2']) && isset($_POST['city']) && isset($_POST['state']) && isset($_POST['zip_code']) && isset($_POST['email']) && isset($_POST['mobile']) && isset($_POST['telephone'])){
+            $file_type = '';
+            $username = $_POST['username'];
+            $work_location_id = $_POST['work_location_id'];
+            $work_location = $_POST['work_location'];
+            $street_1 = $_POST['street_1'];
+            $street_2 = $_POST['street_2'];
+            $city = $_POST['city'];
+            $state = $_POST['state'];
+            $zip_code = $_POST['zip_code'];
+            $email = $_POST['email'];
+            $mobile = $_POST['mobile'];
+            $telephone = $_POST['telephone'];
+
+            $state_details = $api->get_state_details($state);
+            $country_id = $state_details[0]['COUNTRY_ID'] ?? null;
+          
+            $check_work_location_exist = $api->check_work_location_exist($work_location_id);
+ 
+            if($check_work_location_exist > 0){
+                $update_work_location = $api->update_work_location($work_location_id, $work_location, $email, $telephone, $mobile, $street_1, $street_2, $country_id, $state, $city, $zip_code, $username);
+
+                if($update_work_location){
+                    echo 'Updated';
+                }
+                else{
+                    echo $update_work_location;
+                }
+            }
+            else{
+                $insert_work_location = $api->insert_work_location($work_location, $email, $telephone, $mobile, $street_1, $street_2, $country_id, $state, $city, $zip_code, $username);
+    
+                if($insert_work_location){
+                    echo 'Inserted';
+                }
+                else{
+                    echo $insert_work_location;
+                }
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Submit departure reason
+    else if($transaction == 'submit departure reason'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['departure_reason_id']) && isset($_POST['departure_reason']) && !empty($_POST['departure_reason'])){
+            $file_type = '';
+            $username = $_POST['username'];
+            $departure_reason_id = $_POST['departure_reason_id'];
+            $departure_reason = $_POST['departure_reason'];
+          
+            $check_departure_reason_exist = $api->check_departure_reason_exist($departure_reason_id);
+ 
+            if($check_departure_reason_exist > 0){
+                $update_departure_reason = $api->update_departure_reason($departure_reason_id, $departure_reason, $username);
+
+                if($update_departure_reason){
+                    echo 'Updated';
+                }
+                else{
+                    echo $update_departure_reason;
+                }
+            }
+            else{
+                $insert_departure_reason = $api->insert_departure_reason($departure_reason, $username);
+    
+                if($insert_departure_reason){
+                    echo 'Inserted';
+                }
+                else{
+                    echo $insert_departure_reason;
+                }
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
     # -------------------------------------------------------------
     #   Delete transactions
     # -------------------------------------------------------------
@@ -1876,6 +1955,118 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     }
     # -------------------------------------------------------------
 
+    # Delete work location
+    else if($transaction == 'delete work location'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['work_location_id']) && !empty($_POST['work_location_id'])){
+            $username = $_POST['username'];
+            $work_location_id = $_POST['work_location_id'];
+
+            $check_work_location_exist = $api->check_work_location_exist($work_location_id);
+
+            if($check_work_location_exist > 0){
+                $delete_work_location = $api->delete_work_location($work_location_id, $username);
+                                    
+                if($delete_work_location){
+                    echo 'Deleted';
+                }
+                else{
+                    echo $delete_work_location;
+                }
+            }
+            else{
+                echo 'Not Found';
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Delete multiple work location
+    else if($transaction == 'delete multiple work location'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['work_location_id'])){
+            $username = $_POST['username'];
+            $work_location_ids = $_POST['work_location_id'];
+
+            foreach($work_location_ids as $work_location_id){
+                $check_work_location_exist = $api->check_work_location_exist($work_location_id);
+
+                if($check_work_location_exist > 0){
+                    $delete_work_location = $api->delete_work_location($work_location_id, $username);
+                                    
+                    if(!$delete_work_location){
+                        $error = $delete_work_location;
+                    }
+                }
+                else{
+                    $error = 'Not Found';
+                }
+            }
+
+            if(empty($error)){
+                echo 'Deleted';
+            }
+            else{
+                echo $error;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Delete departure reason
+    else if($transaction == 'delete departure reason'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['departure_reason_id']) && !empty($_POST['departure_reason_id'])){
+            $username = $_POST['username'];
+            $departure_reason_id = $_POST['departure_reason_id'];
+
+            $check_departure_reason_exist = $api->check_departure_reason_exist($departure_reason_id);
+
+            if($check_departure_reason_exist > 0){
+                $delete_departure_reason = $api->delete_departure_reason($departure_reason_id, $username);
+                                    
+                if($delete_departure_reason){
+                    echo 'Deleted';
+                }
+                else{
+                    echo $delete_departure_reason;
+                }
+            }
+            else{
+                echo 'Not Found';
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Delete multiple departure reason
+    else if($transaction == 'delete multiple departure reason'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['departure_reason_id'])){
+            $username = $_POST['username'];
+            $departure_reason_ids = $_POST['departure_reason_id'];
+
+            foreach($departure_reason_ids as $departure_reason_id){
+                $check_departure_reason_exist = $api->check_departure_reason_exist($departure_reason_id);
+
+                if($check_departure_reason_exist > 0){
+                    $delete_departure_reason = $api->delete_departure_reason($departure_reason_id, $username);
+                                    
+                    if(!$delete_departure_reason){
+                        $error = $delete_departure_reason;
+                    }
+                }
+                else{
+                    $error = 'Not Found';
+                }
+            }
+
+            if(empty($error)){
+                echo 'Deleted';
+            }
+            else{
+                echo $error;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
     # -------------------------------------------------------------
     #   Unlock transactions
     # -------------------------------------------------------------
@@ -2580,7 +2771,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     }
     # -------------------------------------------------------------
 
-    # Company summary details
+    # Job position summary details
     else if($transaction == 'job position summary details'){
         if(isset($_POST['job_position_id']) && !empty($_POST['job_position_id'])){
             $job_position_id = $_POST['job_position_id'];
@@ -2598,6 +2789,96 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
             $response[] = array(
                 'JOB_POSITION' => $job_position_details[0]['JOB_POSITION'],
                 'JOB_DESCRIPTION' =>  $job_description_file_path
+            );
+
+            echo json_encode($response);
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Work location details
+    else if($transaction == 'work location details'){
+        if(isset($_POST['work_location_id']) && !empty($_POST['work_location_id'])){
+            $work_location_id = $_POST['work_location_id'];
+            $work_location_details = $api->get_work_location_details($work_location_id);
+
+            $response[] = array(
+                'WORK_LOCATION' => $work_location_details[0]['WORK_LOCATION'],
+                'EMAIL' => $work_location_details[0]['EMAIL'],
+                'TELEPHONE' => $work_location_details[0]['TELEPHONE'],
+                'MOBILE' => $work_location_details[0]['MOBILE'],
+                'STREET_1' => $work_location_details[0]['STREET_1'],
+                'STREET_2' => $work_location_details[0]['STREET_2'],
+                'STATE_ID' => $work_location_details[0]['STATE_ID'],
+                'CITY' => $work_location_details[0]['CITY'],
+                'ZIP_CODE' => $work_location_details[0]['ZIP_CODE']
+            );
+
+            echo json_encode($response);
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Work location summary details
+    else if($transaction == 'work location summary details'){
+        if(isset($_POST['work_location_id']) && !empty($_POST['work_location_id'])){
+            $work_location_id = $_POST['work_location_id'];
+            
+            $work_location_details = $api->get_work_location_details($work_location_id);
+            $email = $work_location_details[0]['EMAIL'] ?? null;
+            $telephone = $work_location_details[0]['TELEPHONE'] ?? null;
+            $mobile = $work_location_details[0]['MOBILE'] ?? null;
+            $state_id = $work_location_details[0]['STATE_ID'] ?? '--';
+
+            $state_details = $api->get_state_details($state_id);
+            $state_name = $state_details[0]['STATE_NAME'] ?? '--';
+
+            if(!empty($email)){
+                $email = '<a href="mailto:'. $email .'">'. $email .'</a>';
+            }
+            else{
+                $email = '--';
+            }
+
+            if(!empty($telephone)){
+                $telephone = '<a href="tel:'. $telephone .'">'. $telephone .'</a>';
+            }
+            else{
+                $telephone = '--';
+            }
+
+            if(!empty($mobile)){
+                $mobile = '<a href="tel:'. $mobile .'">'. $mobile .'</a>';
+            }
+            else{
+                $mobile = '--';
+            }
+
+            $response[] = array(
+                'WORK_LOCATION' => $work_location_details[0]['WORK_LOCATION'],
+                'EMAIL' => $email,
+                'TELEPHONE' => $telephone,
+                'MOBILE' => $mobile,
+                'STREET_1' => $work_location_details[0]['STREET_1'],
+                'STREET_2' => $work_location_details[0]['STREET_2'],
+                'STATE_ID' => $state_name,
+                'CITY' => $work_location_details[0]['CITY'],
+                'ZIP_CODE' => $work_location_details[0]['ZIP_CODE']
+            );
+
+            echo json_encode($response);
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Departure reason details
+    else if($transaction == 'departure reason details'){
+        if(isset($_POST['departure_reason_id']) && !empty($_POST['departure_reason_id'])){
+            $departure_reason_id = $_POST['departure_reason_id'];
+            $departure_reason_details = $api->get_departure_reason_details($departure_reason_id);
+
+            $response[] = array(
+                'DEPARTURE_REASON' => $departure_reason_details[0]['DEPARTURE_REASON']
             );
 
             echo json_encode($response);

@@ -927,6 +927,56 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : check_work_location_exist
+    # Purpose    : Checks if the work location exists.
+    #
+    # Returns    : Number
+    #
+    # -------------------------------------------------------------
+    public function check_work_location_exist($work_location_id){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL check_work_location_exist(:work_location_id)');
+            $sql->bindValue(':work_location_id', $work_location_id);
+
+            if($sql->execute()){
+                $row = $sql->fetch();
+
+                return $row['TOTAL'];
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : check_departure_reason_exist
+    # Purpose    : Checks if the departure reason exists.
+    #
+    # Returns    : Number
+    #
+    # -------------------------------------------------------------
+    public function check_departure_reason_exist($departure_reason_id){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL check_departure_reason_exist(:departure_reason_id)');
+            $sql->bindValue(':departure_reason_id', $departure_reason_id);
+
+            if($sql->execute()){
+                $row = $sql->fetch();
+
+                return $row['TOTAL'];
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Update methods
     # -------------------------------------------------------------
     
@@ -2534,6 +2584,147 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : update_work_location
+    # Purpose    : Updates work location.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function update_work_location($work_location_id, $work_location, $email, $telephone, $mobile, $street_1, $street_2, $country_id, $state, $city, $zip_code, $username){
+        if ($this->databaseConnection()) {
+            $record_log = 'UPD->' . $username . '->' . date('Y-m-d h:i:s');
+            $work_location_details = $this->get_work_location_details($work_location_id);
+            
+            if(!empty($work_location_details[0]['TRANSACTION_LOG_ID'])){
+                $transaction_log_id = $work_location_details[0]['TRANSACTION_LOG_ID'];
+            }
+            else{
+                # Get transaction log id
+                $transaction_log_system_parameter = $this->get_system_parameter(2, 1);
+                $transaction_log_parameter_number = $transaction_log_system_parameter[0]['PARAMETER_NUMBER'];
+                $transaction_log_id = $transaction_log_system_parameter[0]['ID'];
+            }
+
+            $sql = $this->db_connection->prepare('CALL update_work_location(:work_location_id, :work_location, :email, :telephone, :mobile, :street_1, :street_2, :country_id, :state, :city, :zip_code, :transaction_log_id, :record_log)');
+            $sql->bindValue(':work_location_id', $work_location_id);
+            $sql->bindValue(':work_location', $work_location);
+            $sql->bindValue(':email', $email);
+            $sql->bindValue(':telephone', $telephone);
+            $sql->bindValue(':mobile', $mobile);
+            $sql->bindValue(':street_1', $street_1);
+            $sql->bindValue(':street_2', $street_2);
+            $sql->bindValue(':country_id', $country_id);
+            $sql->bindValue(':state', $state);
+            $sql->bindValue(':city', $city);
+            $sql->bindValue(':zip_code', $zip_code);
+            $sql->bindValue(':transaction_log_id', $transaction_log_id);
+            $sql->bindValue(':record_log', $record_log);
+        
+            if($sql->execute()){
+                if(!empty($work_location_details[0]['TRANSACTION_LOG_ID'])){
+                    $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated work location.');
+                                    
+                    if($insert_transaction_log){
+                        return true;
+                    }
+                    else{
+                        return $insert_transaction_log;
+                    }
+                }
+                else{
+                    # Update transaction log value
+                    $update_system_parameter_value = $this->update_system_parameter_value($transaction_log_parameter_number, 2, $username);
+
+                    if($update_system_parameter_value){
+                        $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated work location.');
+                                    
+                        if($insert_transaction_log){
+                            return true;
+                        }
+                        else{
+                            return $insert_transaction_log;
+                        }
+                    }
+                    else{
+                        return $update_system_parameter_value;
+                    }
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : update_departure_reason
+    # Purpose    : Updates departure reason.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function update_departure_reason($departure_reason_id, $departure_reason, $username){
+        if ($this->databaseConnection()) {
+            $record_log = 'UPD->' . $username . '->' . date('Y-m-d h:i:s');
+            $departure_reason_details = $this->get_departure_reason_details($departure_reason_id);
+            
+            if(!empty($departure_reason_details[0]['TRANSACTION_LOG_ID'])){
+                $transaction_log_id = $departure_reason_details[0]['TRANSACTION_LOG_ID'];
+            }
+            else{
+                # Get transaction log id
+                $transaction_log_system_parameter = $this->get_system_parameter(2, 1);
+                $transaction_log_parameter_number = $transaction_log_system_parameter[0]['PARAMETER_NUMBER'];
+                $transaction_log_id = $transaction_log_system_parameter[0]['ID'];
+            }
+
+            $sql = $this->db_connection->prepare('CALL update_departure_reason(:departure_reason_id, :departure_reason, :transaction_log_id, :record_log)');
+            $sql->bindValue(':departure_reason_id', $departure_reason_id);
+            $sql->bindValue(':departure_reason', $departure_reason);
+            $sql->bindValue(':transaction_log_id', $transaction_log_id);
+            $sql->bindValue(':record_log', $record_log);
+        
+            if($sql->execute()){
+                if(!empty($departure_reason_details[0]['TRANSACTION_LOG_ID'])){
+                    $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated departure reason.');
+                                    
+                    if($insert_transaction_log){
+                        return true;
+                    }
+                    else{
+                        return $insert_transaction_log;
+                    }
+                }
+                else{
+                    # Update transaction log value
+                    $update_system_parameter_value = $this->update_system_parameter_value($transaction_log_parameter_number, 2, $username);
+
+                    if($update_system_parameter_value){
+                        $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated departure reason.');
+                                    
+                        if($insert_transaction_log){
+                            return true;
+                        }
+                        else{
+                            return $insert_transaction_log;
+                        }
+                    }
+                    else{
+                        return $update_system_parameter_value;
+                    }
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Insert methods
     # -------------------------------------------------------------
     
@@ -3764,6 +3955,137 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : insert_work_location
+    # Purpose    : Insert work location.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function insert_work_location($work_location, $email, $telephone, $mobile, $street_1, $street_2, $country_id, $state, $city, $zip_code, $username){
+        if ($this->databaseConnection()) {
+            $record_log = 'INS->' . $username . '->' . date('Y-m-d h:i:s');
+
+            # Get system parameter id
+            $system_parameter = $this->get_system_parameter(13, 1);
+            $parameter_number = $system_parameter[0]['PARAMETER_NUMBER'];
+            $id = $system_parameter[0]['ID'];
+
+            # Get transaction log id
+            $transaction_log_system_parameter = $this->get_system_parameter(2, 1);
+            $transaction_log_parameter_number = $transaction_log_system_parameter[0]['PARAMETER_NUMBER'];
+            $transaction_log_id = $transaction_log_system_parameter[0]['ID'];
+
+            $sql = $this->db_connection->prepare('CALL insert_work_location(:id, :work_location, :email, :telephone, :mobile, :street_1, :street_2, :country_id, :state, :city, :zip_code, :transaction_log_id, :record_log)');
+            $sql->bindValue(':id', $id);
+            $sql->bindValue(':work_location', $work_location);
+            $sql->bindValue(':email', $email);
+            $sql->bindValue(':telephone', $telephone);
+            $sql->bindValue(':mobile', $mobile);
+            $sql->bindValue(':street_1', $street_1);
+            $sql->bindValue(':street_2', $street_2);
+            $sql->bindValue(':country_id', $country_id);
+            $sql->bindValue(':state', $state);
+            $sql->bindValue(':city', $city);
+            $sql->bindValue(':zip_code', $zip_code);
+            $sql->bindValue(':transaction_log_id', $transaction_log_id);
+            $sql->bindValue(':record_log', $record_log); 
+        
+            if($sql->execute()){
+                # Update system parameter value
+                $update_system_parameter_value = $this->update_system_parameter_value($parameter_number, 13, $username);
+
+                if($update_system_parameter_value){
+                    # Update transaction log value
+                    $update_system_parameter_value = $this->update_system_parameter_value($transaction_log_parameter_number, 2, $username);
+
+                    if($update_system_parameter_value){
+                        $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Insert', 'User ' . $username . ' inserted work location.');
+                                    
+                        if($insert_transaction_log){
+                            return true;
+                        }
+                        else{
+                            return $insert_transaction_log;
+                        }
+                    }
+                    else{
+                        return $update_system_parameter_value;
+                    }
+                }
+                else{
+                    return $update_system_parameter_value;
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : insert_departure_reason
+    # Purpose    : Insert departure reason.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function insert_departure_reason($departure_reason, $username){
+        if ($this->databaseConnection()) {
+            $record_log = 'INS->' . $username . '->' . date('Y-m-d h:i:s');
+
+            # Get system parameter id
+            $system_parameter = $this->get_system_parameter(14, 1);
+            $parameter_number = $system_parameter[0]['PARAMETER_NUMBER'];
+            $id = $system_parameter[0]['ID'];
+
+            # Get transaction log id
+            $transaction_log_system_parameter = $this->get_system_parameter(2, 1);
+            $transaction_log_parameter_number = $transaction_log_system_parameter[0]['PARAMETER_NUMBER'];
+            $transaction_log_id = $transaction_log_system_parameter[0]['ID'];
+
+            $sql = $this->db_connection->prepare('CALL insert_departure_reason(:id, :departure_reason, :transaction_log_id, :record_log)');
+            $sql->bindValue(':id', $id);
+            $sql->bindValue(':departure_reason', $departure_reason);
+            $sql->bindValue(':transaction_log_id', $transaction_log_id);
+            $sql->bindValue(':record_log', $record_log); 
+        
+            if($sql->execute()){
+                # Update system parameter value
+                $update_system_parameter_value = $this->update_system_parameter_value($parameter_number, 14, $username);
+
+                if($update_system_parameter_value){
+                    # Update transaction log value
+                    $update_system_parameter_value = $this->update_system_parameter_value($transaction_log_parameter_number, 2, $username);
+
+                    if($update_system_parameter_value){
+                        $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Insert', 'User ' . $username . ' inserted departure reason.');
+                                    
+                        if($insert_transaction_log){
+                            return true;
+                        }
+                        else{
+                            return $insert_transaction_log;
+                        }
+                    }
+                    else{
+                        return $update_system_parameter_value;
+                    }
+                }
+                else{
+                    return $update_system_parameter_value;
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Delete methods
     # -------------------------------------------------------------
 
@@ -4279,6 +4601,52 @@ class Api{
                 else{
                     return true;
                 }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : delete_work_location
+    # Purpose    : Delete work location.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function delete_work_location($work_location_id, $username){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL delete_work_location(:work_location_id)');
+            $sql->bindValue(':work_location_id', $work_location_id);
+        
+            if($sql->execute()){ 
+                return true;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : delete_departure_reason
+    # Purpose    : Delete departure reason.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function delete_departure_reason($departure_reason_id, $username){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL delete_departure_reason(:departure_reason_id)');
+            $sql->bindValue(':departure_reason_id', $departure_reason_id);
+        
+            if($sql->execute()){ 
+                return true;
             }
             else{
                 return $sql->errorInfo()[2];
@@ -5078,6 +5446,81 @@ class Api{
                     $response[] = array(
                         'JOB_POSITION' => $row['JOB_POSITION'],
                         'JOB_DESCRIPTION' => $row['JOB_DESCRIPTION'],
+                        'TRANSACTION_LOG_ID' => $row['TRANSACTION_LOG_ID'],
+                        'RECORD_LOG' => $row['RECORD_LOG']
+                    );
+                }
+
+                return $response;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : get_work_location_details
+    # Purpose    : Gets the work location details.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_work_location_details($work_location_id){
+        if ($this->databaseConnection()) {
+            $response = array();
+
+            $sql = $this->db_connection->prepare('CALL get_work_location_details(:work_location_id)');
+            $sql->bindValue(':work_location_id', $work_location_id);
+
+            if($sql->execute()){
+                while($row = $sql->fetch()){
+                    $response[] = array(
+                        'WORK_LOCATION' => $row['WORK_LOCATION'],
+                        'EMAIL' => $row['EMAIL'],
+                        'TELEPHONE' => $row['TELEPHONE'],
+                        'MOBILE' => $row['MOBILE'],
+                        'STREET_1' => $row['STREET_1'],
+                        'STREET_2' => $row['STREET_2'],
+                        'COUNTRY_ID' => $row['COUNTRY_ID'],
+                        'STATE_ID' => $row['STATE_ID'],
+                        'CITY' => $row['CITY'],
+                        'ZIP_CODE' => $row['ZIP_CODE'],
+                        'TRANSACTION_LOG_ID' => $row['TRANSACTION_LOG_ID'],
+                        'RECORD_LOG' => $row['RECORD_LOG']
+                    );
+                }
+
+                return $response;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : get_departure_reason_details
+    # Purpose    : Gets the departure reason details.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_departure_reason_details($departure_reason_id){
+        if ($this->databaseConnection()) {
+            $response = array();
+
+            $sql = $this->db_connection->prepare('CALL get_departure_reason_details(:departure_reason_id)');
+            $sql->bindValue(':departure_reason_id', $departure_reason_id);
+
+            if($sql->execute()){
+                while($row = $sql->fetch()){
+                    $response[] = array(
+                        'DEPARTURE_REASON' => $row['DEPARTURE_REASON'],
                         'TRANSACTION_LOG_ID' => $row['TRANSACTION_LOG_ID'],
                         'RECORD_LOG' => $row['RECORD_LOG']
                     );
