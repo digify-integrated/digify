@@ -9,7 +9,7 @@
                                     <img src="<?php echo $menu_icon; ?>" alt="menu icon" height="50">
                                 </span>
                                 <span class="logo-lg">
-                                    <img src="<?php echo $menu_logo; ?>" alt="menu logo" height="100">
+                                    <img src="<?php echo $menu_logo; ?>" alt="menu logo" height="70">
                                 </span>
                             </a>
                         </div>

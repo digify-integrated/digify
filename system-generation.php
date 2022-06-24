@@ -715,19 +715,193 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                                         $form .='</select>
                                                     </div>
                                                 </div>
+                                                <div class="row mb-3">
+                                                    <label for="working_hours" class="col-sm-3 col-form-label">Working Hours</label>
+                                                    <div class="col-sm-9">
+                                                        <select class="form-control form-select2" id="working_hours" name="working_hours">
+                                                        <option value="">--</option>';
+                                                        $form .= $api->generate_work_location_options();
+                                                        $form .='</select>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="tab-pane" id="private-information" role="tabpanel">
-                                        <p class="mb-0">
-                                            Food truck fixie locavore, accusamus mcsweeneys marfa nulla
-                                            single-origin coffee squid. Exercitation +1 labore velit, blog
-                                            sartorial PBR leggings next level wes anderson artisan four loko
-                                            farm-to-table craft beer twee. Qui photo booth letterpress,
-                                            commodo enim craft beer mlkshk aliquip jean shorts ullamco ad
-                                            vinyl cillum PBR. Homo nostrud organic, assumenda labore
-                                            aesthetic magna delectus.
-                                        </p>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="row mb-3">
+                                                    <label for="street_1" class="col-sm-3 col-form-label">Address</label>
+                                                    <div class="col-sm-9">
+                                                        <input type="text" class="form-control form-maxlength" autocomplete="off" id="street_1" name="street_1" placeholder="Street" maxlength="200">
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <div class="col-sm-3"></div>
+                                                    <div class="col-sm-9">
+                                                        <input type="text" class="form-control form-maxlength" autocomplete="off" id="street_2" name="street_2" placeholder="Street 2" maxlength="200">
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <div class="col-sm-3"></div>
+                                                    <div class="col-sm-3">
+                                                        <input type="text" class="form-control form-maxlength" autocomplete="off" id="city" name="city" placeholder="City" maxlength="100">
+                                                    </div>
+                                                    <div class="col-sm-3">
+                                                        <select class="form-control form-select2" id="state" name="state">
+                                                        <option value="">State</option>';
+                                                        $form .= $api->generate_state_options();
+                                                        $form .='</select>
+                                                    </div>
+                                                    <div class="col-sm-3">
+                                                        <input type="text" class="form-control form-maxlength" autocomplete="off" id="zip_code" name="zip_code" placeholder="Zip Code" maxlength="10">
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <label for="bank_account_number" class="col-sm-3 col-form-label">Bank Account Number</label>
+                                                    <div class="col-sm-9">
+                                                        <input type="text" class="form-control form-maxlength" autocomplete="off" id="bank_account_number" name="bank_account_number" maxlength="100">
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <label for="home_work_distance" class="col-sm-3 col-form-label">Home-Work Distance</label>
+                                                    <div class="col-sm-9">
+                                                        <div class="input-group">
+                                                            <input id="home_work_distance" name="home_work_distance" class="form-control" type="number" min="0">
+                                                            <div class="input-group-text">km</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <label for="marital_status" class="col-sm-3 col-form-label">Marital Status</label>
+                                                    <div class="col-sm-9">
+                                                        <select class="form-control form-select2" id="marital_status" name="marital_status">
+                                                        <option value="">--</option>';
+                                                        $form .= $api->generate_system_code_options('MARITALSTATUS');
+                                                        $form .='</select>
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                <label for="emergency_contact" class="col-sm-3 col-form-label">Emergency Contact</label>
+                                                    <div class="col-sm-9">
+                                                        <input type="text" class="form-control form-maxlength" autocomplete="off" id="emergency_contact" name="emergency_contact" maxlength="500">
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <label for="emergency_phone" class="col-sm-3 col-form-label">Emergency Phone</label>
+                                                    <div class="col-sm-9">
+                                                        <input type="text" class="form-control form-maxlength" autocomplete="off" id="emergency_phone" name="emergency_phone" maxlength="20">
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <label for="certificate_level" class="col-sm-3 col-form-label">Certificate Level</label>
+                                                    <div class="col-sm-9">
+                                                        <select class="form-control form-select2" id="certificate_level" name="certificate_level">
+                                                        <option value="">--</option>';
+                                                        $form .= $api->generate_system_code_options('CERTIFICATELEVEL');
+                                                        $form .='</select>
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                <label for="field_of_study" class="col-sm-3 col-form-label">Field of Study</label>
+                                                    <div class="col-sm-9">
+                                                        <input type="text" class="form-control form-maxlength" autocomplete="off" id="field_of_study" name="field_of_study" maxlength="200">
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <label for="school" class="col-sm-3 col-form-label">School</label>
+                                                    <div class="col-sm-9">
+                                                        <input type="text" class="form-control form-maxlength" autocomplete="off" id="school" name="school" maxlength="200">
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <label for="nationality" class="col-sm-3 col-form-label">Nationality</label>
+                                                    <div class="col-sm-9">
+                                                        <select class="form-control form-select2" id="nationality" name="nationality">
+                                                            <option value="">--</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <label for="identification_number" class="col-sm-3 col-form-label">Identification Number</label>
+                                                    <div class="col-sm-9">
+                                                        <input type="text" class="form-control form-maxlength" autocomplete="off" id="identification_number" name="identification_number" maxlength="100">
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <label for="passport_number" class="col-sm-3 col-form-label">Passport Number</label>
+                                                    <div class="col-sm-9">
+                                                        <input type="text" class="form-control form-maxlength" autocomplete="off" id="passport_number" name="passport_number" maxlength="100">
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <label for="gender" class="col-sm-3 col-form-label">Gender</label>
+                                                    <div class="col-sm-9">
+                                                        <select class="form-control form-select2" id="gender" name="gender">
+                                                        <option value="">--</option>';
+                                                        $form .= $api->generate_system_code_options('GENDER');
+                                                        $form .='</select>
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <label for="birthday" class="col-sm-3 col-form-label">Date of Birth</label>
+                                                    <div class="col-sm-9">
+                                                        <div class="input-group" id="birthday-container">
+                                                            <input type="text" class="form-control" id="birthday" name="birthday" autocomplete="off" data-date-format="m/dd/yyyy" data-date-container="#birthday-container" data-provide="datepicker" data-date-autoclose="true">
+                                                            <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <label for="place_of_birth" class="col-sm-3 col-form-label">Place of Birth</label>
+                                                    <div class="col-sm-9">
+                                                        <input type="text" class="form-control form-maxlength" autocomplete="off" id="place_of_birth" name="place_of_birth" maxlength="500">
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <label for="number_of_children" class="col-sm-3 col-form-label">Number of Children</label>
+                                                    <div class="col-sm-9">
+                                                        <input id="number_of_children" name="number_of_children" class="form-control" type="number" min="0">
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <label for="visa_number" class="col-sm-3 col-form-label">Visa Number</label>
+                                                    <div class="col-sm-9">
+                                                        <input type="text" class="form-control form-maxlength" autocomplete="off" id="visa_number" name="visa_number" maxlength="100">
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <label for="work_permit_number" class="col-sm-3 col-form-label">Work Permit Number</label>
+                                                    <div class="col-sm-9">
+                                                        <input type="text" class="form-control form-maxlength" autocomplete="off" id="work_permit_number" name="work_permit_number" maxlength="100">
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <label for="visa_expiry_date" class="col-sm-3 col-form-label">Visa Expiry Date</label>
+                                                    <div class="col-sm-9">
+                                                        <div class="input-group" id="visa-expiry-date-container">
+                                                            <input type="text" class="form-control" id="visa_expiry_date" name="visa_expiry_date" autocomplete="off" data-date-format="m/dd/yyyy" data-date-container="#visa-expiry-date-container" data-provide="datepicker" data-date-autoclose="true">
+                                                            <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <label for="work_permit_expiry_date" class="col-sm-3 col-form-label">Work Permit Expiry Date</label>
+                                                    <div class="col-sm-9">
+                                                        <div class="input-group" id="work-permit-expiry-date-container">
+                                                            <input type="text" class="form-control" id="work_permit_expiry_date" name="work_permit_expiry_date" autocomplete="off" data-date-format="m/dd/yyyy" data-date-container="#work-permit-expiry-date-container" data-provide="datepicker" data-date-autoclose="true">
+                                                            <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <label for="work_permit" class="col-sm-3 col-form-label">Work Permit</label>
+                                                    <div class="col-sm-9">
+                                                     <input class="form-control" type="file" name="work_permit" id="work_permit">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
