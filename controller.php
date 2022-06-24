@@ -1171,6 +1171,40 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     }
     # -------------------------------------------------------------
 
+    # Submit employee type
+    else if($transaction == 'submit employee type'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['employee_type_id']) && isset($_POST['employee_type']) && !empty($_POST['employee_type'])){
+            $file_type = '';
+            $username = $_POST['username'];
+            $employee_type_id = $_POST['employee_type_id'];
+            $employee_type = $_POST['employee_type'];
+          
+            $check_employee_type_exist = $api->check_employee_type_exist($employee_type_id);
+ 
+            if($check_employee_type_exist > 0){
+                $update_employee_type = $api->update_employee_type($employee_type_id, $employee_type, $username);
+
+                if($update_employee_type){
+                    echo 'Updated';
+                }
+                else{
+                    echo $update_employee_type;
+                }
+            }
+            else{
+                $insert_employee_type = $api->insert_employee_type($employee_type, $username);
+    
+                if($insert_employee_type){
+                    echo 'Inserted';
+                }
+                else{
+                    echo $insert_employee_type;
+                }
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
     # -------------------------------------------------------------
     #   Delete transactions
     # -------------------------------------------------------------
@@ -2067,6 +2101,62 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     }
     # -------------------------------------------------------------
 
+    # Delete employee type
+    else if($transaction == 'delete employee type'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['employee_type_id']) && !empty($_POST['employee_type_id'])){
+            $username = $_POST['username'];
+            $employee_type_id = $_POST['employee_type_id'];
+
+            $check_employee_type_exist = $api->check_employee_type_exist($employee_type_id);
+
+            if($check_employee_type_exist > 0){
+                $delete_employee_type = $api->delete_employee_type($employee_type_id, $username);
+                                    
+                if($delete_employee_type){
+                    echo 'Deleted';
+                }
+                else{
+                    echo $delete_employee_type;
+                }
+            }
+            else{
+                echo 'Not Found';
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Delete multiple employee type
+    else if($transaction == 'delete multiple employee type'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['employee_type_id'])){
+            $username = $_POST['username'];
+            $employee_type_ids = $_POST['employee_type_id'];
+
+            foreach($employee_type_ids as $employee_type_id){
+                $check_employee_type_exist = $api->check_employee_type_exist($employee_type_id);
+
+                if($check_employee_type_exist > 0){
+                    $delete_employee_type = $api->delete_employee_type($employee_type_id, $username);
+                                    
+                    if(!$delete_employee_type){
+                        $error = $delete_employee_type;
+                    }
+                }
+                else{
+                    $error = 'Not Found';
+                }
+            }
+
+            if(empty($error)){
+                echo 'Deleted';
+            }
+            else{
+                echo $error;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
     # -------------------------------------------------------------
     #   Unlock transactions
     # -------------------------------------------------------------
@@ -2879,6 +2969,21 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
             $response[] = array(
                 'DEPARTURE_REASON' => $departure_reason_details[0]['DEPARTURE_REASON']
+            );
+
+            echo json_encode($response);
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Employee type details
+    else if($transaction == 'employee type details'){
+        if(isset($_POST['employee_type_id']) && !empty($_POST['employee_type_id'])){
+            $employee_type_id = $_POST['employee_type_id'];
+            $employee_type_details = $api->get_employee_type_details($employee_type_id);
+
+            $response[] = array(
+                'EMPLOYEE_TYPE' => $employee_type_details[0]['EMPLOYEE_TYPE']
             );
 
             echo json_encode($response);

@@ -2,31 +2,38 @@
     'use strict';
 
     $(function() {
-        if($('#plan-datatable').length){
-            initialize_plan_table('#plan-datatable');
+        if($('#employee-datatable').length){
+            initialize_employee_table('#employee-datatable');
         }
 
         initialize_click_events();
     });
 })(jQuery);
 
-function initialize_plan_table(datatable_name, buttons = false, show_all = false){
+function initialize_employee_table(datatable_name, buttons = false, show_all = false){
     hide_multiple_buttons();
     
     var username = $('#username').text();
-    var type = 'plan table';
+    var filter_employee_status = $('#filter_employee_status').val();
+    var filter_work_location = $('#filter_work_location').val();
+    var filter_department = $('#filter_department').val();
+    var filter_job_position = $('#filter_job_position').val();
+    var filter_employee_type = $('#filter_employee_type').val();
+    var type = 'employee table';
     var settings;
 
     var column = [ 
         { 'data' : 'CHECK_BOX' },
-        { 'data' : 'PLAN' },
+        { 'data' : 'IMAGE' },
+        { 'data' : 'FILE_AS' },
         { 'data' : 'ACTION' }
     ];
 
     var column_definition = [
         { 'width': '1%','bSortable': false, 'aTargets': 0 },
-        { 'width': '79%', 'aTargets': 1 },
-        { 'width': '20%','bSortable': false, 'aTargets': 2 },
+        { 'width': '9%','bSortable': false, 'aTargets': 1 },
+        { 'width': '70%', 'aTargets': 2 },
+        { 'width': '20%','bSortable': false, 'aTargets': 3 },
     ];
 
     if(show_all){
@@ -42,14 +49,14 @@ function initialize_plan_table(datatable_name, buttons = false, show_all = false
                 'url' : 'system-generation.php',
                 'method' : 'POST',
                 'dataType': 'JSON',
-                'data': {'type' : type, 'username' : username},
+                'data': {'type' : type, 'username' : username, 'filter_employee_status' : filter_employee_status, 'filter_work_location' : filter_work_location, 'filter_department' : filter_department, 'filter_job_position' : filter_job_position, 'filter_employee_type' : filter_employee_type },
                 'dataSrc' : ''
             },
             dom:  "<'row'<'col-sm-3'l><'col-sm-6 text-center mb-2'B><'col-sm-3'f>>" +  "<'row'<'col-sm-12'tr>>" + "<'row'<'col-sm-5'i><'col-sm-7'p>>",
             buttons: [
                 'csv', 'excel', 'pdf'
             ],
-            'order': [[ 1, 'asc' ]],
+            'order': [[ 2, 'asc' ]],
             'columns' : column,
             'scrollY': false,
             'scrollX': true,
@@ -73,10 +80,10 @@ function initialize_plan_table(datatable_name, buttons = false, show_all = false
                 'url' : 'system-generation.php',
                 'method' : 'POST',
                 'dataType': 'JSON',
-                'data': {'type' : type, 'username' : username},
+                'data': {'type' : type, 'username' : username, 'filter_employee_status' : filter_employee_status, 'filter_work_location' : filter_work_location, 'filter_department' : filter_department, 'filter_job_position' : filter_job_position, 'filter_employee_type' : filter_employee_type },
                 'dataSrc' : ''
             },
-            'order': [[ 1, 'asc' ]],
+            'order': [[ 2, 'asc' ]],
             'columns' : column,
             'scrollY': false,
             'scrollX': true,
@@ -103,25 +110,25 @@ function initialize_plan_table(datatable_name, buttons = false, show_all = false
 function initialize_click_events(){
     var username = $('#username').text();
 
-    $(document).on('click','#add-plan',function() {
-        generate_modal('plan form', 'Plan', 'R' , '1', '1', 'form', 'plan-form', '1', username);
+    $(document).on('click','#add-employee',function() {
+        generate_modal('employee form', 'Employee', 'XL' , '1', '1', 'form', 'employee-form', '1', username);
     });
 
-    $(document).on('click','.update-plan',function() {
-        var plan_id = $(this).data('plan-id');
+    $(document).on('click','.update-employee',function() {
+        var employee_id = $(this).data('employee-id');
 
-        sessionStorage.setItem('plan_id', plan_id);
+        sessionStorage.setItem('employee_id', employee_id);
         
-        generate_modal('plan form', 'Plan', 'R' , '1', '1', 'form', 'plan-form', '0', username);
+        generate_modal('employee form', 'Employee', 'XL' , '1', '1', 'form', 'employee-form', '0', username);
     });
     
-    $(document).on('click','.delete-plan',function() {
-        var plan_id = $(this).data('plan-id');
-        var transaction = 'delete plan';
+    $(document).on('click','.delete-employee',function() {
+        var employee_id = $(this).data('employee-id');
+        var transaction = 'delete employee';
 
         Swal.fire({
-            title: 'Delete Plan',
-            text: 'Are you sure you want to delete this plan?',
+            title: 'Delete Employee',
+            text: 'Are you sure you want to delete this employee?',
             icon: 'warning',
             showCancelButton: !0,
             confirmButtonText: 'Delete',
@@ -134,18 +141,18 @@ function initialize_click_events(){
                 $.ajax({
                     type: 'POST',
                     url: 'controller.php',
-                    data: {username : username, plan_id : plan_id, transaction : transaction},
+                    data: {username : username, employee_id : employee_id, transaction : transaction},
                     success: function (response) {
                         if(response === 'Deleted'){
-                          show_alert('Delete Plan', 'The plan has been deleted.', 'success');
+                          show_alert('Delete Employee', 'The employee has been deleted.', 'success');
 
-                          reload_datatable('#plan-datatable');
+                          reload_datatable('#employee-datatable');
                         }
                         else if(response === 'Not Found'){
-                          show_alert('Delete Plan', 'The plan does not exist.', 'info');
+                          show_alert('Delete Employee', 'The employee does not exist.', 'info');
                         }
                         else{
-                          show_alert('Delete Plan', response, 'error');
+                          show_alert('Delete Employee', response, 'error');
                         }
                     }
                 });
@@ -154,20 +161,20 @@ function initialize_click_events(){
         });
     });
 
-    $(document).on('click','#delete-plan',function() {
-        var plan_id = [];
-        var transaction = 'delete multiple plan';
+    $(document).on('click','#delete-employee',function() {
+        var employee_id = [];
+        var transaction = 'delete multiple employee';
 
         $('.datatable-checkbox-children').each(function(){
             if($(this).is(':checked')){  
-                plan_id.push(this.value);  
+                employee_id.push(this.value);  
             }
         });
 
-        if(plan_id.length > 0){
+        if(employee_id.length > 0){
             Swal.fire({
-                title: 'Delete Multiple Plans',
-                text: 'Are you sure you want to delete these plans?',
+                title: 'Delete Multiple Employees',
+                text: 'Are you sure you want to delete these employees?',
                 icon: 'warning',
                 showCancelButton: !0,
                 confirmButtonText: 'Delete',
@@ -181,18 +188,18 @@ function initialize_click_events(){
                     $.ajax({
                         type: 'POST',
                         url: 'controller.php',
-                        data: {username : username, plan_id : plan_id, transaction : transaction},
+                        data: {username : username, employee_id : employee_id, transaction : transaction},
                         success: function (response) {
                             if(response === 'Deleted'){
-                                show_alert('Delete Multiple Plans', 'The plans have been deleted.', 'success');
+                                show_alert('Delete Multiple Employees', 'The employees have been deleted.', 'success');
     
-                                reload_datatable('#plan-datatable');
+                                reload_datatable('#employee-datatable');
                             }
                             else if(response === 'Not Found'){
-                                show_alert('Delete Multiple Plans', 'The plan does not exist.', 'info');
+                                show_alert('Delete Multiple Employees', 'The employee does not exist.', 'info');
                             }
                             else{
-                                show_alert('Delete Multiple Plans', response, 'error');
+                                show_alert('Delete Multiple Employees', response, 'error');
                             }
                         }
                     });
@@ -202,7 +209,7 @@ function initialize_click_events(){
             });
         }
         else{
-            show_alert('Delete Multiple Plans', 'Please select the plans you want to delete.', 'error');
+            show_alert('Delete Multiple Employees', 'Please select the employees you want to delete.', 'error');
         }
     });
 

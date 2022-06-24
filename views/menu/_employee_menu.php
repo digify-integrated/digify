@@ -6,10 +6,15 @@
     $job_position_page = $api->check_role_permissions($username, 75);
     $work_location_page = $api->check_role_permissions($username, 80);
     $departure_reason_page = $api->check_role_permissions($username, 85);
-    $plan_page = $api->check_role_permissions($username, 90);
+    $employee_page = $api->check_role_permissions($username, 90);
+    $employee_type_page = $api->check_role_permissions($username, 97);
 
-    if($department_page > 0 || $job_position_page > 0 || $work_location_page > 0 || $departure_reason_page > 0 || $plan_page > 0){
-        if($department_page > 0 || $job_position_page > 0 || $work_location_page > 0 || $departure_reason_page > 0 || $plan_page > 0){
+    if($department_page > 0 || $job_position_page > 0 || $work_location_page > 0 || $departure_reason_page > 0 || $employee_page > 0 || $employee_type_page > 0){
+        if($employee_page > 0){
+            $menu .= '<li class="nav-item dropdown"><a href="employee.php" class="nav-link">Employee</a></li>';
+        }
+
+        if($department_page > 0 || $job_position_page > 0 || $work_location_page > 0 || $departure_reason_page > 0 || $employee_type_page > 0){
             $menu .= '<li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle arrow-none" href="javascript: void(0);" id="topnav-configurations" role="button">
                             <span key="t-configurations">Configurations</span> <div class="arrow-down"></div>
@@ -24,12 +29,12 @@
                                 $menu .= '<a href="departure-reason.php" class="dropdown-item" key="t-departure-reason">Departure Reason</a>';
                             }
 
-                            if($job_position_page > 0){
-                                $menu .= '<a href="job-position.php" class="dropdown-item" key="t-job-position">Job Position</a>';
+                            if($employee_type_page > 0){
+                                $menu .= '<a href="employee-type.php" class="dropdown-item" key="t-employee-type">Employee Type</a>';
                             }
 
-                            if($plan_page > 0){
-                                $menu .= '<a href="plan.php" class="dropdown-item" key="t-plan">Plan</a>';
+                            if($job_position_page > 0){
+                                $menu .= '<a href="job-position.php" class="dropdown-item" key="t-job-position">Job Position</a>';
                             }
 
                             if($work_location_page > 0){

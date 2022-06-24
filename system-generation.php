@@ -555,7 +555,180 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                 <div class="mb-3">
                                     <input type="hidden" id="departure_reason_id" name="departure_reason_id">
                                     <label for="departure_reason" class="form-label">Departure Reason <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control form-maxlength" autocomplete="off" id="departure_reason" name="departure_reason" maxlength="200">
+                                    <input type="text" class="form-control form-maxlength" autocomplete="off" id="departure_reason" name="departure_reason" maxlength="100">
+                                </div>
+                            </div>
+                        </div>';
+            }
+            else if($form_type == 'employee type form'){
+                $form .= '<div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <input type="hidden" id="employee_type_id" name="employee_type_id">
+                                    <label for="employee_type" class="form-label">Employee Type <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control form-maxlength" autocomplete="off" id="employee_type" name="employee_type" maxlength="100">
+                                </div>
+                            </div>
+                        </div>';
+            }
+            else if($form_type == 'employee form'){
+                $form .= '<div class="row">
+                            <div class="col-md-2">
+                                <div class="mb-3">
+                                    <input type="hidden" id="employee_id" name="employee_id">
+                                    <label for="badge_id" class="form-label">Badge ID <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control maxlength" autocomplete="off" id="badge_id" name="badge_id" maxlength="100">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="first_name" class="form-label">First Name <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control form-maxlength" autocomplete="off" id="first_name" name="first_name" maxlength="100">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="middle_name" class="form-label">Middle Name</label>
+                                    <input type="text" class="form-control form-maxlength" autocomplete="off" id="middle_name" name="middle_name" maxlength="100">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="last_name" class="form-label">Last Name <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control form-maxlength" autocomplete="off" id="last_name" name="last_name" maxlength="100">
+                                </div>
+                            </div>
+                            <div class="col-md-1">
+                                <div class="mb-3">
+                                    <label class="form-label">Suffix</label>
+                                    <select class="form-control form-select2" id="suffix" name="suffix">
+                                    <option value="">--</option>';
+                                    $form .= $api->generate_system_code_options('SUFFIX');
+                                    $form .='</select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="job_position" class="form-label">Job Position <span class="text-danger">*</span></label>
+                                    <select class="form-control form-select2" id="job_position" name="job_position">
+                                    <option value="">--</option>';
+                                    $form .= $api->generate_job_position_options();
+                                    $form .='</select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="employee_image" class="form-label">Employee Image</label><br/>
+                                    <input class="form-control" type="file" name="employee_image" id="employee_image">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="row mb-3">
+                                    <label for="work_email" class="col-sm-4 col-form-label">Work Email</label>
+                                    <div class="col-sm-8">
+                                        <input type="email" id="work_email" name="work_email" class="form-control form-maxlength" maxlength="100" autocomplete="off">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <label for="work_mobile" class="col-sm-4 col-form-label">Work Mobile Number</label>
+                                    <div class="col-sm-8">
+                                        <input type="text" class="form-control form-maxlength" autocomplete="off" id="work_mobile" name="work_mobile" maxlength="30">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <label for="work_telephone" class="col-sm-4 col-form-label">Work Telephone</label>
+                                    <div class="col-sm-8">
+                                        <input type="text" class="form-control form-maxlength" autocomplete="off" id="work_telephone" name="work_telephone" maxlength="30">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="row mb-3">
+                                    <label for="department" class="col-sm-4 col-form-label">Department</label>
+                                    <div class="col-sm-8">
+                                        <select class="form-control form-select2" id="department" name="department">
+                                        <option value="">--</option>';
+                                        $form .= $api->generate_department_options();
+                                        $form .='</select>
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <label for="manager" class="col-sm-4 col-form-label">Manager</label>
+                                    <div class="col-sm-8">
+                                        <select class="form-control form-select2" id="manager" name="manager">
+                                        <option value="">--</option>';
+                                        $form .= $api->generate_department_options();
+                                        $form .='</select>
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <label for="coach" class="col-sm-4 col-form-label">Coach</label>
+                                    <div class="col-sm-8">
+                                        <select class="form-control form-select2" id="coach" name="coach">
+                                        <option value="">--</option>';
+                                        $form .= $api->generate_department_options();
+                                        $form .='</select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <ul class="nav nav-tabs" role="tablist">
+                                    <li class="nav-item">
+                                        <a class="nav-link active" data-bs-toggle="tab" href="#work-information" role="tab">
+                                            <span class="d-block d-sm-none"><i class="fas fa-home"></i></span>
+                                            <span class="d-none d-sm-block">Work Information</span>    
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" data-bs-toggle="tab" href="#private-information" role="tab">
+                                            <span class="d-block d-sm-none"><i class="far fa-user"></i></span>
+                                            <span class="d-none d-sm-block">Private Information</span>    
+                                        </a>
+                                    </li>
+                                </ul>
+
+                                <div class="tab-content p-3">
+                                    <div class="tab-pane active" id="work-information" role="tabpanel">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="row mb-3">
+                                                    <label for="company" class="col-sm-3 col-form-label">Company</label>
+                                                    <div class="col-sm-9">
+                                                        <select class="form-control form-select2" id="company" name="company">
+                                                        <option value="">--</option>';
+                                                        $form .= $api->generate_work_location_options();
+                                                        $form .='</select>
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <label for="work_location" class="col-sm-3 col-form-label">Work Location</label>
+                                                    <div class="col-sm-9">
+                                                        <select class="form-control form-select2" id="work_location" name="work_location">
+                                                        <option value="">--</option>';
+                                                        $form .= $api->generate_work_location_options();
+                                                        $form .='</select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane" id="private-information" role="tabpanel">
+                                        <p class="mb-0">
+                                            Food truck fixie locavore, accusamus mcsweeneys marfa nulla
+                                            single-origin coffee squid. Exercitation +1 labore velit, blog
+                                            sartorial PBR leggings next level wes anderson artisan four loko
+                                            farm-to-table craft beer twee. Qui photo booth letterpress,
+                                            commodo enim craft beer mlkshk aliquip jean shorts ullamco ad
+                                            vinyl cillum PBR. Homo nostrud organic, assumenda labore
+                                            aesthetic magna delectus.
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         </div>';
@@ -1967,6 +2140,225 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
             }
             else{
                 echo $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Employee type table
+    else if($type == 'employee type table'){
+        if ($api->databaseConnection()) {
+            # Get permission
+            $update_employee_type = $api->check_role_permissions($username, 99);
+            $delete_employee_type = $api->check_role_permissions($username, 100);
+            $view_transaction_log = $api->check_role_permissions($username, 101);
+
+            $sql = $api->db_connection->prepare('SELECT EMPLOYEE_TYPE_ID, EMPLOYEE_TYPE, TRANSACTION_LOG_ID FROM employee_type');
+
+            if($sql->execute()){
+                while($row = $sql->fetch()){
+                    $employee_type_id = $row['EMPLOYEE_TYPE_ID'];
+                    $employee_type = $row['EMPLOYEE_TYPE'];
+                    $transaction_log_id = $row['TRANSACTION_LOG_ID'];
+
+                    if($update_employee_type > 0){
+                        $update = '<button type="button" class="btn btn-info waves-effect waves-light update-employee-type" data-employee-type-id="'. $employee_type_id .'" title="Edit Employee Type">
+                                        <i class="bx bx-pencil font-size-16 align-middle"></i>
+                                    </button>';
+                    }
+                    else{
+                        $update = '';
+                    }
+
+                    if($delete_employee_type > 0){
+                        $delete = '<button type="button" class="btn btn-danger waves-effect waves-light delete-employee-type" data-employee-type-id="'. $employee_type_id .'" title="Delete Employee Type">
+                            <i class="bx bx-trash font-size-16 align-middle"></i>
+                        </button>';
+                    }
+                    else{
+                        $delete = '';
+                    }
+
+                    if($view_transaction_log > 0 && !empty($transaction_log_id)){
+                        $transaction_log = '<button type="button" class="btn btn-dark waves-effect waves-light view-transaction-log" data-transaction-log-id="'. $transaction_log_id .'" title="View Transaction Log">
+                                                <i class="bx bx-detail font-size-16 align-middle"></i>
+                                            </button>';
+                    }
+                    else{
+                        $transaction_log = '';
+                    }
+
+                    $response[] = array(
+                        'CHECK_BOX' => '<input class="form-check-input datatable-checkbox-children" type="checkbox" value="'. $employee_type_id .'">',
+                        'EMPLOYEE_TYPE' => $employee_type,
+                        'ACTION' => '<div class="d-flex gap-2">
+                                            '. $update .'
+                                            '. $transaction_log .'
+                                            '. $delete .'
+                                        </div>'
+                    );
+                }
+
+                echo json_encode($response);
+            }
+            else{
+                echo $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Employee table
+    else if($type == 'employee table'){
+        if(isset($_POST['filter_employee_status']) && isset($_POST['filter_work_location']) && isset($_POST['filter_department']) && isset($_POST['filter_job_position']) && isset($_POST['filter_employee_type'])){
+            if ($api->databaseConnection()) {
+                # Get permission
+                $update_employee = $api->check_role_permissions($username, 92);
+                $delete_employee = $api->check_role_permissions($username, 93);
+                $archive_employee = $api->check_role_permissions($username, 94);
+                $unarchive_employee = $api->check_role_permissions($username, 95);
+                $view_transaction_log = $api->check_role_permissions($username, 96);
+
+                $filter_employee_status = $_POST['filter_employee_status'];
+                $filter_work_location = $_POST['filter_work_location'];
+                $filter_department = $_POST['filter_department'];
+                $filter_job_position = $_POST['filter_job_position'];
+                $filter_employee_type = $_POST['filter_employee_type'];
+
+                $query = 'SELECT EMPLOYEE_ID, FILE_AS, EMPLOYEE_IMAGE, JOB_POSITION, EMPLOYEE_STATUS, TRANSACTION_LOG_ID FROM employee_details';
+
+                if(!empty($filter_employee_status) || !empty($filter_work_location) || !empty($filter_department) || !empty($filter_job_position) || !empty($filter_employee_type)){
+                    $query .= ' WHERE ';
+
+                    if(!empty($filter_employee_status)){
+                        $filter[] = 'EMPLOYEE_STATUS = :filter_employee_status';
+                    }
+
+                    if(!empty($filter_work_location)){
+                        $filter[] = 'WORK_LOCATION = :filter_work_location';
+                    }
+
+                    if(!empty($filter_department)){
+                        $filter[] = 'DEPARTMENT = :filter_department';
+                    }
+
+                    if(!empty($filter_job_position)){
+                        $filter[] = 'JOB_POSITION = :filter_job_position';
+                    }
+
+                    if(!empty($filter_employee_type)){
+                        $filter[] = 'EMPLOYEE_TYPE = :filter_employee_type';
+                    }
+
+                    if(!empty($filter)){
+                        $query .= implode(' AND ', $filter);
+                    }
+                }
+    
+                $sql = $api->db_connection->prepare($query);
+
+                if(!empty($filter_employee_status) || !empty($filter_work_location) || !empty($filter_department) || !empty($filter_job_position) || !empty($filter_employee_type)){
+
+                    if(!empty($filter_employee_status)){
+                        $sql->bindValue(':filter_employee_status', $filter_employee_status);
+                    }
+
+                    if(!empty($filter_work_location)){
+                        $sql->bindValue(':filter_work_location', $filter_work_location);
+                    }
+
+                    if(!empty($filter_department)){
+                        $sql->bindValue(':filter_department', $filter_department);
+                    }
+
+                    if(!empty($filter_job_position)){
+                        $sql->bindValue(':filter_job_position', $filter_job_position);
+                    }
+
+                    if(!empty($filter_employee_type)){
+                        $sql->bindValue(':filter_employee_type', $filter_employee_type);
+                    }
+                }
+    
+                if($sql->execute()){
+                    while($row = $sql->fetch()){
+                        $employee_id = $row['EMPLOYEE_ID'];
+                        $file_as = $row['FILE_AS'];
+                        $employee_image = $row['EMPLOYEE_IMAGE'];
+                        $job_position = $row['JOB_POSITION'];
+                        $employee_status = $row['EMPLOYEE_STATUS'];
+                        $transaction_log_id = $row['TRANSACTION_LOG_ID'];
+
+                        if(empty($employee_image)){
+                            $employee_image = $api->check_image($employee_image ?? null, 'profile');
+                        }
+
+                        $job_position_details = $api->get_job_position_details($job_position);
+                        $job_position_name = $job_position_details[0]['JOB_POSITION'];
+
+                        if($update_user_account > 0){
+                            $update = '<button type="button" class="btn btn-info waves-effect waves-light update-user-account" data-employee-id="'. $employee_id .'" title="Edit Employee">
+                                            <i class="bx bx-pencil font-size-16 align-middle"></i>
+                                        </button>';
+                        }
+                        else{
+                            $update = '';
+                        }
+    
+                        if($user_status == 'ACTIVE'){
+                            if($archive_employee > 0){
+                                $archive_unarchive = '<button class="btn btn-danger waves-effect waves-light archive-employee" title="Archive Employee" data-employee-id="'. $employee_id .'">
+                                <i class="bx bx-x font-size-16 align-middle"></i>
+                                </button>';
+                            }
+                            else{
+                                $archive_unarchive = '';
+                            }
+    
+                            $data_archive = '1';
+                        }
+                        else{
+                            if($unarchive_employee > 0){
+                                $archive_unarchive = '<button class="btn btn-success waves-effect waves-light unarchive-employee" title="Unarchive Employee" data-employee-id="'. $employee_id .'">
+                                <i class="bx bx-user-check font-size-16 align-middle"></i>
+                                </button>';
+                            }
+                            else{
+                                $archive_unarchive = '';
+                            }
+    
+                            $data_archive = '0';
+                        }
+    
+                        if($view_transaction_log > 0 && !empty($transaction_log_id)){
+                            $transaction_log = '<button type="button" class="btn btn-dark waves-effect waves-light view-transaction-log" data-transaction-log-id="'. $transaction_log_id .'" title="View Transaction Log">
+                                                    <i class="bx bx-detail font-size-16 align-middle"></i>
+                                                </button>';
+                        }
+                        else{
+                            $transaction_log = '';
+                        }
+    
+                        $response[] = array(
+                            'CHECK_BOX' => '<input class="form-check-input datatable-checkbox-children" type="checkbox" data-archive="'. $data_archive .'" value="'. $employee_id .'">',
+                            'IMAGE' => '<img class="rounded-circle avatar-xs" src="'. $employee_image .'" alt="profile">',
+                            'FILE_AS' => $file_as . '<p class="text-muted mb-0">'. $job_position_name .'</p>',
+                            'ACTION' => '<div class="d-flex gap-2">
+                                <button type="button" class="btn btn-primary waves-effect waves-light view-employee" data-user-code="'. $username .'" title="View Employee">
+                                    <i class="bx bx-show font-size-16 align-middle"></i>
+                                </button>
+                                '. $update .'
+                                '. $archive_unarchive .'
+                                '. $transaction_log .'
+                            </div>'
+                        );
+                    }
+    
+                    echo json_encode($response);
+                }
+                else{
+                    echo $sql->errorInfo()[2];
+                }
             }
         }
     }

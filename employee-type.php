@@ -4,11 +4,11 @@
     require('classes/api.php');
 
     $api = new Api;
-    $page_title = 'Plan';
+    $page_title = 'Employee Type';
 
-    $page_access = $api->check_role_permissions($username, 85);
-    $add_plan = $api->check_role_permissions($username, 86);
-	$delete_plan = $api->check_role_permissions($username, 88);
+    $page_access = $api->check_role_permissions($username, 97);
+    $add_employee_type = $api->check_role_permissions($username, 98);
+	$delete_employee_type = $api->check_role_permissions($username, 100);
     
     $check_user_account_status = $api->check_user_account_status($username);
 
@@ -72,20 +72,20 @@
                                             <div class="col-md-12">
                                                 <div class="d-flex align-items-start">
                                                     <div class="flex-grow-1 align-self-center">
-                                                        <h4 class="card-title">Plan List</h4>
+                                                        <h4 class="card-title">Employee Type List</h4>
                                                     </div>
                                                     <?php
-                                                        if($add_plan > 0 || $delete_plan > 0){
+                                                        if($add_employee_type > 0 || $delete_employee_type > 0){
 
-                                                            if($add_plan > 0){
-                                                                $add = '<button type="button" class="btn btn-primary waves-effect btn-label waves-light" id="add-plan"><i class="bx bx-plus label-icon"></i> Add</button>';
+                                                            if($add_employee_type > 0){
+                                                                $add = '<button type="button" class="btn btn-primary waves-effect btn-label waves-light" id="add-employee-type"><i class="bx bx-plus label-icon"></i> Add</button>';
                                                             }
                                                             else{
                                                                 $add = '';
                                                             }
 
-                                                            if($delete_plan > 0){
-                                                                $delete = '<button type="button" class="btn btn-danger waves-effect btn-label waves-light d-none multiple" id="delete-plan"><i class="bx bx-trash label-icon"></i> Delete</button>';
+                                                            if($delete_employee_type > 0){
+                                                                $delete = '<button type="button" class="btn btn-danger waves-effect btn-label waves-light d-none multiple" id="delete-employee-type"><i class="bx bx-trash label-icon"></i> Delete</button>';
                                                             }
                                                             else{
                                                                 $delete = '';
@@ -102,7 +102,7 @@
                                         </div>
                                         <div class="row mt-4">
                                             <div class="col-md-12">
-                                                <table id="plan-datatable" class="table table-bordered align-middle mb-0 table-hover table-striped dt-responsive nowrap w-100">
+                                                <table id="employee-type-datatable" class="table table-bordered align-middle mb-0 table-hover table-striped dt-responsive nowrap w-100">
                                                     <thead>
                                                         <tr>
                                                             <th>
@@ -110,7 +110,7 @@
                                                                     <input class="form-check-input" id="datatable-checkbox" type="checkbox">
                                                                 </div>
                                                             </th>
-                                                            <th class="all">Plan</th>
+                                                            <th class="all">Employee Type</th>
                                                             <th class="all">Action</th>
                                                         </tr>
                                                     </thead>
@@ -140,6 +140,6 @@
         <script src="assets/libs/sweetalert2/sweetalert2.min.js"></script>
         <script src="assets/libs/select2/js/select2.min.js"></script>
         <script src="assets/js/system.js?v=<?php echo rand(); ?>"></script>
-        <script src="assets/js/pages/plan.js?v=<?php echo rand(); ?>"></script>
+        <script src="assets/js/pages/employee-type.js?v=<?php echo rand(); ?>"></script>
     </body>
 </html>

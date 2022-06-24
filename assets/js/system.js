@@ -1450,6 +1450,74 @@ function initialize_form_validation(form_type){
             }
         });
     }
+    else if(form_type == 'employee type form'){
+        $('#employee-type-form').validate({
+            submitHandler: function (form) {
+                transaction = 'submit employee type';
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'controller.php',
+                    data: $(form).serialize() + '&username=' + username + '&transaction=' + transaction,
+                    beforeSend: function(){
+                        document.getElementById('submit-form').disabled = true;
+                        $('#submit-form').html('<div class="spinner-border spinner-border-sm text-light" role="status"><span rclass="sr-only"></span></div>');
+                    },
+                    success: function (response) {
+                        if(response === 'Updated' || response === 'Inserted'){
+                            if(response === 'Inserted'){
+                                show_alert('Insert Employee Type Success', 'The employee type has been inserted.', 'success');
+                            }
+                            else{
+                                show_alert('Update Employee Type Success', 'The employee type has been updated.', 'success');
+                            }
+
+                            $('#System-Modal').modal('hide');
+                            reload_datatable('#employee-type-datatable');
+                        }
+                        else{
+                            show_alert('Employee Type Error', response, 'error');
+                        }
+                    },
+                    complete: function(){
+                        document.getElementById('submit-form').disabled = false;
+                        $('#submit-form').html('Submit');
+                    }
+                });
+                return false;
+            },
+            rules: {
+                employee_type: {
+                    required: true         
+                }
+            },
+            messages: {
+                employee_type: {
+                    required: 'Please enter the employee type',
+                }
+            },
+            errorPlacement: function(label, element) {
+                if((element.hasClass('select2') || element.hasClass('form-select2')) && element.next('.select2-container').length) {
+                    label.insertAfter(element.next('.select2-container'));
+                }
+                else if(element.parent('.input-group').length){
+                    label.insertAfter(element.parent());
+                }
+                else{
+                    label.insertAfter(element);
+                }
+            },
+            highlight: function(element) {
+                $(element).parent().addClass('has-danger');
+                $(element).addClass('form-control-danger');
+            },
+            success: function(label,element) {
+                $(element).parent().removeClass('has-danger')
+                $(element).removeClass('form-control-danger')
+                label.remove();
+            }
+        });
+    }
 }
 
 // Display functions
@@ -1968,6 +2036,22 @@ function display_form_details(form_type){
             success: function(response) {
                 $('#departure_reason').val(response[0].DEPARTURE_REASON);
                 $('#departure_reason_id').val(departure_reason_id);
+            }
+        });
+    }
+    else if(form_type == 'employee type form'){
+        transaction = 'employee type details';
+
+        var employee_type_id = sessionStorage.getItem('employee_type_id');
+
+        $.ajax({
+            url: 'controller.php',
+            method: 'POST',
+            dataType: 'JSON',
+            data: {employee_type_id : employee_type_id, transaction : transaction},
+            success: function(response) {
+                $('#employee_type').val(response[0].EMPLOYEE_TYPE);
+                $('#employee_type_id').val(employee_type_id);
             }
         });
     }
