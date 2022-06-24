@@ -235,6 +235,7 @@ CREATE TABLE employee_details(
 	EMPLOYEE_ID VARCHAR(100) PRIMARY KEY,
 	USERNAME VARCHAR(50),
 	BADGE_ID VARCHAR(100),
+	EMPLOYEE_IMAGE VARCHAR(500),
 	FILE_AS VARCHAR(350) NOT NULL,
 	FIRST_NAME VARCHAR(100) NOT NULL,
 	MIDDLE_NAME VARCHAR(100) NOT NULL,
@@ -247,9 +248,11 @@ CREATE TABLE employee_details(
 	MANAGER VARCHAR(100),
 	COACH VARCHAR(100),
 	EMPLOYEE_TYPE VARCHAR(100),
+	EMPLOYEE_STATUS VARCHAR(100),
 	ONBOARD_DATE DATE,
 	OFFBOARD_DATE DATE,
 	DEPARTURE_REASON VARCHAR(50),
+	DETAILED_REASON VARCHAR(500),
 	EMAIL VARCHAR(50),
 	TELEPHONE VARCHAR(20),
 	MOBILE VARCHAR(20),
@@ -257,22 +260,48 @@ CREATE TABLE employee_details(
 	RECORD_LOG VARCHAR(100)
 );
 
-CREATE TABLE employee_plan(
-	PLAN_ID VARCHAR(100) PRIMARY KEY,
-	PLAN VARCHAR(200) NOT NULL,
+CREATE TABLE employee_private_information(
+	EMPLOYEE_ID VARCHAR(100) PRIMARY KEY,
+	BANK_ACCOUNT_NUMBER VARCHAR(100),
+	HOME_WORK_DISTANCE DOUBLE,
+	EMAIL VARCHAR(50),
+	TELEPHONE VARCHAR(20),
+	MOBILE VARCHAR(20),
+	WEBSITE VARCHAR(100),
+	TAX_ID VARCHAR(100),
+	STREET_1 VARCHAR(200),
+	STREET_2 VARCHAR(200),
+	COUNTRY_ID INT,
+	STATE_ID INT,
+	CITY VARCHAR(100),
+	ZIP_CODE VARCHAR(10),
+	MARITAL_STATUS VARCHAR(20),
+	SPOUSE_NAME VARCHAR(500),
+	SPOUSE_BIRTHDAY DATE,
+	EMERGENCY_CONTACT VARCHAR(500),
+	EMERGENCY_PHONE VARCHAR(20),
+	NATIONALITY INT,
+	IDENTIFICATION_NUMBER VARCHAR(100),
+	PASSPORT_NUMBER VARCHAR(100),
+	GENDER VARCHAR(20),
+	BIRTHDAY DATE,
+	CERTIFICATE_LEVEL VARCHAR(20),
+	FIELD_OF_STUDY VARCHAR(200),
+	SCHOOL VARCHAR(200),
+	PLACE_OF_BIRTH VARCHAR(500),
+	NUMBER_OF_CHILDREN INT,
+	VISA_NUMBER VARCHAR(100),
+	WORK_PERMIT_NUMBER VARCHAR(100),
+	VISA_EXPIRY_DATE DATE,
+	WORK_PERMIT_DATE DATE,
+	WORK_PERMIT VARCHAR(500),
 	TRANSACTION_LOG_ID VARCHAR(100),
 	RECORD_LOG VARCHAR(100)
 );
 
-CREATE TABLE employee_plan_activities(
-	ACTIVITY_ID VARCHAR(100) PRIMARY KEY,
-	PLAN_ID VARCHAR(100),
-	ACTIVITY_TYPE VARCHAR(20) NOT NULL,
-	SUMMARY VARCHAR(200) NOT NULL,
-	RESPONSIBLE VARCHAR(20) NOT NULL,
-	RESPONSIBLE_PERSON VARCHAR(100),
-	DAYS_DUE VARCHAR(100),
-	NOTE VARCHAR(500),
+CREATE TABLE employee_type(
+	EMPLOYEE_TYPE_ID VARCHAR(50) PRIMARY KEY,
+	EMPLOYEE_TYPE VARCHAR(100) NOT NULL,
 	TRANSACTION_LOG_ID VARCHAR(100),
 	RECORD_LOG VARCHAR(100)
 );
@@ -297,8 +326,9 @@ CREATE INDEX employee_department_index ON employee_department(DEPARTMENT_ID);
 CREATE INDEX employee_job_position_index ON employee_job_position(JOB_POSITION_ID);
 CREATE INDEX employee_work_location_index ON employee_work_location(WORK_LOCATION_ID);
 CREATE INDEX employee_departure_reason_index ON employee_departure_reason(DEPARTURE_REASON_ID);
-CREATE INDEX employee_plan_index ON employee_plan(PLAN_ID);
-CREATE INDEX employee_plan_activities_index ON employee_plan_activities(ACTIVITY_ID);
+CREATE INDEX employee_details_index ON employee_details(EMPLOYEE_ID);
+CREATE INDEX employee_type_index ON employee_type(EMPLOYEE_TYPE_ID);
+CREATE INDEX employee_private_information_index ON employee_private_information(EMPLOYEE_ID);
 
 /* Stored Procedure */
 
@@ -1948,6 +1978,103 @@ BEGIN
 	SET @departure_reason_id = departure_reason_id;
 
 	SET @query = 'DELETE FROM employee_departure_reason WHERE DEPARTURE_REASON_ID = @departure_reason_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE check_employee_type_exist(IN employee_type_id VARCHAR(50))
+BEGIN
+	SET @employee_type_id = employee_type_id;
+
+	SET @query = 'SELECT COUNT(1) AS TOTAL FROM employee_type WHERE EMPLOYEE_TYPE_ID = @employee_type_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE update_employee_type(IN employee_type_id VARCHAR(50), IN employee_type VARCHAR(100), IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
+BEGIN
+	SET @employee_type_id = employee_type_id;
+	SET @employee_type = employee_type;
+	SET @transaction_log_id = transaction_log_id;
+	SET @record_log = record_log;
+
+	SET @query = 'UPDATE employee_type SET EMPLOYEE_TYPE = @employee_type, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE EMPLOYEE_TYPE_ID = @employee_type_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE insert_employee_type(IN employee_type_id VARCHAR(50), IN employee_type VARCHAR(100), IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
+BEGIN
+	SET @employee_type_id = employee_type_id;
+	SET @employee_type = employee_type;
+	SET @transaction_log_id = transaction_log_id;
+	SET @record_log = record_log;
+
+	SET @query = 'INSERT INTO employee_type (EMPLOYEE_TYPE_ID, EMPLOYEE_TYPE, TRANSACTION_LOG_ID, RECORD_LOG) VALUES(@employee_type_id, @employee_type, @transaction_log_id, @record_log)';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE get_employee_type_details(IN employee_type_id VARCHAR(50))
+BEGIN
+	SET @employee_type_id = employee_type_id;
+
+	SET @query = 'SELECT EMPLOYEE_TYPE, TRANSACTION_LOG_ID, RECORD_LOG FROM employee_type WHERE EMPLOYEE_TYPE_ID = @employee_type_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE delete_employee_type(IN employee_type_id VARCHAR(50))
+BEGIN
+	SET @employee_type_id = employee_type_id;
+
+	SET @query = 'DELETE FROM employee_type WHERE EMPLOYEE_TYPE_ID = @employee_type_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE generate_work_location_options()
+BEGIN
+	SET @query = 'SELECT WORK_LOCATION_ID, WORK_LOCATION FROM employee_work_location ORDER BY WORK_LOCATION';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE generate_department_options()
+BEGIN
+	SET @query = 'SELECT DEPARTMENT_ID, DEPARTMENT FROM employee_department ORDER BY DEPARTMENT';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE generate_job_position_options()
+BEGIN
+	SET @query = 'SELECT JOB_POSITION_ID, JOB_POSITION FROM employee_job_position ORDER BY JOB_POSITION';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE generate_employee_type_options()
+BEGIN
+	SET @query = 'SELECT EMPLOYEE_TYPE_ID, EMPLOYEE_TYPE FROM employee_type ORDER BY EMPLOYEE_TYPE';
 
 	PREPARE stmt FROM @query;
 	EXECUTE stmt;
