@@ -5947,6 +5947,32 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : get_file_as_format
+    # Purpose    : Returns the file as name format
+    #
+    # Returns    : String
+    #
+    # -------------------------------------------------------------
+    public function get_file_as_format($first_name, $middle_name, $last_name, $suffix){
+        $suffix = $this->get_system_code_details('SUFFIX', $suffix)[0]['DESCRIPTION'] ?? null;
+
+        if(!empty($middle_name) && !empty($suffix)){
+            return $last_name . ', ' . $first_name . ' ' . $middle_name . ', ' . $suffix;
+        }
+        else if(!empty($middle_name) && empty($suffix)){
+            return $last_name . ', ' . $first_name . ' ' . $middle_name;
+        }
+        else if(empty($middle_name) && !empty($suffix)){
+            return $last_name . ', ' . $first_name . ', ' . $suffix;
+        }
+        else{
+            return $last_name . ', ' . $first_name;
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Check methods
     # -------------------------------------------------------------
 

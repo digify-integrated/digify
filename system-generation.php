@@ -286,10 +286,10 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                             </div>
                             <div class="row mb-3">
                                 <div class="col-sm-3"></div>
-                                <div class="col-sm-3">
+                                <div class="col-sm-3 mb-3">
                                     <input type="text" class="form-control form-maxlength" autocomplete="off" id="city" name="city" placeholder="City" maxlength="100">
                                 </div>
-                                <div class="col-sm-3">
+                                <div class="col-sm-3 mb-3">
                                     <select class="form-control form-select2" id="state" name="state">
                                     <option value="">State</option>';
                                     $form .= $api->generate_state_options();
@@ -517,10 +517,10 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                             </div>
                             <div class="row mb-3">
                                 <div class="col-sm-3"></div>
-                                <div class="col-sm-3">
+                                <div class="col-sm-3 mb-3">
                                     <input type="text" class="form-control form-maxlength" autocomplete="off" id="city" name="city" placeholder="City" maxlength="100">
                                 </div>
-                                <div class="col-sm-3">
+                                <div class="col-sm-3 mb-3">
                                     <select class="form-control form-select2" id="state" name="state">
                                     <option value="">State</option>';
                                     $form .= $api->generate_state_options();
@@ -573,16 +573,10 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
             }
             else if($form_type == 'employee form'){
                 $form .= '<div class="row">
-                            <div class="col-md-2">
-                                <div class="mb-3">
-                                    <input type="hidden" id="employee_id" name="employee_id">
-                                    <label for="badge_id" class="form-label">Badge ID <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control maxlength" autocomplete="off" id="badge_id" name="badge_id" maxlength="100">
-                                </div>
-                            </div>
                             <div class="col-md-3">
                                 <div class="mb-3">
                                     <label for="first_name" class="form-label">First Name <span class="text-danger">*</span></label>
+                                    <input type="hidden" id="employee_id" name="employee_id">
                                     <input type="text" class="form-control form-maxlength" autocomplete="off" id="first_name" name="first_name" maxlength="100">
                                 </div>
                             </div>
@@ -598,7 +592,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                     <input type="text" class="form-control form-maxlength" autocomplete="off" id="last_name" name="last_name" maxlength="100">
                                 </div>
                             </div>
-                            <div class="col-md-1">
+                            <div class="col-md-3">
                                 <div class="mb-3">
                                     <label class="form-label">Suffix</label>
                                     <select class="form-control form-select2" id="suffix" name="suffix">
@@ -611,7 +605,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="job_position" class="form-label">Job Position <span class="text-danger">*</span></label>
+                                    <label for="job_position" class="form-label">Job Position</label>
                                     <select class="form-control form-select2" id="job_position" name="job_position">
                                     <option value="">--</option>';
                                     $form .= $api->generate_job_position_options();
@@ -680,23 +674,35 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                             <div class="col-md-12">
                                 <ul class="nav nav-tabs" role="tablist">
                                     <li class="nav-item">
-                                        <a class="nav-link active" data-bs-toggle="tab" href="#work-information" role="tab">
-                                            <span class="d-block d-sm-none"><i class="fas fa-home"></i></span>
+                                        <a class="nav-link active" data-bs-toggle="tab" href="#work-information-tab" role="tab">
+                                            <span class="d-block d-sm-none"><i class="bx bx-building"></i></span>
                                             <span class="d-none d-sm-block">Work Information</span>    
                                         </a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link" data-bs-toggle="tab" href="#private-information" role="tab">
-                                            <span class="d-block d-sm-none"><i class="far fa-user"></i></span>
+                                        <a class="nav-link" data-bs-toggle="tab" href="#private-information-tab" role="tab">
+                                            <span class="d-block d-sm-none"><i class="bx bx-user"></i></span>
                                             <span class="d-none d-sm-block">Private Information</span>    
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" data-bs-toggle="tab" href="#citizenship-tab" role="tab">
+                                            <span class="d-block d-sm-none"><i class="bx bx-id-card"></i></span>
+                                            <span class="d-none d-sm-block">Citizenship</span>    
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" data-bs-toggle="tab" href="#work-permit-tab" role="tab">
+                                            <span class="d-block d-sm-none"><i class="bx bx-folder"></i></span>
+                                            <span class="d-none d-sm-block">Work Permit</span>    
                                         </a>
                                     </li>
                                 </ul>
 
                                 <div class="tab-content p-3">
-                                    <div class="tab-pane active" id="work-information" role="tabpanel">
+                                    <div class="tab-pane active" id="work-information-tab" role="tabpanel">
                                         <div class="row">
-                                            <div class="col-md-12">
+                                            <div class="col-md-6">
                                                 <div class="row mb-3">
                                                     <label for="company" class="col-sm-3 col-form-label">Company</label>
                                                     <div class="col-sm-9">
@@ -704,6 +710,12 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                                         <option value="">--</option>';
                                                         $form .= $api->generate_work_location_options();
                                                         $form .='</select>
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <label for="badge_id" class="col-sm-3 col-form-label">Badge ID</label>
+                                                    <div class="col-sm-9">
+                                                        <input type="text" class="form-control form-maxlength" autocomplete="off" id="badge_id" name="badge_id" maxlength="100">
                                                     </div>
                                                 </div>
                                                 <div class="row mb-3">
@@ -716,6 +728,33 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                                     </div>
                                                 </div>
                                                 <div class="row mb-3">
+                                                    <label for="employee_type" class="col-sm-3 col-form-label">Employee Type</label>
+                                                    <div class="col-sm-9">
+                                                        <select class="form-control form-select2" id="employee_type" name="employee_type">
+                                                        <option value="">--</option>';
+                                                        $form .= $api->generate_work_location_options();
+                                                        $form .='</select>
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <label for="onboard_date" class="col-sm-3 col-form-label">Onboard Date</label>
+                                                    <div class="col-sm-9">
+                                                        <div class="input-group" id="onboard-date-container">
+                                                            <input type="text" class="form-control" id="onboard_date" name="onboard_date" autocomplete="off" data-date-format="m/dd/yyyy" data-date-container="#onboard-date-container" data-provide="datepicker" data-date-autoclose="true">
+                                                            <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <label for="permanency_date" class="col-sm-3 col-form-label">Permanency Date</label>
+                                                    <div class="col-sm-9">
+                                                        <div class="input-group" id="permanency-date-container">
+                                                            <input type="text" class="form-control" id="permanency_date" name="permanency_date" autocomplete="off" data-date-format="m/dd/yyyy" data-date-container="#permanency-date-container" data-provide="datepicker" data-date-autoclose="true">
+                                                            <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
                                                     <label for="working_hours" class="col-sm-3 col-form-label">Working Hours</label>
                                                     <div class="col-sm-9">
                                                         <select class="form-control form-select2" id="working_hours" name="working_hours">
@@ -725,13 +764,39 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                                     </div>
                                                 </div>
                                             </div>
+                                            <div class="col-md-6">
+                                                <div class="row mb-3">
+                                                    <label for="sss" class="col-sm-3 col-form-label">SSS</label>
+                                                    <div class="col-sm-9">
+                                                        <input type="text" class="form-control form-maxlength" autocomplete="off" id="sss" name="sss" maxlength="20">
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <label for="tin" class="col-sm-3 col-form-label">TIN</label>
+                                                    <div class="col-sm-9">
+                                                        <input type="text" class="form-control form-maxlength" autocomplete="off" id="tin" name="tin" maxlength="20">
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <label for="philhealth" class="col-sm-3 col-form-label">Philhealth</label>
+                                                    <div class="col-sm-9">
+                                                        <input type="text" class="form-control form-maxlength" autocomplete="off" id="philhealth" name="philhealth" maxlength="20">
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <label for="pagibig" class="col-sm-3 col-form-label">Pagibig</label>
+                                                    <div class="col-sm-9">
+                                                        <input type="text" class="form-control form-maxlength" autocomplete="off" id="pagibig" name="pagibig" maxlength="20">
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div class="tab-pane" id="private-information" role="tabpanel">
+                                    <div class="tab-pane" id="private-information-tab" role="tabpanel">
                                         <div class="row">
                                             <div class="col-md-12">
                                                 <div class="row mb-3">
-                                                    <label for="street_1" class="col-sm-3 col-form-label">Address</label>
+                                                    <label for="street_1" class="col-sm-3 col-form-label">Employee Address</label>
                                                     <div class="col-sm-9">
                                                         <input type="text" class="form-control form-maxlength" autocomplete="off" id="street_1" name="street_1" placeholder="Street" maxlength="200">
                                                     </div>
@@ -744,10 +809,10 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                                 </div>
                                                 <div class="row mb-3">
                                                     <div class="col-sm-3"></div>
-                                                    <div class="col-sm-3">
+                                                    <div class="col-sm-3 mb-3">
                                                         <input type="text" class="form-control form-maxlength" autocomplete="off" id="city" name="city" placeholder="City" maxlength="100">
                                                     </div>
-                                                    <div class="col-sm-3">
+                                                    <div class="col-sm-3 mb-3">
                                                         <select class="form-control form-select2" id="state" name="state">
                                                         <option value="">State</option>';
                                                         $form .= $api->generate_state_options();
@@ -755,6 +820,24 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                                     </div>
                                                     <div class="col-sm-3">
                                                         <input type="text" class="form-control form-maxlength" autocomplete="off" id="zip_code" name="zip_code" placeholder="Zip Code" maxlength="10">
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <label for="personal_email" class="col-sm-3 col-form-label">Personal Email</label>
+                                                    <div class="col-sm-9">
+                                                        <input type="email" id="personal_email" name="personal_email" class="form-control form-maxlength" maxlength="100" autocomplete="off">
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <label for="personal_mobile" class="col-sm-3 col-form-label">Personal Mobile Number</label>
+                                                    <div class="col-sm-9">
+                                                        <input type="text" class="form-control form-maxlength" autocomplete="off" id="personal_mobile" name="personal_mobile" maxlength="30">
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <label for="personal_telephone" class="col-sm-3 col-form-label">Personal Telephone</label>
+                                                    <div class="col-sm-9">
+                                                        <input type="text" class="form-control form-maxlength" autocomplete="off" id="personal_telephone" name="personal_telephone" maxlength="30">
                                                     </div>
                                                 </div>
                                                 <div class="row mb-3">
@@ -782,7 +865,22 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                                     </div>
                                                 </div>
                                                 <div class="row mb-3">
-                                                <label for="emergency_contact" class="col-sm-3 col-form-label">Emergency Contact</label>
+                                                    <label for="spouse_name" class="col-sm-3 col-form-label">Spouse Name</label>
+                                                    <div class="col-sm-9">
+                                                        <input type="text" class="form-control form-maxlength" autocomplete="off" id="spouse_name" name="spouse_name" maxlength="500">
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <label for="spouse_birthday" class="col-sm-3 col-form-label">Spouse Birthday</label>
+                                                    <div class="col-sm-9">
+                                                        <div class="input-group" id="spouse-birthday-container">
+                                                            <input type="text" class="form-control" id="spouse_birthday" name="spouse_birthday" autocomplete="off" data-date-format="m/dd/yyyy" data-date-container="#spouse-birthday-container" data-provide="datepicker" data-date-autoclose="true">
+                                                            <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <label for="emergency_contact" class="col-sm-3 col-form-label">Emergency Contact</label>
                                                     <div class="col-sm-9">
                                                         <input type="text" class="form-control form-maxlength" autocomplete="off" id="emergency_contact" name="emergency_contact" maxlength="500">
                                                     </div>
@@ -814,6 +912,12 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                                         <input type="text" class="form-control form-maxlength" autocomplete="off" id="school" name="school" maxlength="200">
                                                     </div>
                                                 </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane" id="citizenship-tab" role="tabpanel">
+                                        <div class="row">
+                                            <div class="col-md-12">
                                                 <div class="row mb-3">
                                                     <label for="nationality" class="col-sm-3 col-form-label">Nationality</label>
                                                     <div class="col-sm-9">
@@ -835,15 +939,6 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                                     </div>
                                                 </div>
                                                 <div class="row mb-3">
-                                                    <label for="gender" class="col-sm-3 col-form-label">Gender</label>
-                                                    <div class="col-sm-9">
-                                                        <select class="form-control form-select2" id="gender" name="gender">
-                                                        <option value="">--</option>';
-                                                        $form .= $api->generate_system_code_options('GENDER');
-                                                        $form .='</select>
-                                                    </div>
-                                                </div>
-                                                <div class="row mb-3">
                                                     <label for="birthday" class="col-sm-3 col-form-label">Date of Birth</label>
                                                     <div class="col-sm-9">
                                                         <div class="input-group" id="birthday-container">
@@ -859,21 +954,30 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                                     </div>
                                                 </div>
                                                 <div class="row mb-3">
+                                                    <label for="gender" class="col-sm-3 col-form-label">Gender</label>
+                                                    <div class="col-sm-9">
+                                                        <select class="form-control form-select2" id="gender" name="gender">
+                                                        <option value="">--</option>';
+                                                        $form .= $api->generate_system_code_options('GENDER');
+                                                        $form .='</select>
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
                                                     <label for="number_of_children" class="col-sm-3 col-form-label">Number of Children</label>
                                                     <div class="col-sm-9">
                                                         <input id="number_of_children" name="number_of_children" class="form-control" type="number" min="0">
                                                     </div>
                                                 </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane" id="work-permit-tab" role="tabpanel">
+                                        <div class="row">
+                                            <div class="col-md-12">
                                                 <div class="row mb-3">
                                                     <label for="visa_number" class="col-sm-3 col-form-label">Visa Number</label>
                                                     <div class="col-sm-9">
                                                         <input type="text" class="form-control form-maxlength" autocomplete="off" id="visa_number" name="visa_number" maxlength="100">
-                                                    </div>
-                                                </div>
-                                                <div class="row mb-3">
-                                                    <label for="work_permit_number" class="col-sm-3 col-form-label">Work Permit Number</label>
-                                                    <div class="col-sm-9">
-                                                        <input type="text" class="form-control form-maxlength" autocomplete="off" id="work_permit_number" name="work_permit_number" maxlength="100">
                                                     </div>
                                                 </div>
                                                 <div class="row mb-3">
@@ -883,6 +987,12 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                                             <input type="text" class="form-control" id="visa_expiry_date" name="visa_expiry_date" autocomplete="off" data-date-format="m/dd/yyyy" data-date-container="#visa-expiry-date-container" data-provide="datepicker" data-date-autoclose="true">
                                                             <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
                                                         </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <label for="work_permit_number" class="col-sm-3 col-form-label">Work Permit Number</label>
+                                                    <div class="col-sm-9">
+                                                        <input type="text" class="form-control form-maxlength" autocomplete="off" id="work_permit_number" name="work_permit_number" maxlength="100">
                                                     </div>
                                                 </div>
                                                 <div class="row mb-3">

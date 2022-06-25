@@ -1518,6 +1518,93 @@ function initialize_form_validation(form_type){
             }
         });
     }
+    else if(form_type == 'employee form'){
+        $('#employee-form').validate({
+            submitHandler: function (form) {
+                var transaction = 'submit employee';
+                var username = $('#username').text();
+                
+                var formData = new FormData(form);
+                formData.append('username', username);
+                formData.append('transaction', transaction);
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'controller.php',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    beforeSend: function(){
+                        document.getElementById('submit-form').disabled = true;
+                        $('#submit-form').html('<div class="spinner-border spinner-border-sm text-light" role="status"><span rclass="sr-only"></span></div>');
+                    },
+                    success: function (response) {
+                        if(response === 'Updated' || response === 'Inserted'){
+                            if(response === 'Inserted'){
+                                show_alert('Insert Employee Success', 'The employee has been inserted.', 'success');
+                            }
+                            else{
+                                show_alert('Update Employee Success', 'The employee has been updated.', 'success');
+                            }
+
+                            $('#System-Modal').modal('hide');
+                            reload_datatable('#employee-datatable');
+                        }
+                        else if(response === 'File Size'){
+                            show_alert('Employee Error', 'The file uploaded exceeds the maximum file size.', 'error');
+                        }
+                        else if(response === 'File Type'){
+                            show_alert('Employee Error', 'The file uploaded is not supported.', 'error');
+                        }
+                        else{
+                            show_alert('Employee Error', response, 'error');
+                        }
+                    },
+                    complete: function(){
+                        document.getElementById('submit-form').disabled = false;
+                        $('#submit-form').html('Submit');
+                    }
+                });
+                return false;
+            },
+            rules: {
+                first_name: {
+                    required: true
+                },
+                last_name: {
+                    required: true
+                },
+            },
+            messages: {
+                first_name: {
+                    required: 'Please enter the first name',
+                },
+                last_name: {
+                    required: 'Please enter the last name',
+                },
+            },
+            errorPlacement: function(label, element) {
+                if((element.hasClass('select2') || element.hasClass('form-select2')) && element.next('.select2-container').length) {
+                    label.insertAfter(element.next('.select2-container'));
+                }
+                else if(element.parent('.input-group').length){
+                    label.insertAfter(element.parent());
+                }
+                else{
+                    label.insertAfter(element);
+                }
+            },
+            highlight: function(element) {
+                $(element).parent().addClass('has-danger');
+                $(element).addClass('form-control-danger');
+            },
+            success: function(label,element) {
+                $(element).parent().removeClass('has-danger')
+                $(element).removeClass('form-control-danger')
+                label.remove();
+            }
+        });
+    }
 }
 
 // Display functions
@@ -2052,6 +2139,73 @@ function display_form_details(form_type){
             success: function(response) {
                 $('#employee_type').val(response[0].EMPLOYEE_TYPE);
                 $('#employee_type_id').val(employee_type_id);
+            }
+        });
+    }
+    else if(form_type == 'employee form'){
+        transaction = 'employee details';
+
+        var employee_id = sessionStorage.getItem('employee_id');
+
+        $.ajax({
+            url: 'controller.php',
+            method: 'POST',
+            dataType: 'JSON',
+            data: {employee_id : employee_id, transaction : transaction},
+            success: function(response) {
+                $('#first_name').val(response[0].FIRST_NAME);
+                $('#middle_name').val(response[0].MIDDLE_NAME);
+                $('#last_name').val(response[0].LAST_NAME);
+                $('#work_email').val(response[0].WORK_EMAIL);
+                $('#work_mobile').val(response[0].WORK_MOBILE);
+                $('#work_telephone').val(response[0].WORK_TELEPHONE);
+                $('#badge_id').val(response[0].BADGE_ID);
+                $('#onboard_date').val(response[0].ONBOARD_DATE);
+                $('#permanency_date').val(response[0].PERMANENCY_DATE);
+                $('#sss').val(response[0].SSS);
+                $('#tin').val(response[0].TIN);
+                $('#philhealth').val(response[0].PHILHEALTH);
+                $('#pagibig').val(response[0].PAGIBIG);
+                $('#street_1').val(response[0].STREET_1);
+                $('#street_2').val(response[0].STREET_2);
+                $('#city').val(response[0].CITY);
+                $('#zip_code').val(response[0].ZIP_CODE);
+                $('#personal_email').val(response[0].PERSONAL_EMAIL);
+                $('#personal_mobile').val(response[0].PERSONAL_TELEPHONE);
+                $('#personal_telephone').val(response[0].PERSONAL_MOBILE);
+                $('#bank_account_number').val(response[0].BANK_ACCOUNT_NUMBER);
+                $('#home_work_distance').val(response[0].HOME_WORK_DISTANCE);
+                $('#spouse_name').val(response[0].SPOUSE_NAME);
+                $('#spouse_birthday').val(response[0].SPOUSE_BIRTHDAY);
+                $('#emergency_contact').val(response[0].EMERGENCY_CONTACT);
+                $('#emergency_phone').val(response[0].EMERGENCY_PHONE);
+                $('#field_of_study').val(response[0].FIELD_OF_STUDY);
+                $('#school').val(response[0].SCHOOL);
+                $('#identification_number').val(response[0].IDENTIFICATION_NUMBER);
+                $('#passport_number').val(response[0].PASSPORT_NUMBER);
+                $('#birthday').val(response[0].BIRTHDAY);
+                $('#place_of_birth').val(response[0].PLACE_OF_BIRTH);
+                $('#number_of_children').val(response[0].NUMBER_OF_CHILDREN);
+                $('#visa_number').val(response[0].VISA_NUMBER);
+                $('#visa_expiry_date').val(response[0].VISA_EXPIRY_DATE);
+                $('#work_permit_number').val(response[0].WORK_PERMIT_NUMBER);
+                $('#work_permit_expiry_date').val(response[0].WORK_PERMIT_EXPIRY_DATE);
+                $('#employee_id').val(employee_id);
+
+                check_option_exist('#suffix', response[0].SUFFIX, '');
+                check_option_exist('#job_position', response[0].JOB_POSITION, '');
+                check_option_exist('#department', response[0].DEPARTMENT, '');
+                check_option_exist('#manager', response[0].MANAGER, '');
+                check_option_exist('#coach', response[0].COACH, '');
+                check_option_exist('#company', response[0].COMPANY, '');
+                check_option_exist('#work_location', response[0].WORK_LOCATION, '');
+                check_option_exist('#employee_type', response[0].EMPLOYEE_TYPE, '');
+                check_option_exist('#working_hours', response[0].WORKING_HOURS, '');
+                check_option_exist('#state', response[0].STATE_ID, '');
+                check_option_exist('#marital_status', response[0].MARITAL_STATUS, '');
+                check_option_exist('#certificate_level', response[0].CERTIFICATE_LEVEL, '');
+                check_option_exist('#nationality', response[0].NATIONALITY, '');
+                check_option_exist('#gender', response[0].GENDER, '');
             }
         });
     }

@@ -1205,6 +1205,182 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     }
     # -------------------------------------------------------------
 
+    # Submit company
+    else if($transaction == 'submit company'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['employee_id']) && isset($_POST['first_name']) && !empty($_POST['first_name']) && isset($_POST['middle_name']) && isset($_POST['last_name']) && !empty($_POST['last_name'])
+        && isset($_POST['suffix']) && isset($_POST['job_position']) && isset($_POST['department']) && isset($_POST['manager']) && isset($_POST['coach']) && isset($_POST['company']) && isset($_POST['work_location']) && isset($_POST['employee_type']) && isset($_POST['working_hours']) && isset($_POST['work_email']) && isset($_POST['work_mobile']) && isset($_POST['work_telephone']) && isset($_POST['badge_id']) && isset($_POST['onboard_date']) && isset($_POST['permanency_date']) && isset($_POST['sss']) && isset($_POST['tin']) && isset($_POST['philhealth']) && isset($_POST['pagibig']) && isset($_POST['street_1']) && isset($_POST['street_2']) && isset($_POST['city']) && isset($_POST['state']) && isset($_POST['zip_code']) && isset($_POST['personal_email']) && isset($_POST['personal_mobile']) && isset($_POST['personal_telephone']) && isset($_POST['bank_account_number']) && isset($_POST['home_work_distance']) && isset($_POST['gender']) && isset($_POST['marital_status']) && isset($_POST['spouse_name']) && isset($_POST['spouse_birthday']) && isset($_POST['emergency_contact']) && isset($_POST['emergency_phone']) && isset($_POST['certificate_level']) && isset($_POST['field_of_study']) && isset($_POST['school']) && isset($_POST['identification_number']) && isset($_POST['passport_number']) && isset($_POST['birthday']) && isset($_POST['place_of_birth']) && isset($_POST['number_of_children']) && isset($_POST['nationality']) && isset($_POST['visa_number']) && isset($_POST['visa_expiry_date']) && isset($_POST['work_permit_number']) && isset($_POST['work_permit_expiry_date'])){
+            $error = '';
+            $employee_image_file_type = '';
+            $work_permit_file_type = '';
+            $username = $_POST['username'];
+            $employee_id = $_POST['employee_id'];
+            $first_name = $_POST['first_name'];
+            $middle_name = $_POST['middle_name'];
+            $last_name = $_POST['last_name'];
+            $suffix = $_POST['suffix'];
+            $file_as = $api->get_file_as_format($first_name, $middle_name, $last_name, $suffix);
+            $job_position = $_POST['job_position'];
+            $department = $_POST['department'];
+            $manager = $_POST['manager'];
+            $coach = $_POST['coach'];
+            $company = $_POST['company'];
+            $work_location = $_POST['work_location'];
+            $employee_type = $_POST['employee_type'];
+            $working_hours = $_POST['working_hours'];
+            $work_email = $_POST['work_email'];
+            $work_mobile = $_POST['work_mobile'];
+            $work_telephone = $_POST['work_telephone'];
+            $badge_id = $_POST['badge_id'];
+            $onboard_date = $api->check_date('empty', $_POST['onboard_date'], '', 'Y-m-d', '', '', '');
+            $permanency_date = $api->check_date('empty', $_POST['permanency_date'], '', 'Y-m-d', '', '', '');
+            $sss = $_POST['sss'];
+            $tin = $_POST['tin'];
+            $philhealth = $_POST['philhealth'];
+            $pagibig = $_POST['pagibig'];
+            $street_1 = $_POST['street_1'];
+            $street_2 = $_POST['street_2'];
+            $city = $_POST['city'];
+            $state = $_POST['state'];
+            $zip_code = $_POST['zip_code'];
+            $personal_email = $_POST['personal_email'];
+            $personal_mobile = $_POST['personal_mobile'];
+            $personal_telephone = $_POST['personal_telephone'];
+            $bank_account_number = $_POST['bank_account_number'];
+            $home_work_distance = $_POST['home_work_distance'];
+            $gender = $_POST['gender'];
+            $marital_status = $_POST['marital_status'];
+            $spouse_name = $_POST['spouse_name'];
+            $spouse_birthday = $api->check_date('empty', $_POST['spouse_birthday'], '', 'Y-m-d', '', '', '');
+            $emergency_contact = $_POST['emergency_contact'];
+            $emergency_phone = $_POST['emergency_phone'];
+            $certificate_level = $_POST['certificate_level'];
+            $field_of_study = $_POST['field_of_study'];
+            $school = $_POST['school'];
+            $identification_number = $_POST['identification_number'];
+            $passport_number = $_POST['passport_number'];
+            $birthday = $api->check_date('empty', $_POST['birthday'], '', 'Y-m-d', '', '', '');
+            $place_of_birth = $_POST['place_of_birth'];
+            $number_of_children = $_POST['number_of_children'];
+            $nationality = $_POST['nationality'];
+            $visa_number = $_POST['visa_number'];
+            $visa_expiry_date = $api->check_date('empty', $_POST['visa_expiry_date'], '', 'Y-m-d', '', '', '');
+            $work_permit_number = $_POST['work_permit_number'];
+            $work_permit_expiry_date = $api->check_date('empty', $_POST['work_permit_expiry_date'], '', 'Y-m-d', '', '', '');
+
+            $state_details = $api->get_state_details($state);
+            $country_id = $state_details[0]['COUNTRY_ID'] ?? null;
+
+            $employee_image_name = $_FILES['employee_image']['name'];
+            $employee_image_size = $_FILES['employee_image']['size'];
+            $employee_image_error = $_FILES['employee_image']['error'];
+            $employee_image_tmp_name = $_FILES['employee_image']['tmp_name'];
+            $employee_image_ext = explode('.', $employee_image_name);
+            $employee_image_actual_ext = strtolower(end($employee_image_ext));
+
+            $work_permit_name = $_FILES['work_permit']['name'];
+            $work_permit_size = $_FILES['work_permit']['size'];
+            $work_permit_error = $_FILES['work_permit']['error'];
+            $work_permit_tmp_name = $_FILES['work_permit']['tmp_name'];
+            $work_permit_ext = explode('.', $work_permit_name);
+            $work_permit_actual_ext = strtolower(end($work_permit_ext));
+
+            $employee_image_upload_setting_details = $api->get_upload_setting_details(8);
+            $employee_image_upload_file_type_details = $api->get_upload_file_type_details(8);
+            $employee_image_file_max_size = $employee_image_upload_setting_details[0]['MAX_FILE_SIZE'] * 1048576;
+
+            for($i = 0; $i < count($employee_image_upload_file_type_details); $i++) {
+                $employee_image_file_type .= $employee_image_upload_file_type_details[$i]['FILE_TYPE'];
+
+                if($i != (count($employee_image_upload_file_type_details) - 1)){
+                    $employee_image_file_type .= ',';
+                }
+            }
+
+            $work_permit_upload_setting_details = $api->get_upload_setting_details(9);
+            $work_permit_upload_file_type_details = $api->get_upload_file_type_details(9);
+            $work_permit_file_max_size = $work_permit_upload_setting_details[0]['MAX_FILE_SIZE'] * 1048576;
+
+            for($i = 0; $i < count($work_permit_upload_file_type_details); $i++) {
+                $work_permit_file_type .= $work_permit_upload_file_type_details[$i]['FILE_TYPE'];
+
+                if($i != (count($work_permit_upload_file_type_details) - 1)){
+                    $work_permit_file_type .= ',';
+                }
+            }
+
+            $employee_image_allowed_ext = explode(',', $employee_image_file_type);
+            $work_permit_allowed_ext = explode(',', $work_permit_file_type);
+
+            $check_employee_exist = $api->check_employee_exist($employee_id);
+ 
+            if($check_employee_exist > 0){
+                if(!empty($employee_image_tmp_name)){
+                    if(in_array($employee_image_actual_ext, $employee_image_allowed_ext)){
+                        if(!$employee_image_error){
+                            if($employee_image_size < $employee_image_file_max_size){
+                                $update_employee_image = $api->update_employee_image($employee_image_tmp_name, $employee_image_actual_ext, $employee_id, $username);
+        
+                                if(!$update_employee_image){
+                                    $error = $update_employee_image;
+                                }
+                            }
+                            else{
+                                $error = 'File Size';
+                            }
+                        }
+                        else{
+                            $error = 'There was an error uploading the file.';
+                        }
+                    }
+                    else{
+                        $error = 'File Type';
+                    }
+                }
+
+                if(!empty($work_permit_tmp_name)){
+                    if(in_array($work_permit_actual_ext, $work_permit_allowed_ext)){
+                        if(!$work_permit_error){
+                            if($work_permit_size < $work_permit_file_max_size){
+                                $update_work_permit = $api->update_work_permit($work_permit_tmp_name, $work_permit_actual_ext, $employee_id, $username);
+        
+                                if(!$update_work_permit){
+                                    $error = $update_work_permit;
+                                }
+                            }
+                            else{
+                                $error = 'File Size';
+                            }
+                        }
+                        else{
+                            $error = 'There was an error uploading the file.';
+                        }
+                    }
+                    else{
+                        $error = 'File Type';
+                    }
+                }
+
+                if(empty($error)){
+                    $update_employee = $api->update_employee($employee_id, $badge_id, $file_as, $first_name, $middle_name, $last_name, $suffix, $company, $job_position, $department, $work_location, $working_hours, $manager, $coach, $employee_type, $permanency_date, $onboard_date, $work_email, $work_telephone, $work_mobile, $sss, $tin, $pagibig, $philhealth, $bank_account_number, $home_work_distance, $personal_email, $personal_telephone, $personal_mobile, $street_1, $street_2, $country_id, $state, $city, $zip_code, $marital_status, $spouse_name, $spouse_birthday, $emergency_contact, $emergency_phone, $nationality, $identification_number, $passport_number, $gender, $birthday, $certificate_level, $field_of_study, $school, $place_of_birth, $number_of_children, $visa_number, $work_permit_number, $visa_expiry_date, $work_permit_expiry_date, $username);
+
+                    if($update_employee){
+                        echo 'Updated';
+                    }
+                    else{
+                        echo $update_employee;
+                    }
+                }
+                else{
+                    echo $error;
+                }
+            }
+            else{
+                
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
     # -------------------------------------------------------------
     #   Delete transactions
     # -------------------------------------------------------------
