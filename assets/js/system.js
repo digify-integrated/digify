@@ -1550,11 +1550,17 @@ function initialize_form_validation(form_type){
                             $('#System-Modal').modal('hide');
                             reload_datatable('#employee-datatable');
                         }
-                        else if(response === 'File Size'){
-                            show_alert('Employee Error', 'The file uploaded exceeds the maximum file size.', 'error');
+                        else if(response === 'Employee Image File Size'){
+                            show_alert('Employee Error', 'The employee image uploaded exceeds the maximum file size.', 'error');
                         }
-                        else if(response === 'File Type'){
-                            show_alert('Employee Error', 'The file uploaded is not supported.', 'error');
+                        else if(response === 'Employee Image File Type'){
+                            show_alert('Employee Error', 'The employee image uploaded is not supported.', 'error');
+                        }
+                        else if(response === 'Work Permit File Size'){
+                            show_alert('Employee Error', 'The work permit uploaded exceeds the maximum file size.', 'error');
+                        }
+                        else if(response === 'Work Permit File Type'){
+                            show_alert('Employee Error', 'The work permit uploaded is not supported.', 'error');
                         }
                         else{
                             show_alert('Employee Error', response, 'error');
@@ -1582,6 +1588,74 @@ function initialize_form_validation(form_type){
                 last_name: {
                     required: 'Please enter the last name',
                 },
+            },
+            errorPlacement: function(label, element) {
+                if((element.hasClass('select2') || element.hasClass('form-select2')) && element.next('.select2-container').length) {
+                    label.insertAfter(element.next('.select2-container'));
+                }
+                else if(element.parent('.input-group').length){
+                    label.insertAfter(element.parent());
+                }
+                else{
+                    label.insertAfter(element);
+                }
+            },
+            highlight: function(element) {
+                $(element).parent().addClass('has-danger');
+                $(element).addClass('form-control-danger');
+            },
+            success: function(label,element) {
+                $(element).parent().removeClass('has-danger')
+                $(element).removeClass('form-control-danger')
+                label.remove();
+            }
+        });
+    }
+    else if(form_type == 'working hours form'){
+        $('#working-hours-form').validate({
+            submitHandler: function (form) {
+                transaction = 'submit working hours';
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'controller.php',
+                    data: $(form).serialize() + '&username=' + username + '&transaction=' + transaction,
+                    beforeSend: function(){
+                        document.getElementById('submit-form').disabled = true;
+                        $('#submit-form').html('<div class="spinner-border spinner-border-sm text-light" role="status"><span rclass="sr-only"></span></div>');
+                    },
+                    success: function (response) {
+                        if(response === 'Updated' || response === 'Inserted'){
+                            if(response === 'Inserted'){
+                                show_alert('Insert Working Hours Success', 'The working hours has been inserted.', 'success');
+                            }
+                            else{
+                                show_alert('Update Working Hours Success', 'The working hours has been updated.', 'success');
+                            }
+
+                            $('#System-Modal').modal('hide');
+                            reload_datatable('#working-hours-datatable');
+                        }
+                        else{
+                            show_alert('Working Hours Error', response, 'error');
+                        }
+                    },
+                    complete: function(){
+                        document.getElementById('submit-form').disabled = false;
+                        $('#submit-form').html('Submit');
+                    }
+                });
+                return false;
+            },
+            rules: {
+                working_hours: {
+                    required: true         
+                }
+            },
+            messages: {
+                working_hours: {
+                    required: 'Please enter the working hours',
+                }
             },
             errorPlacement: function(label, element) {
                 if((element.hasClass('select2') || element.hasClass('form-select2')) && element.next('.select2-container').length) {
@@ -2206,6 +2280,22 @@ function display_form_details(form_type){
                 check_option_exist('#certificate_level', response[0].CERTIFICATE_LEVEL, '');
                 check_option_exist('#nationality', response[0].NATIONALITY, '');
                 check_option_exist('#gender', response[0].GENDER, '');
+            }
+        });
+    }
+    else if(form_type == 'working hours form'){
+        transaction = 'working hours details';
+
+        var working_hours_id = sessionStorage.getItem('working_hours_id');
+
+        $.ajax({
+            url: 'controller.php',
+            method: 'POST',
+            dataType: 'JSON',
+            data: {working_hours_id : working_hours_id, transaction : transaction},
+            success: function(response) {
+                $('#working_hours').val(response[0].WORKING_HOURS);
+                $('#working_hours_id').val(working_hours_id);
             }
         });
     }

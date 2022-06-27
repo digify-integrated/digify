@@ -2,38 +2,31 @@
     'use strict';
 
     $(function() {
-        if($('#employee-datatable').length){
-            initialize_employee_table('#employee-datatable');
+        if($('#working-hours-datatable').length){
+            initialize_working_hours_table('#working-hours-datatable');
         }
 
         initialize_click_events();
     });
 })(jQuery);
 
-function initialize_employee_table(datatable_name, buttons = false, show_all = false){
+function initialize_working_hours_table(datatable_name, buttons = false, show_all = false){
     hide_multiple_buttons();
     
     var username = $('#username').text();
-    var filter_employee_status = $('#filter_employee_status').val();
-    var filter_work_location = $('#filter_work_location').val();
-    var filter_department = $('#filter_department').val();
-    var filter_job_position = $('#filter_job_position').val();
-    var filter_employee_type = $('#filter_employee_type').val();
-    var type = 'employee table';
+    var type = 'working hours table';
     var settings;
 
     var column = [ 
         { 'data' : 'CHECK_BOX' },
-        { 'data' : 'IMAGE' },
-        { 'data' : 'FILE_AS' },
+        { 'data' : 'WORKING_HOURS' },
         { 'data' : 'ACTION' }
     ];
 
     var column_definition = [
         { 'width': '1%','bSortable': false, 'aTargets': 0 },
-        { 'width': '6%','bSortable': false, 'aTargets': 1 },
-        { 'width': '73%', 'aTargets': 2 },
-        { 'width': '20%','bSortable': false, 'aTargets': 3 },
+        { 'width': '79%', 'aTargets': 1 },
+        { 'width': '20%','bSortable': false, 'aTargets': 2 },
     ];
 
     if(show_all){
@@ -49,14 +42,14 @@ function initialize_employee_table(datatable_name, buttons = false, show_all = f
                 'url' : 'system-generation.php',
                 'method' : 'POST',
                 'dataType': 'JSON',
-                'data': {'type' : type, 'username' : username, 'filter_employee_status' : filter_employee_status, 'filter_work_location' : filter_work_location, 'filter_department' : filter_department, 'filter_job_position' : filter_job_position, 'filter_employee_type' : filter_employee_type },
+                'data': {'type' : type, 'username' : username},
                 'dataSrc' : ''
             },
             dom:  "<'row'<'col-sm-3'l><'col-sm-6 text-center mb-2'B><'col-sm-3'f>>" +  "<'row'<'col-sm-12'tr>>" + "<'row'<'col-sm-5'i><'col-sm-7'p>>",
             buttons: [
                 'csv', 'excel', 'pdf'
             ],
-            'order': [[ 2, 'asc' ]],
+            'order': [[ 1, 'asc' ]],
             'columns' : column,
             'scrollY': false,
             'scrollX': true,
@@ -80,10 +73,10 @@ function initialize_employee_table(datatable_name, buttons = false, show_all = f
                 'url' : 'system-generation.php',
                 'method' : 'POST',
                 'dataType': 'JSON',
-                'data': {'type' : type, 'username' : username, 'filter_employee_status' : filter_employee_status, 'filter_work_location' : filter_work_location, 'filter_department' : filter_department, 'filter_job_position' : filter_job_position, 'filter_employee_type' : filter_employee_type },
+                'data': {'type' : type, 'username' : username},
                 'dataSrc' : ''
             },
-            'order': [[ 2, 'asc' ]],
+            'order': [[ 1, 'asc' ]],
             'columns' : column,
             'scrollY': false,
             'scrollX': true,
@@ -110,25 +103,34 @@ function initialize_employee_table(datatable_name, buttons = false, show_all = f
 function initialize_click_events(){
     var username = $('#username').text();
 
-    $(document).on('click','#add-employee',function() {
-        generate_modal('employee form', 'Employee', 'XL' , '1', '1', 'form', 'employee-form', '1', username);
+    $(document).on('click','.view-working-hours',function() {
+        var working_hours_id = $(this).data('working-hours-id');
+
+        sessionStorage.setItem('working_hours_id', working_hours_id);
+
+        generate_modal('working hours details', 'Working Hours Details', 'R' , '1', '0', 'element', '', '0', username);
     });
 
-    $(document).on('click','.update-employee',function() {
-        var employee_id = $(this).data('employee-id');
 
-        sessionStorage.setItem('employee_id', employee_id);
+    $(document).on('click','#add-working-hours',function() {
+        generate_modal('working hours form', 'Working Hours', 'R' , '1', '1', 'form', 'working-hours-form', '1', username);
+    });
+
+    $(document).on('click','.update-working-hours',function() {
+        var working_hours_id = $(this).data('working-hours-id');
+
+        sessionStorage.setItem('working_hours_id', working_hours_id);
         
-        generate_modal('employee form', 'Employee', 'XL' , '1', '1', 'form', 'employee-form', '0', username);
+        generate_modal('working hours form', 'Working Hours', 'R' , '1', '1', 'form', 'working-hours-form', '0', username);
     });
     
-    $(document).on('click','.delete-employee',function() {
-        var employee_id = $(this).data('employee-id');
-        var transaction = 'delete employee';
+    $(document).on('click','.delete-working-hours',function() {
+        var working_hours_id = $(this).data('working-hours-id');
+        var transaction = 'delete working hours';
 
         Swal.fire({
-            title: 'Delete Employee',
-            text: 'Are you sure you want to delete this employee?',
+            title: 'Delete Working Hours',
+            text: 'Are you sure you want to delete this working hours?',
             icon: 'warning',
             showCancelButton: !0,
             confirmButtonText: 'Delete',
@@ -141,18 +143,18 @@ function initialize_click_events(){
                 $.ajax({
                     type: 'POST',
                     url: 'controller.php',
-                    data: {username : username, employee_id : employee_id, transaction : transaction},
+                    data: {username : username, working_hours_id : working_hours_id, transaction : transaction},
                     success: function (response) {
                         if(response === 'Deleted'){
-                          show_alert('Delete Employee', 'The employee has been deleted.', 'success');
+                          show_alert('Delete Working Hours', 'The working hours has been deleted.', 'success');
 
-                          reload_datatable('#employee-datatable');
+                          reload_datatable('#working-hours-datatable');
                         }
                         else if(response === 'Not Found'){
-                          show_alert('Delete Employee', 'The employee does not exist.', 'info');
+                          show_alert('Delete Working Hours', 'The working hours does not exist.', 'info');
                         }
                         else{
-                          show_alert('Delete Employee', response, 'error');
+                          show_alert('Delete Working Hours', response, 'error');
                         }
                     }
                 });
@@ -161,20 +163,20 @@ function initialize_click_events(){
         });
     });
 
-    $(document).on('click','#delete-employee',function() {
-        var employee_id = [];
-        var transaction = 'delete multiple employee';
+    $(document).on('click','#delete-working-hours',function() {
+        var working_hours_id = [];
+        var transaction = 'delete multiple working hours';
 
         $('.datatable-checkbox-children').each(function(){
             if($(this).is(':checked')){  
-                employee_id.push(this.value);  
+                working_hours_id.push(this.value);  
             }
         });
 
-        if(employee_id.length > 0){
+        if(working_hours_id.length > 0){
             Swal.fire({
-                title: 'Delete Multiple Employees',
-                text: 'Are you sure you want to delete these employees?',
+                title: 'Delete Multiple Working Hours',
+                text: 'Are you sure you want to delete these working hours?',
                 icon: 'warning',
                 showCancelButton: !0,
                 confirmButtonText: 'Delete',
@@ -188,18 +190,18 @@ function initialize_click_events(){
                     $.ajax({
                         type: 'POST',
                         url: 'controller.php',
-                        data: {username : username, employee_id : employee_id, transaction : transaction},
+                        data: {username : username, working_hours_id : working_hours_id, transaction : transaction},
                         success: function (response) {
                             if(response === 'Deleted'){
-                                show_alert('Delete Multiple Employees', 'The employees have been deleted.', 'success');
+                                show_alert('Delete Multiple Working Hours', 'The working hours have been deleted.', 'success');
     
-                                reload_datatable('#employee-datatable');
+                                reload_datatable('#working-hours-datatable');
                             }
                             else if(response === 'Not Found'){
-                                show_alert('Delete Multiple Employees', 'The employee does not exist.', 'info');
+                                show_alert('Delete Multiple Working Hours', 'The working hours does not exist.', 'info');
                             }
                             else{
-                                show_alert('Delete Multiple Employees', response, 'error');
+                                show_alert('Delete Multiple Working Hours', response, 'error');
                             }
                         }
                     });
@@ -209,7 +211,7 @@ function initialize_click_events(){
             });
         }
         else{
-            show_alert('Delete Multiple Employees', 'Please select the employees you want to delete.', 'error');
+            show_alert('Delete Multiple Working Hours', 'Please select the working hours you want to delete.', 'error');
         }
     });
 

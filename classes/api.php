@@ -1002,6 +1002,56 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : check_employee_exist
+    # Purpose    : Checks if the employee exists.
+    #
+    # Returns    : Number
+    #
+    # -------------------------------------------------------------
+    public function check_employee_exist($employee_id){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL check_employee_exist(:employee_id)');
+            $sql->bindValue(':employee_id', $employee_id);
+
+            if($sql->execute()){
+                $row = $sql->fetch();
+
+                return $row['TOTAL'];
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : check_working_hours_exist
+    # Purpose    : Checks if the working hours exists.
+    #
+    # Returns    : Number
+    #
+    # -------------------------------------------------------------
+    public function check_working_hours_exist($working_hours_id){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL check_working_hours_exist(:working_hours_id)');
+            $sql->bindValue(':working_hours_id', $working_hours_id);
+
+            if($sql->execute()){
+                $row = $sql->fetch();
+
+                return $row['TOTAL'];
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Update methods
     # -------------------------------------------------------------
     
@@ -2451,7 +2501,7 @@ class Api{
     # -------------------------------------------------------------
     #
     # Name       : update_job_position
-    # Purpose    : Updates company.
+    # Purpose    : Updates job position.
     #
     # Returns    : Number/String
     #
@@ -2795,6 +2845,382 @@ class Api{
 
                     if($update_system_parameter_value){
                         $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated employee type.');
+                                    
+                        if($insert_transaction_log){
+                            return true;
+                        }
+                        else{
+                            return $insert_transaction_log;
+                        }
+                    }
+                    else{
+                        return $update_system_parameter_value;
+                    }
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : update_employee
+    # Purpose    : Updates employee.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function update_employee($employee_id, $badge_id, $file_as, $first_name, $middle_name, $last_name, $suffix, $company, $job_position, $department, $work_location, $working_hours, $manager, $coach, $employee_type, $permanency_date, $onboard_date, $work_email, $work_telephone, $work_mobile, $sss, $tin, $pagibig, $philhealth, $bank_account_number, $home_work_distance, $personal_email, $personal_telephone, $personal_mobile, $street_1, $street_2, $country_id, $state, $city, $zip_code, $marital_status, $spouse_name, $spouse_birthday, $emergency_contact, $emergency_phone, $nationality, $identification_number, $passport_number, $gender, $birthday, $certificate_level, $field_of_study, $school, $place_of_birth, $number_of_children, $visa_number, $work_permit_number, $visa_expiry_date, $work_permit_expiry_date, $username){
+        if ($this->databaseConnection()) {
+            $record_log = 'UPD->' . $username . '->' . date('Y-m-d h:i:s');
+            $employee_details = $this->get_employee_details($employee_id);
+            
+            if(!empty($employee_details[0]['TRANSACTION_LOG_ID'])){
+                $transaction_log_id = $employee_details[0]['TRANSACTION_LOG_ID'];
+            }
+            else{
+                # Get transaction log id
+                $transaction_log_system_parameter = $this->get_system_parameter(2, 1);
+                $transaction_log_parameter_number = $transaction_log_system_parameter[0]['PARAMETER_NUMBER'];
+                $transaction_log_id = $transaction_log_system_parameter[0]['ID'];
+            }
+
+            $sql = $this->db_connection->prepare('CALL update_employee(:employee_id, :badge_id, :file_as, :first_name, :middle_name, :last_name, :suffix, :company, :job_position, :department, :work_location, :working_hours, :manager, :coach, :employee_type, :permanency_date, :onboard_date, :work_email, :work_telephone, :work_mobile, :sss, :tin, :pagibig, :philhealth, :bank_account_number, :home_work_distance, :personal_email, :personal_telephone, :personal_mobile, :street_1, :street_2, :country_id, :state, :city, :zip_code, :marital_status, :spouse_name, :spouse_birthday, :emergency_contact, :emergency_phone, :nationality, :identification_number, :passport_number, :gender, :birthday, :certificate_level, :field_of_study, :school, :place_of_birth, :number_of_children, :visa_number, :work_permit_number, :visa_expiry_date, :work_permit_expiry_date, :transaction_log_id, :record_log)');
+            $sql->bindValue(':employee_id', $employee_id);
+            $sql->bindValue(':badge_id', $badge_id);
+            $sql->bindValue(':file_as', $file_as);
+            $sql->bindValue(':first_name', $first_name);
+            $sql->bindValue(':middle_name', $middle_name);
+            $sql->bindValue(':last_name', $last_name);
+            $sql->bindValue(':suffix', $suffix);
+            $sql->bindValue(':company', $company);
+            $sql->bindValue(':job_position', $job_position);
+            $sql->bindValue(':department', $department);
+            $sql->bindValue(':work_location', $work_location);
+            $sql->bindValue(':working_hours', $working_hours);
+            $sql->bindValue(':manager', $manager);
+            $sql->bindValue(':coach', $coach);
+            $sql->bindValue(':employee_type', $employee_type);
+            $sql->bindValue(':permanency_date', $permanency_date);
+            $sql->bindValue(':onboard_date', $onboard_date);
+            $sql->bindValue(':work_email', $work_email);
+            $sql->bindValue(':work_telephone', $work_telephone);
+            $sql->bindValue(':work_mobile', $work_mobile);
+            $sql->bindValue(':sss', $sss);
+            $sql->bindValue(':tin', $tin);
+            $sql->bindValue(':pagibig', $pagibig);
+            $sql->bindValue(':philhealth', $philhealth);
+            $sql->bindValue(':bank_account_number', $bank_account_number);
+            $sql->bindValue(':home_work_distance', $home_work_distance);
+            $sql->bindValue(':personal_email', $personal_email);
+            $sql->bindValue(':personal_telephone', $personal_telephone);
+            $sql->bindValue(':personal_mobile', $personal_mobile);
+            $sql->bindValue(':street_1', $street_1);
+            $sql->bindValue(':street_2', $street_2);
+            $sql->bindValue(':country_id', $country_id);
+            $sql->bindValue(':state', $state);
+            $sql->bindValue(':city', $city);
+            $sql->bindValue(':zip_code', $zip_code);
+            $sql->bindValue(':marital_status', $marital_status);
+            $sql->bindValue(':spouse_name', $spouse_name);
+            $sql->bindValue(':spouse_birthday', $spouse_birthday);
+            $sql->bindValue(':emergency_contact', $emergency_contact);
+            $sql->bindValue(':emergency_phone', $emergency_phone);
+            $sql->bindValue(':nationality', $nationality);
+            $sql->bindValue(':identification_number', $identification_number);
+            $sql->bindValue(':passport_number', $passport_number);
+            $sql->bindValue(':gender', $gender);
+            $sql->bindValue(':birthday', $birthday);
+            $sql->bindValue(':certificate_level', $certificate_level);
+            $sql->bindValue(':field_of_study', $field_of_study);
+            $sql->bindValue(':school', $school);
+            $sql->bindValue(':place_of_birth', $place_of_birth);
+            $sql->bindValue(':number_of_children', $number_of_children);
+            $sql->bindValue(':visa_number', $visa_number);
+            $sql->bindValue(':work_permit_number', $work_permit_number);
+            $sql->bindValue(':visa_expiry_date', $visa_expiry_date);
+            $sql->bindValue(':work_permit_expiry_date', $work_permit_expiry_date);
+            $sql->bindValue(':transaction_log_id', $transaction_log_id);
+            $sql->bindValue(':record_log', $record_log);
+        
+            if($sql->execute()){
+                if(!empty($employee_details[0]['TRANSACTION_LOG_ID'])){
+                    $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated employee.');
+                                    
+                    if($insert_transaction_log){
+                        return true;
+                    }
+                    else{
+                        return $insert_transaction_log;
+                    }
+                }
+                else{
+                    # Update transaction log value
+                    $update_system_parameter_value = $this->update_system_parameter_value($transaction_log_parameter_number, 2, $username);
+
+                    if($update_system_parameter_value){
+                        $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated employee.');
+                                    
+                        if($insert_transaction_log){
+                            return true;
+                        }
+                        else{
+                            return $insert_transaction_log;
+                        }
+                    }
+                    else{
+                        return $update_system_parameter_value;
+                    }
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : update_employee_image
+    # Purpose    : Updates employee image.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function update_employee_image($employee_image_tmp_name, $employee_image_actual_ext, $employee_id, $username){
+        if ($this->databaseConnection()) {
+            $record_log = 'UPD->' . $username . '->' . date('Y-m-d h:i:s');
+
+            if(!empty($employee_image_tmp_name)){ 
+                $file_name = $this->generate_file_name(10);
+                $file_new = $file_name . '.' . $employee_image_actual_ext;
+
+                $directory = './company/employee/image/';
+                $file_destination = $_SERVER['DOCUMENT_ROOT'] . '/digify/company/employee/image/' . $file_new;
+                $file_path = $directory . $file_new;
+
+                $directory_checker = $this->directory_checker($directory);
+
+                if($directory_checker){
+                    $employee_details = $this->get_employee_details($employee_id);
+                    $employee_image = $employee_details[0]['EMPLOYEE_IMAGE'];
+                    $transaction_log_id = $employee_details[0]['TRANSACTION_LOG_ID'];
+    
+                    if(file_exists($employee_image)){
+                        if (unlink($employee_image)) {
+                            if(move_uploaded_file($employee_image_tmp_name, $file_destination)){
+                                $sql = $this->db_connection->prepare('CALL update_employee_image(:employee_id, :file_path, :transaction_log_id, :record_log)');
+                                $sql->bindValue(':employee_id', $employee_id);
+                                $sql->bindValue(':file_path', $file_path);
+                                $sql->bindValue(':transaction_log_id', $transaction_log_id);
+                                $sql->bindValue(':record_log', $record_log);
+                            
+                                if($sql->execute()){
+                                    $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated employee image.');
+                                        
+                                    if($insert_transaction_log){
+                                        return true;
+                                    }
+                                    else{
+                                        return $insert_transaction_log;
+                                    }
+                                }
+                                else{
+                                    return $sql->errorInfo()[2];
+                                }
+                            }
+                            else{
+                                return 'There was an error uploading your file.';
+                            }
+                        }
+                        else {
+                            return $employee_image . ' cannot be deleted due to an error.';
+                        }
+                    }
+                    else{
+                        if(move_uploaded_file($employee_image_tmp_name, $file_destination)){
+                            $sql = $this->db_connection->prepare('CALL update_employee_image(:employee_id, :file_path, :transaction_log_id, :record_log)');
+                            $sql->bindValue(':employee_id', $employee_id);
+                            $sql->bindValue(':file_path', $file_path);
+                            $sql->bindValue(':transaction_log_id', $transaction_log_id);
+                            $sql->bindValue(':record_log', $record_log);
+                        
+                            if($sql->execute()){
+                                $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated employee image.');
+                                    
+                                if($insert_transaction_log){
+                                    return true;
+                                }
+                                else{
+                                    return $insert_transaction_log;
+                                }
+                            }
+                            else{
+                                return $sql->errorInfo()[2];
+                            }
+                        }
+                        else{
+                            return 'There was an error uploading your file.';
+                        }
+                    }
+                }
+                else{
+                    return $directory_checker;
+                }
+            }
+            else{
+                return true;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : update_work_permit
+    # Purpose    : Updates work permit.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function update_work_permit($work_permit_tmp_name, $work_permit_actual_ext, $employee_id, $username){
+        if ($this->databaseConnection()) {
+            $record_log = 'UPD->' . $username . '->' . date('Y-m-d h:i:s');
+
+            if(!empty($work_permit_tmp_name)){ 
+                $file_name = $this->generate_file_name(10);
+                $file_new = $file_name . '.' . $work_permit_actual_ext;
+
+                $directory = './company/employee/work_permit/';
+                $file_destination = $_SERVER['DOCUMENT_ROOT'] . '/digify/company/employee/work_permit/' . $file_new;
+                $file_path = $directory . $file_new;
+
+                $directory_checker = $this->directory_checker($directory);
+
+                if($directory_checker){
+                    $employee_details = $this->get_employee_details($employee_id);
+                    $work_permit = $employee_details[0]['WORK_PERMIT'];
+                    $transaction_log_id = $employee_details[0]['TRANSACTION_LOG_ID'];
+    
+                    if(file_exists($work_permit)){
+                        if (unlink($work_permit)) {
+                            if(move_uploaded_file($work_permit_tmp_name, $file_destination)){
+                                $sql = $this->db_connection->prepare('CALL update_work_permit(:employee_id, :file_path, :transaction_log_id, :record_log)');
+                                $sql->bindValue(':employee_id', $employee_id);
+                                $sql->bindValue(':file_path', $file_path);
+                                $sql->bindValue(':transaction_log_id', $transaction_log_id);
+                                $sql->bindValue(':record_log', $record_log);
+                            
+                                if($sql->execute()){
+                                    $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated work permit.');
+                                        
+                                    if($insert_transaction_log){
+                                        return true;
+                                    }
+                                    else{
+                                        return $insert_transaction_log;
+                                    }
+                                }
+                                else{
+                                    return $sql->errorInfo()[2];
+                                }
+                            }
+                            else{
+                                return 'There was an error uploading your file.';
+                            }
+                        }
+                        else {
+                            return $work_permit . ' cannot be deleted due to an error.';
+                        }
+                    }
+                    else{
+                        if(move_uploaded_file($work_permit_tmp_name, $file_destination)){
+                            $sql = $this->db_connection->prepare('CALL update_work_permit(:employee_id, :file_path, :transaction_log_id, :record_log)');
+                            $sql->bindValue(':employee_id', $employee_id);
+                            $sql->bindValue(':file_path', $file_path);
+                            $sql->bindValue(':transaction_log_id', $transaction_log_id);
+                            $sql->bindValue(':record_log', $record_log);
+                        
+                            if($sql->execute()){
+                                $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated work permit.');
+                                    
+                                if($insert_transaction_log){
+                                    return true;
+                                }
+                                else{
+                                    return $insert_transaction_log;
+                                }
+                            }
+                            else{
+                                return $sql->errorInfo()[2];
+                            }
+                        }
+                        else{
+                            return 'There was an error uploading your file.';
+                        }
+                    }
+                }
+                else{
+                    return $directory_checker;
+                }
+            }
+            else{
+                return true;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : update_working_hours
+    # Purpose    : Updates working hours.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function update_working_hours($working_hours_id, $working_hours, $username){
+        if ($this->databaseConnection()) {
+            $record_log = 'UPD->' . $username . '->' . date('Y-m-d h:i:s');
+            $working_hours_details = $this->get_working_hours_details($working_hours_id);
+            
+            if(!empty($working_hours_details[0]['TRANSACTION_LOG_ID'])){
+                $transaction_log_id = $working_hours_details[0]['TRANSACTION_LOG_ID'];
+            }
+            else{
+                # Get transaction log id
+                $transaction_log_system_parameter = $this->get_system_parameter(2, 1);
+                $transaction_log_parameter_number = $transaction_log_system_parameter[0]['PARAMETER_NUMBER'];
+                $transaction_log_id = $transaction_log_system_parameter[0]['ID'];
+            }
+
+            $sql = $this->db_connection->prepare('CALL update_working_hours(:working_hours_id, :working_hours, :transaction_log_id, :record_log)');
+            $sql->bindValue(':working_hours_id', $working_hours_id);
+            $sql->bindValue(':working_hours', $working_hours);
+            $sql->bindValue(':transaction_log_id', $transaction_log_id);
+            $sql->bindValue(':record_log', $record_log);
+        
+            if($sql->execute()){
+                if(!empty($working_hours_details[0]['TRANSACTION_LOG_ID'])){
+                    $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated working hours.');
+                                    
+                    if($insert_transaction_log){
+                        return true;
+                    }
+                    else{
+                        return $insert_transaction_log;
+                    }
+                }
+                else{
+                    # Update transaction log value
+                    $update_system_parameter_value = $this->update_system_parameter_value($transaction_log_parameter_number, 2, $username);
+
+                    if($update_system_parameter_value){
+                        $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated working hours.');
                                     
                         if($insert_transaction_log){
                             return true;
@@ -4238,6 +4664,203 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : insert_employee
+    # Purpose    : Insert employee.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function insert_employee($employee_image_tmp_name, $employee_image_actual_ext, $work_permit_tmp_name, $work_permit_actual_ext, $badge_id, $file_as, $first_name, $middle_name, $last_name, $suffix, $company, $job_position, $department, $work_location, $working_hours, $manager, $coach, $employee_type, $permanency_date, $onboard_date, $work_email, $work_telephone, $work_mobile, $sss, $tin, $pagibig, $philhealth, $bank_account_number, $home_work_distance, $personal_email, $personal_telephone, $personal_mobile, $street_1, $street_2, $country_id, $state, $city, $zip_code, $marital_status, $spouse_name, $spouse_birthday, $emergency_contact, $emergency_phone, $nationality, $identification_number, $passport_number, $gender, $birthday, $certificate_level, $field_of_study, $school, $place_of_birth, $number_of_children, $visa_number, $work_permit_number, $visa_expiry_date, $work_permit_expiry_date, $username){
+        if ($this->databaseConnection()) {
+            $error = '';
+            $record_log = 'INS->' . $username . '->' . date('Y-m-d h:i:s');
+
+            # Get system parameter id
+            $system_parameter = $this->get_system_parameter(16, 1);
+            $parameter_number = $system_parameter[0]['PARAMETER_NUMBER'];
+            $id = $system_parameter[0]['ID'];
+
+            # Get transaction log id
+            $transaction_log_system_parameter = $this->get_system_parameter(2, 1);
+            $transaction_log_parameter_number = $transaction_log_system_parameter[0]['PARAMETER_NUMBER'];
+            $transaction_log_id = $transaction_log_system_parameter[0]['ID'];
+
+            $sql = $this->db_connection->prepare('CALL insert_employee(:id, :badge_id, :file_as, :first_name, :middle_name, :last_name, :suffix, :company, :job_position, :department, :work_location, :working_hours, :manager, :coach, :employee_type, :permanency_date, :onboard_date, :work_email, :work_telephone, :work_mobile, :sss, :tin, :pagibig, :philhealth, :bank_account_number, :home_work_distance, :personal_email, :personal_telephone, :personal_mobile, :street_1, :street_2, :country_id, :state, :city, :zip_code, :marital_status, :spouse_name, :spouse_birthday, :emergency_contact, :emergency_phone, :nationality, :identification_number, :passport_number, :gender, :birthday, :certificate_level, :field_of_study, :school, :place_of_birth, :number_of_children, :visa_number, :work_permit_number, :visa_expiry_date, :work_permit_expiry_date, :transaction_log_id, :record_log)');
+            $sql->bindValue(':id', $id);
+            $sql->bindValue(':badge_id', $badge_id);
+            $sql->bindValue(':file_as', $file_as);
+            $sql->bindValue(':first_name', $first_name);
+            $sql->bindValue(':middle_name', $middle_name);
+            $sql->bindValue(':last_name', $last_name);
+            $sql->bindValue(':suffix', $suffix);
+            $sql->bindValue(':company', $company);
+            $sql->bindValue(':job_position', $job_position);
+            $sql->bindValue(':department', $department);
+            $sql->bindValue(':work_location', $work_location);
+            $sql->bindValue(':working_hours', $working_hours);
+            $sql->bindValue(':manager', $manager);
+            $sql->bindValue(':coach', $coach);
+            $sql->bindValue(':employee_type', $employee_type);
+            $sql->bindValue(':permanency_date', $permanency_date);
+            $sql->bindValue(':onboard_date', $onboard_date);
+            $sql->bindValue(':work_email', $work_email);
+            $sql->bindValue(':work_telephone', $work_telephone);
+            $sql->bindValue(':work_mobile', $work_mobile);
+            $sql->bindValue(':sss', $sss);
+            $sql->bindValue(':tin', $tin);
+            $sql->bindValue(':pagibig', $pagibig);
+            $sql->bindValue(':philhealth', $philhealth);
+            $sql->bindValue(':bank_account_number', $bank_account_number);
+            $sql->bindValue(':home_work_distance', $home_work_distance);
+            $sql->bindValue(':personal_email', $personal_email);
+            $sql->bindValue(':personal_telephone', $personal_telephone);
+            $sql->bindValue(':personal_mobile', $personal_mobile);
+            $sql->bindValue(':street_1', $street_1);
+            $sql->bindValue(':street_2', $street_2);
+            $sql->bindValue(':country_id', $country_id);
+            $sql->bindValue(':state', $state);
+            $sql->bindValue(':city', $city);
+            $sql->bindValue(':zip_code', $zip_code);
+            $sql->bindValue(':marital_status', $marital_status);
+            $sql->bindValue(':spouse_name', $spouse_name);
+            $sql->bindValue(':spouse_birthday', $spouse_birthday);
+            $sql->bindValue(':emergency_contact', $emergency_contact);
+            $sql->bindValue(':emergency_phone', $emergency_phone);
+            $sql->bindValue(':nationality', $nationality);
+            $sql->bindValue(':identification_number', $identification_number);
+            $sql->bindValue(':passport_number', $passport_number);
+            $sql->bindValue(':gender', $gender);
+            $sql->bindValue(':birthday', $birthday);
+            $sql->bindValue(':certificate_level', $certificate_level);
+            $sql->bindValue(':field_of_study', $field_of_study);
+            $sql->bindValue(':school', $school);
+            $sql->bindValue(':place_of_birth', $place_of_birth);
+            $sql->bindValue(':number_of_children', $number_of_children);
+            $sql->bindValue(':visa_number', $visa_number);
+            $sql->bindValue(':work_permit_number', $work_permit_number);
+            $sql->bindValue(':visa_expiry_date', $visa_expiry_date);
+            $sql->bindValue(':work_permit_expiry_date', $work_permit_expiry_date);
+            $sql->bindValue(':transaction_log_id', $transaction_log_id);
+            $sql->bindValue(':record_log', $record_log);
+        
+            if($sql->execute()){
+                # Update system parameter value
+                $update_system_parameter_value = $this->update_system_parameter_value($parameter_number, 16, $username);
+
+                if($update_system_parameter_value){
+                    # Update transaction log value
+                    $update_system_parameter_value = $this->update_system_parameter_value($transaction_log_parameter_number, 2, $username);
+
+                    if($update_system_parameter_value){
+                        $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Insert', 'User ' . $username . ' inserted employee.');
+                                    
+                        if($insert_transaction_log){
+                            if(!empty($employee_image_tmp_name) && !empty($employee_image_actual_ext)){
+                                $update_employee_image = $this->update_employee_image($employee_image_tmp_name, $employee_image_actual_ext, $id, $username);
+        
+                                if(!$update_employee_image){
+                                    $error = $update_employee_image;
+                                }
+
+                                $update_work_permit = $this->update_work_permit($work_permit_tmp_name, $work_permit_actual_ext, $id, $username);
+        
+                                if(!$update_work_permit){
+                                    $error = $update_work_permit;
+                                }
+
+                                if(empty($error)){
+                                    return true;
+                                }
+                                else{
+                                    return $error;
+                                }
+                            }
+                            else{
+                                return true;
+                            }
+                        }
+                        else{
+                            return $insert_transaction_log;
+                        }
+                    }
+                    else{
+                        return $update_system_parameter_value;
+                    }
+                }
+                else{
+                    return $update_system_parameter_value;
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : insert_working_hours
+    # Purpose    : Insert working hours.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function insert_working_hours($working_hours, $username){
+        if ($this->databaseConnection()) {
+            $record_log = 'INS->' . $username . '->' . date('Y-m-d h:i:s');
+
+            # Get system parameter id
+            $system_parameter = $this->get_system_parameter(17, 1);
+            $parameter_number = $system_parameter[0]['PARAMETER_NUMBER'];
+            $id = $system_parameter[0]['ID'];
+
+            # Get transaction log id
+            $transaction_log_system_parameter = $this->get_system_parameter(2, 1);
+            $transaction_log_parameter_number = $transaction_log_system_parameter[0]['PARAMETER_NUMBER'];
+            $transaction_log_id = $transaction_log_system_parameter[0]['ID'];
+
+            $sql = $this->db_connection->prepare('CALL insert_working_hours(:id, :working_hours, :transaction_log_id, :record_log)');
+            $sql->bindValue(':id', $id);
+            $sql->bindValue(':working_hours', $working_hours);
+            $sql->bindValue(':transaction_log_id', $transaction_log_id);
+            $sql->bindValue(':record_log', $record_log); 
+        
+            if($sql->execute()){
+                # Update system parameter value
+                $update_system_parameter_value = $this->update_system_parameter_value($parameter_number, 17, $username);
+
+                if($update_system_parameter_value){
+                    # Update transaction log value
+                    $update_system_parameter_value = $this->update_system_parameter_value($transaction_log_parameter_number, 2, $username);
+
+                    if($update_system_parameter_value){
+                        $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Insert', 'User ' . $username . ' inserted working hours.');
+                                    
+                        if($insert_transaction_log){
+                            return true;
+                        }
+                        else{
+                            return $insert_transaction_log;
+                        }
+                    }
+                    else{
+                        return $update_system_parameter_value;
+                    }
+                }
+                else{
+                    return $update_system_parameter_value;
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Delete methods
     # -------------------------------------------------------------
 
@@ -4819,6 +5442,78 @@ class Api{
         if ($this->databaseConnection()) {
             $sql = $this->db_connection->prepare('CALL delete_employee_type(:employee_type_id)');
             $sql->bindValue(':employee_type_id', $employee_type_id);
+        
+            if($sql->execute()){ 
+                return true;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : delete_employee
+    # Purpose    : Delete employee.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function delete_employee($employee_id, $username){
+        if ($this->databaseConnection()) {
+            $error = '';
+            $employee_details = $this->get_employee_details($employee_id);
+            $employee_image = $employee_details[0]['EMPLOYEE_IMAGE'];
+            $work_permit = $employee_details[0]['WORK_PERMIT'];
+
+            $sql = $this->db_connection->prepare('CALL delete_employee(:employee_id)');
+            $sql->bindValue(':employee_id', $employee_id);
+        
+            if($sql->execute()){ 
+                if(!empty($employee_image)){
+                    if(file_exists($employee_image)){
+                        if (!unlink($employee_image)) {
+                            $error = $employee_image . ' cannot be deleted due to an error.';
+                        }
+                    }
+                }
+
+                if(!empty($work_permit)){
+                    if(file_exists($work_permit)){
+                        if (!unlink($work_permit)) {
+                            $error = $work_permit . ' cannot be deleted due to an error.';
+                        }
+                    }
+                }
+
+                if(empty($error)){
+                    return true;
+                }
+                else{
+                    return $error;
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : delete_working_hours
+    # Purpose    : Delete working hours.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function delete_working_hours($working_hours_id, $username){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL delete_working_hours(:working_hours_id)');
+            $sql->bindValue(':working_hours_id', $working_hours_id);
         
             if($sql->execute()){ 
                 return true;
@@ -5744,6 +6439,132 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : get_employee_details
+    # Purpose    : Gets the employee details.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_employee_details($employee_id){
+        if ($this->databaseConnection()) {
+            $response = array();
+
+            $sql = $this->db_connection->prepare('CALL get_employee_details(:employee_id)');
+            $sql->bindValue(':employee_id', $employee_id);
+
+            if($sql->execute()){
+                while($row = $sql->fetch()){
+                    $response[] = array(
+                        'EMPLOYEE_ID' => $row['EMPLOYEE_ID'],
+                        'USERNAME' => $row['USERNAME'],
+                        'BADGE_ID' => $row['BADGE_ID'],
+                        'EMPLOYEE_IMAGE' => $row['EMPLOYEE_IMAGE'],
+                        'FILE_AS' => $row['FILE_AS'],
+                        'FIRST_NAME' => $row['FIRST_NAME'],
+                        'MIDDLE_NAME' => $row['MIDDLE_NAME'],
+                        'LAST_NAME' => $row['LAST_NAME'],
+                        'SUFFIX' => $row['SUFFIX'],
+                        'COMPANY' => $row['COMPANY'],
+                        'JOB_POSITION' => $row['JOB_POSITION'],
+                        'DEPARTMENT' => $row['DEPARTMENT'],
+                        'WORK_LOCATION' => $row['WORK_LOCATION'],
+                        'WORKING_HOURS' => $row['WORKING_HOURS'],
+                        'MANAGER' => $row['MANAGER'],
+                        'COACH' => $row['COACH'],
+                        'EMPLOYEE_TYPE' => $row['EMPLOYEE_TYPE'],
+                        'EMPLOYEE_STATUS' => $row['EMPLOYEE_STATUS'],
+                        'PERMANENCY_DATE' => $row['PERMANENCY_DATE'],
+                        'ONBOARD_DATE' => $row['ONBOARD_DATE'],
+                        'OFFBOARD_DATE' => $row['OFFBOARD_DATE'],
+                        'DEPARTURE_REASON' => $row['DEPARTURE_REASON'],
+                        'DETAILED_REASON' => $row['DETAILED_REASON'],
+                        'WORK_EMAIL' => $row['WORK_EMAIL'],
+                        'WORK_TELEPHONE' => $row['WORK_TELEPHONE'],
+                        'WORK_MOBILE' => $row['WORK_MOBILE'],
+                        'SSS' => $row['SSS'],
+                        'TIN' => $row['TIN'],
+                        'PAGIBIG' => $row['PAGIBIG'],
+                        'PHILHEALTH' => $row['PHILHEALTH'],
+                        'BANK_ACCOUNT_NUMBER' => $row['BANK_ACCOUNT_NUMBER'],
+                        'HOME_WORK_DISTANCE' => $row['HOME_WORK_DISTANCE'],
+                        'PERSONAL_EMAIL' => $row['PERSONAL_EMAIL'],
+                        'PERSONAL_TELEPHONE' => $row['PERSONAL_TELEPHONE'],
+                        'PERSONAL_MOBILE' => $row['PERSONAL_MOBILE'],
+                        'STREET_1' => $row['STREET_1'],
+                        'STREET_2' => $row['STREET_2'],
+                        'COUNTRY_ID' => $row['COUNTRY_ID'],
+                        'STATE_ID' => $row['STATE_ID'],
+                        'CITY' => $row['CITY'],
+                        'ZIP_CODE' => $row['ZIP_CODE'],
+                        'MARITAL_STATUS' => $row['MARITAL_STATUS'],
+                        'SPOUSE_NAME' => $row['SPOUSE_NAME'],
+                        'SPOUSE_BIRTHDAY' => $row['SPOUSE_BIRTHDAY'],
+                        'EMERGENCY_CONTACT' => $row['EMERGENCY_CONTACT'],
+                        'EMERGENCY_PHONE' => $row['EMERGENCY_PHONE'],
+                        'NATIONALITY' => $row['NATIONALITY'],
+                        'IDENTIFICATION_NUMBER' => $row['IDENTIFICATION_NUMBER'],
+                        'PASSPORT_NUMBER' => $row['PASSPORT_NUMBER'],
+                        'GENDER' => $row['GENDER'],
+                        'BIRTHDAY' => $row['BIRTHDAY'],
+                        'CERTIFICATE_LEVEL' => $row['CERTIFICATE_LEVEL'],
+                        'FIELD_OF_STUDY' => $row['FIELD_OF_STUDY'],
+                        'SCHOOL' => $row['SCHOOL'],
+                        'PLACE_OF_BIRTH' => $row['PLACE_OF_BIRTH'],
+                        'NUMBER_OF_CHILDREN' => $row['NUMBER_OF_CHILDREN'],
+                        'VISA_NUMBER' => $row['VISA_NUMBER'],
+                        'WORK_PERMIT_NUMBER' => $row['WORK_PERMIT_NUMBER'],
+                        'VISA_EXPIRY_DATE' => $row['VISA_EXPIRY_DATE'],
+                        'WORK_PERMIT_EXPIRY_DATE' => $row['WORK_PERMIT_EXPIRY_DATE'],
+                        'WORK_PERMIT' => $row['WORK_PERMIT'],
+                        'TRANSACTION_LOG_ID' => $row['TRANSACTION_LOG_ID'],
+                        'RECORD_LOG' => $row['RECORD_LOG']
+                    );
+                }
+
+                return $response;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : get_working_hours_details
+    # Purpose    : Gets the working hours details.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_working_hours_details($working_hours_id){
+        if ($this->databaseConnection()) {
+            $response = array();
+
+            $sql = $this->db_connection->prepare('CALL get_working_hours_details(:working_hours_id)');
+            $sql->bindValue(':working_hours_id', $working_hours_id);
+
+            if($sql->execute()){
+                while($row = $sql->fetch()){
+                    $response[] = array(
+                        'WORKING_HOURS' => $row['WORKING_HOURS'],
+                        'TRANSACTION_LOG_ID' => $row['TRANSACTION_LOG_ID'],
+                        'RECORD_LOG' => $row['RECORD_LOG']
+                    );
+                }
+
+                return $response;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Get methods
     # -------------------------------------------------------------
 
@@ -5955,7 +6776,7 @@ class Api{
     #
     # -------------------------------------------------------------
     public function get_file_as_format($first_name, $middle_name, $last_name, $suffix){
-        $suffix = $this->get_system_code_details('SUFFIX', $suffix)[0]['DESCRIPTION'] ?? null;
+        $suffix = $this->get_system_code_details('SUFFIX', $suffix)[0]['SYSTEM_DESCRIPTION'] ?? null;
 
         if(!empty($middle_name) && !empty($suffix)){
             return $last_name . ', ' . $first_name . ' ' . $middle_name . ', ' . $suffix;

@@ -1205,8 +1205,8 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     }
     # -------------------------------------------------------------
 
-    # Submit company
-    else if($transaction == 'submit company'){
+    # Submit employee
+    else if($transaction == 'submit employee'){
         if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['employee_id']) && isset($_POST['first_name']) && !empty($_POST['first_name']) && isset($_POST['middle_name']) && isset($_POST['last_name']) && !empty($_POST['last_name'])
         && isset($_POST['suffix']) && isset($_POST['job_position']) && isset($_POST['department']) && isset($_POST['manager']) && isset($_POST['coach']) && isset($_POST['company']) && isset($_POST['work_location']) && isset($_POST['employee_type']) && isset($_POST['working_hours']) && isset($_POST['work_email']) && isset($_POST['work_mobile']) && isset($_POST['work_telephone']) && isset($_POST['badge_id']) && isset($_POST['onboard_date']) && isset($_POST['permanency_date']) && isset($_POST['sss']) && isset($_POST['tin']) && isset($_POST['philhealth']) && isset($_POST['pagibig']) && isset($_POST['street_1']) && isset($_POST['street_2']) && isset($_POST['city']) && isset($_POST['state']) && isset($_POST['zip_code']) && isset($_POST['personal_email']) && isset($_POST['personal_mobile']) && isset($_POST['personal_telephone']) && isset($_POST['bank_account_number']) && isset($_POST['home_work_distance']) && isset($_POST['gender']) && isset($_POST['marital_status']) && isset($_POST['spouse_name']) && isset($_POST['spouse_birthday']) && isset($_POST['emergency_contact']) && isset($_POST['emergency_phone']) && isset($_POST['certificate_level']) && isset($_POST['field_of_study']) && isset($_POST['school']) && isset($_POST['identification_number']) && isset($_POST['passport_number']) && isset($_POST['birthday']) && isset($_POST['place_of_birth']) && isset($_POST['number_of_children']) && isset($_POST['nationality']) && isset($_POST['visa_number']) && isset($_POST['visa_expiry_date']) && isset($_POST['work_permit_number']) && isset($_POST['work_permit_expiry_date'])){
             $error = '';
@@ -1325,7 +1325,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                                 }
                             }
                             else{
-                                $error = 'File Size';
+                                $error = 'Employee Image File Size';
                             }
                         }
                         else{
@@ -1333,7 +1333,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                         }
                     }
                     else{
-                        $error = 'File Type';
+                        $error = 'Employee Image File Type';
                     }
                 }
 
@@ -1348,7 +1348,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                                 }
                             }
                             else{
-                                $error = 'File Size';
+                                $error = 'Work Permit File Size';
                             }
                         }
                         else{
@@ -1356,7 +1356,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                         }
                     }
                     else{
-                        $error = 'File Type';
+                        $error = 'Work Permit File Type';
                     }
                 }
 
@@ -1375,7 +1375,93 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                 }
             }
             else{
+                if(!empty($employee_image_tmp_name)){
+                    if(in_array($employee_image_actual_ext, $employee_image_allowed_ext)){
+                        if(!$employee_image_error){
+                            if($employee_image_size > $employee_image_file_max_size){
+                                $error = 'File Size';
+                            }
+                        }
+                        else{
+                            $error = 'There was an error uploading the file.';
+                        }
+                    }
+                    else{
+                        $error = 'File Type';
+                    }
+                }
+                else{
+                    $employee_image_tmp_name = null;
+                    $employee_image_actual_ext = null;
+                }
+
+                if(!empty($work_permit_tmp_name)){
+                    if(in_array($work_permit_actual_ext, $work_permit_allowed_ext)){
+                        if(!$work_permit_error){
+                            if($work_permit_size > $work_permit_file_max_size){
+                                $error = 'File Size';
+                            }
+                        }
+                        else{
+                            $error = 'There was an error uploading the file.';
+                        }
+                    }
+                    else{
+                        $error = 'File Type';
+                    }
+                }
+                else{
+                    $work_permit_tmp_name = null;
+                    $work_permit_actual_ext = null;
+                }
                 
+                if(empty($error)){
+                    $insert_employee = $api->insert_employee($employee_image_tmp_name, $employee_image_actual_ext, $work_permit_tmp_name, $work_permit_actual_ext, $badge_id, $file_as, $first_name, $middle_name, $last_name, $suffix, $company, $job_position, $department, $work_location, $working_hours, $manager, $coach, $employee_type, $permanency_date, $onboard_date, $work_email, $work_telephone, $work_mobile, $sss, $tin, $pagibig, $philhealth, $bank_account_number, $home_work_distance, $personal_email, $personal_telephone, $personal_mobile, $street_1, $street_2, $country_id, $state, $city, $zip_code, $marital_status, $spouse_name, $spouse_birthday, $emergency_contact, $emergency_phone, $nationality, $identification_number, $passport_number, $gender, $birthday, $certificate_level, $field_of_study, $school, $place_of_birth, $number_of_children, $visa_number, $work_permit_number, $visa_expiry_date, $work_permit_expiry_date, $username);
+    
+                    if($insert_employee){
+                        echo 'Inserted';
+                    }
+                    else{
+                        echo $insert_employee;
+                    }
+                }
+                else{
+                    echo $error;
+                }
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Submit working hours
+    else if($transaction == 'submit working hours'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['working_hours_id']) && isset($_POST['working_hours']) && !empty($_POST['working_hours'])){
+            $file_type = '';
+            $username = $_POST['username'];
+            $working_hours_id = $_POST['working_hours_id'];
+            $working_hours = $_POST['working_hours'];
+          
+            $check_working_hours_exist = $api->check_working_hours_exist($working_hours_id);
+ 
+            if($check_working_hours_exist > 0){
+                $update_working_hours = $api->update_working_hours($working_hours_id, $working_hours, $username);
+
+                if($update_working_hours){
+                    echo 'Updated';
+                }
+                else{
+                    echo $update_working_hours;
+                }
+            }
+            else{
+                $insert_working_hours = $api->insert_working_hours($working_hours, $username);
+    
+                if($insert_working_hours){
+                    echo 'Inserted';
+                }
+                else{
+                    echo $insert_working_hours;
+                }
             }
         }
     }
@@ -2333,6 +2419,118 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     }
     # -------------------------------------------------------------
 
+    # Delete employee
+    else if($transaction == 'delete employee'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['employee_id']) && !empty($_POST['employee_id'])){
+            $username = $_POST['username'];
+            $employee_id = $_POST['employee_id'];
+
+            $check_employee_exist = $api->check_employee_exist($employee_id);
+
+            if($check_employee_exist > 0){
+                $delete_employee = $api->delete_employee($employee_id, $username);
+                                    
+                if($delete_employee){
+                    echo 'Deleted';
+                }
+                else{
+                    echo $delete_employee;
+                }
+            }
+            else{
+                echo 'Not Found';
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Delete multiple employee
+    else if($transaction == 'delete multiple employee'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['employee_id'])){
+            $username = $_POST['username'];
+            $employee_ids = $_POST['employee_id'];
+
+            foreach($employee_ids as $employee_id){
+                $check_employee_exist = $api->check_employee_exist($employee_id);
+
+                if($check_employee_exist > 0){
+                    $delete_employee = $api->delete_employee($employee_id, $username);
+                                    
+                    if(!$delete_employee){
+                        $error = $delete_employee;
+                    }
+                }
+                else{
+                    $error = 'Not Found';
+                }
+            }
+
+            if(empty($error)){
+                echo 'Deleted';
+            }
+            else{
+                echo $error;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Delete working hours
+    else if($transaction == 'delete working hours'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['working_hours_id']) && !empty($_POST['working_hours_id'])){
+            $username = $_POST['username'];
+            $working_hours_id = $_POST['working_hours_id'];
+
+            $check_working_hours_exist = $api->check_working_hours_exist($working_hours_id);
+
+            if($check_working_hours_exist > 0){
+                $delete_working_hours = $api->delete_working_hours($working_hours_id, $username);
+                                    
+                if($delete_working_hours){
+                    echo 'Deleted';
+                }
+                else{
+                    echo $delete_working_hours;
+                }
+            }
+            else{
+                echo 'Not Found';
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Delete multiple working hours
+    else if($transaction == 'delete multiple working hours'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['working_hours_id'])){
+            $username = $_POST['username'];
+            $working_hours_ids = $_POST['working_hours_id'];
+
+            foreach($working_hours_ids as $working_hours_id){
+                $check_working_hours_exist = $api->check_working_hours_exist($working_hours_id);
+
+                if($check_working_hours_exist > 0){
+                    $delete_working_hours = $api->delete_working_hours($working_hours_id, $username);
+                                    
+                    if(!$delete_working_hours){
+                        $error = $delete_working_hours;
+                    }
+                }
+                else{
+                    $error = 'Not Found';
+                }
+            }
+
+            if(empty($error)){
+                echo 'Deleted';
+            }
+            else{
+                echo $error;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
     # -------------------------------------------------------------
     #   Unlock transactions
     # -------------------------------------------------------------
@@ -3160,6 +3358,87 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
             $response[] = array(
                 'EMPLOYEE_TYPE' => $employee_type_details[0]['EMPLOYEE_TYPE']
+            );
+
+            echo json_encode($response);
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Employee details
+    else if($transaction == 'employee details'){
+        if(isset($_POST['employee_id']) && !empty($_POST['employee_id'])){
+            $employee_id = $_POST['employee_id'];
+            $employee_details = $api->get_employee_details($employee_id);
+
+            $response[] = array(
+                'BADGE_ID' => $employee_details[0]['BADGE_ID'],
+                'FIRST_NAME' => $employee_details[0]['FIRST_NAME'],
+                'MIDDLE_NAME' => $employee_details[0]['MIDDLE_NAME'],
+                'LAST_NAME' => $employee_details[0]['LAST_NAME'],
+                'SUFFIX' => $employee_details[0]['SUFFIX'],
+                'COMPANY' => $employee_details[0]['COMPANY'],
+                'JOB_POSITION' => $employee_details[0]['JOB_POSITION'],
+                'DEPARTMENT' => $employee_details[0]['DEPARTMENT'],
+                'WORK_LOCATION' => $employee_details[0]['WORK_LOCATION'],
+                'WORKING_HOURS' => $employee_details[0]['WORKING_HOURS'],
+                'MANAGER' => $employee_details[0]['MANAGER'],
+                'COACH' => $employee_details[0]['COACH'],
+                'EMPLOYEE_TYPE' => $employee_details[0]['EMPLOYEE_TYPE'],
+                'PERMANENCY_DATE' => $api->check_date('empty', $employee_details[0]['PERMANENCY_DATE'], '', 'n/d/Y', '', '', ''),
+                'ONBOARD_DATE' => $api->check_date('empty', $employee_details[0]['ONBOARD_DATE'], '', 'n/d/Y', '', '', ''),
+                'WORK_EMAIL' => $employee_details[0]['WORK_EMAIL'],
+                'WORK_TELEPHONE' => $employee_details[0]['WORK_TELEPHONE'],
+                'WORK_MOBILE' => $employee_details[0]['WORK_MOBILE'],
+                'SSS' => $employee_details[0]['SSS'],
+                'TIN' => $employee_details[0]['TIN'],
+                'PAGIBIG' => $employee_details[0]['PAGIBIG'],
+                'PHILHEALTH' => $employee_details[0]['PHILHEALTH'],
+                'BANK_ACCOUNT_NUMBER' => $employee_details[0]['BANK_ACCOUNT_NUMBER'],
+                'HOME_WORK_DISTANCE' => $employee_details[0]['HOME_WORK_DISTANCE'],
+                'PERSONAL_EMAIL' => $employee_details[0]['PERSONAL_EMAIL'],
+                'PERSONAL_TELEPHONE' => $employee_details[0]['PERSONAL_TELEPHONE'],
+                'PERSONAL_MOBILE' => $employee_details[0]['PERSONAL_MOBILE'],
+                'STREET_1' => $employee_details[0]['STREET_1'],
+                'STREET_2' => $employee_details[0]['STREET_2'],
+                'STATE_ID' => $employee_details[0]['STATE_ID'],
+                'CITY' => $employee_details[0]['CITY'],
+                'ZIP_CODE' => $employee_details[0]['ZIP_CODE'],
+                'MARITAL_STATUS' => $employee_details[0]['MARITAL_STATUS'],
+                'SPOUSE_NAME' => $employee_details[0]['SPOUSE_NAME'],
+                'SPOUSE_BIRTHDAY' => $employee_details[0]['SPOUSE_BIRTHDAY'],
+                'EMERGENCY_CONTACT' => $employee_details[0]['EMERGENCY_CONTACT'],
+                'EMERGENCY_PHONE' => $employee_details[0]['EMERGENCY_PHONE'],
+                'NATIONALITY' => $employee_details[0]['NATIONALITY'],
+                'IDENTIFICATION_NUMBER' => $employee_details[0]['IDENTIFICATION_NUMBER'],
+                'PASSPORT_NUMBER' => $employee_details[0]['PASSPORT_NUMBER'],
+                'GENDER' => $employee_details[0]['GENDER'],
+                'BIRTHDAY' => $api->check_date('empty', $employee_details[0]['BIRTHDAY'], '', 'n/d/Y', '', '', ''),
+                'CERTIFICATE_LEVEL' => $employee_details[0]['CERTIFICATE_LEVEL'],
+                'FIELD_OF_STUDY' => $employee_details[0]['FIELD_OF_STUDY'],
+                'SCHOOL' => $employee_details[0]['SCHOOL'],
+                'PLACE_OF_BIRTH' => $employee_details[0]['PLACE_OF_BIRTH'],
+                'NUMBER_OF_CHILDREN' => $employee_details[0]['NUMBER_OF_CHILDREN'],
+                'VISA_NUMBER' => $employee_details[0]['VISA_NUMBER'],
+                'WORK_PERMIT_NUMBER' => $employee_details[0]['WORK_PERMIT_NUMBER'],
+                'VISA_EXPIRY_DATE' => $api->check_date('empty', $employee_details[0]['VISA_EXPIRY_DATE'], '', 'n/d/Y', '', '', ''),
+                'WORK_PERMIT_EXPIRY_DATE' => $api->check_date('empty', $employee_details[0]['WORK_PERMIT_EXPIRY_DATE'], '', 'n/d/Y', '', '', ''),
+                'WORK_PERMIT' => $employee_details[0]['WORK_PERMIT'],
+            );
+
+            echo json_encode($response);
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Working hours details
+    else if($transaction == 'working hours details'){
+        if(isset($_POST['working_hours_id']) && !empty($_POST['working_hours_id'])){
+            $working_hours_id = $_POST['working_hours_id'];
+            $working_hours_details = $api->get_working_hours_details($working_hours_id);
+
+            $response[] = array(
+                'WORKING_HOURS' => $working_hours_details[0]['WORKING_HOURS']
             );
 
             echo json_encode($response);

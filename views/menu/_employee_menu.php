@@ -8,10 +8,15 @@
     $departure_reason_page = $api->check_role_permissions($username, 85);
     $employee_page = $api->check_role_permissions($username, 90);
     $employee_type_page = $api->check_role_permissions($username, 97);
+    $working_hours_page = $api->check_role_permissions($username, 102);
 
-    if($department_page > 0 || $job_position_page > 0 || $work_location_page > 0 || $departure_reason_page > 0 || $employee_page > 0 || $employee_type_page > 0){
+    if($department_page > 0 || $job_position_page > 0 || $work_location_page > 0 || $departure_reason_page > 0 || $employee_page > 0 || $employee_type_page > 0 || $working_hours_page > 0){
         if($employee_page > 0){
             $menu .= '<li class="nav-item dropdown"><a href="employee.php" class="nav-link">Employee</a></li>';
+        }
+
+        if($working_hours_page > 0){
+            $menu .= '<li class="nav-item dropdown"><a href="working-hours.php" class="nav-link">Working Hours</a></li>';
         }
 
         if($department_page > 0 || $job_position_page > 0 || $work_location_page > 0 || $departure_reason_page > 0 || $employee_type_page > 0){

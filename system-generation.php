@@ -201,7 +201,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                 <div class="mb-3">
                                     <label class="form-label">System Type <span class="text-danger">*</span></label>
                                     <select class="form-control form-select2" id="system_type" name="system_type">
-                                    <option value="">--</option>';
+                                    <option value=""></option>';
                                     $form .= $api->generate_system_code_options('SYSTYPE');
                                     $form .='</select>
                                 </div>
@@ -356,7 +356,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                 <div class="mb-3">
                                     <label class="form-label">Country <span class="text-danger">*</span></label>
                                     <select class="form-control form-select2" id="country" name="country">
-                                    <option value="">--</option>';
+                                    <option value=""></option>';
                                     $form .= $api->generate_country_options();
                                     $form .='</select>
                                 </div>
@@ -460,7 +460,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                 <div class="mb-3">
                                     <label class="form-label">Parent Department</label>
                                     <select class="form-control form-select2" id="parent_department" name="parent_department">
-                                    <option value="">--</option>';
+                                    <option value=""></option>';
                                     $form .= $api->generate_system_code_options('SYSTYPE');
                                     $form .='</select>
                                 </div>
@@ -469,7 +469,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                 <div class="mb-3">
                                     <label class="form-label">Manager</label>
                                     <select class="form-control form-select2" id="manager" name="manager">
-                                    <option value="">--</option>';
+                                    <option value=""></option>';
                                     $form .= $api->generate_system_code_options('SYSTYPE');
                                     $form .='</select>
                                 </div>
@@ -596,7 +596,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                 <div class="mb-3">
                                     <label class="form-label">Suffix</label>
                                     <select class="form-control form-select2" id="suffix" name="suffix">
-                                    <option value="">--</option>';
+                                    <option value=""></option>';
                                     $form .= $api->generate_system_code_options('SUFFIX');
                                     $form .='</select>
                                 </div>
@@ -607,7 +607,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                 <div class="mb-3">
                                     <label for="job_position" class="form-label">Job Position</label>
                                     <select class="form-control form-select2" id="job_position" name="job_position">
-                                    <option value="">--</option>';
+                                    <option value=""></option>';
                                     $form .= $api->generate_job_position_options();
                                     $form .='</select>
                                 </div>
@@ -645,7 +645,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                     <label for="department" class="col-sm-4 col-form-label">Department</label>
                                     <div class="col-sm-8">
                                         <select class="form-control form-select2" id="department" name="department">
-                                        <option value="">--</option>';
+                                        <option value=""></option>';
                                         $form .= $api->generate_department_options();
                                         $form .='</select>
                                     </div>
@@ -654,7 +654,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                     <label for="manager" class="col-sm-4 col-form-label">Manager</label>
                                     <div class="col-sm-8">
                                         <select class="form-control form-select2" id="manager" name="manager">
-                                        <option value="">--</option>';
+                                        <option value=""></option>';
                                         $form .= $api->generate_department_options();
                                         $form .='</select>
                                     </div>
@@ -663,7 +663,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                     <label for="coach" class="col-sm-4 col-form-label">Coach</label>
                                     <div class="col-sm-8">
                                         <select class="form-control form-select2" id="coach" name="coach">
-                                        <option value="">--</option>';
+                                        <option value=""></option>';
                                         $form .= $api->generate_department_options();
                                         $form .='</select>
                                     </div>
@@ -707,7 +707,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                                     <label for="company" class="col-sm-3 col-form-label">Company</label>
                                                     <div class="col-sm-9">
                                                         <select class="form-control form-select2" id="company" name="company">
-                                                        <option value="">--</option>';
+                                                        <option value=""></option>';
                                                         $form .= $api->generate_work_location_options();
                                                         $form .='</select>
                                                     </div>
@@ -722,7 +722,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                                     <label for="work_location" class="col-sm-3 col-form-label">Work Location</label>
                                                     <div class="col-sm-9">
                                                         <select class="form-control form-select2" id="work_location" name="work_location">
-                                                        <option value="">--</option>';
+                                                        <option value=""></option>';
                                                         $form .= $api->generate_work_location_options();
                                                         $form .='</select>
                                                     </div>
@@ -731,7 +731,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                                     <label for="employee_type" class="col-sm-3 col-form-label">Employee Type</label>
                                                     <div class="col-sm-9">
                                                         <select class="form-control form-select2" id="employee_type" name="employee_type">
-                                                        <option value="">--</option>';
+                                                        <option value=""></option>';
                                                         $form .= $api->generate_work_location_options();
                                                         $form .='</select>
                                                     </div>
@@ -758,7 +758,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                                     <label for="working_hours" class="col-sm-3 col-form-label">Working Hours</label>
                                                     <div class="col-sm-9">
                                                         <select class="form-control form-select2" id="working_hours" name="working_hours">
-                                                        <option value="">--</option>';
+                                                        <option value=""></option>';
                                                         $form .= $api->generate_work_location_options();
                                                         $form .='</select>
                                                     </div>
@@ -859,7 +859,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                                     <label for="marital_status" class="col-sm-3 col-form-label">Marital Status</label>
                                                     <div class="col-sm-9">
                                                         <select class="form-control form-select2" id="marital_status" name="marital_status">
-                                                        <option value="">--</option>';
+                                                        <option value=""></option>';
                                                         $form .= $api->generate_system_code_options('MARITALSTATUS');
                                                         $form .='</select>
                                                     </div>
@@ -895,7 +895,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                                     <label for="certificate_level" class="col-sm-3 col-form-label">Certificate Level</label>
                                                     <div class="col-sm-9">
                                                         <select class="form-control form-select2" id="certificate_level" name="certificate_level">
-                                                        <option value="">--</option>';
+                                                        <option value=""></option>';
                                                         $form .= $api->generate_system_code_options('CERTIFICATELEVEL');
                                                         $form .='</select>
                                                     </div>
@@ -919,11 +919,12 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                         <div class="row">
                                             <div class="col-md-12">
                                                 <div class="row mb-3">
-                                                    <label for="nationality" class="col-sm-3 col-form-label">Nationality</label>
+                                                    <label for="nationality" class="col-sm-3 col-form-label">Nationality (Country)</label>
                                                     <div class="col-sm-9">
                                                         <select class="form-control form-select2" id="nationality" name="nationality">
-                                                            <option value="">--</option>
-                                                        </select>
+                                                        <option value=""></option>';
+                                                        $form .= $api->generate_country_options();
+                                                        $form .='</select>
                                                     </div>
                                                 </div>
                                                 <div class="row mb-3">
@@ -957,7 +958,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                                     <label for="gender" class="col-sm-3 col-form-label">Gender</label>
                                                     <div class="col-sm-9">
                                                         <select class="form-control form-select2" id="gender" name="gender">
-                                                        <option value="">--</option>';
+                                                        <option value=""></option>';
                                                         $form .= $api->generate_system_code_options('GENDER');
                                                         $form .='</select>
                                                     </div>
@@ -1013,6 +1014,17 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                             </div>
                                         </div>
                                     </div>
+                                </div>
+                            </div>
+                        </div>';
+            }
+            else if($form_type == 'working hours form'){
+                $form .= '<div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <input type="hidden" id="working_hours_id" name="working_hours_id">
+                                    <label for="working_hours" class="form-label">Working Hours <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control form-maxlength" autocomplete="off" id="working_hours" name="working_hours" maxlength="100">
                                 </div>
                             </div>
                         </div>';
@@ -2578,18 +2590,27 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                         }
 
                         $job_position_details = $api->get_job_position_details($job_position);
-                        $job_position_name = $job_position_details[0]['JOB_POSITION'];
+                        $job_position_name = $job_position_details[0]['JOB_POSITION'] ?? null;
 
-                        if($update_user_account > 0){
-                            $update = '<button type="button" class="btn btn-info waves-effect waves-light update-user-account" data-employee-id="'. $employee_id .'" title="Edit Employee">
+                        if($update_employee > 0){
+                            $update = '<button type="button" class="btn btn-info waves-effect waves-light update-employee" data-employee-id="'. $employee_id .'" title="Edit Employee">
                                             <i class="bx bx-pencil font-size-16 align-middle"></i>
                                         </button>';
                         }
                         else{
                             $update = '';
                         }
+
+                        if($delete_employee > 0){
+                            $delete = '<button type="button" class="btn btn-danger waves-effect waves-light delete-employee" data-employee-id="'. $employee_id .'" title="Delete Employee">
+                                <i class="bx bx-trash font-size-16 align-middle"></i>
+                            </button>';
+                        }
+                        else{
+                            $delete = '';
+                        }
     
-                        if($user_status == 'ACTIVE'){
+                        if($employee_status == 'ACTIVE'){
                             if($archive_employee > 0){
                                 $archive_unarchive = '<button class="btn btn-danger waves-effect waves-light archive-employee" title="Archive Employee" data-employee-id="'. $employee_id .'">
                                 <i class="bx bx-x font-size-16 align-middle"></i>
@@ -2634,6 +2655,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                 '. $update .'
                                 '. $archive_unarchive .'
                                 '. $transaction_log .'
+                                '. $delete .'
                             </div>'
                         );
                     }
@@ -2643,6 +2665,83 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                 else{
                     echo $sql->errorInfo()[2];
                 }
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Working hours table
+    else if($type == 'working hours table'){
+        if ($api->databaseConnection()) {
+            # Get permission
+            $update_working_hours = $api->check_role_permissions($username, 104);
+            $update_working_hours_schedule = $api->check_role_permissions($username, 105);
+            $delete_working_hours = $api->check_role_permissions($username, 106);
+            $view_transaction_log = $api->check_role_permissions($username, 107);
+
+            $sql = $api->db_connection->prepare('SELECT WORKING_HOURS_ID, WORKING_HOURS, TRANSACTION_LOG_ID FROM employee_working_hours');
+
+            if($sql->execute()){
+                while($row = $sql->fetch()){
+                    $working_hours_id = $row['WORKING_HOURS_ID'];
+                    $working_hours = $row['WORKING_HOURS'];
+                    $transaction_log_id = $row['TRANSACTION_LOG_ID'];
+
+                    if($update_working_hours > 0){
+                        $update = '<button type="button" class="btn btn-info waves-effect waves-light update-working-hours" data-working-hours-id="'. $working_hours_id .'" title="Edit Working Hours">
+                                        <i class="bx bx-pencil font-size-16 align-middle"></i>
+                                    </button>';
+                    }
+                    else{
+                        $update = '';
+                    }
+
+                    if($update_working_hours_schedule > 0){
+                        $schedule = '<button type="button" class="btn btn-success waves-effect waves-light update-working-hours-schedule" data-working-hours-id="'. $working_hours_id .'" title="Edit Working Hours Schedule">
+                                        <i class="bx bx-time font-size-16 align-middle"></i>
+                                    </button>';
+                    }
+                    else{
+                        $schedule = '';
+                    }
+
+                    if($delete_working_hours > 0){
+                        $delete = '<button type="button" class="btn btn-danger waves-effect waves-light delete-working-hours" data-working-hours-id="'. $working_hours_id .'" title="Delete Working Hours">
+                            <i class="bx bx-trash font-size-16 align-middle"></i>
+                        </button>';
+                    }
+                    else{
+                        $delete = '';
+                    }
+
+                    if($view_transaction_log > 0 && !empty($transaction_log_id)){
+                        $transaction_log = '<button type="button" class="btn btn-dark waves-effect waves-light view-transaction-log" data-transaction-log-id="'. $transaction_log_id .'" title="View Transaction Log">
+                                                <i class="bx bx-detail font-size-16 align-middle"></i>
+                                            </button>';
+                    }
+                    else{
+                        $transaction_log = '';
+                    }
+
+                    $response[] = array(
+                        'CHECK_BOX' => '<input class="form-check-input datatable-checkbox-children" type="checkbox" value="'. $working_hours_id .'">',
+                        'WORKING_HOURS' => $working_hours,
+                        'ACTION' => '<div class="d-flex gap-2">
+                                            <button type="button" class="btn btn-primary waves-effect waves-light view-working-hours" data-working-hours-id="'. $working_hours_id .'" title="View Working Hours">
+                                                <i class="bx bx-show font-size-16 align-middle"></i>
+                                            </button>
+                                            '. $update .'
+                                            '. $schedule .'
+                                            '. $transaction_log .'
+                                            '. $delete .'
+                                        </div>'
+                    );
+                }
+
+                echo json_encode($response);
+            }
+            else{
+                echo $sql->errorInfo()[2];
             }
         }
     }

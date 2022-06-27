@@ -304,6 +304,13 @@ CREATE TABLE employee_type(
 	RECORD_LOG VARCHAR(100)
 );
 
+CREATE TABLE employee_working_hours(
+	WORKING_HOURS_ID VARCHAR(50) PRIMARY KEY,
+	WORKING_HOURS VARCHAR(100) NOT NULL,
+	TRANSACTION_LOG_ID VARCHAR(100),
+	RECORD_LOG VARCHAR(100)
+);
+
 /* Index */
 CREATE INDEX global_user_account_index ON global_user_account(USERNAME);
 CREATE INDEX global_system_parameter_index ON global_system_parameters(PARAMETER_ID);
@@ -326,7 +333,7 @@ CREATE INDEX employee_work_location_index ON employee_work_location(WORK_LOCATIO
 CREATE INDEX employee_departure_reason_index ON employee_departure_reason(DEPARTURE_REASON_ID);
 CREATE INDEX employee_details_index ON employee_details(EMPLOYEE_ID);
 CREATE INDEX employee_type_index ON employee_type(EMPLOYEE_TYPE_ID);
-CREATE INDEX employee_private_information_index ON employee_private_information(EMPLOYEE_ID);
+CREATE INDEX employee_working_hours_index ON employee_working_hours(WORKING_HOURS_ID);
 
 /* Stored Procedure */
 
@@ -2073,6 +2080,261 @@ END //
 CREATE PROCEDURE generate_employee_type_options()
 BEGIN
 	SET @query = 'SELECT EMPLOYEE_TYPE_ID, EMPLOYEE_TYPE FROM employee_type ORDER BY EMPLOYEE_TYPE';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE check_employee_exist(IN employee_id INT)
+BEGIN
+	SET @employee_id = employee_id;
+
+	SET @query = 'SELECT COUNT(1) AS TOTAL FROM employee_details WHERE EMPLOYEE_ID = @employee_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE update_employee(IN employee_id VARCHAR(100), IN badge_id VARCHAR(100), IN file_as VARCHAR(350), IN first_name VARCHAR(100), IN middle_name VARCHAR(100), IN last_name VARCHAR(100), IN suffix VARCHAR(5), IN company VARCHAR(50), IN job_position VARCHAR(50), IN department VARCHAR(50), IN work_location VARCHAR(50), IN working_hours VARCHAR(50), IN manager VARCHAR(100), IN coach VARCHAR(100), IN employee_type VARCHAR(100), IN permanency_date DATE, IN onboard_date DATE, IN work_email VARCHAR(50), IN work_telephone VARCHAR(50), IN work_mobile VARCHAR(50), IN sss VARCHAR(20), IN tin VARCHAR(20), IN pagibig VARCHAR(20), IN philhealth VARCHAR(20), IN bank_account_number VARCHAR(100), IN home_work_distance DOUBLE, IN personal_email VARCHAR(50), IN personal_telephone VARCHAR(20), IN personal_mobile VARCHAR(20), IN street_1 VARCHAR(200), IN street_2 VARCHAR(200), IN country_id INT, IN state INT, IN city VARCHAR(100), IN zip_code VARCHAR(10), IN marital_status VARCHAR(20), IN spouse_name VARCHAR(500), IN spouse_birthday DATE, IN emergency_contact VARCHAR(500), IN emergency_phone VARCHAR(20), IN nationality INT, IN identification_number VARCHAR(100), IN passport_number VARCHAR(100), IN gender VARCHAR(20), IN birthday DATE, IN certificate_level VARCHAR(20), IN field_of_study VARCHAR(200), IN school VARCHAR(200), IN place_of_birth VARCHAR(500), IN number_of_children INT, IN visa_number VARCHAR(100), IN work_permit_number VARCHAR(100), IN visa_expiry_date DATE, IN work_permit_expiry_date DATE, IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
+BEGIN
+	SET @employee_id = employee_id;
+	SET @badge_id = badge_id;
+	SET @file_as = file_as;
+	SET @first_name = first_name;
+	SET @middle_name = middle_name;
+	SET @last_name = last_name;
+	SET @suffix = suffix;
+	SET @company = company;
+	SET @job_position = job_position;
+	SET @department = department;
+	SET @work_location = work_location;
+	SET @working_hours = working_hours;
+	SET @manager = manager;
+	SET @coach = coach;
+	SET @employee_type = employee_type;
+	SET @permanency_date = permanency_date;
+	SET @onboard_date = onboard_date;
+	SET @work_email = work_email;
+	SET @work_telephone = work_telephone;
+	SET @work_mobile = work_mobile;
+	SET @sss = sss;
+	SET @tin = tin;
+	SET @pagibig = pagibig;
+	SET @philhealth = philhealth;
+	SET @bank_account_number = bank_account_number;
+	SET @home_work_distance = home_work_distance;
+	SET @personal_email = personal_email;
+	SET @personal_telephone = personal_telephone;
+	SET @personal_mobile = personal_mobile;
+	SET @street_1 = street_1;
+	SET @street_2 = street_2;
+	SET @country_id = country_id;
+	SET @state = state;
+	SET @city = city;
+	SET @zip_code = zip_code;
+	SET @marital_status = marital_status;
+	SET @spouse_name = spouse_name;
+	SET @spouse_birthday = spouse_birthday;
+	SET @emergency_contact = emergency_contact;
+	SET @emergency_phone = emergency_phone;
+	SET @nationality = nationality;
+	SET @identification_number = identification_number;
+	SET @passport_number = passport_number;
+	SET @gender = gender;
+	SET @birthday = birthday;
+	SET @certificate_level = certificate_level;
+	SET @field_of_study = field_of_study;
+	SET @school = school;
+	SET @place_of_birth = place_of_birth;
+	SET @number_of_children = number_of_children;
+	SET @visa_number = visa_number;
+	SET @work_permit_number = work_permit_number;
+	SET @visa_expiry_date = visa_expiry_date;
+	SET @work_permit_expiry_date = work_permit_expiry_date;
+	SET @transaction_log_id = transaction_log_id;
+	SET @record_log = record_log;
+
+	SET @query = 'UPDATE employee_details SET BADGE_ID = @badge_id, FILE_AS = @file_as, FIRST_NAME = @first_name, MIDDLE_NAME = @middle_name, LAST_NAME = @last_name, SUFFIX = @suffix, COMPANY = @company, JOB_POSITION = @job_position, DEPARTMENT = @department, WORK_LOCATION = @work_location, WORKING_HOURS = @working_hours, MANAGER = @manager, COACH = @coach, EMPLOYEE_TYPE = @employee_type, PERMANENCY_DATE = @permanency_date, ONBOARD_DATE = @onboard_date, WORK_EMAIL = @work_email, WORK_TELEPHONE = @work_telephone, WORK_MOBILE = @work_mobile, SSS = @sss, TIN = @tin, PAGIBIG = @pagibig, PHILHEALTH = @philhealth, BANK_ACCOUNT_NUMBER = @bank_account_number, HOME_WORK_DISTANCE = @home_work_distance, PERSONAL_EMAIL = @personal_email, PERSONAL_TELEPHONE = @personal_telephone, PERSONAL_MOBILE = @personal_mobile, STREET_1 = @street_1, STREET_2 = @street_2, COUNTRY_ID = @country_id, STATE_ID = @state, CITY = @city, ZIP_CODE = @zip_code, MARITAL_STATUS = @marital_status, SPOUSE_NAME = @spouse_name, SPOUSE_BIRTHDAY = @spouse_birthday, EMERGENCY_CONTACT = @emergency_contact, EMERGENCY_PHONE = @emergency_phone, NATIONALITY = @nationality, IDENTIFICATION_NUMBER = @identification_number, PASSPORT_NUMBER = @passport_number, GENDER = @gender, BIRTHDAY = @birthday, CERTIFICATE_LEVEL = @certificate_level, FIELD_OF_STUDY = @field_of_study, SCHOOL = @school, PLACE_OF_BIRTH = @place_of_birth, NUMBER_OF_CHILDREN = @number_of_children, VISA_NUMBER = @visa_number, WORK_PERMIT_NUMBER = @work_permit_number, VISA_EXPIRY_DATE = @visa_expiry_date, WORK_PERMIT_EXPIRY_DATE = @work_permit_expiry_date, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE EMPLOYEE_ID = @employee_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE insert_employee(IN employee_id VARCHAR(100), IN badge_id VARCHAR(100), IN file_as VARCHAR(350), IN first_name VARCHAR(100), IN middle_name VARCHAR(100), IN last_name VARCHAR(100), IN suffix VARCHAR(5), IN company VARCHAR(50), IN job_position VARCHAR(50), IN department VARCHAR(50), IN work_location VARCHAR(50), IN working_hours VARCHAR(50), IN manager VARCHAR(100), IN coach VARCHAR(100), IN employee_type VARCHAR(100), IN permanency_date DATE, IN onboard_date DATE, IN work_email VARCHAR(50), IN work_telephone VARCHAR(50), IN work_mobile VARCHAR(50), IN sss VARCHAR(20), IN tin VARCHAR(20), IN pagibig VARCHAR(20), IN philhealth VARCHAR(20), IN bank_account_number VARCHAR(100), IN home_work_distance DOUBLE, IN personal_email VARCHAR(50), IN personal_telephone VARCHAR(20), IN personal_mobile VARCHAR(20), IN street_1 VARCHAR(200), IN street_2 VARCHAR(200), IN country_id INT, IN state INT, IN city VARCHAR(100), IN zip_code VARCHAR(10), IN marital_status VARCHAR(20), IN spouse_name VARCHAR(500), IN spouse_birthday DATE, IN emergency_contact VARCHAR(500), IN emergency_phone VARCHAR(20), IN nationality INT, IN identification_number VARCHAR(100), IN passport_number VARCHAR(100), IN gender VARCHAR(20), IN birthday DATE, IN certificate_level VARCHAR(20), IN field_of_study VARCHAR(200), IN school VARCHAR(200), IN place_of_birth VARCHAR(500), IN number_of_children INT, IN visa_number VARCHAR(100), IN work_permit_number VARCHAR(100), IN visa_expiry_date DATE, IN work_permit_expiry_date DATE, IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
+BEGIN
+	SET @employee_id = employee_id;
+	SET @badge_id = badge_id;
+	SET @file_as = file_as;
+	SET @first_name = first_name;
+	SET @middle_name = middle_name;
+	SET @last_name = last_name;
+	SET @suffix = suffix;
+	SET @company = company;
+	SET @job_position = job_position;
+	SET @department = department;
+	SET @work_location = work_location;
+	SET @working_hours = working_hours;
+	SET @manager = manager;
+	SET @coach = coach;
+	SET @employee_type = employee_type;
+	SET @permanency_date = permanency_date;
+	SET @onboard_date = onboard_date;
+	SET @work_email = work_email;
+	SET @work_telephone = work_telephone;
+	SET @work_mobile = work_mobile;
+	SET @sss = sss;
+	SET @tin = tin;
+	SET @pagibig = pagibig;
+	SET @philhealth = philhealth;
+	SET @bank_account_number = bank_account_number;
+	SET @home_work_distance = home_work_distance;
+	SET @personal_email = personal_email;
+	SET @personal_telephone = personal_telephone;
+	SET @personal_mobile = personal_mobile;
+	SET @street_1 = street_1;
+	SET @street_2 = street_2;
+	SET @country_id = country_id;
+	SET @state = state;
+	SET @city = city;
+	SET @zip_code = zip_code;
+	SET @marital_status = marital_status;
+	SET @spouse_name = spouse_name;
+	SET @spouse_birthday = spouse_birthday;
+	SET @emergency_contact = emergency_contact;
+	SET @emergency_phone = emergency_phone;
+	SET @nationality = nationality;
+	SET @identification_number = identification_number;
+	SET @passport_number = passport_number;
+	SET @gender = gender;
+	SET @birthday = birthday;
+	SET @certificate_level = certificate_level;
+	SET @field_of_study = field_of_study;
+	SET @school = school;
+	SET @place_of_birth = place_of_birth;
+	SET @number_of_children = number_of_children;
+	SET @visa_number = visa_number;
+	SET @work_permit_number = work_permit_number;
+	SET @visa_expiry_date = visa_expiry_date;
+	SET @work_permit_expiry_date = work_permit_expiry_date;
+	SET @transaction_log_id = transaction_log_id;
+	SET @record_log = record_log;
+
+	SET @query = 'INSERT INTO employee_details (EMPLOYEE_ID, BADGE_ID, FILE_AS, FIRST_NAME, MIDDLE_NAME, LAST_NAME, SUFFIX, COMPANY, JOB_POSITION, DEPARTMENT, WORK_LOCATION, WORKING_HOURS, MANAGER, COACH, EMPLOYEE_TYPE, EMPLOYEE_STATUS, PERMANENCY_DATE, ONBOARD_DATE, WORK_EMAIL, WORK_TELEPHONE, WORK_MOBILE, SSS, TIN, PAGIBIG, PHILHEALTH, BANK_ACCOUNT_NUMBER, HOME_WORK_DISTANCE, PERSONAL_EMAIL, PERSONAL_TELEPHONE, PERSONAL_MOBILE, STREET_1, STREET_2, COUNTRY_ID, STATE_ID, CITY, ZIP_CODE, MARITAL_STATUS, SPOUSE_NAME, SPOUSE_BIRTHDAY, EMERGENCY_CONTACT, EMERGENCY_PHONE, NATIONALITY, IDENTIFICATION_NUMBER, PASSPORT_NUMBER, GENDER, BIRTHDAY, CERTIFICATE_LEVEL, FIELD_OF_STUDY, SCHOOL, PLACE_OF_BIRTH, NUMBER_OF_CHILDREN, VISA_NUMBER, WORK_PERMIT_NUMBER, VISA_EXPIRY_DATE, WORK_PERMIT_EXPIRY_DATE, TRANSACTION_LOG_ID, RECORD_LOG) VALUES(@employee_id, @badge_id, @file_as, @first_name, @middle_name, @last_name, @suffix, @company, @job_position, @department, @work_location, @working_hours, @manager, @coach, @employee_type, "ACTIVE", @permanency_date, @onboard_date, @work_email, @work_telephone, @work_mobile, @sss, @tin, @pagibig, @philhealth, @bank_account_number, @home_work_distance, @personal_email, @personal_telephone, @personal_mobile, @street_1, @street_2, @country_id, @state, @city, @zip_code, @marital_status, @spouse_name, @spouse_birthday, @emergency_contact, @emergency_phone, @nationality, @identification_number, @passport_number, @gender, @birthday, @certificate_level, @field_of_study, @school, @place_of_birth, @number_of_children, @visa_number, @work_permit_number, @visa_expiry_date, @work_permit_expiry_date, @transaction_log_id, @record_log)';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE get_employee_details(IN id VARCHAR(100))
+BEGIN
+	SET @id = id;
+
+	SET @query = 'SELECT EMPLOYEE_ID, USERNAME, BADGE_ID, EMPLOYEE_IMAGE, FILE_AS, FIRST_NAME, MIDDLE_NAME, LAST_NAME, SUFFIX, COMPANY, JOB_POSITION, DEPARTMENT, WORK_LOCATION, WORKING_HOURS, MANAGER, COACH, EMPLOYEE_TYPE, EMPLOYEE_STATUS, PERMANENCY_DATE, ONBOARD_DATE, OFFBOARD_DATE, DEPARTURE_REASON, DETAILED_REASON, WORK_EMAIL, WORK_TELEPHONE, WORK_MOBILE, SSS, TIN, PAGIBIG, PHILHEALTH, BANK_ACCOUNT_NUMBER, HOME_WORK_DISTANCE, PERSONAL_EMAIL, PERSONAL_TELEPHONE, PERSONAL_MOBILE, STREET_1, STREET_2, COUNTRY_ID, STATE_ID, CITY, ZIP_CODE, MARITAL_STATUS, SPOUSE_NAME, SPOUSE_BIRTHDAY, EMERGENCY_CONTACT, EMERGENCY_PHONE, NATIONALITY, IDENTIFICATION_NUMBER, PASSPORT_NUMBER, GENDER, BIRTHDAY, CERTIFICATE_LEVEL, FIELD_OF_STUDY, SCHOOL, PLACE_OF_BIRTH, NUMBER_OF_CHILDREN, VISA_NUMBER, WORK_PERMIT_NUMBER, VISA_EXPIRY_DATE, WORK_PERMIT_EXPIRY_DATE, WORK_PERMIT, TRANSACTION_LOG_ID, RECORD_LOG FROM employee_details WHERE EMPLOYEE_ID = @id OR USERNAME = @id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE delete_employee(IN employee_id VARCHAR(100))
+BEGIN
+	SET @employee_id = employee_id;
+
+	SET @query = 'DELETE FROM employee_details WHERE EMPLOYEE_ID = @employee_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE update_employee_image(IN employee_id VARCHAR(100), IN employee_image VARCHAR(500), IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
+BEGIN
+	SET @employee_id = employee_id;
+	SET @employee_image = employee_image;
+	SET @transaction_log_id = transaction_log_id;
+	SET @record_log = record_log;
+
+	SET @query = 'UPDATE employee_details SET EMPLOYEE_IMAGE = @employee_image, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE EMPLOYEE_ID = @employee_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE update_work_permit(IN employee_id VARCHAR(100), IN work_permit VARCHAR(500), IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
+BEGIN
+	SET @employee_id = employee_id;
+	SET @work_permit = work_permit;
+	SET @transaction_log_id = transaction_log_id;
+	SET @record_log = record_log;
+
+	SET @query = 'UPDATE employee_details SET WORK_PERMIT = @work_permit, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE EMPLOYEE_ID = @employee_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+
+CREATE PROCEDURE check_working_hours_exist(IN working_hours_id VARCHAR(50))
+BEGIN
+	SET @working_hours_id = working_hours_id;
+
+	SET @query = 'SELECT COUNT(1) AS TOTAL FROM employee_working_hours WHERE WORKING_HOURS_ID = @working_hours_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE update_working_hours(IN working_hours_id VARCHAR(50), IN working_hours VARCHAR(100), IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
+BEGIN
+	SET @working_hours_id = working_hours_id;
+	SET @working_hours = working_hours;
+	SET @transaction_log_id = transaction_log_id;
+	SET @record_log = record_log;
+
+	SET @query = 'UPDATE employee_working_hours SET WORKING_HOURS = @working_hours, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE WORKING_HOURS_ID = @working_hours_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE insert_working_hours(IN working_hours_id VARCHAR(50), IN working_hours VARCHAR(100), IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
+BEGIN
+	SET @working_hours_id = working_hours_id;
+	SET @working_hours = working_hours;
+	SET @transaction_log_id = transaction_log_id;
+	SET @record_log = record_log;
+
+	SET @query = 'INSERT INTO employee_working_hours (WORKING_HOURS_ID, WORKING_HOURS, TRANSACTION_LOG_ID, RECORD_LOG) VALUES(@working_hours_id, @working_hours, @transaction_log_id, @record_log)';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE get_working_hours_details(IN working_hours_id VARCHAR(50))
+BEGIN
+	SET @working_hours_id = working_hours_id;
+
+	SET @query = 'SELECT WORKING_HOURS, TRANSACTION_LOG_ID, RECORD_LOG FROM employee_working_hours WHERE WORKING_HOURS_ID = @working_hours_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE delete_working_hours(IN working_hours_id VARCHAR(50))
+BEGIN
+	SET @working_hours_id = working_hours_id;
+
+	SET @query = 'DELETE FROM employee_working_hours WHERE WORKING_HOURS_ID = @working_hours_id';
 
 	PREPARE stmt FROM @query;
 	EXECUTE stmt;
