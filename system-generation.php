@@ -201,7 +201,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                 <div class="mb-3">
                                     <label class="form-label">System Type <span class="text-danger">*</span></label>
                                     <select class="form-control form-select2" id="system_type" name="system_type">
-                                    <option value=""></option>';
+                                    <option></option>';
                                     $form .= $api->generate_system_code_options('SYSTYPE');
                                     $form .='</select>
                                 </div>
@@ -356,7 +356,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                 <div class="mb-3">
                                     <label class="form-label">Country <span class="text-danger">*</span></label>
                                     <select class="form-control form-select2" id="country" name="country">
-                                    <option value=""></option>';
+                                    <option></option>';
                                     $form .= $api->generate_country_options();
                                     $form .='</select>
                                 </div>
@@ -460,7 +460,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                 <div class="mb-3">
                                     <label class="form-label">Parent Department</label>
                                     <select class="form-control form-select2" id="parent_department" name="parent_department">
-                                    <option value=""></option>';
+                                    <option></option>';
                                     $form .= $api->generate_system_code_options('SYSTYPE');
                                     $form .='</select>
                                 </div>
@@ -469,7 +469,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                 <div class="mb-3">
                                     <label class="form-label">Manager</label>
                                     <select class="form-control form-select2" id="manager" name="manager">
-                                    <option value=""></option>';
+                                    <option></option>';
                                     $form .= $api->generate_system_code_options('SYSTYPE');
                                     $form .='</select>
                                 </div>
@@ -596,7 +596,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                 <div class="mb-3">
                                     <label class="form-label">Suffix</label>
                                     <select class="form-control form-select2" id="suffix" name="suffix">
-                                    <option value=""></option>';
+                                    <option></option>';
                                     $form .= $api->generate_system_code_options('SUFFIX');
                                     $form .='</select>
                                 </div>
@@ -607,7 +607,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                 <div class="mb-3">
                                     <label for="job_position" class="form-label">Job Position</label>
                                     <select class="form-control form-select2" id="job_position" name="job_position">
-                                    <option value=""></option>';
+                                    <option></option>';
                                     $form .= $api->generate_job_position_options();
                                     $form .='</select>
                                 </div>
@@ -645,7 +645,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                     <label for="department" class="col-sm-4 col-form-label">Department</label>
                                     <div class="col-sm-8">
                                         <select class="form-control form-select2" id="department" name="department">
-                                        <option value=""></option>';
+                                        <option></option>';
                                         $form .= $api->generate_department_options();
                                         $form .='</select>
                                     </div>
@@ -654,8 +654,8 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                     <label for="manager" class="col-sm-4 col-form-label">Manager</label>
                                     <div class="col-sm-8">
                                         <select class="form-control form-select2" id="manager" name="manager">
-                                        <option value=""></option>';
-                                        $form .= $api->generate_department_options();
+                                        <option></option>';
+                                        $form .= $api->generate_employee_options();
                                         $form .='</select>
                                     </div>
                                 </div>
@@ -663,8 +663,8 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                     <label for="coach" class="col-sm-4 col-form-label">Coach</label>
                                     <div class="col-sm-8">
                                         <select class="form-control form-select2" id="coach" name="coach">
-                                        <option value=""></option>';
-                                        $form .= $api->generate_department_options();
+                                        <option></option>';
+                                        $form .= $api->generate_employee_options();
                                         $form .='</select>
                                     </div>
                                 </div>
@@ -707,33 +707,18 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                                     <label for="company" class="col-sm-3 col-form-label">Company</label>
                                                     <div class="col-sm-9">
                                                         <select class="form-control form-select2" id="company" name="company">
-                                                        <option value=""></option>';
-                                                        $form .= $api->generate_work_location_options();
+                                                        <option></option>';
+                                                        $form .= $api->generate_company_options();
                                                         $form .='</select>
                                                     </div>
                                                 </div>
                                                 <div class="row mb-3">
-                                                    <label for="badge_id" class="col-sm-3 col-form-label">Badge ID</label>
+                                                    <label for="permanency_date" class="col-sm-3 col-form-label">Permanent Date</label>
                                                     <div class="col-sm-9">
-                                                        <input type="text" class="form-control form-maxlength" autocomplete="off" id="badge_id" name="badge_id" maxlength="100">
-                                                    </div>
-                                                </div>
-                                                <div class="row mb-3">
-                                                    <label for="work_location" class="col-sm-3 col-form-label">Work Location</label>
-                                                    <div class="col-sm-9">
-                                                        <select class="form-control form-select2" id="work_location" name="work_location">
-                                                        <option value=""></option>';
-                                                        $form .= $api->generate_work_location_options();
-                                                        $form .='</select>
-                                                    </div>
-                                                </div>
-                                                <div class="row mb-3">
-                                                    <label for="employee_type" class="col-sm-3 col-form-label">Employee Type</label>
-                                                    <div class="col-sm-9">
-                                                        <select class="form-control form-select2" id="employee_type" name="employee_type">
-                                                        <option value=""></option>';
-                                                        $form .= $api->generate_work_location_options();
-                                                        $form .='</select>
+                                                        <div class="input-group" id="permanency-date-container">
+                                                            <input type="text" class="form-control" id="permanency_date" name="permanency_date" autocomplete="off" data-date-format="m/dd/yyyy" data-date-container="#permanency-date-container" data-provide="datepicker" data-date-autoclose="true">
+                                                            <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                                 <div class="row mb-3">
@@ -746,25 +731,40 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                                     </div>
                                                 </div>
                                                 <div class="row mb-3">
-                                                    <label for="permanency_date" class="col-sm-3 col-form-label">Permanency Date</label>
+                                                    <label for="work_location" class="col-sm-3 col-form-label">Work Location</label>
                                                     <div class="col-sm-9">
-                                                        <div class="input-group" id="permanency-date-container">
-                                                            <input type="text" class="form-control" id="permanency_date" name="permanency_date" autocomplete="off" data-date-format="m/dd/yyyy" data-date-container="#permanency-date-container" data-provide="datepicker" data-date-autoclose="true">
-                                                            <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
-                                                        </div>
+                                                        <select class="form-control form-select2" id="work_location" name="work_location">
+                                                        <option></option>';
+                                                        $form .= $api->generate_work_location_options();
+                                                        $form .='</select>
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <label for="employee_type" class="col-sm-3 col-form-label">Employee Type</label>
+                                                    <div class="col-sm-9">
+                                                        <select class="form-control form-select2" id="employee_type" name="employee_type">
+                                                        <option></option>';
+                                                        $form .= $api->generate_employee_type_options();
+                                                        $form .='</select>
                                                     </div>
                                                 </div>
                                                 <div class="row mb-3">
                                                     <label for="working_hours" class="col-sm-3 col-form-label">Working Hours</label>
                                                     <div class="col-sm-9">
                                                         <select class="form-control form-select2" id="working_hours" name="working_hours">
-                                                        <option value=""></option>';
-                                                        $form .= $api->generate_work_location_options();
+                                                        <option></option>';
+                                                        $form .= $api->generate_working_hours_options();
                                                         $form .='</select>
                                                     </div>
                                                 </div>
                                             </div>
                                             <div class="col-md-6">
+                                                <div class="row mb-3">
+                                                    <label for="badge_id" class="col-sm-3 col-form-label">Badge ID</label>
+                                                    <div class="col-sm-9">
+                                                        <input type="text" class="form-control form-maxlength" autocomplete="off" id="badge_id" name="badge_id" maxlength="100">
+                                                    </div>
+                                                </div>
                                                 <div class="row mb-3">
                                                     <label for="sss" class="col-sm-3 col-form-label">SSS</label>
                                                     <div class="col-sm-9">
@@ -859,7 +859,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                                     <label for="marital_status" class="col-sm-3 col-form-label">Marital Status</label>
                                                     <div class="col-sm-9">
                                                         <select class="form-control form-select2" id="marital_status" name="marital_status">
-                                                        <option value=""></option>';
+                                                        <option></option>';
                                                         $form .= $api->generate_system_code_options('MARITALSTATUS');
                                                         $form .='</select>
                                                     </div>
@@ -895,7 +895,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                                     <label for="certificate_level" class="col-sm-3 col-form-label">Certificate Level</label>
                                                     <div class="col-sm-9">
                                                         <select class="form-control form-select2" id="certificate_level" name="certificate_level">
-                                                        <option value=""></option>';
+                                                        <option></option>';
                                                         $form .= $api->generate_system_code_options('CERTIFICATELEVEL');
                                                         $form .='</select>
                                                     </div>
@@ -922,7 +922,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                                     <label for="nationality" class="col-sm-3 col-form-label">Nationality (Country)</label>
                                                     <div class="col-sm-9">
                                                         <select class="form-control form-select2" id="nationality" name="nationality">
-                                                        <option value=""></option>';
+                                                        <option></option>';
                                                         $form .= $api->generate_country_options();
                                                         $form .='</select>
                                                     </div>
@@ -958,7 +958,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                                     <label for="gender" class="col-sm-3 col-form-label">Gender</label>
                                                     <div class="col-sm-9">
                                                         <select class="form-control form-select2" id="gender" name="gender">
-                                                        <option value=""></option>';
+                                                        <option></option>';
                                                         $form .= $api->generate_system_code_options('GENDER');
                                                         $form .='</select>
                                                     </div>
@@ -1008,7 +1008,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                                 <div class="row mb-3">
                                                     <label for="work_permit" class="col-sm-3 col-form-label">Work Permit</label>
                                                     <div class="col-sm-9">
-                                                     <input class="form-control" type="file" name="work_permit" id="work_permit">
+                                                        <input class="form-control" type="file" name="work_permit" id="work_permit">
                                                     </div>
                                                 </div>
                                             </div>
@@ -1027,7 +1027,246 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                     <input type="text" class="form-control form-maxlength" autocomplete="off" id="working_hours" name="working_hours" maxlength="100">
                                 </div>
                             </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label for="schedule_type" class="form-label">Schedule Type <span class="text-danger">*</span></label>
+                                    <select class="form-control form-select2" id="schedule_type" name="schedule_type">
+                                    <option></option>';
+                                    $form .= $api->generate_system_code_options('SCHEDULETYPE');
+                                    $form .='</select>
+                                </div>
+                            </div>
                         </div>';
+            }
+            else if($form_type == 'regular working hours form'){
+                $form .= ' <div class="row">
+                                <div class="col-md-12">
+                                    <input type="hidden" id="working_hours_id" name="working_hours_id">
+                                    <div class="mb-3">
+                                        <table class="table table-borderless mb-0">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Day of Week</th>
+                                                    <th>Period</th>
+                                                    <th>Work From</th>
+                                                    <th>Work To</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <th scope="row">Monday</th>
+                                                    <td>Morning</td>
+                                                    <td><input type="time" id="monday_morning_work_from" name="monday_morning_work_from" class="form-control" autocomplete="off"></td>
+                                                    <td><input type="time" id="monday_morning_work_to" name="monday_morning_work_to" class="form-control" autocomplete="off"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">Monday</th>
+                                                    <td>Afternoon</td>
+                                                    <td><input type="time" id="monday_afternoon_work_from" name="monday_afternoon_work_from" class="form-control" autocomplete="off"></td>
+                                                    <td><input type="time" id="monday_afternoon_work_to" name="monday_afternoon_work_to" class="form-control" autocomplete="off"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">Tuesday</th>
+                                                    <td>Morning</td>
+                                                    <td><input type="time" id="tuesday_morning_work_from" name="tuesday_morning_work_from" class="form-control" autocomplete="off"></td>
+                                                    <td><input type="time" id="tuesday_morning_work_to" name="tuesday_morning_work_to" class="form-control" autocomplete="off"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">Tuesday</th>
+                                                    <td>Afternoon</td>
+                                                    <td><input type="time" id="tuesday_afternoon_work_from" name="tuesday_afternoon_work_from" class="form-control" autocomplete="off"></td>
+                                                    <td><input type="time" id="tuesday_afternoon_work_to" name="tuesday_afternoon_work_to" class="form-control" autocomplete="off"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">Wednesday</th>
+                                                    <td>Morning</td>
+                                                    <td><input type="time" id="wednesday_morning_work_from" name="wednesday_morning_work_from" class="form-control" autocomplete="off"></td>
+                                                    <td><input type="time" id="wednesday_morning_work_to" name="wednesday_morning_work_to" class="form-control" autocomplete="off"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">Wednesday</th>
+                                                    <td>Afternoon</td>
+                                                    <td><input type="time" id="wednesday_afternoon_work_from" name="wednesday_afternoon_work_from" class="form-control" autocomplete="off"></td>
+                                                    <td><input type="time" id="wednesday_afternoon_work_to" name="wednesday_afternoon_work_to" class="form-control" autocomplete="off"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">Thursday</th>
+                                                    <td>Morning</td>
+                                                    <td><input type="time" id="thursday_morning_work_from" name="thursday_morning_work_from" class="form-control" autocomplete="off"></td>
+                                                    <td><input type="time" id="thursday_morning_work_to" name="thursday_morning_work_to" class="form-control" autocomplete="off"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">Thursday</th>
+                                                    <td>Afternoon</td>
+                                                    <td><input type="time" id="thursday_afternoon_work_from" name="thursday_afternoon_work_from" class="form-control" autocomplete="off"></td>
+                                                    <td><input type="time" id="thursday_afternoon_work_to" name="thursday_afternoon_work_to" class="form-control" autocomplete="off"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">Friday</th>
+                                                    <td>Morning</td>
+                                                    <td><input type="time" id="friday_morning_work_from" name="friday_morning_work_from" class="form-control" autocomplete="off"></td>
+                                                    <td><input type="time" id="friday_morning_work_to" name="friday_morning_work_to" class="form-control" autocomplete="off"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">Friday</th>
+                                                    <td>Afternoon</td>
+                                                    <td><input type="time" id="friday_afternoon_work_from" name="friday_afternoon_work_from" class="form-control" autocomplete="off"></td>
+                                                    <td><input type="time" id="friday_afternoon_work_to" name="friday_afternoon_work_to" class="form-control" autocomplete="off"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">Saturday</th>
+                                                    <td>Morning</td>
+                                                    <td><input type="time" id="saturday_morning_work_from" name="saturday_morning_work_from" class="form-control" autocomplete="off"></td>
+                                                    <td><input type="time" id="saturday_morning_work_to" name="saturday_morning_work_to" class="form-control" autocomplete="off"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">Saturday</th>
+                                                    <td>Afternoon</td>
+                                                    <td><input type="time" id="saturday_afternoon_work_from" name="saturday_afternoon_work_from" class="form-control" autocomplete="off"></td>
+                                                    <td><input type="time" id="saturday_afternoon_work_to" name="saturday_afternoon_work_to" class="form-control" autocomplete="off"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">Sunday</th>
+                                                    <td>Morning</td>
+                                                    <td><input type="time" id="sunday_morning_work_from" name="sunday_morning_work_from" class="form-control" autocomplete="off"></td>
+                                                    <td><input type="time" id="sunday_morning_work_to" name="sunday_morning_work_to" class="form-control" autocomplete="off"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">Sunday</th>
+                                                    <td>Afternoon</td>
+                                                    <td><input type="time" id="sunday_afternoon_work_from" name="sunday_afternoon_work_from" class="form-control" autocomplete="off"></td>
+                                                    <td><input type="time" id="sunday_afternoon_work_to" name="sunday_afternoon_work_to" class="form-control" autocomplete="off"></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>';
+            }
+            else if($form_type == 'scheduled working hours form'){
+                $form .= ' <div class="row mb-3">
+                                <input type="hidden" id="working_hours_id" name="working_hours_id">
+                                <label for="start_date" class="col-sm-3 col-form-label">Start Date <span class="text-danger">*</span></label>
+                                <div class="col-sm-9">
+                                    <div class="input-group" id="start-date-container">
+                                        <input type="text" class="form-control" id="start_date" name="start_date" autocomplete="off" data-date-format="m/dd/yyyy" data-date-container="#start-date-container" data-provide="datepicker" data-date-autoclose="true">
+                                        <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label for="end_date" class="col-sm-3 col-form-label">End Date <span class="text-danger">*</span></label>
+                                <div class="col-sm-9">
+                                    <div class="input-group" id="end-date-container">
+                                        <input type="text" class="form-control" id="end_date" name="end_date" autocomplete="off" data-date-format="m/dd/yyyy" data-date-container="#end-date-container" data-provide="datepicker" data-date-autoclose="true">
+                                        <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <table class="table table-borderless mb-0">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Day of Week</th>
+                                                    <th>Period</th>
+                                                    <th>Work From</th>
+                                                    <th>Work To</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <th scope="row">Monday</th>
+                                                    <td>Morning</td>
+                                                    <td><input type="time" id="monday_morning_work_from" name="monday_morning_work_from" class="form-control" autocomplete="off"></td>
+                                                    <td><input type="time" id="monday_morning_work_to" name="monday_morning_work_to" class="form-control" autocomplete="off"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">Monday</th>
+                                                    <td>Afternoon</td>
+                                                    <td><input type="time" id="monday_afternoon_work_from" name="monday_afternoon_work_from" class="form-control" autocomplete="off"></td>
+                                                    <td><input type="time" id="monday_afternoon_work_to" name="monday_afternoon_work_to" class="form-control" autocomplete="off"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">Tuesday</th>
+                                                    <td>Morning</td>
+                                                    <td><input type="time" id="tuesday_morning_work_from" name="tuesday_morning_work_from" class="form-control" autocomplete="off"></td>
+                                                    <td><input type="time" id="tuesday_morning_work_to" name="tuesday_morning_work_to" class="form-control" autocomplete="off"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">Tuesday</th>
+                                                    <td>Afternoon</td>
+                                                    <td><input type="time" id="tuesday_afternoon_work_from" name="tuesday_afternoon_work_from" class="form-control" autocomplete="off"></td>
+                                                    <td><input type="time" id="tuesday_afternoon_work_to" name="tuesday_afternoon_work_to" class="form-control" autocomplete="off"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">Wednesday</th>
+                                                    <td>Morning</td>
+                                                    <td><input type="time" id="wednesday_morning_work_from" name="wednesday_morning_work_from" class="form-control" autocomplete="off"></td>
+                                                    <td><input type="time" id="wednesday_morning_work_to" name="wednesday_morning_work_to" class="form-control" autocomplete="off"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">Wednesday</th>
+                                                    <td>Afternoon</td>
+                                                    <td><input type="time" id="wednesday_afternoon_work_from" name="wednesday_afternoon_work_from" class="form-control" autocomplete="off"></td>
+                                                    <td><input type="time" id="wednesday_afternoon_work_to" name="wednesday_afternoon_work_to" class="form-control" autocomplete="off"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">Thursday</th>
+                                                    <td>Morning</td>
+                                                    <td><input type="time" id="thursday_morning_work_from" name="thursday_morning_work_from" class="form-control" autocomplete="off"></td>
+                                                    <td><input type="time" id="thursday_morning_work_to" name="thursday_morning_work_to" class="form-control" autocomplete="off"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">Thursday</th>
+                                                    <td>Afternoon</td>
+                                                    <td><input type="time" id="thursday_afternoon_work_from" name="thursday_afternoon_work_from" class="form-control" autocomplete="off"></td>
+                                                    <td><input type="time" id="thursday_afternoon_work_to" name="thursday_afternoon_work_to" class="form-control" autocomplete="off"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">Friday</th>
+                                                    <td>Morning</td>
+                                                    <td><input type="time" id="friday_morning_work_from" name="friday_morning_work_from" class="form-control" autocomplete="off"></td>
+                                                    <td><input type="time" id="friday_morning_work_to" name="friday_morning_work_to" class="form-control" autocomplete="off"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">Friday</th>
+                                                    <td>Afternoon</td>
+                                                    <td><input type="time" id="friday_afternoon_work_from" name="friday_afternoon_work_from" class="form-control" autocomplete="off"></td>
+                                                    <td><input type="time" id="friday_afternoon_work_to" name="friday_afternoon_work_to" class="form-control" autocomplete="off"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">Saturday</th>
+                                                    <td>Morning</td>
+                                                    <td><input type="time" id="saturday_morning_work_from" name="saturday_morning_work_from" class="form-control" autocomplete="off"></td>
+                                                    <td><input type="time" id="saturday_morning_work_to" name="saturday_morning_work_to" class="form-control" autocomplete="off"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">Saturday</th>
+                                                    <td>Afternoon</td>
+                                                    <td><input type="time" id="saturday_afternoon_work_from" name="saturday_afternoon_work_from" class="form-control" autocomplete="off"></td>
+                                                    <td><input type="time" id="saturday_afternoon_work_to" name="saturday_afternoon_work_to" class="form-control" autocomplete="off"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">Sunday</th>
+                                                    <td>Morning</td>
+                                                    <td><input type="time" id="sunday_morning_work_from" name="sunday_morning_work_from" class="form-control" autocomplete="off"></td>
+                                                    <td><input type="time" id="sunday_morning_work_to" name="sunday_morning_work_to" class="form-control" autocomplete="off"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">Sunday</th>
+                                                    <td>Afternoon</td>
+                                                    <td><input type="time" id="sunday_afternoon_work_from" name="sunday_afternoon_work_from" class="form-control" autocomplete="off"></td>
+                                                    <td><input type="time" id="sunday_afternoon_work_to" name="sunday_afternoon_work_to" class="form-control" autocomplete="off"></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>';
             }
 
             $form .= '</form>';
@@ -1222,6 +1461,146 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                     </tr>
                                 </tbody>
                             </table>';
+            }
+            else if($element_type == 'working hours details'){
+                $element = '<div class="row">
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <table class="table table-nowrap mb-0">
+                                            <tbody>
+                                                <tr>
+                                                    <th scope="row">Working Hours :</th>
+                                                    <td id="working_hours"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">Schedule Type :</th>
+                                                    <td id="schedule_type"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">Start Date :</th>
+                                                    <td id="start_date"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">End Date :</th>
+                                                    <td id="end_date"></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <ul class="nav nav-tabs" role="tablist">
+                                        <li class="nav-item">
+                                            <a class="nav-link active" data-bs-toggle="tab" href="#working_hours_schedule" role="tab">
+                                                <span class="d-block d-sm-none"><i class="bx bx-time"></i></span>
+                                                <span class="d-none d-sm-block">Working Hours Schedule</span>    
+                                            </a>
+                                        </li>
+                                    </ul>
+                                    <div class="tab-content p-3 text-muted">
+                                        <div class="tab-pane active" id="working_hours_schedule" role="tabpanel">
+                                            <table class="table table-bordered mb-0">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th>Day of Week</th>
+                                                        <th>Period</th>
+                                                        <th>Work From</th>
+                                                        <th>Work To</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <th scope="row">Monday</th>
+                                                        <td>Morning</td>
+                                                        <td id="monday_morning_work_from"></td>
+                                                        <td id="monday_morning_work_to"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row">Monday</th>
+                                                        <td>Afternoon</td>
+                                                        <td id="monday_afternoon_work_from"></td>
+                                                        <td id="monday_afternoon_work_to"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row">Tueday</th>
+                                                        <td>Morning</td>
+                                                        <td id="tuesday_morning_work_from"></td>
+                                                        <td id="tuesday_morning_work_to"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row">Tueday</th>
+                                                        <td>Afternoon</td>
+                                                        <td id="tuesday_afternoon_work_from"></td>
+                                                        <td id="tuesday_afternoon_work_to"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row">Wednesday</th>
+                                                        <td>Morning</td>
+                                                        <td id="wednesday_morning_work_from"></td>
+                                                        <td id="wednesday_morning_work_to"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row">Wednesday</th>
+                                                        <td>Afternoon</td>
+                                                        <td id="wednesday_afternoon_work_from"></td>
+                                                        <td id="wednesday_afternoon_work_to"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row">Thursday</th>
+                                                        <td>Morning</td>
+                                                        <td id="thursday_morning_work_from"></td>
+                                                        <td id="thursday_morning_work_to"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row">Thursday</th>
+                                                        <td>Afternoon</td>
+                                                        <td id="thursday_afternoon_work_from"></td>
+                                                        <td id="thursday_afternoon_work_to"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row">Friday</th>
+                                                        <td>Morning</td>
+                                                        <td id="friday_morning_work_from"></td>
+                                                        <td id="friday_morning_work_to"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row">Friday</th>
+                                                        <td>Afternoon</td>
+                                                        <td id="friday_afternoon_work_from"></td>
+                                                        <td id="friday_afternoon_work_to"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row">Saturday</th>
+                                                        <td>Morning</td>
+                                                        <td id="saturday_morning_work_from"></td>
+                                                        <td id="saturday_morning_work_to"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row">Saturday</th>
+                                                        <td>Afternoon</td>
+                                                        <td id="saturday_afternoon_work_from"></td>
+                                                        <td id="saturday_afternoon_work_to"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row">Sunday</th>
+                                                        <td>Morning</td>
+                                                        <td id="sunday_morning_work_from"></td>
+                                                        <td id="sunday_morning_work_to"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row">Sunday</th>
+                                                        <td>Afternoon</td>
+                                                        <td id="sunday_afternoon_work_from"></td>
+                                                        <td id="sunday_afternoon_work_to"></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>';
             }
 
             $response[] = array(
@@ -2679,13 +3058,17 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
             $delete_working_hours = $api->check_role_permissions($username, 106);
             $view_transaction_log = $api->check_role_permissions($username, 107);
 
-            $sql = $api->db_connection->prepare('SELECT WORKING_HOURS_ID, WORKING_HOURS, TRANSACTION_LOG_ID FROM employee_working_hours');
+            $sql = $api->db_connection->prepare('SELECT WORKING_HOURS_ID, WORKING_HOURS, SCHEDULE_TYPE, TRANSACTION_LOG_ID FROM employee_working_hours');
 
             if($sql->execute()){
                 while($row = $sql->fetch()){
                     $working_hours_id = $row['WORKING_HOURS_ID'];
                     $working_hours = $row['WORKING_HOURS'];
+                    $schedule_type = $row['SCHEDULE_TYPE'];
                     $transaction_log_id = $row['TRANSACTION_LOG_ID'];
+
+                    $system_code_details = $api->get_system_code_details('SCHEDULETYPE', $schedule_type);
+                    $schedule_type_name = $system_code_details[0]['SYSTEM_DESCRIPTION'];
 
                     if($update_working_hours > 0){
                         $update = '<button type="button" class="btn btn-info waves-effect waves-light update-working-hours" data-working-hours-id="'. $working_hours_id .'" title="Edit Working Hours">
@@ -2697,9 +3080,16 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                     }
 
                     if($update_working_hours_schedule > 0){
-                        $schedule = '<button type="button" class="btn btn-success waves-effect waves-light update-working-hours-schedule" data-working-hours-id="'. $working_hours_id .'" title="Edit Working Hours Schedule">
+                        if($schedule_type == 'REGULAR'){
+                            $schedule = '<button type="button" class="btn btn-success waves-effect waves-light update-regular-working-hours" data-working-hours-id="'. $working_hours_id .'" title="Edit Regular Working Hours">
                                         <i class="bx bx-time font-size-16 align-middle"></i>
                                     </button>';
+                        }
+                        else{
+                            $schedule = '<button type="button" class="btn btn-success waves-effect waves-light update-scheduled-working-hours" data-working-hours-id="'. $working_hours_id .'" title="Edit Scheduled Working Hours">
+                                    <i class="bx bx-time font-size-16 align-middle"></i>
+                                </button>';
+                        }
                     }
                     else{
                         $schedule = '';
@@ -2725,7 +3115,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
 
                     $response[] = array(
                         'CHECK_BOX' => '<input class="form-check-input datatable-checkbox-children" type="checkbox" value="'. $working_hours_id .'">',
-                        'WORKING_HOURS' => $working_hours,
+                        'WORKING_HOURS' => $working_hours . '<p class="text-muted mb-0">'. $schedule_type_name .'</p>',
                         'ACTION' => '<div class="d-flex gap-2">
                                             <button type="button" class="btn btn-primary waves-effect waves-light view-working-hours" data-working-hours-id="'. $working_hours_id .'" title="View Working Hours">
                                                 <i class="bx bx-show font-size-16 align-middle"></i>
