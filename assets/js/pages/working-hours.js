@@ -108,7 +108,7 @@ function initialize_click_events(){
 
         sessionStorage.setItem('working_hours_id', working_hours_id);
 
-        generate_modal('working hours details', 'Working Hours Details', 'R' , '1', '0', 'element', '', '0', username);
+        generate_modal('working hours details', 'Working Hours Details', 'LG' , '1', '0', 'element', '', '0', username);
     });
 
 
@@ -122,6 +122,22 @@ function initialize_click_events(){
         sessionStorage.setItem('working_hours_id', working_hours_id);
         
         generate_modal('working hours form', 'Working Hours', 'R' , '1', '1', 'form', 'working-hours-form', '0', username);
+    });
+
+    $(document).on('click','.update-regular-working-hours',function() {
+        var working_hours_id = $(this).data('working-hours-id');
+
+        sessionStorage.setItem('working_hours_id', working_hours_id);
+        
+        generate_modal('regular working hours form', 'Regular Working Hours', 'LG' , '1', '1', 'form', 'regular-working-hours-form', '0', username);
+    });
+
+    $(document).on('click','.update-scheduled-working-hours',function() {
+        var working_hours_id = $(this).data('working-hours-id');
+
+        sessionStorage.setItem('working_hours_id', working_hours_id);
+        
+        generate_modal('scheduled working hours form', 'Scheduled Working Hours', 'LG' , '1', '1', 'form', 'scheduled-working-hours-form', '0', username);
     });
     
     $(document).on('click','.delete-working-hours',function() {

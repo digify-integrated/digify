@@ -307,7 +307,43 @@ CREATE TABLE employee_type(
 CREATE TABLE employee_working_hours(
 	WORKING_HOURS_ID VARCHAR(50) PRIMARY KEY,
 	WORKING_HOURS VARCHAR(100) NOT NULL,
+	SCHEDULE_TYPE VARCHAR(20) NOT NULL,
 	TRANSACTION_LOG_ID VARCHAR(100),
+	RECORD_LOG VARCHAR(100)
+);
+
+CREATE TABLE employee_working_hours_schedule(
+	WORKING_HOURS_ID VARCHAR(50) PRIMARY KEY,
+	START_DATE DATE,
+	END_DATE DATE,
+	MONDAY_MORNING_WORK_FROM TIME,
+	MONDAY_MORNING_WORK_TO TIME,
+	MONDAY_AFTERNOON_WORK_FROM TIME,
+	MONDAY_AFTERNOON_WORK_TO TIME,
+	TUESDAY_MORNING_WORK_FROM TIME,
+	TUESDAY_MORNING_WORK_TO TIME,
+	TUESDAY_AFTERNOON_WORK_FROM TIME,
+	TUESDAY_AFTERNOON_WORK_TO TIME,
+	WEDNESDAY_MORNING_WORK_FROM TIME,
+	WEDNESDAY_MORNING_WORK_TO TIME,
+	WEDNESDAY_AFTERNOON_WORK_FROM TIME,
+	WEDNESDAY_AFTERNOON_WORK_TO TIME,
+	THURSDAY_MORNING_WORK_FROM TIME,
+	THURSDAY_MORNING_WORK_TO TIME,
+	THURSDAY_AFTERNOON_WORK_FROM TIME,
+	THURSDAY_AFTERNOON_WORK_TO TIME,
+	FRIDAY_MORNING_WORK_FROM TIME,
+	FRIDAY_MORNING_WORK_TO TIME,
+	FRIDAY_AFTERNOON_WORK_FROM TIME,
+	FRIDAY_AFTERNOON_WORK_TO TIME,
+	SATURDAY_MORNING_WORK_FROM TIME,
+	SATURDAY_MORNING_WORK_TO TIME,
+	SATURDAY_AFTERNOON_WORK_FROM TIME,
+	SATURDAY_AFTERNOON_WORK_TO TIME,
+	SUNDAY_MORNING_WORK_FROM TIME,
+	SUNDAY_MORNING_WORK_TO TIME,
+	SUNDAY_AFTERNOON_WORK_FROM TIME,
+	SUNDAY_AFTERNOON_WORK_TO TIME,
 	RECORD_LOG VARCHAR(100)
 );
 
@@ -334,6 +370,7 @@ CREATE INDEX employee_departure_reason_index ON employee_departure_reason(DEPART
 CREATE INDEX employee_details_index ON employee_details(EMPLOYEE_ID);
 CREATE INDEX employee_type_index ON employee_type(EMPLOYEE_TYPE_ID);
 CREATE INDEX employee_working_hours_index ON employee_working_hours(WORKING_HOURS_ID);
+CREATE INDEX employee_working_hours_schedule_index ON employee_working_hours_schedule(WORKING_HOURS_ID);
 
 /* Stored Procedure */
 
@@ -2086,6 +2123,33 @@ BEGIN
 	DROP PREPARE stmt;
 END //
 
+CREATE PROCEDURE generate_working_hours_options()
+BEGIN
+	SET @query = 'SELECT WORKING_HOURS_ID, WORKING_HOURS FROM employee_working_hours ORDER BY WORKING_HOURS';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE generate_employee_options()
+BEGIN
+	SET @query = 'SELECT EMPLOYEE_ID, FILE_AS FROM employee_details ORDER BY FILE_AS';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE generate_company_options()
+BEGIN
+	SET @query = 'SELECT COMPANY_ID, COMPANY_NAME FROM global_company ORDER BY COMPANY_NAME';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
 CREATE PROCEDURE check_employee_exist(IN employee_id INT)
 BEGIN
 	SET @employee_id = employee_id;
@@ -2279,7 +2343,6 @@ BEGIN
 	DROP PREPARE stmt;
 END //
 
-
 CREATE PROCEDURE check_working_hours_exist(IN working_hours_id VARCHAR(50))
 BEGIN
 	SET @working_hours_id = working_hours_id;
@@ -2291,28 +2354,30 @@ BEGIN
 	DROP PREPARE stmt;
 END //
 
-CREATE PROCEDURE update_working_hours(IN working_hours_id VARCHAR(50), IN working_hours VARCHAR(100), IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
+CREATE PROCEDURE update_working_hours(IN working_hours_id VARCHAR(50), IN working_hours VARCHAR(100), IN schedule_type VARCHAR(20), IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
 BEGIN
 	SET @working_hours_id = working_hours_id;
 	SET @working_hours = working_hours;
+	SET @schedule_type = schedule_type;
 	SET @transaction_log_id = transaction_log_id;
 	SET @record_log = record_log;
 
-	SET @query = 'UPDATE employee_working_hours SET WORKING_HOURS = @working_hours, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE WORKING_HOURS_ID = @working_hours_id';
+	SET @query = 'UPDATE employee_working_hours SET WORKING_HOURS = @working_hours, SCHEDULE_TYPE = @schedule_type, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE WORKING_HOURS_ID = @working_hours_id';
 
 	PREPARE stmt FROM @query;
 	EXECUTE stmt;
 	DROP PREPARE stmt;
 END //
 
-CREATE PROCEDURE insert_working_hours(IN working_hours_id VARCHAR(50), IN working_hours VARCHAR(100), IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
+CREATE PROCEDURE insert_working_hours(IN working_hours_id VARCHAR(50), IN working_hours VARCHAR(100), IN schedule_type VARCHAR(20), IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
 BEGIN
 	SET @working_hours_id = working_hours_id;
 	SET @working_hours = working_hours;
+	SET @schedule_type = schedule_type;
 	SET @transaction_log_id = transaction_log_id;
 	SET @record_log = record_log;
 
-	SET @query = 'INSERT INTO employee_working_hours (WORKING_HOURS_ID, WORKING_HOURS, TRANSACTION_LOG_ID, RECORD_LOG) VALUES(@working_hours_id, @working_hours, @transaction_log_id, @record_log)';
+	SET @query = 'INSERT INTO employee_working_hours (WORKING_HOURS_ID, WORKING_HOURS, SCHEDULE_TYPE, TRANSACTION_LOG_ID, RECORD_LOG) VALUES(@working_hours_id, @working_hours, @schedule_type, @transaction_log_id, @record_log)';
 
 	PREPARE stmt FROM @query;
 	EXECUTE stmt;
@@ -2323,7 +2388,7 @@ CREATE PROCEDURE get_working_hours_details(IN working_hours_id VARCHAR(50))
 BEGIN
 	SET @working_hours_id = working_hours_id;
 
-	SET @query = 'SELECT WORKING_HOURS, TRANSACTION_LOG_ID, RECORD_LOG FROM employee_working_hours WHERE WORKING_HOURS_ID = @working_hours_id';
+	SET @query = 'SELECT WORKING_HOURS, SCHEDULE_TYPE, TRANSACTION_LOG_ID, RECORD_LOG FROM employee_working_hours WHERE WORKING_HOURS_ID = @working_hours_id';
 
 	PREPARE stmt FROM @query;
 	EXECUTE stmt;
@@ -2335,6 +2400,123 @@ BEGIN
 	SET @working_hours_id = working_hours_id;
 
 	SET @query = 'DELETE FROM employee_working_hours WHERE WORKING_HOURS_ID = @working_hours_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE check_working_hours_schedule_exist(IN working_hours_id VARCHAR(50))
+BEGIN
+	SET @working_hours_id = working_hours_id;
+
+	SET @query = 'SELECT COUNT(1) AS TOTAL FROM employee_working_hours_schedule WHERE WORKING_HOURS_ID = @working_hours_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE update_working_hours_schedule(IN working_hours_id VARCHAR(50), IN start_date DATE, IN end_date DATE, IN monday_morning_work_from TIME, IN monday_morning_work_to TIME, IN monday_afternoon_work_from TIME, IN monday_afternoon_work_to TIME, IN tuesday_morning_work_from TIME, IN tuesday_morning_work_to TIME, IN tuesday_afternoon_work_from TIME, IN tuesday_afternoon_work_to TIME, IN wednesday_morning_work_from TIME, IN wednesday_morning_work_to TIME, IN wednesday_afternoon_work_from TIME, IN wednesday_afternoon_work_to TIME, IN thursday_morning_work_from TIME, IN thursday_morning_work_to TIME, IN thursday_afternoon_work_from TIME, IN thursday_afternoon_work_to TIME, IN friday_morning_work_from TIME, IN friday_morning_work_to TIME, IN friday_afternoon_work_from TIME, IN friday_afternoon_work_to TIME, IN saturday_morning_work_from TIME, IN saturday_morning_work_to TIME, IN saturday_afternoon_work_from TIME, IN saturday_afternoon_work_to TIME, IN sunday_morning_work_from TIME, IN sunday_morning_work_to TIME, IN sunday_afternoon_work_from TIME, IN sunday_afternoon_work_to TIME, IN record_log VARCHAR(100))
+BEGIN
+	SET @working_hours_id = working_hours_id;
+	SET @start_date = start_date;
+	SET @end_date = end_date;
+	SET @monday_morning_work_from = monday_morning_work_from;
+	SET @monday_morning_work_to = monday_morning_work_to;
+	SET @monday_afternoon_work_from = monday_afternoon_work_from;
+	SET @monday_afternoon_work_to = monday_afternoon_work_to;
+	SET @tuesday_morning_work_from = tuesday_morning_work_from;
+	SET @tuesday_morning_work_to = tuesday_morning_work_to;
+	SET @tuesday_afternoon_work_from = tuesday_afternoon_work_from;
+	SET @tuesday_afternoon_work_to = tuesday_afternoon_work_to;
+	SET @wednesday_morning_work_from = wednesday_morning_work_from;
+	SET @wednesday_morning_work_to = wednesday_morning_work_to;
+	SET @wednesday_afternoon_work_from = wednesday_afternoon_work_from;
+	SET @wednesday_afternoon_work_to = wednesday_afternoon_work_to;
+	SET @thursday_morning_work_from = thursday_morning_work_from;
+	SET @thursday_morning_work_to = thursday_morning_work_to;
+	SET @thursday_afternoon_work_from = thursday_afternoon_work_from;
+	SET @thursday_afternoon_work_to = thursday_afternoon_work_to;
+	SET @friday_morning_work_from = friday_morning_work_from;
+	SET @friday_morning_work_to = friday_morning_work_to;
+	SET @friday_afternoon_work_from = friday_afternoon_work_from;
+	SET @friday_afternoon_work_to = friday_afternoon_work_to;
+	SET @saturday_morning_work_from = saturday_morning_work_from;
+	SET @saturday_morning_work_to = saturday_morning_work_to;
+	SET @saturday_afternoon_work_from = saturday_afternoon_work_from;
+	SET @saturday_afternoon_work_to = saturday_afternoon_work_to;
+	SET @sunday_morning_work_from = sunday_morning_work_from;
+	SET @sunday_morning_work_to = sunday_morning_work_to;
+	SET @sunday_afternoon_work_from = sunday_afternoon_work_from;
+	SET @sunday_afternoon_work_to = sunday_afternoon_work_to;
+	SET @record_log = record_log;
+
+	SET @query = 'UPDATE employee_working_hours_schedule SET START_DATE = @start_date, END_DATE = @end_date, MONDAY_MORNING_WORK_FROM = @monday_morning_work_from, MONDAY_MORNING_WORK_TO = @monday_morning_work_to, MONDAY_AFTERNOON_WORK_FROM = @monday_afternoon_work_from, MONDAY_AFTERNOON_WORK_TO = @monday_afternoon_work_to, TUESDAY_MORNING_WORK_FROM = @tuesday_morning_work_from, TUESDAY_MORNING_WORK_TO = @tuesday_morning_work_to, TUESDAY_AFTERNOON_WORK_FROM = @tuesday_afternoon_work_from, TUESDAY_AFTERNOON_WORK_TO = @tuesday_afternoon_work_to, WEDNESDAY_MORNING_WORK_FROM = @wednesday_morning_work_from, WEDNESDAY_MORNING_WORK_TO = @wednesday_morning_work_to, WEDNESDAY_AFTERNOON_WORK_FROM = @wednesday_afternoon_work_from, WEDNESDAY_AFTERNOON_WORK_TO = @wednesday_afternoon_work_to, THURSDAY_MORNING_WORK_FROM = @thursday_morning_work_from, THURSDAY_MORNING_WORK_TO = @thursday_morning_work_to, THURSDAY_AFTERNOON_WORK_FROM = @thursday_afternoon_work_from, THURSDAY_AFTERNOON_WORK_TO = @thursday_afternoon_work_to, FRIDAY_MORNING_WORK_FROM = @friday_morning_work_from, FRIDAY_MORNING_WORK_TO = @friday_morning_work_to, FRIDAY_AFTERNOON_WORK_FROM = @friday_afternoon_work_from, FRIDAY_AFTERNOON_WORK_TO = @friday_afternoon_work_to, SATURDAY_MORNING_WORK_FROM = @saturday_morning_work_from, SATURDAY_MORNING_WORK_TO = @saturday_morning_work_to, SATURDAY_AFTERNOON_WORK_FROM = @saturday_afternoon_work_from, SATURDAY_AFTERNOON_WORK_TO = @saturday_afternoon_work_to, SUNDAY_MORNING_WORK_FROM = @sunday_morning_work_from, SUNDAY_MORNING_WORK_TO = @sunday_morning_work_to, SUNDAY_AFTERNOON_WORK_FROM = @sunday_afternoon_work_from, SUNDAY_AFTERNOON_WORK_TO = @sunday_afternoon_work_to, RECORD_LOG = @record_log WHERE WORKING_HOURS_ID = @working_hours_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE insert_working_hours_schedule(IN working_hours_id VARCHAR(50), IN start_date DATE, IN end_date DATE, IN monday_morning_work_from TIME, IN monday_morning_work_to TIME, IN monday_afternoon_work_from TIME, IN monday_afternoon_work_to TIME, IN tuesday_morning_work_from TIME, IN tuesday_morning_work_to TIME, IN tuesday_afternoon_work_from TIME, IN tuesday_afternoon_work_to TIME, IN wednesday_morning_work_from TIME, IN wednesday_morning_work_to TIME, IN wednesday_afternoon_work_from TIME, IN wednesday_afternoon_work_to TIME, IN thursday_morning_work_from TIME, IN thursday_morning_work_to TIME, IN thursday_afternoon_work_from TIME, IN thursday_afternoon_work_to TIME, IN friday_morning_work_from TIME, IN friday_morning_work_to TIME, IN friday_afternoon_work_from TIME, IN friday_afternoon_work_to TIME, IN saturday_morning_work_from TIME, IN saturday_morning_work_to TIME, IN saturday_afternoon_work_from TIME, IN saturday_afternoon_work_to TIME, IN sunday_morning_work_from TIME, IN sunday_morning_work_to TIME, IN sunday_afternoon_work_from TIME, IN sunday_afternoon_work_to TIME, IN record_log VARCHAR(100))
+BEGIN
+	SET @working_hours_id = working_hours_id;
+	SET @start_date = start_date;
+	SET @end_date = end_date;
+	SET @monday_morning_work_from = monday_morning_work_from;
+	SET @monday_morning_work_to = monday_morning_work_to;
+	SET @monday_afternoon_work_from = monday_afternoon_work_from;
+	SET @monday_afternoon_work_to = monday_afternoon_work_to;
+	SET @tuesday_morning_work_from = tuesday_morning_work_from;
+	SET @tuesday_morning_work_to = tuesday_morning_work_to;
+	SET @tuesday_afternoon_work_from = tuesday_afternoon_work_from;
+	SET @tuesday_afternoon_work_to = tuesday_afternoon_work_to;
+	SET @wednesday_morning_work_from = wednesday_morning_work_from;
+	SET @wednesday_morning_work_to = wednesday_morning_work_to;
+	SET @wednesday_afternoon_work_from = wednesday_afternoon_work_from;
+	SET @wednesday_afternoon_work_to = wednesday_afternoon_work_to;
+	SET @thursday_morning_work_from = thursday_morning_work_from;
+	SET @thursday_morning_work_to = thursday_morning_work_to;
+	SET @thursday_afternoon_work_from = thursday_afternoon_work_from;
+	SET @thursday_afternoon_work_to = thursday_afternoon_work_to;
+	SET @friday_morning_work_from = friday_morning_work_from;
+	SET @friday_morning_work_to = friday_morning_work_to;
+	SET @friday_afternoon_work_from = friday_afternoon_work_from;
+	SET @friday_afternoon_work_to = friday_afternoon_work_to;
+	SET @saturday_morning_work_from = saturday_morning_work_from;
+	SET @saturday_morning_work_to = saturday_morning_work_to;
+	SET @saturday_afternoon_work_from = saturday_afternoon_work_from;
+	SET @saturday_afternoon_work_to = saturday_afternoon_work_to;
+	SET @sunday_morning_work_from = sunday_morning_work_from;
+	SET @sunday_morning_work_to = sunday_morning_work_to;
+	SET @sunday_afternoon_work_from = sunday_afternoon_work_from;
+	SET @sunday_afternoon_work_to = sunday_afternoon_work_to;
+	SET @record_log = record_log;
+
+	SET @query = 'INSERT INTO employee_working_hours_schedule (WORKING_HOURS_ID, START_DATE, END_DATE, MONDAY_MORNING_WORK_FROM, MONDAY_MORNING_WORK_TO, MONDAY_AFTERNOON_WORK_FROM, MONDAY_AFTERNOON_WORK_TO, TUESDAY_MORNING_WORK_FROM, TUESDAY_MORNING_WORK_TO, TUESDAY_AFTERNOON_WORK_FROM, TUESDAY_AFTERNOON_WORK_TO, WEDNESDAY_MORNING_WORK_FROM, WEDNESDAY_MORNING_WORK_TO, WEDNESDAY_AFTERNOON_WORK_FROM, WEDNESDAY_AFTERNOON_WORK_TO, THURSDAY_MORNING_WORK_FROM, THURSDAY_MORNING_WORK_TO, THURSDAY_AFTERNOON_WORK_FROM, THURSDAY_AFTERNOON_WORK_TO, FRIDAY_MORNING_WORK_FROM, FRIDAY_MORNING_WORK_TO, FRIDAY_AFTERNOON_WORK_FROM, FRIDAY_AFTERNOON_WORK_TO, SATURDAY_MORNING_WORK_FROM, SATURDAY_MORNING_WORK_TO, SATURDAY_AFTERNOON_WORK_FROM, SATURDAY_AFTERNOON_WORK_TO, SUNDAY_MORNING_WORK_FROM, SUNDAY_MORNING_WORK_TO, SUNDAY_AFTERNOON_WORK_FROM, SUNDAY_AFTERNOON_WORK_TO, RECORD_LOG) VALUES(@working_hours_id, @start_date, @end_date, @monday_morning_work_from, @monday_morning_work_to, @monday_afternoon_work_from, @monday_afternoon_work_to, @tuesday_morning_work_from, @tuesday_morning_work_to, @tuesday_afternoon_work_from, @tuesday_afternoon_work_to, @wednesday_morning_work_from, @wednesday_morning_work_to, @wednesday_afternoon_work_from, @wednesday_afternoon_work_to, @thursday_morning_work_from, @thursday_morning_work_to, @thursday_afternoon_work_from, @thursday_afternoon_work_to,  @friday_morning_work_from, @friday_morning_work_to, @friday_afternoon_work_from, @friday_afternoon_work_to, @saturday_morning_work_from, @saturday_morning_work_to, @saturday_afternoon_work_from, @saturday_afternoon_work_to, @sunday_morning_work_from, @sunday_morning_work_to, @sunday_afternoon_work_from, @sunday_afternoon_work_to, @record_log)';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE get_working_hours_schedule_details(IN working_hours_id VARCHAR(50))
+BEGIN
+	SET @working_hours_id = working_hours_id;
+
+	SET @query = 'SELECT START_DATE, END_DATE, MONDAY_MORNING_WORK_FROM, MONDAY_MORNING_WORK_TO, MONDAY_AFTERNOON_WORK_FROM, MONDAY_AFTERNOON_WORK_TO, TUESDAY_MORNING_WORK_FROM, TUESDAY_MORNING_WORK_TO, TUESDAY_AFTERNOON_WORK_FROM, TUESDAY_AFTERNOON_WORK_TO, WEDNESDAY_MORNING_WORK_FROM, WEDNESDAY_MORNING_WORK_TO, WEDNESDAY_AFTERNOON_WORK_FROM, WEDNESDAY_AFTERNOON_WORK_TO, THURSDAY_MORNING_WORK_FROM, THURSDAY_MORNING_WORK_TO, THURSDAY_AFTERNOON_WORK_FROM, THURSDAY_AFTERNOON_WORK_TO, FRIDAY_MORNING_WORK_FROM, FRIDAY_MORNING_WORK_TO, FRIDAY_AFTERNOON_WORK_FROM, FRIDAY_AFTERNOON_WORK_TO, SATURDAY_MORNING_WORK_FROM, SATURDAY_MORNING_WORK_TO, SATURDAY_AFTERNOON_WORK_FROM, SATURDAY_AFTERNOON_WORK_TO, SUNDAY_MORNING_WORK_FROM, SUNDAY_MORNING_WORK_TO, SUNDAY_AFTERNOON_WORK_FROM, SUNDAY_AFTERNOON_WORK_TO, RECORD_LOG FROM employee_working_hours_schedule WHERE WORKING_HOURS_ID = @working_hours_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE delete_working_hours_schedule(IN working_hours_id VARCHAR(50))
+BEGIN
+	SET @working_hours_id = working_hours_id;
+
+	SET @query = 'DELETE FROM employee_working_hours_schedule WHERE WORKING_HOURS_ID = @working_hours_id';
 
 	PREPARE stmt FROM @query;
 	EXECUTE stmt;

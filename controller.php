@@ -1435,16 +1435,16 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
     # Submit working hours
     else if($transaction == 'submit working hours'){
-        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['working_hours_id']) && isset($_POST['working_hours']) && !empty($_POST['working_hours'])){
-            $file_type = '';
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['working_hours_id']) && isset($_POST['working_hours']) && !empty($_POST['working_hours']) && isset($_POST['schedule_type']) && !empty($_POST['schedule_type'])){
             $username = $_POST['username'];
             $working_hours_id = $_POST['working_hours_id'];
             $working_hours = $_POST['working_hours'];
+            $schedule_type = $_POST['schedule_type'];
           
             $check_working_hours_exist = $api->check_working_hours_exist($working_hours_id);
  
             if($check_working_hours_exist > 0){
-                $update_working_hours = $api->update_working_hours($working_hours_id, $working_hours, $username);
+                $update_working_hours = $api->update_working_hours($working_hours_id, $working_hours, $schedule_type, $username);
 
                 if($update_working_hours){
                     echo 'Updated';
@@ -1454,7 +1454,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                 }
             }
             else{
-                $insert_working_hours = $api->insert_working_hours($working_hours, $username);
+                $insert_working_hours = $api->insert_working_hours($working_hours, $schedule_type, $username);
     
                 if($insert_working_hours){
                     echo 'Inserted';
@@ -1462,6 +1462,156 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                 else{
                     echo $insert_working_hours;
                 }
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Submit regular working hours
+    else if($transaction == 'submit regular working hours'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['working_hours_id']) && !empty($_POST['working_hours_id']) && isset($_POST['monday_morning_work_from']) && isset($_POST['monday_morning_work_to']) && isset($_POST['monday_afternoon_work_from']) && isset($_POST['monday_afternoon_work_to']) && isset($_POST['tuesday_morning_work_from']) && isset($_POST['tuesday_morning_work_to']) && isset($_POST['tuesday_afternoon_work_from']) && isset($_POST['tuesday_afternoon_work_to']) && isset($_POST['wednesday_morning_work_from']) && isset($_POST['wednesday_morning_work_to']) && isset($_POST['wednesday_afternoon_work_from']) && isset($_POST['wednesday_afternoon_work_to']) && isset($_POST['thursday_morning_work_from']) && isset($_POST['thursday_morning_work_to']) && isset($_POST['thursday_afternoon_work_from']) && isset($_POST['thursday_afternoon_work_to']) && isset($_POST['friday_morning_work_from']) && isset($_POST['friday_morning_work_to']) && isset($_POST['friday_afternoon_work_from']) && isset($_POST['friday_afternoon_work_to']) && isset($_POST['saturday_morning_work_from']) && isset($_POST['saturday_morning_work_to']) && isset($_POST['saturday_afternoon_work_from']) && isset($_POST['saturday_afternoon_work_to']) && isset($_POST['sunday_morning_work_from']) && isset($_POST['sunday_morning_work_to']) && isset($_POST['sunday_afternoon_work_from']) && isset($_POST['sunday_afternoon_work_to'])){
+            $error = '';
+            $username = $_POST['username'];
+            $working_hours_id = $_POST['working_hours_id'];
+            $monday_morning_work_from = $api->check_date('empty', $_POST['monday_morning_work_from'], '', 'H:i:s', '', '', '');
+            $monday_morning_work_to = $api->check_date('empty', $_POST['monday_morning_work_to'], '', 'H:i:s', '', '', '');
+            $monday_afternoon_work_from = $api->check_date('empty', $_POST['monday_afternoon_work_from'], '', 'H:i:s', '', '', '');
+            $monday_afternoon_work_to = $api->check_date('empty', $_POST['monday_afternoon_work_to'], '', 'H:i:s', '', '', '');
+            $tuesday_morning_work_from = $api->check_date('empty', $_POST['tuesday_morning_work_from'], '', 'H:i:s', '', '', '');
+            $tuesday_morning_work_to = $api->check_date('empty', $_POST['tuesday_morning_work_to'], '', 'H:i:s', '', '', '');
+            $tuesday_afternoon_work_from = $api->check_date('empty', $_POST['tuesday_afternoon_work_from'], '', 'H:i:s', '', '', '');
+            $tuesday_afternoon_work_to = $api->check_date('empty', $_POST['tuesday_afternoon_work_to'], '', 'H:i:s', '', '', '');
+            $wednesday_morning_work_from = $api->check_date('empty', $_POST['wednesday_morning_work_from'], '', 'H:i:s', '', '', '');
+            $wednesday_morning_work_to = $api->check_date('empty', $_POST['wednesday_morning_work_to'], '', 'H:i:s', '', '', '');
+            $wednesday_afternoon_work_from = $api->check_date('empty', $_POST['wednesday_afternoon_work_from'], '', 'H:i:s', '', '', '');
+            $wednesday_afternoon_work_to = $api->check_date('empty', $_POST['wednesday_afternoon_work_to'], '', 'H:i:s', '', '', '');
+            $thursday_morning_work_from = $api->check_date('empty', $_POST['thursday_morning_work_from'], '', 'H:i:s', '', '', '');
+            $thursday_morning_work_to = $api->check_date('empty', $_POST['thursday_morning_work_to'], '', 'H:i:s', '', '', '');
+            $thursday_afternoon_work_from = $api->check_date('empty', $_POST['thursday_afternoon_work_from'], '', 'H:i:s', '', '', '');
+            $thursday_afternoon_work_to = $api->check_date('empty', $_POST['thursday_afternoon_work_to'], '', 'H:i:s', '', '', '');
+            $friday_morning_work_from = $api->check_date('empty', $_POST['friday_morning_work_from'], '', 'H:i:s', '', '', '');
+            $friday_morning_work_to = $api->check_date('empty', $_POST['friday_morning_work_to'], '', 'H:i:s', '', '', '');
+            $friday_afternoon_work_from = $api->check_date('empty', $_POST['friday_afternoon_work_from'], '', 'H:i:s', '', '', '');
+            $friday_afternoon_work_to = $api->check_date('empty', $_POST['friday_afternoon_work_to'], '', 'H:i:s', '', '', '');
+            $saturday_morning_work_from = $api->check_date('empty', $_POST['saturday_morning_work_from'], '', 'H:i:s', '', '', '');
+            $saturday_morning_work_to = $api->check_date('empty', $_POST['saturday_morning_work_to'], '', 'H:i:s', '', '', '');
+            $saturday_afternoon_work_from = $api->check_date('empty', $_POST['saturday_afternoon_work_from'], '', 'H:i:s', '', '', '');
+            $saturday_afternoon_work_to = $api->check_date('empty', $_POST['saturday_afternoon_work_to'], '', 'H:i:s', '', '', '');
+            $sunday_morning_work_from = $api->check_date('empty', $_POST['sunday_morning_work_from'], '', 'H:i:s', '', '', '');
+            $sunday_morning_work_to = $api->check_date('empty', $_POST['sunday_morning_work_to'], '', 'H:i:s', '', '', '');
+            $sunday_afternoon_work_from = $api->check_date('empty', $_POST['sunday_afternoon_work_from'], '', 'H:i:s', '', '', '');
+            $sunday_afternoon_work_to = $api->check_date('empty', $_POST['sunday_afternoon_work_to'], '', 'H:i:s', '', '', '');
+
+            $monday_working_hours_schedule_overlap = $api->check_working_hours_schedue_overlap($monday_morning_work_from, $monday_morning_work_to, $monday_afternoon_work_from, $monday_afternoon_work_to);
+            $tuesday_working_hours_schedule_overlap = $api->check_working_hours_schedue_overlap($tuesday_morning_work_from, $tuesday_morning_work_to, $tuesday_afternoon_work_from, $tuesday_afternoon_work_to);
+            $wednesday_working_hours_schedule_overlap = $api->check_working_hours_schedue_overlap($wednesday_morning_work_from, $wednesday_morning_work_to, $wednesday_afternoon_work_from, $wednesday_afternoon_work_to);
+            $thursday_working_hours_schedule_overlap = $api->check_working_hours_schedue_overlap($thursday_morning_work_from, $thursday_morning_work_to, $thursday_afternoon_work_from, $thursday_afternoon_work_to);
+            $friday_working_hours_schedule_overlap = $api->check_working_hours_schedue_overlap($friday_morning_work_from, $friday_morning_work_to, $friday_afternoon_work_from, $friday_afternoon_work_to);
+            $saturday_working_hours_schedule_overlap = $api->check_working_hours_schedue_overlap($saturday_morning_work_from, $saturday_morning_work_to, $saturday_afternoon_work_from, $saturday_afternoon_work_to);
+            $sunday_working_hours_schedule_overlap = $api->check_working_hours_schedue_overlap($sunday_morning_work_from, $sunday_morning_work_to, $sunday_afternoon_work_from, $sunday_afternoon_work_to);
+          
+            if(!$monday_working_hours_schedule_overlap && !$tuesday_working_hours_schedule_overlap && !$wednesday_working_hours_schedule_overlap && !$thursday_working_hours_schedule_overlap && !$friday_working_hours_schedule_overlap && !$saturday_working_hours_schedule_overlap && !$sunday_working_hours_schedule_overlap){
+                $check_working_hours_schedule_exist = $api->check_working_hours_schedule_exist($working_hours_id);
+ 
+                if($check_working_hours_schedule_exist > 0){
+                    $update_working_hours_schedule = $api->update_working_hours_schedule($working_hours_id, null, null, $monday_morning_work_from, $monday_morning_work_to, $monday_afternoon_work_from, $monday_afternoon_work_to, $tuesday_morning_work_from, $tuesday_morning_work_to, $tuesday_afternoon_work_from, $tuesday_afternoon_work_to, $wednesday_morning_work_from, $wednesday_morning_work_to, $wednesday_afternoon_work_from, $wednesday_afternoon_work_to, $thursday_morning_work_from, $thursday_morning_work_to, $thursday_afternoon_work_from, $thursday_afternoon_work_to, $friday_morning_work_from, $friday_morning_work_to, $friday_afternoon_work_from, $friday_afternoon_work_to, $saturday_morning_work_from, $saturday_morning_work_to, $saturday_afternoon_work_from, $saturday_afternoon_work_to, $sunday_morning_work_from, $sunday_morning_work_to, $sunday_afternoon_work_from, $sunday_afternoon_work_to, $username);
+
+                    if($update_working_hours_schedule){
+                        echo 'Updated';
+                    }
+                    else{
+                        echo $update_working_hours_schedule;
+                    }
+                }
+                else{
+                    $insert_working_hours_schedule = $api->insert_working_hours_schedule($working_hours_id, null, null, $monday_morning_work_from, $monday_morning_work_to, $monday_afternoon_work_from, $monday_afternoon_work_to, $tuesday_morning_work_from, $tuesday_morning_work_to, $tuesday_afternoon_work_from, $tuesday_afternoon_work_to, $wednesday_morning_work_from, $wednesday_morning_work_to, $wednesday_afternoon_work_from, $wednesday_afternoon_work_to, $thursday_morning_work_from, $thursday_morning_work_to, $thursday_afternoon_work_from, $thursday_afternoon_work_to, $friday_morning_work_from, $friday_morning_work_to, $friday_afternoon_work_from, $friday_afternoon_work_to, $saturday_morning_work_from, $saturday_morning_work_to, $saturday_afternoon_work_from, $saturday_afternoon_work_to, $sunday_morning_work_from, $sunday_morning_work_to, $sunday_afternoon_work_from, $sunday_afternoon_work_to, $username);
+        
+                    if($insert_working_hours_schedule){
+                        echo 'Updated';
+                    }
+                    else{
+                        echo $insert_working_hours_schedule;
+                    }
+                }
+            }
+            else{
+                echo 'Overlap';
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Submit scheduled working hours
+    else if($transaction == 'submit scheduled working hours'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['working_hours_id']) && !empty($_POST['working_hours_id']) && isset($_POST['start_date']) && !empty($_POST['start_date']) && isset($_POST['end_date']) && !empty($_POST['end_date']) && isset($_POST['monday_morning_work_from']) && isset($_POST['monday_morning_work_to']) && isset($_POST['monday_afternoon_work_from']) && isset($_POST['monday_afternoon_work_to']) && isset($_POST['tuesday_morning_work_from']) && isset($_POST['tuesday_morning_work_to']) && isset($_POST['tuesday_afternoon_work_from']) && isset($_POST['tuesday_afternoon_work_to']) && isset($_POST['wednesday_morning_work_from']) && isset($_POST['wednesday_morning_work_to']) && isset($_POST['wednesday_afternoon_work_from']) && isset($_POST['wednesday_afternoon_work_to']) && isset($_POST['thursday_morning_work_from']) && isset($_POST['thursday_morning_work_to']) && isset($_POST['thursday_afternoon_work_from']) && isset($_POST['thursday_afternoon_work_to']) && isset($_POST['friday_morning_work_from']) && isset($_POST['friday_morning_work_to']) && isset($_POST['friday_afternoon_work_from']) && isset($_POST['friday_afternoon_work_to']) && isset($_POST['saturday_morning_work_from']) && isset($_POST['saturday_morning_work_to']) && isset($_POST['saturday_afternoon_work_from']) && isset($_POST['saturday_afternoon_work_to']) && isset($_POST['sunday_morning_work_from']) && isset($_POST['sunday_morning_work_to']) && isset($_POST['sunday_afternoon_work_from']) && isset($_POST['sunday_afternoon_work_to'])){
+            $error = '';
+            $username = $_POST['username'];
+            $working_hours_id = $_POST['working_hours_id'];
+            $start_date = $api->check_date('empty', $_POST['start_date'], '', 'Y-m-d', '', '', '');
+            $end_date = $api->check_date('empty', $_POST['end_date'], '', 'Y-m-d', '', '', '');
+            $monday_morning_work_from = $api->check_date('empty', $_POST['monday_morning_work_from'], '', 'H:i:s', '', '', '');
+            $monday_morning_work_to = $api->check_date('empty', $_POST['monday_morning_work_to'], '', 'H:i:s', '', '', '');
+            $monday_afternoon_work_from = $api->check_date('empty', $_POST['monday_afternoon_work_from'], '', 'H:i:s', '', '', '');
+            $monday_afternoon_work_to = $api->check_date('empty', $_POST['monday_afternoon_work_to'], '', 'H:i:s', '', '', '');
+            $tuesday_morning_work_from = $api->check_date('empty', $_POST['tuesday_morning_work_from'], '', 'H:i:s', '', '', '');
+            $tuesday_morning_work_to = $api->check_date('empty', $_POST['tuesday_morning_work_to'], '', 'H:i:s', '', '', '');
+            $tuesday_afternoon_work_from = $api->check_date('empty', $_POST['tuesday_afternoon_work_from'], '', 'H:i:s', '', '', '');
+            $tuesday_afternoon_work_to = $api->check_date('empty', $_POST['tuesday_afternoon_work_to'], '', 'H:i:s', '', '', '');
+            $wednesday_morning_work_from = $api->check_date('empty', $_POST['wednesday_morning_work_from'], '', 'H:i:s', '', '', '');
+            $wednesday_morning_work_to = $api->check_date('empty', $_POST['wednesday_morning_work_to'], '', 'H:i:s', '', '', '');
+            $wednesday_afternoon_work_from = $api->check_date('empty', $_POST['wednesday_afternoon_work_from'], '', 'H:i:s', '', '', '');
+            $wednesday_afternoon_work_to = $api->check_date('empty', $_POST['wednesday_afternoon_work_to'], '', 'H:i:s', '', '', '');
+            $thursday_morning_work_from = $api->check_date('empty', $_POST['thursday_morning_work_from'], '', 'H:i:s', '', '', '');
+            $thursday_morning_work_to = $api->check_date('empty', $_POST['thursday_morning_work_to'], '', 'H:i:s', '', '', '');
+            $thursday_afternoon_work_from = $api->check_date('empty', $_POST['thursday_afternoon_work_from'], '', 'H:i:s', '', '', '');
+            $thursday_afternoon_work_to = $api->check_date('empty', $_POST['thursday_afternoon_work_to'], '', 'H:i:s', '', '', '');
+            $friday_morning_work_from = $api->check_date('empty', $_POST['friday_morning_work_from'], '', 'H:i:s', '', '', '');
+            $friday_morning_work_to = $api->check_date('empty', $_POST['friday_morning_work_to'], '', 'H:i:s', '', '', '');
+            $friday_afternoon_work_from = $api->check_date('empty', $_POST['friday_afternoon_work_from'], '', 'H:i:s', '', '', '');
+            $friday_afternoon_work_to = $api->check_date('empty', $_POST['friday_afternoon_work_to'], '', 'H:i:s', '', '', '');
+            $saturday_morning_work_from = $api->check_date('empty', $_POST['saturday_morning_work_from'], '', 'H:i:s', '', '', '');
+            $saturday_morning_work_to = $api->check_date('empty', $_POST['saturday_morning_work_to'], '', 'H:i:s', '', '', '');
+            $saturday_afternoon_work_from = $api->check_date('empty', $_POST['saturday_afternoon_work_from'], '', 'H:i:s', '', '', '');
+            $saturday_afternoon_work_to = $api->check_date('empty', $_POST['saturday_afternoon_work_to'], '', 'H:i:s', '', '', '');
+            $sunday_morning_work_from = $api->check_date('empty', $_POST['sunday_morning_work_from'], '', 'H:i:s', '', '', '');
+            $sunday_morning_work_to = $api->check_date('empty', $_POST['sunday_morning_work_to'], '', 'H:i:s', '', '', '');
+            $sunday_afternoon_work_from = $api->check_date('empty', $_POST['sunday_afternoon_work_from'], '', 'H:i:s', '', '', '');
+            $sunday_afternoon_work_to = $api->check_date('empty', $_POST['sunday_afternoon_work_to'], '', 'H:i:s', '', '', '');
+
+            $monday_working_hours_schedule_overlap = $api->check_working_hours_schedue_overlap($monday_morning_work_from, $monday_morning_work_to, $monday_afternoon_work_from, $monday_afternoon_work_to);
+            $tuesday_working_hours_schedule_overlap = $api->check_working_hours_schedue_overlap($tuesday_morning_work_from, $tuesday_morning_work_to, $tuesday_afternoon_work_from, $tuesday_afternoon_work_to);
+            $wednesday_working_hours_schedule_overlap = $api->check_working_hours_schedue_overlap($wednesday_morning_work_from, $wednesday_morning_work_to, $wednesday_afternoon_work_from, $wednesday_afternoon_work_to);
+            $thursday_working_hours_schedule_overlap = $api->check_working_hours_schedue_overlap($thursday_morning_work_from, $thursday_morning_work_to, $thursday_afternoon_work_from, $thursday_afternoon_work_to);
+            $friday_working_hours_schedule_overlap = $api->check_working_hours_schedue_overlap($friday_morning_work_from, $friday_morning_work_to, $friday_afternoon_work_from, $friday_afternoon_work_to);
+            $saturday_working_hours_schedule_overlap = $api->check_working_hours_schedue_overlap($saturday_morning_work_from, $saturday_morning_work_to, $saturday_afternoon_work_from, $saturday_afternoon_work_to);
+            $sunday_working_hours_schedule_overlap = $api->check_working_hours_schedue_overlap($sunday_morning_work_from, $sunday_morning_work_to, $sunday_afternoon_work_from, $sunday_afternoon_work_to);
+          
+            if(!$monday_working_hours_schedule_overlap && !$tuesday_working_hours_schedule_overlap && !$wednesday_working_hours_schedule_overlap && !$thursday_working_hours_schedule_overlap && !$friday_working_hours_schedule_overlap && !$saturday_working_hours_schedule_overlap && !$sunday_working_hours_schedule_overlap){
+                $check_working_hours_schedule_exist = $api->check_working_hours_schedule_exist($working_hours_id);
+ 
+                if($check_working_hours_schedule_exist > 0){
+                    $update_working_hours_schedule = $api->update_working_hours_schedule($working_hours_id, $start_date, $end_date, $monday_morning_work_from, $monday_morning_work_to, $monday_afternoon_work_from, $monday_afternoon_work_to, $tuesday_morning_work_from, $tuesday_morning_work_to, $tuesday_afternoon_work_from, $tuesday_afternoon_work_to, $wednesday_morning_work_from, $wednesday_morning_work_to, $wednesday_afternoon_work_from, $wednesday_afternoon_work_to, $thursday_morning_work_from, $thursday_morning_work_to, $thursday_afternoon_work_from, $thursday_afternoon_work_to, $friday_morning_work_from, $friday_morning_work_to, $friday_afternoon_work_from, $friday_afternoon_work_to, $saturday_morning_work_from, $saturday_morning_work_to, $saturday_afternoon_work_from, $saturday_afternoon_work_to, $sunday_morning_work_from, $sunday_morning_work_to, $sunday_afternoon_work_from, $sunday_afternoon_work_to, $username);
+
+                    if($update_working_hours_schedule){
+                        echo 'Updated';
+                    }
+                    else{
+                        echo $update_working_hours_schedule;
+                    }
+                }
+                else{
+                    $insert_working_hours_schedule = $api->insert_working_hours_schedule($working_hours_id, $start_date, $end_date, $monday_morning_work_from, $monday_morning_work_to, $monday_afternoon_work_from, $monday_afternoon_work_to, $tuesday_morning_work_from, $tuesday_morning_work_to, $tuesday_afternoon_work_from, $tuesday_afternoon_work_to, $wednesday_morning_work_from, $wednesday_morning_work_to, $wednesday_afternoon_work_from, $wednesday_afternoon_work_to, $thursday_morning_work_from, $thursday_morning_work_to, $thursday_afternoon_work_from, $thursday_afternoon_work_to, $friday_morning_work_from, $friday_morning_work_to, $friday_afternoon_work_from, $friday_afternoon_work_to, $saturday_morning_work_from, $saturday_morning_work_to, $saturday_afternoon_work_from, $saturday_afternoon_work_to, $sunday_morning_work_from, $sunday_morning_work_to, $sunday_afternoon_work_from, $sunday_afternoon_work_to, $username);
+        
+                    if($insert_working_hours_schedule){
+                        echo 'Updated';
+                    }
+                    else{
+                        echo $insert_working_hours_schedule;
+                    }
+                }
+            }
+            else{
+                echo 'Overlap';
             }
         }
     }
@@ -2487,7 +2637,14 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                 $delete_working_hours = $api->delete_working_hours($working_hours_id, $username);
                                     
                 if($delete_working_hours){
-                    echo 'Deleted';
+                    $delete_working_hours_schedule = $api->delete_working_hours_schedule($working_hours_id, $username);
+                                    
+                    if($delete_working_hours_schedule){
+                        echo 'Deleted';
+                    }
+                    else{
+                        echo $delete_working_hours_schedule;
+                    }
                 }
                 else{
                     echo $delete_working_hours;
@@ -2512,7 +2669,14 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                 if($check_working_hours_exist > 0){
                     $delete_working_hours = $api->delete_working_hours($working_hours_id, $username);
                                     
-                    if(!$delete_working_hours){
+                    if($delete_working_hours){
+                        $delete_working_hours_schedule = $api->delete_working_hours_schedule($working_hours_id, $username);
+                                    
+                        if(!$delete_working_hours_schedule){
+                            $error = $delete_working_hours_schedule;
+                        }
+                    }
+                    else{
                         $error = $delete_working_hours;
                     }
                 }
@@ -3438,7 +3602,103 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
             $working_hours_details = $api->get_working_hours_details($working_hours_id);
 
             $response[] = array(
-                'WORKING_HOURS' => $working_hours_details[0]['WORKING_HOURS']
+                'WORKING_HOURS' => $working_hours_details[0]['WORKING_HOURS'],
+                'SCHEDULE_TYPE' => $working_hours_details[0]['SCHEDULE_TYPE']
+            );
+
+            echo json_encode($response);
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Working hours schedule details
+    else if($transaction == 'working hours schedule details'){
+        if(isset($_POST['working_hours_id']) && !empty($_POST['working_hours_id'])){
+            $working_hours_id = $_POST['working_hours_id'];
+            $working_hours_schedule_details = $api->get_working_hours_schedule_details($working_hours_id);
+
+            $response[] = array(
+                'START_DATE' => $api->check_date('empty', $working_hours_schedule_details[0]['START_DATE'] ?? null, '', 'n/d/Y', '', '', ''),
+                'END_DATE' => $api->check_date('empty', $working_hours_schedule_details[0]['END_DATE'] ?? null, '', 'n/d/Y', '', '', ''),
+                'MONDAY_MORNING_WORK_FROM' => $working_hours_schedule_details[0]['MONDAY_MORNING_WORK_FROM'] ?? null,
+                'MONDAY_MORNING_WORK_TO' => $working_hours_schedule_details[0]['MONDAY_MORNING_WORK_TO'] ?? null,
+                'MONDAY_AFTERNOON_WORK_FROM' => $working_hours_schedule_details[0]['MONDAY_AFTERNOON_WORK_FROM'] ?? null,
+                'MONDAY_AFTERNOON_WORK_TO' => $working_hours_schedule_details[0]['MONDAY_AFTERNOON_WORK_TO'] ?? null,
+                'TUESDAY_MORNING_WORK_FROM' => $working_hours_schedule_details[0]['TUESDAY_MORNING_WORK_FROM'] ?? null,
+                'TUESDAY_MORNING_WORK_TO' => $working_hours_schedule_details[0]['TUESDAY_MORNING_WORK_TO'] ?? null,
+                'TUESDAY_AFTERNOON_WORK_FROM' => $working_hours_schedule_details[0]['TUESDAY_AFTERNOON_WORK_FROM'] ?? null,
+                'TUESDAY_AFTERNOON_WORK_TO' => $working_hours_schedule_details[0]['TUESDAY_AFTERNOON_WORK_TO'] ?? null,
+                'WEDNESDAY_MORNING_WORK_FROM' => $working_hours_schedule_details[0]['WEDNESDAY_MORNING_WORK_FROM'] ?? null,
+                'WEDNESDAY_MORNING_WORK_TO' => $working_hours_schedule_details[0]['WEDNESDAY_MORNING_WORK_TO'] ?? null,
+                'WEDNESDAY_AFTERNOON_WORK_FROM' => $working_hours_schedule_details[0]['WEDNESDAY_AFTERNOON_WORK_FROM'] ?? null,
+                'WEDNESDAY_AFTERNOON_WORK_TO' => $working_hours_schedule_details[0]['WEDNESDAY_AFTERNOON_WORK_TO'] ?? null,
+                'THURSDAY_MORNING_WORK_FROM' => $working_hours_schedule_details[0]['THURSDAY_MORNING_WORK_FROM'] ?? null,
+                'THURSDAY_MORNING_WORK_TO' => $working_hours_schedule_details[0]['THURSDAY_MORNING_WORK_TO'] ?? null,
+                'THURSDAY_AFTERNOON_WORK_FROM' => $working_hours_schedule_details[0]['THURSDAY_AFTERNOON_WORK_FROM'] ?? null,
+                'THURSDAY_AFTERNOON_WORK_TO' => $working_hours_schedule_details[0]['THURSDAY_AFTERNOON_WORK_TO'] ?? null,
+                'FRIDAY_MORNING_WORK_FROM' => $working_hours_schedule_details[0]['FRIDAY_MORNING_WORK_FROM'] ?? null,
+                'FRIDAY_MORNING_WORK_TO' => $working_hours_schedule_details[0]['FRIDAY_MORNING_WORK_TO'] ?? null,
+                'FRIDAY_AFTERNOON_WORK_FROM' => $working_hours_schedule_details[0]['FRIDAY_AFTERNOON_WORK_FROM'] ?? null,
+                'FRIDAY_AFTERNOON_WORK_TO' => $working_hours_schedule_details[0]['FRIDAY_AFTERNOON_WORK_TO'] ?? null,
+                'SATURDAY_MORNING_WORK_FROM' => $working_hours_schedule_details[0]['SATURDAY_MORNING_WORK_FROM'] ?? null,
+                'SATURDAY_MORNING_WORK_TO' => $working_hours_schedule_details[0]['SATURDAY_MORNING_WORK_TO'] ?? null,
+                'SATURDAY_AFTERNOON_WORK_FROM' => $working_hours_schedule_details[0]['SATURDAY_AFTERNOON_WORK_FROM'] ?? null,
+                'SATURDAY_AFTERNOON_WORK_TO' => $working_hours_schedule_details[0]['SATURDAY_AFTERNOON_WORK_TO'] ?? null,
+                'SUNDAY_MORNING_WORK_FROM' => $working_hours_schedule_details[0]['SUNDAY_MORNING_WORK_FROM'] ?? null,
+                'SUNDAY_MORNING_WORK_TO' => $working_hours_schedule_details[0]['SUNDAY_MORNING_WORK_TO'] ?? null,
+                'SUNDAY_AFTERNOON_WORK_FROM' => $working_hours_schedule_details[0]['SUNDAY_AFTERNOON_WORK_FROM'] ?? null,
+                'SUNDAY_AFTERNOON_WORK_TO' => $working_hours_schedule_details[0]['SUNDAY_AFTERNOON_WORK_TO'] ?? null,
+            );
+
+            echo json_encode($response);
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Working hours summary details
+    else if($transaction == 'working hours summary details'){
+        if(isset($_POST['working_hours_id']) && !empty($_POST['working_hours_id'])){
+            $working_hours_id = $_POST['working_hours_id'];
+            $working_hours_details = $api->get_working_hours_details($working_hours_id);
+            $working_hours_schedule_details = $api->get_working_hours_schedule_details($working_hours_id);
+            $schedule_type = $working_hours_details[0]['SCHEDULE_TYPE'];
+
+            $system_code_details = $api->get_system_code_details('SCHEDULETYPE', $schedule_type);
+            $schedule_type_name = $system_code_details[0]['SYSTEM_DESCRIPTION'];
+
+            $response[] = array(
+                'WORKING_HOURS' => $working_hours_details[0]['WORKING_HOURS'],
+                'SCHEDULE_TYPE' => $schedule_type_name,
+                'START_DATE' => $api->check_date('summary', $working_hours_schedule_details[0]['START_DATE'] ?? null, '', 'n/d/Y', '', '', ''),
+                'END_DATE' => $api->check_date('summary', $working_hours_schedule_details[0]['END_DATE'] ?? null, '', 'n/d/Y', '', '', ''),
+                'MONDAY_MORNING_WORK_FROM' => $api->check_date('summary', $working_hours_schedule_details[0]['MONDAY_MORNING_WORK_FROM'] ?? null, '', 'h:i a', '', '', ''),
+                'MONDAY_MORNING_WORK_TO' => $api->check_date('summary', $working_hours_schedule_details[0]['MONDAY_MORNING_WORK_TO'] ?? null, '', 'h:i a', '', '', ''),
+                'MONDAY_AFTERNOON_WORK_FROM' => $api->check_date('summary', $working_hours_schedule_details[0]['MONDAY_AFTERNOON_WORK_FROM'] ?? null, '', 'h:i a', '', '', ''),
+                'MONDAY_AFTERNOON_WORK_TO' => $api->check_date('summary', $working_hours_schedule_details[0]['MONDAY_AFTERNOON_WORK_TO'] ?? null, '', 'h:i a', '', '', ''),
+                'TUESDAY_MORNING_WORK_FROM' => $api->check_date('summary', $working_hours_schedule_details[0]['TUESDAY_MORNING_WORK_FROM'] ?? null, '', 'h:i a', '', '', ''),
+                'TUESDAY_MORNING_WORK_TO' => $api->check_date('summary', $working_hours_schedule_details[0]['TUESDAY_MORNING_WORK_TO'] ?? null, '', 'h:i a', '', '', ''),
+                'TUESDAY_AFTERNOON_WORK_FROM' => $api->check_date('summary', $working_hours_schedule_details[0]['TUESDAY_AFTERNOON_WORK_FROM'] ?? null, '', 'h:i a', '', '', ''),
+                'TUESDAY_AFTERNOON_WORK_TO' => $api->check_date('summary', $working_hours_schedule_details[0]['TUESDAY_AFTERNOON_WORK_TO'] ?? null, '', 'h:i a', '', '', ''),
+                'WEDNESDAY_MORNING_WORK_FROM' => $api->check_date('summary', $working_hours_schedule_details[0]['WEDNESDAY_MORNING_WORK_FROM'] ?? null, '', 'h:i a', '', '', ''),
+                'WEDNESDAY_MORNING_WORK_TO' => $api->check_date('summary', $working_hours_schedule_details[0]['WEDNESDAY_MORNING_WORK_TO'] ?? null, '', 'h:i a', '', '', ''),
+                'WEDNESDAY_AFTERNOON_WORK_FROM' => $api->check_date('summary', $working_hours_schedule_details[0]['WEDNESDAY_AFTERNOON_WORK_FROM'] ?? null, '', 'h:i a', '', '', ''),
+                'WEDNESDAY_AFTERNOON_WORK_TO' => $api->check_date('summary', $working_hours_schedule_details[0]['WEDNESDAY_AFTERNOON_WORK_TO'] ?? null, '', 'h:i a', '', '', ''),
+                'THURSDAY_MORNING_WORK_FROM' => $api->check_date('summary', $working_hours_schedule_details[0]['THURSDAY_MORNING_WORK_FROM'] ?? null, '', 'h:i a', '', '', ''),
+                'THURSDAY_MORNING_WORK_TO' => $api->check_date('summary', $working_hours_schedule_details[0]['THURSDAY_MORNING_WORK_TO'] ?? null, '', 'h:i a', '', '', ''),
+                'THURSDAY_AFTERNOON_WORK_FROM' => $api->check_date('summary', $working_hours_schedule_details[0]['THURSDAY_AFTERNOON_WORK_FROM'] ?? null, '', 'h:i a', '', '', ''),
+                'THURSDAY_AFTERNOON_WORK_TO' => $api->check_date('summary', $working_hours_schedule_details[0]['THURSDAY_AFTERNOON_WORK_TO'] ?? null, '', 'h:i a', '', '', ''),
+                'FRIDAY_MORNING_WORK_FROM' => $api->check_date('summary', $working_hours_schedule_details[0]['FRIDAY_MORNING_WORK_FROM'] ?? null, '', 'h:i a', '', '', ''),
+                'FRIDAY_MORNING_WORK_TO' => $api->check_date('summary', $working_hours_schedule_details[0]['FRIDAY_MORNING_WORK_TO'] ?? null, '', 'h:i a', '', '', ''),
+                'FRIDAY_AFTERNOON_WORK_FROM' => $api->check_date('summary', $working_hours_schedule_details[0]['FRIDAY_AFTERNOON_WORK_FROM'] ?? null, '', 'h:i a', '', '', ''),
+                'FRIDAY_AFTERNOON_WORK_TO' => $api->check_date('summary', $working_hours_schedule_details[0]['FRIDAY_AFTERNOON_WORK_TO'] ?? null, '', 'h:i a', '', '', ''),
+                'SATURDAY_MORNING_WORK_FROM' => $api->check_date('summary', $working_hours_schedule_details[0]['SATURDAY_MORNING_WORK_FROM'] ?? null, '', 'h:i a', '', '', ''),
+                'SATURDAY_MORNING_WORK_TO' => $api->check_date('summary', $working_hours_schedule_details[0]['SATURDAY_MORNING_WORK_TO'] ?? null, '', 'h:i a', '', '', ''),
+                'SATURDAY_AFTERNOON_WORK_FROM' => $api->check_date('summary', $working_hours_schedule_details[0]['SATURDAY_AFTERNOON_WORK_FROM'] ?? null, '', 'h:i a', '', '', ''),
+                'SATURDAY_AFTERNOON_WORK_TO' => $api->check_date('summary', $working_hours_schedule_details[0]['SATURDAY_AFTERNOON_WORK_TO'] ?? null, '', 'h:i a', '', '', ''),
+                'SUNDAY_MORNING_WORK_FROM' => $api->check_date('summary', $working_hours_schedule_details[0]['SUNDAY_MORNING_WORK_FROM'] ?? null, '', 'h:i a', '', '', ''),
+                'SUNDAY_MORNING_WORK_TO' => $api->check_date('summary', $working_hours_schedule_details[0]['SUNDAY_MORNING_WORK_TO'] ?? null, '', 'h:i a', '', '', ''),
+                'SUNDAY_AFTERNOON_WORK_FROM' => $api->check_date('summary', $working_hours_schedule_details[0]['SUNDAY_AFTERNOON_WORK_FROM'] ?? null, '', 'h:i a', '', '', ''),
+                'SUNDAY_AFTERNOON_WORK_TO' => $api->check_date('summary', $working_hours_schedule_details[0]['SUNDAY_AFTERNOON_WORK_TO'] ?? null, '', 'h:i a', '', '', ''),
             );
 
             echo json_encode($response);

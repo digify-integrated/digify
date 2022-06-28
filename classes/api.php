@@ -1052,6 +1052,31 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : check_working_hours_schedule_exist
+    # Purpose    : Checks if the working hours schedule exists.
+    #
+    # Returns    : Number
+    #
+    # -------------------------------------------------------------
+    public function check_working_hours_schedule_exist($working_hours_id){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL check_working_hours_schedule_exist(:working_hours_id)');
+            $sql->bindValue(':working_hours_id', $working_hours_id);
+
+            if($sql->execute()){
+                $row = $sql->fetch();
+
+                return $row['TOTAL'];
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Update methods
     # -------------------------------------------------------------
     
@@ -3183,7 +3208,7 @@ class Api{
     # Returns    : Number/String
     #
     # -------------------------------------------------------------
-    public function update_working_hours($working_hours_id, $working_hours, $username){
+    public function update_working_hours($working_hours_id, $working_hours, $schedule_type, $username){
         if ($this->databaseConnection()) {
             $record_log = 'UPD->' . $username . '->' . date('Y-m-d h:i:s');
             $working_hours_details = $this->get_working_hours_details($working_hours_id);
@@ -3198,9 +3223,10 @@ class Api{
                 $transaction_log_id = $transaction_log_system_parameter[0]['ID'];
             }
 
-            $sql = $this->db_connection->prepare('CALL update_working_hours(:working_hours_id, :working_hours, :transaction_log_id, :record_log)');
+            $sql = $this->db_connection->prepare('CALL update_working_hours(:working_hours_id, :working_hours, :schedule_type, :transaction_log_id, :record_log)');
             $sql->bindValue(':working_hours_id', $working_hours_id);
             $sql->bindValue(':working_hours', $working_hours);
+            $sql->bindValue(':schedule_type', $schedule_type);
             $sql->bindValue(':transaction_log_id', $transaction_log_id);
             $sql->bindValue(':record_log', $record_log);
         
@@ -3232,6 +3258,71 @@ class Api{
                     else{
                         return $update_system_parameter_value;
                     }
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : update_working_hours_schedule
+    # Purpose    : Updates working hours schedule.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function update_working_hours_schedule($working_hours_id, $start_date, $end_date, $monday_morning_work_from, $monday_morning_work_to, $monday_afternoon_work_from, $monday_afternoon_work_to, $tuesday_morning_work_from, $tuesday_morning_work_to, $tuesday_afternoon_work_from, $tuesday_afternoon_work_to, $wednesday_morning_work_from, $wednesday_morning_work_to, $wednesday_afternoon_work_from, $wednesday_afternoon_work_to, $thursday_morning_work_from, $thursday_morning_work_to, $thursday_afternoon_work_from, $thursday_afternoon_work_to, $friday_morning_work_from, $friday_morning_work_to, $friday_afternoon_work_from, $friday_afternoon_work_to, $saturday_morning_work_from, $saturday_morning_work_to, $saturday_afternoon_work_from, $saturday_afternoon_work_to, $sunday_morning_work_from, $sunday_morning_work_to, $sunday_afternoon_work_from, $sunday_afternoon_work_to, $username){
+        if ($this->databaseConnection()) {
+            $record_log = 'UPD->' . $username . '->' . date('Y-m-d h:i:s');
+            $working_hours_details = $this->get_working_hours_details($working_hours_id);
+            $transaction_log_id = $working_hours_details[0]['TRANSACTION_LOG_ID'];
+            
+            $sql = $this->db_connection->prepare('CALL update_working_hours_schedule(:working_hours_id, :start_date, :end_date, :monday_morning_work_from, :monday_morning_work_to, :monday_afternoon_work_from, :monday_afternoon_work_to, :tuesday_morning_work_from, :tuesday_morning_work_to, :tuesday_afternoon_work_from, :tuesday_afternoon_work_to, :wednesday_morning_work_from, :wednesday_morning_work_to, :wednesday_afternoon_work_from, :wednesday_afternoon_work_to, :thursday_morning_work_from, :thursday_morning_work_to, :thursday_afternoon_work_from, :thursday_afternoon_work_to, :friday_morning_work_from, :friday_morning_work_to, :friday_afternoon_work_from, :friday_afternoon_work_to, :saturday_morning_work_from, :saturday_morning_work_to, :saturday_afternoon_work_from, :saturday_afternoon_work_to, :sunday_morning_work_from, :sunday_morning_work_to, :sunday_afternoon_work_from, :sunday_afternoon_work_to, :record_log)');
+            $sql->bindValue(':working_hours_id', $working_hours_id);
+            $sql->bindValue(':start_date', $start_date);
+            $sql->bindValue(':end_date', $end_date);
+            $sql->bindValue(':monday_morning_work_from', $monday_morning_work_from);
+            $sql->bindValue(':monday_morning_work_to', $monday_morning_work_to);
+            $sql->bindValue(':monday_afternoon_work_from', $monday_afternoon_work_from);
+            $sql->bindValue(':monday_afternoon_work_to', $monday_afternoon_work_to);
+            $sql->bindValue(':tuesday_morning_work_from', $tuesday_morning_work_from);
+            $sql->bindValue(':tuesday_morning_work_to', $tuesday_morning_work_to);
+            $sql->bindValue(':tuesday_afternoon_work_from', $tuesday_afternoon_work_from);
+            $sql->bindValue(':tuesday_afternoon_work_to', $tuesday_afternoon_work_to);
+            $sql->bindValue(':wednesday_morning_work_from', $wednesday_morning_work_from);
+            $sql->bindValue(':wednesday_morning_work_to', $wednesday_morning_work_to);
+            $sql->bindValue(':wednesday_afternoon_work_from', $wednesday_afternoon_work_from);
+            $sql->bindValue(':wednesday_afternoon_work_to', $wednesday_afternoon_work_to);
+            $sql->bindValue(':thursday_morning_work_from', $thursday_morning_work_from);
+            $sql->bindValue(':thursday_morning_work_to', $thursday_morning_work_to);
+            $sql->bindValue(':thursday_afternoon_work_from', $thursday_afternoon_work_from);
+            $sql->bindValue(':thursday_afternoon_work_to', $thursday_afternoon_work_to);
+            $sql->bindValue(':friday_morning_work_from', $friday_morning_work_from);
+            $sql->bindValue(':friday_morning_work_to', $friday_morning_work_to);
+            $sql->bindValue(':friday_afternoon_work_from', $friday_afternoon_work_from);
+            $sql->bindValue(':friday_afternoon_work_to', $friday_afternoon_work_to);
+            $sql->bindValue(':saturday_morning_work_from', $saturday_morning_work_from);
+            $sql->bindValue(':saturday_morning_work_to', $saturday_morning_work_to);
+            $sql->bindValue(':saturday_afternoon_work_from', $saturday_afternoon_work_from);
+            $sql->bindValue(':saturday_afternoon_work_to', $saturday_afternoon_work_to);
+            $sql->bindValue(':sunday_morning_work_from', $sunday_morning_work_from);
+            $sql->bindValue(':sunday_morning_work_to', $sunday_morning_work_to);
+            $sql->bindValue(':sunday_afternoon_work_from', $sunday_afternoon_work_from);
+            $sql->bindValue(':sunday_afternoon_work_to', $sunday_afternoon_work_to);
+            $sql->bindValue(':record_log', $record_log);
+        
+            if($sql->execute()){
+                $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated working hours schedule.');
+                                    
+                if($insert_transaction_log){
+                    return true;
+                }
+                else{
+                    return $insert_transaction_log;
                 }
             }
             else{
@@ -4807,7 +4898,7 @@ class Api{
     # Returns    : Number/String
     #
     # -------------------------------------------------------------
-    public function insert_working_hours($working_hours, $username){
+    public function insert_working_hours($working_hours, $schedule_type, $username){
         if ($this->databaseConnection()) {
             $record_log = 'INS->' . $username . '->' . date('Y-m-d h:i:s');
 
@@ -4821,9 +4912,10 @@ class Api{
             $transaction_log_parameter_number = $transaction_log_system_parameter[0]['PARAMETER_NUMBER'];
             $transaction_log_id = $transaction_log_system_parameter[0]['ID'];
 
-            $sql = $this->db_connection->prepare('CALL insert_working_hours(:id, :working_hours, :transaction_log_id, :record_log)');
+            $sql = $this->db_connection->prepare('CALL insert_working_hours(:id, :working_hours, :schedule_type, :transaction_log_id, :record_log)');
             $sql->bindValue(':id', $id);
             $sql->bindValue(':working_hours', $working_hours);
+            $sql->bindValue(':schedule_type', $schedule_type);
             $sql->bindValue(':transaction_log_id', $transaction_log_id);
             $sql->bindValue(':record_log', $record_log); 
         
@@ -4851,6 +4943,72 @@ class Api{
                 }
                 else{
                     return $update_system_parameter_value;
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : insert_working_hours_schedule
+    # Purpose    : Insert working hours schedule.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function insert_working_hours_schedule($working_hours_id, $start_date, $end_date, $monday_morning_work_from, $monday_morning_work_to, $monday_afternoon_work_from, $monday_afternoon_work_to, $tuesday_morning_work_from, $tuesday_morning_work_to, $tuesday_afternoon_work_from, $tuesday_afternoon_work_to, $wednesday_morning_work_from, $wednesday_morning_work_to, $wednesday_afternoon_work_from, $wednesday_afternoon_work_to, $thursday_morning_work_from, $thursday_morning_work_to, $thursday_afternoon_work_from, $thursday_afternoon_work_to, $friday_morning_work_from, $friday_morning_work_to, $friday_afternoon_work_from, $friday_afternoon_work_to, $saturday_morning_work_from, $saturday_morning_work_to, $saturday_afternoon_work_from, $saturday_afternoon_work_to, $sunday_morning_work_from, $sunday_morning_work_to, $sunday_afternoon_work_from, $sunday_afternoon_work_to, $username){
+        if ($this->databaseConnection()) {
+            $record_log = 'INS->' . $username . '->' . date('Y-m-d h:i:s');
+
+            $working_hours_details = $this->get_working_hours_details($working_hours_id);
+            $transaction_log_id = $working_hours_details[0]['TRANSACTION_LOG_ID'];
+
+            $sql = $this->db_connection->prepare('CALL insert_working_hours_schedule(:working_hours_id, :start_date, :end_date, :monday_morning_work_from, :monday_morning_work_to, :monday_afternoon_work_from, :monday_afternoon_work_to, :tuesday_morning_work_from, :tuesday_morning_work_to, :tuesday_afternoon_work_from, :tuesday_afternoon_work_to, :wednesday_morning_work_from, :wednesday_morning_work_to, :wednesday_afternoon_work_from, :wednesday_afternoon_work_to, :thursday_morning_work_from, :thursday_morning_work_to, :thursday_afternoon_work_from, :thursday_afternoon_work_to, :friday_morning_work_from, :friday_morning_work_to, :friday_afternoon_work_from, :friday_afternoon_work_to, :saturday_morning_work_from, :saturday_morning_work_to, :saturday_afternoon_work_from, :saturday_afternoon_work_to, :sunday_morning_work_from, :sunday_morning_work_to, :sunday_afternoon_work_from, :sunday_afternoon_work_to, :record_log)');
+            $sql->bindValue(':working_hours_id', $working_hours_id);
+            $sql->bindValue(':start_date', $start_date);
+            $sql->bindValue(':end_date', $end_date);
+            $sql->bindValue(':monday_morning_work_from', $monday_morning_work_from);
+            $sql->bindValue(':monday_morning_work_to', $monday_morning_work_to);
+            $sql->bindValue(':monday_afternoon_work_from', $monday_afternoon_work_from);
+            $sql->bindValue(':monday_afternoon_work_to', $monday_afternoon_work_to);
+            $sql->bindValue(':tuesday_morning_work_from', $tuesday_morning_work_from);
+            $sql->bindValue(':tuesday_morning_work_to', $tuesday_morning_work_to);
+            $sql->bindValue(':tuesday_afternoon_work_from', $tuesday_afternoon_work_from);
+            $sql->bindValue(':tuesday_afternoon_work_to', $tuesday_afternoon_work_to);
+            $sql->bindValue(':wednesday_morning_work_from', $wednesday_morning_work_from);
+            $sql->bindValue(':wednesday_morning_work_to', $wednesday_morning_work_to);
+            $sql->bindValue(':wednesday_afternoon_work_from', $wednesday_afternoon_work_from);
+            $sql->bindValue(':wednesday_afternoon_work_to', $wednesday_afternoon_work_to);
+            $sql->bindValue(':thursday_morning_work_from', $thursday_morning_work_from);
+            $sql->bindValue(':thursday_morning_work_to', $thursday_morning_work_to);
+            $sql->bindValue(':thursday_afternoon_work_from', $thursday_afternoon_work_from);
+            $sql->bindValue(':thursday_afternoon_work_to', $thursday_afternoon_work_to);
+            $sql->bindValue(':friday_morning_work_from', $friday_morning_work_from);
+            $sql->bindValue(':friday_morning_work_to', $friday_morning_work_to);
+            $sql->bindValue(':friday_afternoon_work_from', $friday_afternoon_work_from);
+            $sql->bindValue(':friday_afternoon_work_to', $friday_afternoon_work_to);
+            $sql->bindValue(':saturday_morning_work_from', $saturday_morning_work_from);
+            $sql->bindValue(':saturday_morning_work_to', $saturday_morning_work_to);
+            $sql->bindValue(':saturday_afternoon_work_from', $saturday_afternoon_work_from);
+            $sql->bindValue(':saturday_afternoon_work_to', $saturday_afternoon_work_to);
+            $sql->bindValue(':sunday_morning_work_from', $sunday_morning_work_from);
+            $sql->bindValue(':sunday_morning_work_to', $sunday_morning_work_to);
+            $sql->bindValue(':sunday_afternoon_work_from', $sunday_afternoon_work_from);
+            $sql->bindValue(':sunday_afternoon_work_to', $sunday_afternoon_work_to);
+            $sql->bindValue(':record_log', $record_log);
+        
+            if($sql->execute()){
+                $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Insert', 'User ' . $username . ' inserted working hours schedule.');
+                                
+                if($insert_transaction_log){
+                    return true;
+                }
+                else{
+                    return $insert_transaction_log;
                 }
             }
             else{
@@ -5513,6 +5671,29 @@ class Api{
     public function delete_working_hours($working_hours_id, $username){
         if ($this->databaseConnection()) {
             $sql = $this->db_connection->prepare('CALL delete_working_hours(:working_hours_id)');
+            $sql->bindValue(':working_hours_id', $working_hours_id);
+        
+            if($sql->execute()){ 
+                return true;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : delete_working_hours_schedule
+    # Purpose    : Delete working hours schedule.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function delete_working_hours_schedule($working_hours_id, $username){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL delete_working_hours_schedule(:working_hours_id)');
             $sql->bindValue(':working_hours_id', $working_hours_id);
         
             if($sql->execute()){ 
@@ -6550,7 +6731,69 @@ class Api{
                 while($row = $sql->fetch()){
                     $response[] = array(
                         'WORKING_HOURS' => $row['WORKING_HOURS'],
+                        'SCHEDULE_TYPE' => $row['SCHEDULE_TYPE'],
                         'TRANSACTION_LOG_ID' => $row['TRANSACTION_LOG_ID'],
+                        'RECORD_LOG' => $row['RECORD_LOG']
+                    );
+                }
+
+                return $response;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : get_working_hours_schedule_details
+    # Purpose    : Gets the working hours schedule details.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_working_hours_schedule_details($working_hours_id){
+        if ($this->databaseConnection()) {
+            $response = array();
+
+            $sql = $this->db_connection->prepare('CALL get_working_hours_schedule_details(:working_hours_id)');
+            $sql->bindValue(':working_hours_id', $working_hours_id);
+
+            if($sql->execute()){
+                while($row = $sql->fetch()){
+                    $response[] = array(
+                        'START_DATE' => $row['START_DATE'],
+                        'END_DATE' => $row['END_DATE'],
+                        'MONDAY_MORNING_WORK_FROM' => $row['MONDAY_MORNING_WORK_FROM'],
+                        'MONDAY_MORNING_WORK_TO' => $row['MONDAY_MORNING_WORK_TO'],
+                        'MONDAY_AFTERNOON_WORK_FROM' => $row['MONDAY_AFTERNOON_WORK_FROM'],
+                        'MONDAY_AFTERNOON_WORK_TO' => $row['MONDAY_AFTERNOON_WORK_TO'],
+                        'TUESDAY_MORNING_WORK_FROM' => $row['TUESDAY_MORNING_WORK_FROM'],
+                        'TUESDAY_MORNING_WORK_TO' => $row['TUESDAY_MORNING_WORK_TO'],
+                        'TUESDAY_AFTERNOON_WORK_FROM' => $row['TUESDAY_AFTERNOON_WORK_FROM'],
+                        'TUESDAY_AFTERNOON_WORK_TO' => $row['TUESDAY_AFTERNOON_WORK_TO'],
+                        'WEDNESDAY_MORNING_WORK_FROM' => $row['WEDNESDAY_MORNING_WORK_FROM'],
+                        'WEDNESDAY_MORNING_WORK_TO' => $row['WEDNESDAY_MORNING_WORK_TO'],
+                        'WEDNESDAY_AFTERNOON_WORK_FROM' => $row['WEDNESDAY_AFTERNOON_WORK_FROM'],
+                        'WEDNESDAY_AFTERNOON_WORK_TO' => $row['WEDNESDAY_AFTERNOON_WORK_TO'],
+                        'THURSDAY_MORNING_WORK_FROM' => $row['THURSDAY_MORNING_WORK_FROM'],
+                        'THURSDAY_MORNING_WORK_TO' => $row['THURSDAY_MORNING_WORK_TO'],
+                        'THURSDAY_AFTERNOON_WORK_FROM' => $row['THURSDAY_AFTERNOON_WORK_FROM'],
+                        'THURSDAY_AFTERNOON_WORK_TO' => $row['THURSDAY_AFTERNOON_WORK_TO'],
+                        'FRIDAY_MORNING_WORK_FROM' => $row['FRIDAY_MORNING_WORK_FROM'],
+                        'FRIDAY_MORNING_WORK_TO' => $row['FRIDAY_MORNING_WORK_TO'],
+                        'FRIDAY_AFTERNOON_WORK_FROM' => $row['FRIDAY_AFTERNOON_WORK_FROM'],
+                        'FRIDAY_AFTERNOON_WORK_TO' => $row['FRIDAY_AFTERNOON_WORK_TO'],
+                        'SATURDAY_MORNING_WORK_FROM' => $row['SATURDAY_MORNING_WORK_FROM'],
+                        'SATURDAY_MORNING_WORK_TO' => $row['SATURDAY_MORNING_WORK_TO'],
+                        'SATURDAY_AFTERNOON_WORK_FROM' => $row['SATURDAY_AFTERNOON_WORK_FROM'],
+                        'SATURDAY_AFTERNOON_WORK_TO' => $row['SATURDAY_AFTERNOON_WORK_TO'],
+                        'SUNDAY_MORNING_WORK_FROM' => $row['SUNDAY_MORNING_WORK_FROM'],
+                        'SUNDAY_MORNING_WORK_TO' => $row['SUNDAY_MORNING_WORK_TO'],
+                        'SUNDAY_AFTERNOON_WORK_FROM' => $row['SUNDAY_AFTERNOON_WORK_FROM'],
+                        'SUNDAY_AFTERNOON_WORK_TO' => $row['SUNDAY_AFTERNOON_WORK_TO'],
                         'RECORD_LOG' => $row['RECORD_LOG']
                     );
                 }
@@ -7123,6 +7366,29 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : check_working_hours_schedule_overlap
+    # Purpose    : Checks if working hours schedule overlaps.
+    #
+    # Returns    : String
+    #
+    # -------------------------------------------------------------
+    public function check_working_hours_schedue_overlap($morning_work_from, $morning_work_to, $afternoon_work_from, $afternoon_work_to){
+        if(!empty($morning_work_from) && !empty($morning_work_to) && !empty($afternoon_work_from) && !empty($afternoon_work_to)){
+            if((strtotime($morning_work_from) <= strtotime($afternoon_work_from) && strtotime($morning_work_to) >= strtotime($afternoon_work_from)) || (strtotime($morning_work_from) <= strtotime($afternoon_work_to) && strtotime($morning_work_to) >= strtotime($afternoon_work_to))){
+                return true;
+            }
+            else{
+                return false;
+            }
+        }
+        else{
+            return false;
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Generate methods
     # -------------------------------------------------------------
 
@@ -7531,6 +7797,111 @@ class Api{
                         $employee_type = $row['EMPLOYEE_TYPE'];
     
                         $option .= "<option value='". $employee_type_id ."'>". $employee_type ."</option>";
+                    }
+    
+                    return $option;
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : generate_working_hours_options
+    # Purpose    : Generates working hours options of dropdown.
+    #
+    # Returns    : String
+    #
+    # -------------------------------------------------------------
+    public function generate_working_hours_options(){
+        if ($this->databaseConnection()) {
+            $option = '';
+            
+            $sql = $this->db_connection->prepare('CALL generate_working_hours_options()');
+
+            if($sql->execute()){
+                $count = $sql->rowCount();
+        
+                if($count > 0){
+                    while($row = $sql->fetch()){
+                        $working_hours_id = $row['WORKING_HOURS_ID'];
+                        $working_hours = $row['WORKING_HOURS'];
+    
+                        $option .= "<option value='". $working_hours_id ."'>". $working_hours ."</option>";
+                    }
+    
+                    return $option;
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : generate_employee_options
+    # Purpose    : Generates employee options of dropdown.
+    #
+    # Returns    : String
+    #
+    # -------------------------------------------------------------
+    public function generate_employee_options(){
+        if ($this->databaseConnection()) {
+            $option = '';
+            
+            $sql = $this->db_connection->prepare('CALL generate_employee_options()');
+
+            if($sql->execute()){
+                $count = $sql->rowCount();
+        
+                if($count > 0){
+                    while($row = $sql->fetch()){
+                        $employee_id = $row['EMPLOYEE_ID'];
+                        $file_as = $row['FILE_AS'];
+    
+                        $option .= "<option value='". $employee_id ."'>". $file_as ."</option>";
+                    }
+    
+                    return $option;
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : generate_company_options
+    # Purpose    : Generates company options of dropdown.
+    #
+    # Returns    : String
+    #
+    # -------------------------------------------------------------
+    public function generate_company_options(){
+        if ($this->databaseConnection()) {
+            $option = '';
+            
+            $sql = $this->db_connection->prepare('CALL generate_company_options()');
+
+            if($sql->execute()){
+                $count = $sql->rowCount();
+        
+                if($count > 0){
+                    while($row = $sql->fetch()){
+                        $company_id = $row['COMPANY_ID'];
+                        $company_name = $row['COMPANY_NAME'];
+    
+                        $option .= "<option value='". $company_id ."'>". $company_name ."</option>";
                     }
     
                     return $option;

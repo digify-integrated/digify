@@ -1679,6 +1679,976 @@ function initialize_form_validation(form_type){
             }
         });
     }
+    else if(form_type == 'regular working hours form'){
+        $('#regular-working-hours-form').validate({
+            submitHandler: function (form) {
+                transaction = 'submit regular working hours';
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'controller.php',
+                    data: $(form).serialize() + '&username=' + username + '&transaction=' + transaction,
+                    beforeSend: function(){
+                        document.getElementById('submit-form').disabled = true;
+                        $('#submit-form').html('<div class="spinner-border spinner-border-sm text-light" role="status"><span rclass="sr-only"></span></div>');
+                    },
+                    success: function (response) {
+                        if(response === 'Updated'){
+                            show_alert('Update Regular Working Hours Success', 'The regular working hours has been updated.', 'success');
+
+                            $('#System-Modal').modal('hide');
+                        }
+                        else if(response === 'Overlap'){
+                            show_alert('Regular Working Hours Error', 'Attendances cannot overlap.', 'error');
+                        }
+                        else{
+                            show_alert('Regular Working Hours Error', response, 'error');
+                        }
+                    },
+                    complete: function(){
+                        document.getElementById('submit-form').disabled = false;
+                        $('#submit-form').html('Submit');
+                    }
+                });
+                return false;
+            },
+            rules: {
+                monday_morning_work_from: {
+                    required: function(element){
+                        var monday_morning_work_to = $('#monday_morning_work_to').val();
+
+                        if(monday_morning_work_to){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                monday_morning_work_to: {
+                    required: function(element){
+                        var monday_morning_work_from = $('#monday_morning_work_from').val();
+
+                        if(monday_morning_work_from){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                monday_afternoon_work_from: {
+                    required: function(element){
+                        var monday_afternoon_work_to = $('#monday_afternoon_work_to').val();
+
+                        if(monday_afternoon_work_to){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                monday_afternoon_work_to: {
+                    required: function(element){
+                        var monday_afternoon_work_from = $('#monday_afternoon_work_from').val();
+
+                        if(monday_afternoon_work_from){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                tuesday_morning_work_from: {
+                    required: function(element){
+                        var tuesday_morning_work_to = $('#tuesday_morning_work_to').val();
+
+                        if(tuesday_morning_work_to){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                tuesday_morning_work_to: {
+                    required: function(element){
+                        var tuesday_morning_work_from = $('#tuesday_morning_work_from').val();
+
+                        if(tuesday_morning_work_from){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                tuesday_afternoon_work_from: {
+                    required: function(element){
+                        var tuesday_afternoon_work_to = $('#tuesday_afternoon_work_to').val();
+
+                        if(tuesday_afternoon_work_to){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                tuesday_afternoon_work_to: {
+                    required: function(element){
+                        var tuesday_afternoon_work_from = $('#tuesday_afternoon_work_from').val();
+
+                        if(tuesday_afternoon_work_from){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                wednesday_morning_work_from: {
+                    required: function(element){
+                        var wednesday_morning_work_to = $('#wednesday_morning_work_to').val();
+
+                        if(wednesday_morning_work_to){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                wednesday_morning_work_to: {
+                    required: function(element){
+                        var wednesday_morning_work_from = $('#wednesday_morning_work_from').val();
+
+                        if(wednesday_morning_work_from){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                wednesday_afternoon_work_from: {
+                    required: function(element){
+                        var wednesday_afternoon_work_to = $('#wednesday_afternoon_work_to').val();
+
+                        if(wednesday_afternoon_work_to){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                wednesday_afternoon_work_to: {
+                    required: function(element){
+                        var wednesday_afternoon_work_from = $('#wednesday_afternoon_work_from').val();
+
+                        if(wednesday_afternoon_work_from){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                thursday_morning_work_from: {
+                    required: function(element){
+                        var thursday_morning_work_to = $('#thursday_morning_work_to').val();
+
+                        if(thursday_morning_work_to){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                thursday_morning_work_to: {
+                    required: function(element){
+                        var thursday_morning_work_from = $('#thursday_morning_work_from').val();
+
+                        if(thursday_morning_work_from){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                thursday_afternoon_work_from: {
+                    required: function(element){
+                        var thursday_afternoon_work_to = $('#thursday_afternoon_work_to').val();
+
+                        if(thursday_afternoon_work_to){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                thursday_afternoon_work_to: {
+                    required: function(element){
+                        var thursday_afternoon_work_from = $('#thursday_afternoon_work_from').val();
+
+                        if(thursday_afternoon_work_from){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                friday_morning_work_from: {
+                    required: function(element){
+                        var friday_morning_work_to = $('#friday_morning_work_to').val();
+
+                        if(friday_morning_work_to){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                friday_morning_work_to: {
+                    required: function(element){
+                        var friday_morning_work_from = $('#friday_morning_work_from').val();
+
+                        if(friday_morning_work_from){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                friday_afternoon_work_from: {
+                    required: function(element){
+                        var friday_afternoon_work_to = $('#friday_afternoon_work_to').val();
+
+                        if(friday_afternoon_work_to){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                friday_afternoon_work_to: {
+                    required: function(element){
+                        var friday_afternoon_work_from = $('#friday_afternoon_work_from').val();
+
+                        if(friday_afternoon_work_from){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                saturday_morning_work_from: {
+                    required: function(element){
+                        var saturday_morning_work_to = $('#saturday_morning_work_to').val();
+
+                        if(saturday_morning_work_to){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                saturday_morning_work_to: {
+                    required: function(element){
+                        var saturday_morning_work_from = $('#saturday_morning_work_from').val();
+
+                        if(saturday_morning_work_from){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                saturday_afternoon_work_from: {
+                    required: function(element){
+                        var saturday_afternoon_work_to = $('#saturday_afternoon_work_to').val();
+
+                        if(saturday_afternoon_work_to){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                saturday_afternoon_work_to: {
+                    required: function(element){
+                        var saturday_afternoon_work_from = $('#saturday_afternoon_work_from').val();
+
+                        if(saturday_afternoon_work_from){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                sunday_morning_work_from: {
+                    required: function(element){
+                        var sunday_morning_work_to = $('#sunday_morning_work_to').val();
+
+                        if(sunday_morning_work_to){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                sunday_morning_work_to: {
+                    required: function(element){
+                        var sunday_morning_work_from = $('#sunday_morning_work_from').val();
+
+                        if(sunday_morning_work_from){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                sunday_afternoon_work_from: {
+                    required: function(element){
+                        var sunday_afternoon_work_to = $('#sunday_afternoon_work_to').val();
+
+                        if(sunday_afternoon_work_to){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                sunday_afternoon_work_to: {
+                    required: function(element){
+                        var sunday_afternoon_work_from = $('#sunday_afternoon_work_from').val();
+
+                        if(sunday_afternoon_work_from){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                }
+            },
+            messages: {
+                monday_morning_work_from: {
+                    required: 'Please choose the work from',
+                },
+                monday_morning_work_to: {
+                    required: 'Please choose the work to',
+                },
+                monday_afternoon_work_from: {
+                    required: 'Please choose the work from',
+                },
+                monday_afternoon_work_to: {
+                    required: 'Please choose the work to',
+                },
+                tuesday_morning_work_from: {
+                    required: 'Please choose the work from',
+                },
+                tuesday_morning_work_to: {
+                    required: 'Please choose the work to',
+                },
+                tuesday_afternoon_work_from: {
+                    required: 'Please choose the work from',
+                },
+                tuesday_afternoon_work_to: {
+                    required: 'Please choose the work to',
+                },
+                wednesday_morning_work_from: {
+                    required: 'Please choose the work from',
+                },
+                wednesday_morning_work_to: {
+                    required: 'Please choose the work to',
+                },
+                wednesday_afternoon_work_from: {
+                    required: 'Please choose the work from',
+                },
+                wednesday_afternoon_work_to: {
+                    required: 'Please choose the work to',
+                },
+                thursday_morning_work_from: {
+                    required: 'Please choose the work from',
+                },
+                thursday_morning_work_to: {
+                    required: 'Please choose the work to',
+                },
+                thursday_afternoon_work_from: {
+                    required: 'Please choose the work from',
+                },
+                thursday_afternoon_work_to: {
+                    required: 'Please choose the work to',
+                },
+                friday_morning_work_from: {
+                    required: 'Please choose the work from',
+                },
+                friday_morning_work_to: {
+                    required: 'Please choose the work to',
+                },
+                friday_afternoon_work_from: {
+                    required: 'Please choose the work from',
+                },
+                friday_afternoon_work_to: {
+                    required: 'Please choose the work to',
+                },
+                saturday_morning_work_from: {
+                    required: 'Please choose the work from',
+                },
+                saturday_morning_work_to: {
+                    required: 'Please choose the work to',
+                },
+                saturday_afternoon_work_from: {
+                    required: 'Please choose the work from',
+                },
+                saturday_afternoon_work_to: {
+                    required: 'Please choose the work to',
+                },
+                sunday_morning_work_from: {
+                    required: 'Please choose the work from',
+                },
+                sunday_morning_work_to: {
+                    required: 'Please choose the work to',
+                },
+                sunday_afternoon_work_from: {
+                    required: 'Please choose the work from',
+                },
+                sunday_afternoon_work_to: {
+                    required: 'Please choose the work to',
+                }
+            },
+            errorPlacement: function(label, element) {
+                if((element.hasClass('select2') || element.hasClass('form-select2')) && element.next('.select2-container').length) {
+                    label.insertAfter(element.next('.select2-container'));
+                }
+                else if(element.parent('.input-group').length){
+                    label.insertAfter(element.parent());
+                }
+                else{
+                    label.insertAfter(element);
+                }
+            },
+            highlight: function(element) {
+                $(element).parent().addClass('has-danger');
+                $(element).addClass('form-control-danger');
+            },
+            success: function(label,element) {
+                $(element).parent().removeClass('has-danger')
+                $(element).removeClass('form-control-danger')
+                label.remove();
+            }
+        });
+    }
+    else if(form_type == 'scheduled working hours form'){
+        $('#scheduled-working-hours-form').validate({
+            submitHandler: function (form) {
+                transaction = 'submit scheduled working hours';
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'controller.php',
+                    data: $(form).serialize() + '&username=' + username + '&transaction=' + transaction,
+                    beforeSend: function(){
+                        document.getElementById('submit-form').disabled = true;
+                        $('#submit-form').html('<div class="spinner-border spinner-border-sm text-light" role="status"><span rclass="sr-only"></span></div>');
+                    },
+                    success: function (response) {
+                        if(response === 'Updated'){
+                            show_alert('Update Scheduled Working Hours Success', 'The scheduled working hours has been updated.', 'success');
+
+                            $('#System-Modal').modal('hide');
+                        }
+                        else if(response === 'Overlap'){
+                            show_alert('Scheduled Working Hours Error', 'Attendances cannot overlap.', 'error');
+                        }
+                        else{
+                            show_alert('Scheduled Working Hours Error', response, 'error');
+                        }
+                    },
+                    complete: function(){
+                        document.getElementById('submit-form').disabled = false;
+                        $('#submit-form').html('Submit');
+                    }
+                });
+                return false;
+            },
+            rules: {
+                start_date: {
+                    required: true
+                },
+                end_date: {
+                    required: true
+                },
+                monday_morning_work_from: {
+                    required: function(element){
+                        var monday_morning_work_to = $('#monday_morning_work_to').val();
+
+                        if(monday_morning_work_to){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                monday_morning_work_to: {
+                    required: function(element){
+                        var monday_morning_work_from = $('#monday_morning_work_from').val();
+
+                        if(monday_morning_work_from){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                monday_afternoon_work_from: {
+                    required: function(element){
+                        var monday_afternoon_work_to = $('#monday_afternoon_work_to').val();
+
+                        if(monday_afternoon_work_to){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                monday_afternoon_work_to: {
+                    required: function(element){
+                        var monday_afternoon_work_from = $('#monday_afternoon_work_from').val();
+
+                        if(monday_afternoon_work_from){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                tuesday_morning_work_from: {
+                    required: function(element){
+                        var tuesday_morning_work_to = $('#tuesday_morning_work_to').val();
+
+                        if(tuesday_morning_work_to){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                tuesday_morning_work_to: {
+                    required: function(element){
+                        var tuesday_morning_work_from = $('#tuesday_morning_work_from').val();
+
+                        if(tuesday_morning_work_from){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                tuesday_afternoon_work_from: {
+                    required: function(element){
+                        var tuesday_afternoon_work_to = $('#tuesday_afternoon_work_to').val();
+
+                        if(tuesday_afternoon_work_to){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                tuesday_afternoon_work_to: {
+                    required: function(element){
+                        var tuesday_afternoon_work_from = $('#tuesday_afternoon_work_from').val();
+
+                        if(tuesday_afternoon_work_from){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                wednesday_morning_work_from: {
+                    required: function(element){
+                        var wednesday_morning_work_to = $('#wednesday_morning_work_to').val();
+
+                        if(wednesday_morning_work_to){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                wednesday_morning_work_to: {
+                    required: function(element){
+                        var wednesday_morning_work_from = $('#wednesday_morning_work_from').val();
+
+                        if(wednesday_morning_work_from){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                wednesday_afternoon_work_from: {
+                    required: function(element){
+                        var wednesday_afternoon_work_to = $('#wednesday_afternoon_work_to').val();
+
+                        if(wednesday_afternoon_work_to){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                wednesday_afternoon_work_to: {
+                    required: function(element){
+                        var wednesday_afternoon_work_from = $('#wednesday_afternoon_work_from').val();
+
+                        if(wednesday_afternoon_work_from){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                thursday_morning_work_from: {
+                    required: function(element){
+                        var thursday_morning_work_to = $('#thursday_morning_work_to').val();
+
+                        if(thursday_morning_work_to){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                thursday_morning_work_to: {
+                    required: function(element){
+                        var thursday_morning_work_from = $('#thursday_morning_work_from').val();
+
+                        if(thursday_morning_work_from){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                thursday_afternoon_work_from: {
+                    required: function(element){
+                        var thursday_afternoon_work_to = $('#thursday_afternoon_work_to').val();
+
+                        if(thursday_afternoon_work_to){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                thursday_afternoon_work_to: {
+                    required: function(element){
+                        var thursday_afternoon_work_from = $('#thursday_afternoon_work_from').val();
+
+                        if(thursday_afternoon_work_from){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                friday_morning_work_from: {
+                    required: function(element){
+                        var friday_morning_work_to = $('#friday_morning_work_to').val();
+
+                        if(friday_morning_work_to){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                friday_morning_work_to: {
+                    required: function(element){
+                        var friday_morning_work_from = $('#friday_morning_work_from').val();
+
+                        if(friday_morning_work_from){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                friday_afternoon_work_from: {
+                    required: function(element){
+                        var friday_afternoon_work_to = $('#friday_afternoon_work_to').val();
+
+                        if(friday_afternoon_work_to){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                friday_afternoon_work_to: {
+                    required: function(element){
+                        var friday_afternoon_work_from = $('#friday_afternoon_work_from').val();
+
+                        if(friday_afternoon_work_from){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                saturday_morning_work_from: {
+                    required: function(element){
+                        var saturday_morning_work_to = $('#saturday_morning_work_to').val();
+
+                        if(saturday_morning_work_to){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                saturday_morning_work_to: {
+                    required: function(element){
+                        var saturday_morning_work_from = $('#saturday_morning_work_from').val();
+
+                        if(saturday_morning_work_from){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                saturday_afternoon_work_from: {
+                    required: function(element){
+                        var saturday_afternoon_work_to = $('#saturday_afternoon_work_to').val();
+
+                        if(saturday_afternoon_work_to){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                saturday_afternoon_work_to: {
+                    required: function(element){
+                        var saturday_afternoon_work_from = $('#saturday_afternoon_work_from').val();
+
+                        if(saturday_afternoon_work_from){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                sunday_morning_work_from: {
+                    required: function(element){
+                        var sunday_morning_work_to = $('#sunday_morning_work_to').val();
+
+                        if(sunday_morning_work_to){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                sunday_morning_work_to: {
+                    required: function(element){
+                        var sunday_morning_work_from = $('#sunday_morning_work_from').val();
+
+                        if(sunday_morning_work_from){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                sunday_afternoon_work_from: {
+                    required: function(element){
+                        var sunday_afternoon_work_to = $('#sunday_afternoon_work_to').val();
+
+                        if(sunday_afternoon_work_to){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                },
+                sunday_afternoon_work_to: {
+                    required: function(element){
+                        var sunday_afternoon_work_from = $('#sunday_afternoon_work_from').val();
+
+                        if(sunday_afternoon_work_from){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                }
+            },
+            messages: {
+                start_date: {
+                    required: 'Please choose the start date'
+                },
+                end_date: {
+                    required: 'Please choose the end date'
+                },
+                monday_morning_work_from: {
+                    required: 'Please choose the work from',
+                },
+                monday_morning_work_to: {
+                    required: 'Please choose the work to',
+                },
+                monday_afternoon_work_from: {
+                    required: 'Please choose the work from',
+                },
+                monday_afternoon_work_to: {
+                    required: 'Please choose the work to',
+                },
+                tuesday_morning_work_from: {
+                    required: 'Please choose the work from',
+                },
+                tuesday_morning_work_to: {
+                    required: 'Please choose the work to',
+                },
+                tuesday_afternoon_work_from: {
+                    required: 'Please choose the work from',
+                },
+                tuesday_afternoon_work_to: {
+                    required: 'Please choose the work to',
+                },
+                wednesday_morning_work_from: {
+                    required: 'Please choose the work from',
+                },
+                wednesday_morning_work_to: {
+                    required: 'Please choose the work to',
+                },
+                wednesday_afternoon_work_from: {
+                    required: 'Please choose the work from',
+                },
+                wednesday_afternoon_work_to: {
+                    required: 'Please choose the work to',
+                },
+                thursday_morning_work_from: {
+                    required: 'Please choose the work from',
+                },
+                thursday_morning_work_to: {
+                    required: 'Please choose the work to',
+                },
+                thursday_afternoon_work_from: {
+                    required: 'Please choose the work from',
+                },
+                thursday_afternoon_work_to: {
+                    required: 'Please choose the work to',
+                },
+                friday_morning_work_from: {
+                    required: 'Please choose the work from',
+                },
+                friday_morning_work_to: {
+                    required: 'Please choose the work to',
+                },
+                friday_afternoon_work_from: {
+                    required: 'Please choose the work from',
+                },
+                friday_afternoon_work_to: {
+                    required: 'Please choose the work to',
+                },
+                saturday_morning_work_from: {
+                    required: 'Please choose the work from',
+                },
+                saturday_morning_work_to: {
+                    required: 'Please choose the work to',
+                },
+                saturday_afternoon_work_from: {
+                    required: 'Please choose the work from',
+                },
+                saturday_afternoon_work_to: {
+                    required: 'Please choose the work to',
+                },
+                sunday_morning_work_from: {
+                    required: 'Please choose the work from',
+                },
+                sunday_morning_work_to: {
+                    required: 'Please choose the work to',
+                },
+                sunday_afternoon_work_from: {
+                    required: 'Please choose the work from',
+                },
+                sunday_afternoon_work_to: {
+                    required: 'Please choose the work to',
+                }
+            },
+            errorPlacement: function(label, element) {
+                if((element.hasClass('select2') || element.hasClass('form-select2')) && element.next('.select2-container').length) {
+                    label.insertAfter(element.next('.select2-container'));
+                }
+                else if(element.parent('.input-group').length){
+                    label.insertAfter(element.parent());
+                }
+                else{
+                    label.insertAfter(element);
+                }
+            },
+            highlight: function(element) {
+                $(element).parent().addClass('has-danger');
+                $(element).addClass('form-control-danger');
+            },
+            success: function(label,element) {
+                $(element).parent().removeClass('has-danger')
+                $(element).removeClass('form-control-danger')
+                label.remove();
+            }
+        });
+    }
 }
 
 // Display functions
@@ -2296,6 +3266,188 @@ function display_form_details(form_type){
             success: function(response) {
                 $('#working_hours').val(response[0].WORKING_HOURS);
                 $('#working_hours_id').val(working_hours_id);
+                
+                check_option_exist('#schedule_type', response[0].SCHEDULE_TYPE, '');
+            }
+        });
+    }
+    else if(form_type == 'regular working hours form'){
+        transaction = 'working hours schedule details';
+
+        var working_hours_id = sessionStorage.getItem('working_hours_id');
+
+        $.ajax({
+            url: 'controller.php',
+            method: 'POST',
+            dataType: 'JSON',
+            data: {working_hours_id : working_hours_id, transaction : transaction},
+            success: function(response) {
+                $('#monday_morning_work_from').val(response[0].MONDAY_MORNING_WORK_FROM);
+                $('#monday_morning_work_to').val(response[0].MONDAY_MORNING_WORK_TO);
+                $('#monday_afternoon_work_from').val(response[0].MONDAY_AFTERNOON_WORK_FROM);
+                $('#monday_afternoon_work_to').val(response[0].MONDAY_AFTERNOON_WORK_TO);
+                $('#tuesday_morning_work_from').val(response[0].TUESDAY_MORNING_WORK_FROM);
+                $('#tuesday_morning_work_to').val(response[0].TUESDAY_MORNING_WORK_TO);
+                $('#tuesday_afternoon_work_from').val(response[0].TUESDAY_AFTERNOON_WORK_FROM);
+                $('#tuesday_afternoon_work_to').val(response[0].TUESDAY_AFTERNOON_WORK_TO);
+                $('#wednesday_morning_work_from').val(response[0].WEDNESDAY_MORNING_WORK_FROM);
+                $('#wednesday_morning_work_to').val(response[0].WEDNESDAY_MORNING_WORK_TO);
+                $('#wednesday_afternoon_work_from').val(response[0].WEDNESDAY_AFTERNOON_WORK_FROM);
+                $('#wednesday_afternoon_work_to').val(response[0].WEDNESDAY_AFTERNOON_WORK_TO);
+                $('#thursday_morning_work_from').val(response[0].THURSDAY_MORNING_WORK_FROM);
+                $('#thursday_morning_work_to').val(response[0].THURSDAY_MORNING_WORK_TO);
+                $('#thursday_afternoon_work_from').val(response[0].THURSDAY_AFTERNOON_WORK_FROM);
+                $('#thursday_afternoon_work_to').val(response[0].THURSDAY_AFTERNOON_WORK_TO);
+                $('#friday_morning_work_from').val(response[0].FRIDAY_MORNING_WORK_FROM);
+                $('#friday_morning_work_to').val(response[0].FRIDAY_MORNING_WORK_TO);
+                $('#friday_afternoon_work_from').val(response[0].FRIDAY_AFTERNOON_WORK_FROM);
+                $('#friday_afternoon_work_to').val(response[0].FRIDAY_AFTERNOON_WORK_TO);
+                $('#saturday_morning_work_from').val(response[0].SATURDAY_MORNING_WORK_FROM);
+                $('#saturday_morning_work_to').val(response[0].SATURDAY_MORNING_WORK_TO);
+                $('#saturday_afternoon_work_from').val(response[0].SATURDAY_AFTERNOON_WORK_FROM);
+                $('#saturday_afternoon_work_to').val(response[0].SATURDAY_AFTERNOON_WORK_TO);
+                $('#sunday_morning_work_from').val(response[0].SUNDAY_MORNING_WORK_FROM);
+                $('#sunday_morning_work_to').val(response[0].SUNDAY_MORNING_WORK_TO);
+                $('#sunday_afternoon_work_from').val(response[0].SUNDAY_AFTERNOON_WORK_FROM);
+                $('#sunday_afternoon_work_to').val(response[0].SUNDAY_AFTERNOON_WORK_TO);
+                
+                $('#working_hours_id').val(working_hours_id);
+            }
+        });
+    }
+    else if(form_type == 'regular working hours form'){
+        transaction = 'working hours schedule details';
+
+        var working_hours_id = sessionStorage.getItem('working_hours_id');
+
+        $.ajax({
+            url: 'controller.php',
+            method: 'POST',
+            dataType: 'JSON',
+            data: {working_hours_id : working_hours_id, transaction : transaction},
+            success: function(response) {
+                $('#monday_morning_work_from').val(response[0].MONDAY_MORNING_WORK_FROM);
+                $('#monday_morning_work_to').val(response[0].MONDAY_MORNING_WORK_TO);
+                $('#monday_afternoon_work_from').val(response[0].MONDAY_AFTERNOON_WORK_FROM);
+                $('#monday_afternoon_work_to').val(response[0].MONDAY_AFTERNOON_WORK_TO);
+                $('#tuesday_morning_work_from').val(response[0].TUESDAY_MORNING_WORK_FROM);
+                $('#tuesday_morning_work_to').val(response[0].TUESDAY_MORNING_WORK_TO);
+                $('#tuesday_afternoon_work_from').val(response[0].TUESDAY_AFTERNOON_WORK_FROM);
+                $('#tuesday_afternoon_work_to').val(response[0].TUESDAY_AFTERNOON_WORK_TO);
+                $('#wednesday_morning_work_from').val(response[0].WEDNESDAY_MORNING_WORK_FROM);
+                $('#wednesday_morning_work_to').val(response[0].WEDNESDAY_MORNING_WORK_TO);
+                $('#wednesday_afternoon_work_from').val(response[0].WEDNESDAY_AFTERNOON_WORK_FROM);
+                $('#wednesday_afternoon_work_to').val(response[0].WEDNESDAY_AFTERNOON_WORK_TO);
+                $('#thursday_morning_work_from').val(response[0].THURSDAY_MORNING_WORK_FROM);
+                $('#thursday_morning_work_to').val(response[0].THURSDAY_MORNING_WORK_TO);
+                $('#thursday_afternoon_work_from').val(response[0].THURSDAY_AFTERNOON_WORK_FROM);
+                $('#thursday_afternoon_work_to').val(response[0].THURSDAY_AFTERNOON_WORK_TO);
+                $('#friday_morning_work_from').val(response[0].FRIDAY_MORNING_WORK_FROM);
+                $('#friday_morning_work_to').val(response[0].FRIDAY_MORNING_WORK_TO);
+                $('#friday_afternoon_work_from').val(response[0].FRIDAY_AFTERNOON_WORK_FROM);
+                $('#friday_afternoon_work_to').val(response[0].FRIDAY_AFTERNOON_WORK_TO);
+                $('#saturday_morning_work_from').val(response[0].SATURDAY_MORNING_WORK_FROM);
+                $('#saturday_morning_work_to').val(response[0].SATURDAY_MORNING_WORK_TO);
+                $('#saturday_afternoon_work_from').val(response[0].SATURDAY_AFTERNOON_WORK_FROM);
+                $('#saturday_afternoon_work_to').val(response[0].SATURDAY_AFTERNOON_WORK_TO);
+                $('#sunday_morning_work_from').val(response[0].SUNDAY_MORNING_WORK_FROM);
+                $('#sunday_morning_work_to').val(response[0].SUNDAY_MORNING_WORK_TO);
+                $('#sunday_afternoon_work_from').val(response[0].SUNDAY_AFTERNOON_WORK_FROM);
+                $('#sunday_afternoon_work_to').val(response[0].SUNDAY_AFTERNOON_WORK_TO);
+                
+                $('#working_hours_id').val(working_hours_id);
+            }
+        });
+    }
+    else if(form_type == 'scheduled working hours form'){
+        transaction = 'working hours schedule details';
+
+        var working_hours_id = sessionStorage.getItem('working_hours_id');
+
+        $.ajax({
+            url: 'controller.php',
+            method: 'POST',
+            dataType: 'JSON',
+            data: {working_hours_id : working_hours_id, transaction : transaction},
+            success: function(response) {
+                $('#start_date').val(response[0].START_DATE);
+                $('#end_date').val(response[0].END_DATE);
+                $('#monday_morning_work_from').val(response[0].MONDAY_MORNING_WORK_FROM);
+                $('#monday_morning_work_to').val(response[0].MONDAY_MORNING_WORK_TO);
+                $('#monday_afternoon_work_from').val(response[0].MONDAY_AFTERNOON_WORK_FROM);
+                $('#monday_afternoon_work_to').val(response[0].MONDAY_AFTERNOON_WORK_TO);
+                $('#tuesday_morning_work_from').val(response[0].TUESDAY_MORNING_WORK_FROM);
+                $('#tuesday_morning_work_to').val(response[0].TUESDAY_MORNING_WORK_TO);
+                $('#tuesday_afternoon_work_from').val(response[0].TUESDAY_AFTERNOON_WORK_FROM);
+                $('#tuesday_afternoon_work_to').val(response[0].TUESDAY_AFTERNOON_WORK_TO);
+                $('#wednesday_morning_work_from').val(response[0].WEDNESDAY_MORNING_WORK_FROM);
+                $('#wednesday_morning_work_to').val(response[0].WEDNESDAY_MORNING_WORK_TO);
+                $('#wednesday_afternoon_work_from').val(response[0].WEDNESDAY_AFTERNOON_WORK_FROM);
+                $('#wednesday_afternoon_work_to').val(response[0].WEDNESDAY_AFTERNOON_WORK_TO);
+                $('#thursday_morning_work_from').val(response[0].THURSDAY_MORNING_WORK_FROM);
+                $('#thursday_morning_work_to').val(response[0].THURSDAY_MORNING_WORK_TO);
+                $('#thursday_afternoon_work_from').val(response[0].THURSDAY_AFTERNOON_WORK_FROM);
+                $('#thursday_afternoon_work_to').val(response[0].THURSDAY_AFTERNOON_WORK_TO);
+                $('#friday_morning_work_from').val(response[0].FRIDAY_MORNING_WORK_FROM);
+                $('#friday_morning_work_to').val(response[0].FRIDAY_MORNING_WORK_TO);
+                $('#friday_afternoon_work_from').val(response[0].FRIDAY_AFTERNOON_WORK_FROM);
+                $('#friday_afternoon_work_to').val(response[0].FRIDAY_AFTERNOON_WORK_TO);
+                $('#saturday_morning_work_from').val(response[0].SATURDAY_MORNING_WORK_FROM);
+                $('#saturday_morning_work_to').val(response[0].SATURDAY_MORNING_WORK_TO);
+                $('#saturday_afternoon_work_from').val(response[0].SATURDAY_AFTERNOON_WORK_FROM);
+                $('#saturday_afternoon_work_to').val(response[0].SATURDAY_AFTERNOON_WORK_TO);
+                $('#sunday_morning_work_from').val(response[0].SUNDAY_MORNING_WORK_FROM);
+                $('#sunday_morning_work_to').val(response[0].SUNDAY_MORNING_WORK_TO);
+                $('#sunday_afternoon_work_from').val(response[0].SUNDAY_AFTERNOON_WORK_FROM);
+                $('#sunday_afternoon_work_to').val(response[0].SUNDAY_AFTERNOON_WORK_TO);
+                
+                $('#working_hours_id').val(working_hours_id);
+            }
+        });
+    }
+     else if(form_type == 'working hours details'){
+        transaction = 'working hours summary details';
+
+        var working_hours_id = sessionStorage.getItem('working_hours_id');
+
+        $.ajax({
+            url: 'controller.php',
+            method: 'POST',
+            dataType: 'JSON',
+            data: {working_hours_id : working_hours_id, transaction : transaction},
+            success: function(response) {
+                $('#working_hours').text(response[0].WORKING_HOURS);
+                $('#schedule_type').text(response[0].SCHEDULE_TYPE);
+                $('#start_date').text(response[0].START_DATE);
+                $('#end_date').text(response[0].END_DATE);
+                $('#monday_morning_work_from').text(response[0].MONDAY_MORNING_WORK_FROM);
+                $('#monday_morning_work_to').text(response[0].MONDAY_MORNING_WORK_TO);
+                $('#monday_afternoon_work_from').text(response[0].MONDAY_AFTERNOON_WORK_FROM);
+                $('#monday_afternoon_work_to').text(response[0].MONDAY_AFTERNOON_WORK_TO);
+                $('#tuesday_morning_work_from').text(response[0].TUESDAY_MORNING_WORK_FROM);
+                $('#tuesday_morning_work_to').text(response[0].TUESDAY_MORNING_WORK_TO);
+                $('#tuesday_afternoon_work_from').text(response[0].TUESDAY_AFTERNOON_WORK_FROM);
+                $('#tuesday_afternoon_work_to').text(response[0].TUESDAY_AFTERNOON_WORK_TO);
+                $('#wednesday_morning_work_from').text(response[0].WEDNESDAY_MORNING_WORK_FROM);
+                $('#wednesday_morning_work_to').text(response[0].WEDNESDAY_MORNING_WORK_TO);
+                $('#wednesday_afternoon_work_from').text(response[0].WEDNESDAY_AFTERNOON_WORK_FROM);
+                $('#wednesday_afternoon_work_to').text(response[0].WEDNESDAY_AFTERNOON_WORK_TO);
+                $('#thursday_morning_work_from').text(response[0].THURSDAY_MORNING_WORK_FROM);
+                $('#thursday_morning_work_to').text(response[0].THURSDAY_MORNING_WORK_TO);
+                $('#thursday_afternoon_work_from').text(response[0].THURSDAY_AFTERNOON_WORK_FROM);
+                $('#thursday_afternoon_work_to').text(response[0].THURSDAY_AFTERNOON_WORK_TO);
+                $('#friday_morning_work_from').text(response[0].FRIDAY_MORNING_WORK_FROM);
+                $('#friday_morning_work_to').text(response[0].FRIDAY_MORNING_WORK_TO);
+                $('#friday_afternoon_work_from').text(response[0].FRIDAY_AFTERNOON_WORK_FROM);
+                $('#friday_afternoon_work_to').text(response[0].FRIDAY_AFTERNOON_WORK_TO);
+                $('#saturday_morning_work_from').text(response[0].SATURDAY_MORNING_WORK_FROM);
+                $('#saturday_morning_work_to').text(response[0].SATURDAY_MORNING_WORK_TO);
+                $('#saturday_afternoon_work_from').text(response[0].SATURDAY_AFTERNOON_WORK_FROM);
+                $('#saturday_afternoon_work_to').text(response[0].SATURDAY_AFTERNOON_WORK_TO);
+                $('#sunday_morning_work_from').text(response[0].SUNDAY_MORNING_WORK_FROM);
+                $('#sunday_morning_work_to').text(response[0].SUNDAY_MORNING_WORK_TO);
+                $('#sunday_afternoon_work_from').text(response[0].SUNDAY_AFTERNOON_WORK_FROM);
+                $('#sunday_afternoon_work_to').text(response[0].SUNDAY_AFTERNOON_WORK_TO);
             }
         });
     }
@@ -2550,7 +3702,7 @@ function generate_element(element_type, value, container, modal, username){
             if(modal == '1'){
                 $('#System-Modal').modal('show');
 
-                if(element_type == 'user account details' || element_type == 'system parameter details' || element_type == 'company details' || element_type == 'job position details' || element_type == 'work location details'){
+                if(element_type == 'user account details' || element_type == 'system parameter details' || element_type == 'company details' || element_type == 'job position details' || element_type == 'work location details' || element_type == 'working hours details'){
                     display_form_details(element_type);
                 }
                 else if(element_type == 'transaction log'){
