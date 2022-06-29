@@ -347,6 +347,34 @@ CREATE TABLE employee_working_hours_schedule(
 	RECORD_LOG VARCHAR(100)
 );
 
+CREATE TABLE attendance_setting(
+	ATTENDANCE_SETTING_ID INT PRIMARY KEY,
+	MAX_ATTENDANCE INT NOT NULL,
+	LATE_GRACE_PERIOD INT NOT NULL,
+	TIME_OUT_INTERVAL INT NOT NULL,
+	LATE_POLICY INT NOT NULL,
+	EARLY_LEAVING_POLICY INT NOT NULL,
+	OVERTIME_POLICY INT NOT NULL,
+	ATTENDANCE_ADJUSTMENT_RECOMMENDATION INT NOT NULL,
+	ATTENDANCE_ADJUSTMENT_APPROVAL INT NOT NULL,
+	ATTENDANCE_CREATION_RECOMMENDATION INT NOT NULL,
+	ATTENDANCE_CREATION_APPROVAL INT NOT NULL,
+	TRANSACTION_LOG_ID VARCHAR(500),
+	RECORD_LOG VARCHAR(100)
+);
+
+CREATE TABLE attendance_creation_exception(
+	EMPLOYEE_ID VARCHAR(100) NOT NULL,
+	EXCEPTION_TYPE VARCHAR(5) NOT NULL,
+	RECORD_LOG VARCHAR(100)
+);
+
+CREATE TABLE attendance_adjustment_exception(
+	EMPLOYEE_ID VARCHAR(100) NOT NULL,
+	EXCEPTION_TYPE VARCHAR(5) NOT NULL,
+	RECORD_LOG VARCHAR(100)
+);
+
 /* Index */
 CREATE INDEX global_user_account_index ON global_user_account(USERNAME);
 CREATE INDEX global_system_parameter_index ON global_system_parameters(PARAMETER_ID);
@@ -371,6 +399,7 @@ CREATE INDEX employee_details_index ON employee_details(EMPLOYEE_ID);
 CREATE INDEX employee_type_index ON employee_type(EMPLOYEE_TYPE_ID);
 CREATE INDEX employee_working_hours_index ON employee_working_hours(WORKING_HOURS_ID);
 CREATE INDEX employee_working_hours_schedule_index ON employee_working_hours_schedule(WORKING_HOURS_ID);
+CREATE INDEX attendance_setting_index ON attendance_setting(ATTENDANCE_SETTING_ID);
 
 /* Stored Procedure */
 
@@ -2522,6 +2551,175 @@ BEGIN
 	EXECUTE stmt;
 	DROP PREPARE stmt;
 END //
+
+CREATE PROCEDURE delete_all_employee_working_hours(IN working_hours_id VARCHAR(50))
+BEGIN
+	SET @working_hours_id = working_hours_id;
+
+	SET @query = 'UPDATE employee_details SET WORKING_HOURS = null WHERE WORKING_HOURS = @working_hours_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE update_employee_working_hours(IN employee_id VARCHAR(100), IN working_hours_id VARCHAR(50))
+BEGIN
+	SET @employee_id = employee_id;
+	SET @working_hours_id = working_hours_id;
+
+	SET @query = 'UPDATE employee_details SET WORKING_HOURS = @working_hours_id WHERE EMPLOYEE_ID = @employee_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE get_employee_working_hours_details(IN working_hours_id VARCHAR(50))
+BEGIN
+	SET @working_hours_id = working_hours_id;
+
+	SET @query = 'SELECT EMPLOYEE_IMAGE, EMPLOYEE_ID, FILE_AS, JOB_POSITION FROM employee_details WHERE ATTENDANCE_SETTING = @working_hours_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE check_attendance_setting_exist(IN attendance_setting_id VARCHAR(50))
+BEGIN
+	SET @attendance_setting_id = attendance_setting_id;
+
+	SET @query = 'SELECT COUNT(1) AS TOTAL FROM attendance_setting WHERE ATTENDANCE_SETTING_ID = @attendance_setting_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE update_attendance_setting(IN attendance_setting_id VARCHAR(50), IN maximum_attendance INT, IN late_grace_period INT, IN time_out_interval INT, IN late_policy INT, IN early_leaving_policy INT, IN overtime_policy INT, IN attendance_adjustment_recommendation INT, IN attendance_adjustment_approval INT, IN attendance_creation_recommendation INT, IN attendance_creation_approval INT, IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
+BEGIN
+	SET @attendance_setting_id = attendance_setting_id;
+	SET @maximum_attendance = maximum_attendance;
+	SET @late_grace_period = late_grace_period;
+	SET @time_out_interval = time_out_interval;
+	SET @late_policy = late_policy;
+	SET @early_leaving_policy = early_leaving_policy;
+	SET @overtime_policy = overtime_policy;
+	SET @attendance_adjustment_recommendation = attendance_adjustment_recommendation;
+	SET @attendance_adjustment_approval = attendance_adjustment_approval;
+	SET @attendance_creation_recommendation = attendance_creation_recommendation;
+	SET @attendance_creation_approval = attendance_creation_approval;
+	SET @transaction_log_id = transaction_log_id;
+	SET @record_log = record_log;
+
+	SET @query = 'UPDATE attendance_setting SET MAX_ATTENDANCE = @maximum_attendance, LATE_GRACE_PERIOD = @late_grace_period, TIME_OUT_INTERVAL = @time_out_interval, LATE_POLICY = @late_policy, EARLY_LEAVING_POLICY = @early_leaving_policy, OVERTIME_POLICY = @overtime_policy, ATTENDANCE_ADJUSTMENT_RECOMMENDATION = @attendance_adjustment_recommendation, ATTENDANCE_ADJUSTMENT_APPROVAL = @attendance_adjustment_approval, ATTENDANCE_CREATION_RECOMMENDATION = @attendance_creation_recommendation, ATTENDANCE_CREATION_APPROVAL = @attendance_creation_approval, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE ATTENDANCE_SETTING_ID = @attendance_setting_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE insert_attendance_setting(IN attendance_setting_id VARCHAR(50), IN maximum_attendance INT, IN late_grace_period INT, IN time_out_interval INT, IN late_policy INT, IN early_leaving_policy INT, IN overtime_policy INT, IN attendance_adjustment_recommendation INT, IN attendance_adjustment_approval INT, IN attendance_creation_recommendation INT, IN attendance_creation_approval INT, IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
+BEGIN
+	SET @attendance_setting_id = attendance_setting_id;
+	SET @maximum_attendance = maximum_attendance;
+	SET @late_grace_period = late_grace_period;
+	SET @time_out_interval = time_out_interval;
+	SET @late_policy = late_policy;
+	SET @early_leaving_policy = early_leaving_policy;
+	SET @overtime_policy = overtime_policy;
+	SET @attendance_adjustment_recommendation = attendance_adjustment_recommendation;
+	SET @attendance_adjustment_approval = attendance_adjustment_approval;
+	SET @attendance_creation_recommendation = attendance_creation_recommendation;
+	SET @attendance_creation_approval = attendance_creation_approval;
+	SET @transaction_log_id = transaction_log_id;
+	SET @record_log = record_log;
+
+	SET @query = 'INSERT INTO attendance_setting (ATTENDANCE_SETTING_ID, MAX_ATTENDANCE, LATE_GRACE_PERIOD, TIME_OUT_INTERVAL, LATE_POLICY, EARLY_LEAVING_POLICY, OVERTIME_POLICY, ATTENDANCE_ADJUSTMENT_RECOMMENDATION, ATTENDANCE_ADJUSTMENT_APPROVAL, ATTENDANCE_CREATION_RECOMMENDATION, ATTENDANCE_CREATION_APPROVAL, TRANSACTION_LOG_ID, RECORD_LOG) VALUES(@attendance_setting_id, @maximum_attendance, @late_grace_period, @time_out_interval, @late_policy, @early_leaving_policy, @overtime_policy, @attendance_adjustment_recommendation, @attendance_adjustment_approval, @attendance_creation_recommendation, @attendance_creation_approval, @transaction_log_id, @record_log)';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE insert_attendance_creation_exception(IN employee_id VARCHAR(100), IN exception_type VARCHAR(5), IN record_log VARCHAR(100))
+BEGIN
+	SET @employee_id = employee_id;
+	SET @exception_type = exception_type;
+	SET @record_log = record_log;
+
+	SET @query = 'INSERT INTO attendance_creation_exception (EMPLOYEE_ID, EXCEPTION_TYPE, RECORD_LOG) VALUES(@employee_id, @exception_type, @record_log)';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE insert_attendance_adjustment_exception(IN employee_id VARCHAR(100), IN exception_type VARCHAR(5), IN record_log VARCHAR(100))
+BEGIN
+	SET @employee_id = employee_id;
+	SET @exception_type = exception_type;
+	SET @record_log = record_log;
+
+	SET @query = 'INSERT INTO attendance_adjustment_exception (EMPLOYEE_ID, EXCEPTION_TYPE, RECORD_LOG) VALUES(@employee_id, @exception_type, @record_log)';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE get_attendance_setting_details(IN attendance_setting_id VARCHAR(50))
+BEGIN
+	SET @attendance_setting_id = attendance_setting_id;
+
+	SET @query = 'SELECT MAX_ATTENDANCE, LATE_GRACE_PERIOD, TIME_OUT_INTERVAL, LATE_POLICY, EARLY_LEAVING_POLICY, OVERTIME_POLICY, ATTENDANCE_ADJUSTMENT_RECOMMENDATION, ATTENDANCE_ADJUSTMENT_APPROVAL, ATTENDANCE_CREATION_RECOMMENDATION, ATTENDANCE_CREATION_APPROVAL, TRANSACTION_LOG_ID, RECORD_LOG FROM attendance_setting WHERE ATTENDANCE_SETTING_ID = @attendance_setting_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE get_attendance_creation_exception_details(IN exception_type VARCHAR(5))
+BEGIN
+	SET @exception_type = exception_type;
+
+	SET @query = 'SELECT EMPLOYEE_ID, RECORD_LOG FROM attendance_creation_exception WHERE EXCEPTION_TYPE = @exception_type';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE get_attendance_adjustment_exception_details(IN exception_type VARCHAR(5))
+BEGIN
+	SET @exception_type = exception_type;
+
+	SET @query = 'SELECT EMPLOYEE_ID, RECORD_LOG FROM attendance_adjustment_exception WHERE EXCEPTION_TYPE = @exception_type';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE delete_all_attendance_creation_exception()
+BEGIN
+	SET @query = 'DELETE FROM attendance_creation_exception';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE delete_all_attendance_adjustment_exception()
+BEGIN
+	SET @query = 'DELETE FROM attendance_adjustment_exception';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
 
 /* Insert Transactions */
 INSERT INTO global_user_account (USERNAME, PASSWORD, USER_STATUS, PASSWORD_EXPIRY_DATE, FAILED_LOGIN, LAST_FAILED_LOGIN, TRANSACTION_LOG_ID) VALUES ('ADMIN', '68aff5412f35ed76', 'Active', '2021-12-30', 0, null, 'TL-1');

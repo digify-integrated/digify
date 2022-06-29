@@ -1469,7 +1469,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
     # Submit regular working hours
     else if($transaction == 'submit regular working hours'){
-        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['working_hours_id']) && !empty($_POST['working_hours_id']) && isset($_POST['monday_morning_work_from']) && isset($_POST['monday_morning_work_to']) && isset($_POST['monday_afternoon_work_from']) && isset($_POST['monday_afternoon_work_to']) && isset($_POST['tuesday_morning_work_from']) && isset($_POST['tuesday_morning_work_to']) && isset($_POST['tuesday_afternoon_work_from']) && isset($_POST['tuesday_afternoon_work_to']) && isset($_POST['wednesday_morning_work_from']) && isset($_POST['wednesday_morning_work_to']) && isset($_POST['wednesday_afternoon_work_from']) && isset($_POST['wednesday_afternoon_work_to']) && isset($_POST['thursday_morning_work_from']) && isset($_POST['thursday_morning_work_to']) && isset($_POST['thursday_afternoon_work_from']) && isset($_POST['thursday_afternoon_work_to']) && isset($_POST['friday_morning_work_from']) && isset($_POST['friday_morning_work_to']) && isset($_POST['friday_afternoon_work_from']) && isset($_POST['friday_afternoon_work_to']) && isset($_POST['saturday_morning_work_from']) && isset($_POST['saturday_morning_work_to']) && isset($_POST['saturday_afternoon_work_from']) && isset($_POST['saturday_afternoon_work_to']) && isset($_POST['sunday_morning_work_from']) && isset($_POST['sunday_morning_work_to']) && isset($_POST['sunday_afternoon_work_from']) && isset($_POST['sunday_afternoon_work_to'])){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['working_hours_id']) && !empty($_POST['working_hours_id']) && isset($_POST['employee']) && isset($_POST['monday_morning_work_from']) && isset($_POST['monday_morning_work_to']) && isset($_POST['monday_afternoon_work_from']) && isset($_POST['monday_afternoon_work_to']) && isset($_POST['tuesday_morning_work_from']) && isset($_POST['tuesday_morning_work_to']) && isset($_POST['tuesday_afternoon_work_from']) && isset($_POST['tuesday_afternoon_work_to']) && isset($_POST['wednesday_morning_work_from']) && isset($_POST['wednesday_morning_work_to']) && isset($_POST['wednesday_afternoon_work_from']) && isset($_POST['wednesday_afternoon_work_to']) && isset($_POST['thursday_morning_work_from']) && isset($_POST['thursday_morning_work_to']) && isset($_POST['thursday_afternoon_work_from']) && isset($_POST['thursday_afternoon_work_to']) && isset($_POST['friday_morning_work_from']) && isset($_POST['friday_morning_work_to']) && isset($_POST['friday_afternoon_work_from']) && isset($_POST['friday_afternoon_work_to']) && isset($_POST['saturday_morning_work_from']) && isset($_POST['saturday_morning_work_to']) && isset($_POST['saturday_afternoon_work_from']) && isset($_POST['saturday_afternoon_work_to']) && isset($_POST['sunday_morning_work_from']) && isset($_POST['sunday_morning_work_to']) && isset($_POST['sunday_afternoon_work_from']) && isset($_POST['sunday_afternoon_work_to'])){
             $error = '';
             $username = $_POST['username'];
             $working_hours_id = $_POST['working_hours_id'];
@@ -1502,6 +1502,8 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
             $sunday_afternoon_work_from = $api->check_date('empty', $_POST['sunday_afternoon_work_from'], '', 'H:i:s', '', '', '');
             $sunday_afternoon_work_to = $api->check_date('empty', $_POST['sunday_afternoon_work_to'], '', 'H:i:s', '', '', '');
 
+            $employees = explode(',', $_POST['employee']);
+
             $monday_working_hours_schedule_overlap = $api->check_working_hours_schedue_overlap($monday_morning_work_from, $monday_morning_work_to, $monday_afternoon_work_from, $monday_afternoon_work_to);
             $tuesday_working_hours_schedule_overlap = $api->check_working_hours_schedue_overlap($tuesday_morning_work_from, $tuesday_morning_work_to, $tuesday_afternoon_work_from, $tuesday_afternoon_work_to);
             $wednesday_working_hours_schedule_overlap = $api->check_working_hours_schedue_overlap($wednesday_morning_work_from, $wednesday_morning_work_to, $wednesday_afternoon_work_from, $wednesday_afternoon_work_to);
@@ -1517,7 +1519,30 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                     $update_working_hours_schedule = $api->update_working_hours_schedule($working_hours_id, null, null, $monday_morning_work_from, $monday_morning_work_to, $monday_afternoon_work_from, $monday_afternoon_work_to, $tuesday_morning_work_from, $tuesday_morning_work_to, $tuesday_afternoon_work_from, $tuesday_afternoon_work_to, $wednesday_morning_work_from, $wednesday_morning_work_to, $wednesday_afternoon_work_from, $wednesday_afternoon_work_to, $thursday_morning_work_from, $thursday_morning_work_to, $thursday_afternoon_work_from, $thursday_afternoon_work_to, $friday_morning_work_from, $friday_morning_work_to, $friday_afternoon_work_from, $friday_afternoon_work_to, $saturday_morning_work_from, $saturday_morning_work_to, $saturday_afternoon_work_from, $saturday_afternoon_work_to, $sunday_morning_work_from, $sunday_morning_work_to, $sunday_afternoon_work_from, $sunday_afternoon_work_to, $username);
 
                     if($update_working_hours_schedule){
-                        echo 'Updated';
+                        $delete_all_employee_working_hours = $api->delete_all_employee_working_hours($working_hours_id, $username);
+                                    
+                        if($delete_all_employee_working_hours){
+                            foreach($employees as $employee_id){
+                                if(!empty($employee_id)){
+                                    $update_employee_working_hours = $api->update_employee_working_hours($employee_id, $working_hours_id, $username);
+        
+                                    if(!$update_employee_working_hours){
+                                        $error = $update_employee_working_hours;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        else{
+                            $error = $delete_all_employee_working_hours;
+                        }
+                        
+                        if(empty($error)){
+                            echo 'Updated';
+                        }
+                        else{
+                            echo $error;
+                        }
                     }
                     else{
                         echo $update_working_hours_schedule;
@@ -1527,7 +1552,30 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                     $insert_working_hours_schedule = $api->insert_working_hours_schedule($working_hours_id, null, null, $monday_morning_work_from, $monday_morning_work_to, $monday_afternoon_work_from, $monday_afternoon_work_to, $tuesday_morning_work_from, $tuesday_morning_work_to, $tuesday_afternoon_work_from, $tuesday_afternoon_work_to, $wednesday_morning_work_from, $wednesday_morning_work_to, $wednesday_afternoon_work_from, $wednesday_afternoon_work_to, $thursday_morning_work_from, $thursday_morning_work_to, $thursday_afternoon_work_from, $thursday_afternoon_work_to, $friday_morning_work_from, $friday_morning_work_to, $friday_afternoon_work_from, $friday_afternoon_work_to, $saturday_morning_work_from, $saturday_morning_work_to, $saturday_afternoon_work_from, $saturday_afternoon_work_to, $sunday_morning_work_from, $sunday_morning_work_to, $sunday_afternoon_work_from, $sunday_afternoon_work_to, $username);
         
                     if($insert_working_hours_schedule){
-                        echo 'Updated';
+                        $delete_all_employee_working_hours = $api->delete_all_employee_working_hours($working_hours_id, $username);
+                                    
+                        if($delete_all_employee_working_hours){
+                            foreach($employees as $employee_id){
+                                if(!empty($employee_id)){
+                                    $update_employee_working_hours = $api->update_employee_working_hours($employee_id, $working_hours_id, $username);
+        
+                                    if(!$update_employee_working_hours){
+                                        $error = $update_employee_working_hours;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        else{
+                            $error = $delete_all_employee_working_hours;
+                        }
+                        
+                        if(empty($error)){
+                            echo 'Updated';
+                        }
+                        else{
+                            echo $error;
+                        }
                     }
                     else{
                         echo $insert_working_hours_schedule;
@@ -1543,7 +1591,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
     # Submit scheduled working hours
     else if($transaction == 'submit scheduled working hours'){
-        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['working_hours_id']) && !empty($_POST['working_hours_id']) && isset($_POST['start_date']) && !empty($_POST['start_date']) && isset($_POST['end_date']) && !empty($_POST['end_date']) && isset($_POST['monday_morning_work_from']) && isset($_POST['monday_morning_work_to']) && isset($_POST['monday_afternoon_work_from']) && isset($_POST['monday_afternoon_work_to']) && isset($_POST['tuesday_morning_work_from']) && isset($_POST['tuesday_morning_work_to']) && isset($_POST['tuesday_afternoon_work_from']) && isset($_POST['tuesday_afternoon_work_to']) && isset($_POST['wednesday_morning_work_from']) && isset($_POST['wednesday_morning_work_to']) && isset($_POST['wednesday_afternoon_work_from']) && isset($_POST['wednesday_afternoon_work_to']) && isset($_POST['thursday_morning_work_from']) && isset($_POST['thursday_morning_work_to']) && isset($_POST['thursday_afternoon_work_from']) && isset($_POST['thursday_afternoon_work_to']) && isset($_POST['friday_morning_work_from']) && isset($_POST['friday_morning_work_to']) && isset($_POST['friday_afternoon_work_from']) && isset($_POST['friday_afternoon_work_to']) && isset($_POST['saturday_morning_work_from']) && isset($_POST['saturday_morning_work_to']) && isset($_POST['saturday_afternoon_work_from']) && isset($_POST['saturday_afternoon_work_to']) && isset($_POST['sunday_morning_work_from']) && isset($_POST['sunday_morning_work_to']) && isset($_POST['sunday_afternoon_work_from']) && isset($_POST['sunday_afternoon_work_to'])){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['working_hours_id']) && !empty($_POST['working_hours_id']) && isset($_POST['employee']) && isset($_POST['start_date']) && !empty($_POST['start_date']) && isset($_POST['end_date']) && !empty($_POST['end_date']) && isset($_POST['monday_morning_work_from']) && isset($_POST['monday_morning_work_to']) && isset($_POST['monday_afternoon_work_from']) && isset($_POST['monday_afternoon_work_to']) && isset($_POST['tuesday_morning_work_from']) && isset($_POST['tuesday_morning_work_to']) && isset($_POST['tuesday_afternoon_work_from']) && isset($_POST['tuesday_afternoon_work_to']) && isset($_POST['wednesday_morning_work_from']) && isset($_POST['wednesday_morning_work_to']) && isset($_POST['wednesday_afternoon_work_from']) && isset($_POST['wednesday_afternoon_work_to']) && isset($_POST['thursday_morning_work_from']) && isset($_POST['thursday_morning_work_to']) && isset($_POST['thursday_afternoon_work_from']) && isset($_POST['thursday_afternoon_work_to']) && isset($_POST['friday_morning_work_from']) && isset($_POST['friday_morning_work_to']) && isset($_POST['friday_afternoon_work_from']) && isset($_POST['friday_afternoon_work_to']) && isset($_POST['saturday_morning_work_from']) && isset($_POST['saturday_morning_work_to']) && isset($_POST['saturday_afternoon_work_from']) && isset($_POST['saturday_afternoon_work_to']) && isset($_POST['sunday_morning_work_from']) && isset($_POST['sunday_morning_work_to']) && isset($_POST['sunday_afternoon_work_from']) && isset($_POST['sunday_afternoon_work_to'])){
             $error = '';
             $username = $_POST['username'];
             $working_hours_id = $_POST['working_hours_id'];
@@ -1578,6 +1626,8 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
             $sunday_afternoon_work_from = $api->check_date('empty', $_POST['sunday_afternoon_work_from'], '', 'H:i:s', '', '', '');
             $sunday_afternoon_work_to = $api->check_date('empty', $_POST['sunday_afternoon_work_to'], '', 'H:i:s', '', '', '');
 
+            $employees = explode(',', $_POST['employee']);
+
             $monday_working_hours_schedule_overlap = $api->check_working_hours_schedue_overlap($monday_morning_work_from, $monday_morning_work_to, $monday_afternoon_work_from, $monday_afternoon_work_to);
             $tuesday_working_hours_schedule_overlap = $api->check_working_hours_schedue_overlap($tuesday_morning_work_from, $tuesday_morning_work_to, $tuesday_afternoon_work_from, $tuesday_afternoon_work_to);
             $wednesday_working_hours_schedule_overlap = $api->check_working_hours_schedue_overlap($wednesday_morning_work_from, $wednesday_morning_work_to, $wednesday_afternoon_work_from, $wednesday_afternoon_work_to);
@@ -1593,7 +1643,30 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                     $update_working_hours_schedule = $api->update_working_hours_schedule($working_hours_id, $start_date, $end_date, $monday_morning_work_from, $monday_morning_work_to, $monday_afternoon_work_from, $monday_afternoon_work_to, $tuesday_morning_work_from, $tuesday_morning_work_to, $tuesday_afternoon_work_from, $tuesday_afternoon_work_to, $wednesday_morning_work_from, $wednesday_morning_work_to, $wednesday_afternoon_work_from, $wednesday_afternoon_work_to, $thursday_morning_work_from, $thursday_morning_work_to, $thursday_afternoon_work_from, $thursday_afternoon_work_to, $friday_morning_work_from, $friday_morning_work_to, $friday_afternoon_work_from, $friday_afternoon_work_to, $saturday_morning_work_from, $saturday_morning_work_to, $saturday_afternoon_work_from, $saturday_afternoon_work_to, $sunday_morning_work_from, $sunday_morning_work_to, $sunday_afternoon_work_from, $sunday_afternoon_work_to, $username);
 
                     if($update_working_hours_schedule){
-                        echo 'Updated';
+                        $delete_all_employee_working_hours = $api->delete_all_employee_working_hours($working_hours_id, $username);
+                                    
+                        if($delete_all_employee_working_hours){
+                            foreach($employees as $employee_id){
+                                if(!empty($employee_id)){
+                                    $update_employee_working_hours = $api->update_employee_working_hours($employee_id, $working_hours_id, $username);
+        
+                                    if(!$update_employee_working_hours){
+                                        $error = $update_employee_working_hours;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        else{
+                            $error = $delete_all_employee_working_hours;
+                        }
+                        
+                        if(empty($error)){
+                            echo 'Updated';
+                        }
+                        else{
+                            echo $error;
+                        }
                     }
                     else{
                         echo $update_working_hours_schedule;
@@ -1603,7 +1676,30 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                     $insert_working_hours_schedule = $api->insert_working_hours_schedule($working_hours_id, $start_date, $end_date, $monday_morning_work_from, $monday_morning_work_to, $monday_afternoon_work_from, $monday_afternoon_work_to, $tuesday_morning_work_from, $tuesday_morning_work_to, $tuesday_afternoon_work_from, $tuesday_afternoon_work_to, $wednesday_morning_work_from, $wednesday_morning_work_to, $wednesday_afternoon_work_from, $wednesday_afternoon_work_to, $thursday_morning_work_from, $thursday_morning_work_to, $thursday_afternoon_work_from, $thursday_afternoon_work_to, $friday_morning_work_from, $friday_morning_work_to, $friday_afternoon_work_from, $friday_afternoon_work_to, $saturday_morning_work_from, $saturday_morning_work_to, $saturday_afternoon_work_from, $saturday_afternoon_work_to, $sunday_morning_work_from, $sunday_morning_work_to, $sunday_afternoon_work_from, $sunday_afternoon_work_to, $username);
         
                     if($insert_working_hours_schedule){
-                        echo 'Updated';
+                        $delete_all_employee_working_hours = $api->delete_all_employee_working_hours($working_hours_id, $username);
+                                    
+                        if($delete_all_employee_working_hours){
+                            foreach($employees as $employee_id){
+                                if(!empty($employee_id)){
+                                    $update_employee_working_hours = $api->update_employee_working_hours($employee_id, $working_hours_id, $username);
+        
+                                    if(!$update_employee_working_hours){
+                                        $error = $update_employee_working_hours;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        else{
+                            $error = $delete_all_employee_working_hours;
+                        }
+                        
+                        if(empty($error)){
+                            echo 'Updated';
+                        }
+                        else{
+                            echo $error;
+                        }
                     }
                     else{
                         echo $insert_working_hours_schedule;
@@ -1612,6 +1708,179 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
             }
             else{
                 echo 'Overlap';
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Submit attendance setting
+    else if($transaction == 'submit attendance setting'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['maximum_attendance']) && isset($_POST['late_grace_period']) && isset($_POST['time_out_interval']) && isset($_POST['late_policy']) && isset($_POST['early_leaving_policy']) && isset($_POST['overtime_policy'])){
+            $username = $_POST['username'];
+            $attendance_setting_id = 1;
+            $maximum_attendance = $_POST['maximum_attendance'];
+            $late_grace_period = $_POST['late_grace_period'];
+            $time_out_interval = $_POST['time_out_interval'];
+            $late_policy = $_POST['late_policy'];
+            $early_leaving_policy = $_POST['early_leaving_policy'];
+            $overtime_policy = $_POST['overtime_policy'];
+            $attendance_creation_recommendation = $_POST['attendance_creation_recommendation'] ?? 0;
+            $attendance_creation_approval = $_POST['attendance_creation_approval'] ?? 0;
+            $attendance_adjustment_recommendation = $_POST['attendance_adjustment_recommendation'] ?? 0;
+            $attendance_adjustment_approval = $_POST['attendance_adjustment_approval'] ?? 0;
+
+            $attendance_creation_recommendation_exceptions = explode(',', $_POST['attendance_creation_recommendation_exception']);
+            $attendance_creation_approval_exceptions = explode(',', $_POST['attendance_creation_approval_exception']);
+            $attendance_adjustment_recommendation_exceptions = explode(',', $_POST['attendance_adjustment_recommendation_exception']);
+            $attendance_adjustment_approval_exceptions = explode(',', $_POST['attendance_adjustment_approval_exception']);
+
+            $check_attendance_setting_exist = $api->check_attendance_setting_exist($attendance_setting_id);
+
+            if($check_attendance_setting_exist > 0){
+                $update_attendance_setting = $api->update_attendance_setting($attendance_setting_id, $maximum_attendance, $late_grace_period, $time_out_interval, $late_policy, $early_leaving_policy, $overtime_policy, $attendance_adjustment_recommendation, $attendance_adjustment_approval, $attendance_creation_recommendation, $attendance_creation_approval, $username);
+
+                if($update_attendance_setting){
+                    $delete_all_attendance_creation_exception = $api->delete_all_attendance_creation_exception($username);
+                                    
+                    if($delete_all_attendance_creation_exception){
+                        $delete_all_attendance_adjustment_exception = $api->delete_all_attendance_adjustment_exception($username);
+                                    
+                        if($delete_all_attendance_adjustment_exception){
+                            foreach($attendance_creation_recommendation_exceptions as $employee_id){
+                                if(!empty($employee_id)){
+                                    $insert_attendance_creation_exception = $api->insert_attendance_creation_exception($employee_id, 'R', $username);
+        
+                                    if(!$insert_attendance_creation_exception){
+                                        $error = $insert_attendance_creation_exception;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            foreach($attendance_creation_approval_exceptions as $employee_id){
+                                if(!empty($employee_id)){
+                                    $insert_attendance_creation_exception = $api->insert_attendance_creation_exception($employee_id, 'A', $username);
+        
+                                    if(!$insert_attendance_creation_exception){
+                                        $error = $insert_attendance_creation_exception;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            foreach($attendance_adjustment_recommendation_exceptions as $employee_id){
+                                if(!empty($employee_id)){
+                                    $insert_attendance_adjustment_exception = $api->insert_attendance_adjustment_exception($employee_id, 'R', $username);
+        
+                                    if(!$insert_attendance_adjustment_exception){
+                                        $error = $insert_attendance_adjustment_exception;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            foreach($attendance_adjustment_approval_exceptions as $employee_id){
+                                if(!empty($employee_id)){
+                                    $insert_attendance_adjustment_exception = $api->insert_attendance_adjustment_exception($employee_id, 'A', $username);
+        
+                                    if(!$insert_attendance_adjustment_exception){
+                                        $error = $insert_attendance_adjustment_exception;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        else{
+                            $error = $delete_all_attendance_adjustment_exception;
+                        }
+                    }
+                    else{
+                        $error = $delete_all_attendance_creation_exception;
+                    }
+                }
+                else{
+                    $error = $update_attendance_setting;
+                }
+
+                if(empty($error)){
+                    echo 'Updated';
+                }
+                else{
+                    echo $error;
+                }
+            }
+            else{
+                $insert_attendance_setting = $api->insert_attendance_setting($attendance_setting_id, $maximum_attendance, $late_grace_period, $time_out_interval, $late_policy, $early_leaving_policy, $overtime_policy, $attendance_adjustment_recommendation, $attendance_adjustment_approval, $attendance_creation_recommendation, $attendance_creation_approval, $username);
+
+                if($insert_attendance_setting){
+                    $delete_all_attendance_creation_exception = $api->delete_all_attendance_creation_exception($username);
+                                    
+                    if($delete_all_attendance_creation_exception){
+                        $delete_all_attendance_adjustment_exception = $api->delete_all_attendance_adjustment_exception($username);
+                                    
+                        if($delete_all_attendance_adjustment_exception){
+                            foreach($attendance_creation_recommendation_exceptions as $employee_id){
+                                if(!empty($employee_id)){
+                                    $insert_attendance_creation_exception = $api->insert_attendance_creation_exception($employee_id, 'R', $username);
+        
+                                    if(!$insert_attendance_creation_exception){
+                                        $error = $insert_attendance_creation_exception;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            foreach($attendance_creation_approval_exceptions as $employee_id){
+                                if(!empty($employee_id)){
+                                    $insert_attendance_creation_exception = $api->insert_attendance_creation_exception($employee_id, 'A', $username);
+        
+                                    if(!$insert_attendance_creation_exception){
+                                        $error = $insert_attendance_creation_exception;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            foreach($attendance_adjustment_recommendation_exceptions as $employee_id){
+                                if(!empty($employee_id)){
+                                    $insert_attendance_adjustment_exception = $api->insert_attendance_adjustment_exception($employee_id, 'R', $username);
+        
+                                    if(!$insert_attendance_adjustment_exception){
+                                        $error = $insert_attendance_adjustment_exception;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            foreach($attendance_adjustment_approval_exceptions as $employee_id){
+                                if(!empty($employee_id)){
+                                    $insert_attendance_adjustment_exception = $api->insert_attendance_adjustment_exception($employee_id, 'A', $username);
+        
+                                    if(!$insert_attendance_adjustment_exception){
+                                        $error = $insert_attendance_adjustment_exception;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        else{
+                            $error = $delete_all_attendance_adjustment_exception;
+                        }
+                    }
+                    else{
+                        $error = $delete_all_attendance_creation_exception;
+                    }
+                }
+                else{
+                    $error = $insert_attendance_setting;
+                }
+
+                if(empty($error)){
+                    echo 'Updated';
+                }
+                else{
+                    echo $error;
+                }
             }
         }
     }
@@ -3614,8 +3883,18 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     # Working hours schedule details
     else if($transaction == 'working hours schedule details'){
         if(isset($_POST['working_hours_id']) && !empty($_POST['working_hours_id'])){
+            $employee = '';
             $working_hours_id = $_POST['working_hours_id'];
             $working_hours_schedule_details = $api->get_working_hours_schedule_details($working_hours_id);
+            $employee_working_hours_details = $api->get_employee_working_hours_details($working_hours_id);
+
+            for($i = 0; $i < count($employee_working_hours_details); $i++) {
+                $employee .= $employee_working_hours_details[$i]['EMPLOYEE_ID'];
+
+                if($i != (count($employee_working_hours_details) - 1)){
+                    $employee .= ',';
+                }
+            }
 
             $response[] = array(
                 'START_DATE' => $api->check_date('empty', $working_hours_schedule_details[0]['START_DATE'] ?? null, '', 'n/d/Y', '', '', ''),
@@ -3648,6 +3927,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                 'SUNDAY_MORNING_WORK_TO' => $working_hours_schedule_details[0]['SUNDAY_MORNING_WORK_TO'] ?? null,
                 'SUNDAY_AFTERNOON_WORK_FROM' => $working_hours_schedule_details[0]['SUNDAY_AFTERNOON_WORK_FROM'] ?? null,
                 'SUNDAY_AFTERNOON_WORK_TO' => $working_hours_schedule_details[0]['SUNDAY_AFTERNOON_WORK_TO'] ?? null,
+                'EMPLOYEE' => $employee,
             );
 
             echo json_encode($response);
@@ -3661,14 +3941,55 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
             $working_hours_id = $_POST['working_hours_id'];
             $working_hours_details = $api->get_working_hours_details($working_hours_id);
             $working_hours_schedule_details = $api->get_working_hours_schedule_details($working_hours_id);
+            $employee_working_hours_details = $api->get_employee_working_hours_details($working_hours_id);
             $schedule_type = $working_hours_details[0]['SCHEDULE_TYPE'];
 
             $system_code_details = $api->get_system_code_details('SCHEDULETYPE', $schedule_type);
             $schedule_type_name = $system_code_details[0]['SYSTEM_DESCRIPTION'];
 
+            $table = '<table class="table table-bordered mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Employee</th>
+                                    </tr>
+                                </thead>
+                                <tbody>';
+
+            if(count($employee_working_hours_details) > 0){
+                for($i = 0; $i < count($employee_working_hours_details); $i++) {
+                    $employee_image = $employee_working_hours_details[$i]['EMPLOYEE_IMAGE'];
+                    $file_as = $employee_working_hours_details[$i]['FILE_AS'];
+                    $job_position = $employee_working_hours_details[$i]['JOB_POSITION'];
+
+                    $job_position_details = $api->get_job_position_details($job_position);
+                    $job_position_name = $job_position_details[0]['JOB_POSITION'] ?? null;
+    
+                    if(empty($employee_image)){
+                        $employee_image = $api->check_image($employee_image ?? null, 'profile');
+                    }
+
+                    $table .= '<tr>
+                                    <td><img class="rounded-circle avatar-xs" src="'. $employee_image .'" alt="profile"></td>
+                                    <td>'. $file_as . '<p class="text-muted mb-0">'. $job_position_name .'</p></td>
+                                </tr>';
+                }
+
+                
+            }
+            else{
+                $table .= '<tr>
+                                <td colspan="2"><p class="text-center">No Assigned Employee</p></td>
+                            </tr>';
+            }
+
+            $table .= '</tbody>
+                </table>';
+
             $response[] = array(
                 'WORKING_HOURS' => $working_hours_details[0]['WORKING_HOURS'],
                 'SCHEDULE_TYPE' => $schedule_type_name,
+                'EMPLOYEE_TABLE' => $table,
                 'START_DATE' => $api->check_date('summary', $working_hours_schedule_details[0]['START_DATE'] ?? null, '', 'n/d/Y', '', '', ''),
                 'END_DATE' => $api->check_date('summary', $working_hours_schedule_details[0]['END_DATE'] ?? null, '', 'n/d/Y', '', '', ''),
                 'MONDAY_MORNING_WORK_FROM' => $api->check_date('summary', $working_hours_schedule_details[0]['MONDAY_MORNING_WORK_FROM'] ?? null, '', 'h:i a', '', '', ''),
@@ -3703,6 +4024,74 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
             echo json_encode($response);
         }
+    }
+    # -------------------------------------------------------------
+
+    # Attendance setting details
+    else if($transaction == 'attendance setting details'){
+        $attendance_creation_recommendation_exception = '';
+        $attendance_creation_approval_exception = '';
+        $attendance_adjustment_recommendation_exception = '';
+        $attendance_adjustment_approval_exception = '';
+
+        $attendance_setting_id = 1;
+        $attendance_setting_details = $api->get_attendance_setting_details($attendance_setting_id);
+
+        $attendance_creation_recommendation_exception_details = $api->get_attendance_creation_exception_details('R');
+        $attendance_creation_approval_exception_details = $api->get_attendance_creation_exception_details('A');
+        $attendance_adjustment_recommendation_exception_details = $api->get_attendance_adjustment_exception_details('R');
+        $attendance_adjustment_approval_exception_details = $api->get_attendance_adjustment_exception_details('A');
+
+        for($i = 0; $i < count($attendance_creation_recommendation_exception_details); $i++) {
+            $attendance_creation_recommendation_exception .= $attendance_creation_recommendation_exception_details[$i]['EMPLOYEE_ID'];
+
+            if($i != (count($attendance_creation_recommendation_exception_details) - 1)){
+                $attendance_creation_recommendation_exception .= ',';
+            }
+        }
+
+        for($i = 0; $i < count($attendance_creation_approval_exception_details); $i++) {
+            $attendance_creation_approval_exception .= $attendance_creation_approval_exception_details[$i]['EMPLOYEE_ID'];
+
+            if($i != (count($attendance_creation_approval_exception_details) - 1)){
+                $attendance_creation_approval_exception .= ',';
+            }
+        }
+
+        for($i = 0; $i < count($attendance_adjustment_recommendation_exception_details); $i++) {
+            $attendance_adjustment_recommendation_exception .= $attendance_adjustment_recommendation_exception_details[$i]['EMPLOYEE_ID'];
+
+            if($i != (count($attendance_adjustment_recommendation_exception_details) - 1)){
+                $attendance_adjustment_recommendation_exception .= ',';
+            }
+        }
+
+        for($i = 0; $i < count($attendance_adjustment_approval_exception_details); $i++) {
+            $attendance_adjustment_approval_exception .= $attendance_adjustment_approval_exception_details[$i]['EMPLOYEE_ID'];
+
+            if($i != (count($attendance_adjustment_approval_exception_details) - 1)){
+                $attendance_adjustment_approval_exception .= ',';
+            }
+        }
+
+        $response[] = array(
+            'MAX_ATTENDANCE' => $attendance_setting_details[0]['MAX_ATTENDANCE'] ?? 1,
+            'LATE_GRACE_PERIOD' => $attendance_setting_details[0]['LATE_GRACE_PERIOD'] ?? 1,
+            'TIME_OUT_INTERVAL' => $attendance_setting_details[0]['TIME_OUT_INTERVAL'] ?? 1,
+            'LATE_POLICY' => $attendance_setting_details[0]['LATE_POLICY'] ?? 0,
+            'EARLY_LEAVING_POLICY' => $attendance_setting_details[0]['EARLY_LEAVING_POLICY'] ?? 0,
+            'OVERTIME_POLICY' => $attendance_setting_details[0]['OVERTIME_POLICY'] ?? 0,
+            'ATTENDANCE_ADJUSTMENT_RECOMMENDATION' => $attendance_setting_details[0]['ATTENDANCE_ADJUSTMENT_RECOMMENDATION'] ?? 0,
+            'ATTENDANCE_ADJUSTMENT_APPROVAL' => $attendance_setting_details[0]['ATTENDANCE_ADJUSTMENT_APPROVAL'] ?? 0,
+            'ATTENDANCE_CREATION_RECOMMENDATION' => $attendance_setting_details[0]['ATTENDANCE_CREATION_RECOMMENDATION'] ?? 0,
+            'ATTENDANCE_CREATION_APPROVAL' => $attendance_setting_details[0]['ATTENDANCE_CREATION_APPROVAL'] ?? 0,
+            'ATTENDANCE_CREATION_RECOMMENDATION_EXCEPTION' => $attendance_creation_recommendation_exception,
+            'ATTENDANCE_CREATION_APPROVAL_EXCEPTION' => $attendance_creation_approval_exception,
+            'ATTENDANCE_ADJUSTMENT_RECOMMENDATION_EXCEPTION' => $attendance_adjustment_recommendation_exception,
+            'ATTENDANCE_ADJUSTMENT_APPROVAL_EXCEPTION' => $attendance_adjustment_approval_exception,
+        );
+
+        echo json_encode($response);
     }
     # -------------------------------------------------------------
 

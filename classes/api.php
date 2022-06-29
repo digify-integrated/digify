@@ -1077,6 +1077,31 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : check_attendance_setting_exist
+    # Purpose    : Checks if the attendance setting exists.
+    #
+    # Returns    : Number
+    #
+    # -------------------------------------------------------------
+    public function check_attendance_setting_exist($attendance_setting_id){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL check_attendance_setting_exist(:attendance_setting_id)');
+            $sql->bindValue(':attendance_setting_id', $attendance_setting_id);
+
+            if($sql->execute()){
+                $row = $sql->fetch();
+
+                return $row['TOTAL'];
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Update methods
     # -------------------------------------------------------------
     
@@ -3331,6 +3356,115 @@ class Api{
         }
     }
     # -------------------------------------------------------------
+    
+    # -------------------------------------------------------------
+    #
+    # Name       : update_employee_working_hours
+    # Purpose    : Updates employee working hours.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function update_employee_working_hours($employee_id, $working_hours_id, $username){
+        if ($this->databaseConnection()) {
+            $employee_details = $this->get_employee_details($employee_id);
+            $transaction_log_id = $employee_details[0]['TRANSACTION_LOG_ID'] ?? null;
+
+            $sql = $this->db_connection->prepare('CALL update_employee_working_hours(:employee_id, :working_hours_id)');
+            $sql->bindValue(':employee_id', $employee_id);
+            $sql->bindValue(':working_hours_id', $working_hours_id);
+        
+            if($sql->execute()){
+                $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated employee working hours.');
+                                    
+                if($insert_transaction_log){
+                    return true;
+                }
+                else{
+                    return $insert_transaction_log;
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : update_attendance_setting
+    # Purpose    : Updates attendance setting.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function update_attendance_setting($attendance_setting_id, $maximum_attendance, $late_grace_period, $time_out_interval, $late_policy, $early_leaving_policy, $overtime_policy, $attendance_adjustment_recommendation, $attendance_adjustment_approval, $attendance_creation_recommendation, $attendance_creation_approval, $username){
+        if ($this->databaseConnection()) {
+            $record_log = 'UPD->' . $username . '->' . date('Y-m-d h:i:s');
+            $attendance_setting_details = $this->get_attendance_setting_details($attendance_setting_id);
+            
+            if(!empty($attendance_setting_details[0]['TRANSACTION_LOG_ID'])){
+                $transaction_log_id = $attendance_setting_details[0]['TRANSACTION_LOG_ID'];
+            }
+            else{
+                # Get transaction log id
+                $transaction_log_system_parameter = $this->get_system_parameter(2, 1);
+                $transaction_log_parameter_number = $transaction_log_system_parameter[0]['PARAMETER_NUMBER'];
+                $transaction_log_id = $transaction_log_system_parameter[0]['ID'];
+            }
+
+            $sql = $this->db_connection->prepare('CALL update_attendance_setting(:attendance_setting_id, :maximum_attendance, :late_grace_period, :time_out_interval, :late_policy, :early_leaving_policy, :overtime_policy, :attendance_adjustment_recommendation, :attendance_adjustment_approval, :attendance_creation_recommendation, :attendance_creation_approval, :transaction_log_id, :record_log)');
+            $sql->bindValue(':attendance_setting_id', $attendance_setting_id);
+            $sql->bindValue(':maximum_attendance', $maximum_attendance);
+            $sql->bindValue(':late_grace_period', $late_grace_period);
+            $sql->bindValue(':time_out_interval', $time_out_interval);
+            $sql->bindValue(':late_policy', $late_policy);
+            $sql->bindValue(':early_leaving_policy', $early_leaving_policy);
+            $sql->bindValue(':overtime_policy', $overtime_policy);
+            $sql->bindValue(':attendance_adjustment_recommendation', $attendance_adjustment_recommendation);
+            $sql->bindValue(':attendance_adjustment_approval', $attendance_adjustment_approval);
+            $sql->bindValue(':attendance_creation_recommendation', $attendance_creation_recommendation);
+            $sql->bindValue(':attendance_creation_approval', $attendance_creation_approval);
+            $sql->bindValue(':transaction_log_id', $transaction_log_id);
+            $sql->bindValue(':record_log', $record_log);
+        
+            if($sql->execute()){
+                if(!empty($attendance_setting_details[0]['TRANSACTION_LOG_ID'])){
+                    $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated attendance setting.');
+                                    
+                    if($insert_transaction_log){
+                        return true;
+                    }
+                    else{
+                        return $insert_transaction_log;
+                    }
+                }
+                else{
+                    # Update transaction log value
+                    $update_system_parameter_value = $this->update_system_parameter_value($transaction_log_parameter_number, 2, $username);
+
+                    if($update_system_parameter_value){
+                        $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated attendance setting.');
+                                    
+                        if($insert_transaction_log){
+                            return true;
+                        }
+                        else{
+                            return $insert_transaction_log;
+                        }
+                    }
+                    else{
+                        return $update_system_parameter_value;
+                    }
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
 
     # -------------------------------------------------------------
     #   Insert methods
@@ -5019,6 +5153,117 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : insert_attendance_setting
+    # Purpose    : Insert attendance setting.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function insert_attendance_setting($attendance_setting_id, $maximum_attendance, $late_grace_period, $time_out_interval, $late_policy, $early_leaving_policy, $overtime_policy, $attendance_adjustment_recommendation, $attendance_adjustment_approval, $attendance_creation_recommendation, $attendance_creation_approval, $username){
+        if ($this->databaseConnection()) {
+            $record_log = 'INS->' . $username . '->' . date('Y-m-d h:i:s');
+
+            # Get transaction log id
+            $transaction_log_system_parameter = $this->get_system_parameter(2, 1);
+            $transaction_log_parameter_number = $transaction_log_system_parameter[0]['PARAMETER_NUMBER'];
+            $transaction_log_id = $transaction_log_system_parameter[0]['ID'];
+
+            $sql = $this->db_connection->prepare('CALL insert_attendance_setting(:attendance_setting_id, :maximum_attendance, :late_grace_period, :time_out_interval, :late_policy, :early_leaving_policy, :overtime_policy, :attendance_adjustment_recommendation, :attendance_adjustment_approval, :attendance_creation_recommendation, :attendance_creation_approval, :transaction_log_id, :record_log)');
+            $sql->bindValue(':attendance_setting_id', $attendance_setting_id);
+            $sql->bindValue(':maximum_attendance', $maximum_attendance);
+            $sql->bindValue(':late_grace_period', $late_grace_period);
+            $sql->bindValue(':time_out_interval', $time_out_interval);
+            $sql->bindValue(':late_policy', $late_policy);
+            $sql->bindValue(':early_leaving_policy', $early_leaving_policy);
+            $sql->bindValue(':overtime_policy', $overtime_policy);
+            $sql->bindValue(':attendance_adjustment_recommendation', $attendance_adjustment_recommendation);
+            $sql->bindValue(':attendance_adjustment_approval', $attendance_adjustment_approval);
+            $sql->bindValue(':attendance_creation_recommendation', $attendance_creation_recommendation);
+            $sql->bindValue(':attendance_creation_approval', $attendance_creation_approval);
+            $sql->bindValue(':transaction_log_id', $transaction_log_id);
+            $sql->bindValue(':record_log', $record_log); 
+        
+            if($sql->execute()){
+                # Update transaction log value
+                $update_system_parameter_value = $this->update_system_parameter_value($transaction_log_parameter_number, 2, $username);
+
+                if($update_system_parameter_value){
+                    $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Insert', 'User ' . $username . ' inserted attendance setting.');
+                                
+                    if($insert_transaction_log){
+                        return true;
+                    }
+                    else{
+                        return $insert_transaction_log;
+                    }
+                }
+                else{
+                    return $update_system_parameter_value;
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : insert_attendance_creation_exception
+    # Purpose    : Insert attendance creation exception.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function insert_attendance_creation_exception($employee_id, $exception_type, $username){
+        if ($this->databaseConnection()) {
+            $record_log = 'INS->' . $username . '->' . date('Y-m-d h:i:s');
+
+            $sql = $this->db_connection->prepare('CALL insert_attendance_creation_exception(:employee_id, :exception_type, :record_log)');
+            $sql->bindValue(':employee_id', $employee_id);
+            $sql->bindValue(':exception_type', $exception_type);
+            $sql->bindValue(':record_log', $record_log); 
+        
+            if($sql->execute()){
+                return true;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : insert_attendance_adjustment_exception
+    # Purpose    : Insert attendance creation exception.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function insert_attendance_adjustment_exception($employee_id, $exception_type, $username){
+        if ($this->databaseConnection()) {
+            $record_log = 'INS->' . $username . '->' . date('Y-m-d h:i:s');
+
+            $sql = $this->db_connection->prepare('CALL insert_attendance_adjustment_exception(:employee_id, :exception_type, :record_log)');
+            $sql->bindValue(':employee_id', $employee_id);
+            $sql->bindValue(':exception_type', $exception_type);
+            $sql->bindValue(':record_log', $record_log); 
+        
+            if($sql->execute()){
+                return true;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Delete methods
     # -------------------------------------------------------------
 
@@ -5695,6 +5940,73 @@ class Api{
         if ($this->databaseConnection()) {
             $sql = $this->db_connection->prepare('CALL delete_working_hours_schedule(:working_hours_id)');
             $sql->bindValue(':working_hours_id', $working_hours_id);
+        
+            if($sql->execute()){ 
+                return true;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : delete_all_employee_working_hours
+    # Purpose    : Delete all employee working hours linked to working hours schedule.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function delete_all_employee_working_hours($working_hours_id, $username){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL delete_all_employee_working_hours(:working_hours_id)');
+            $sql->bindValue(':working_hours_id', $working_hours_id);
+        
+            if($sql->execute()){
+                return true;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : delete_all_attendance_creation_exception
+    # Purpose    : Delete working hours schedule.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function delete_all_attendance_creation_exception($username){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL delete_all_attendance_creation_exception()');
+        
+            if($sql->execute()){ 
+                return true;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : delete_all_attendance_adjustment_exception
+    # Purpose    : Delete working hours schedule.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function delete_all_attendance_adjustment_exception($username){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL delete_all_attendance_adjustment_exception()');
         
             if($sql->execute()){ 
                 return true;
@@ -6794,6 +7106,146 @@ class Api{
                         'SUNDAY_MORNING_WORK_TO' => $row['SUNDAY_MORNING_WORK_TO'],
                         'SUNDAY_AFTERNOON_WORK_FROM' => $row['SUNDAY_AFTERNOON_WORK_FROM'],
                         'SUNDAY_AFTERNOON_WORK_TO' => $row['SUNDAY_AFTERNOON_WORK_TO'],
+                        'RECORD_LOG' => $row['RECORD_LOG']
+                    );
+                }
+
+                return $response;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : get_employee_working_hours_details
+    # Purpose    : Gets the employee working hours schedule details.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_employee_working_hours_details($working_hours_id){
+        if ($this->databaseConnection()) {
+            $response = array();
+
+            $sql = $this->db_connection->prepare('CALL get_employee_working_hours_details(:working_hours_id)');
+            $sql->bindValue(':working_hours_id', $working_hours_id);
+
+            if($sql->execute()){
+                while($row = $sql->fetch()){
+                    $response[] = array(
+                        'EMPLOYEE_IMAGE' => $row['EMPLOYEE_IMAGE'],
+                        'EMPLOYEE_ID' => $row['EMPLOYEE_ID'],
+                        'FILE_AS' => $row['FILE_AS'],
+                        'JOB_POSITION' => $row['JOB_POSITION']
+                    );
+                }
+
+                return $response;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : get_attendance_setting_details
+    # Purpose    : Gets the attendance setting details.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_attendance_setting_details($attendance_setting_id){
+        if ($this->databaseConnection()) {
+            $response = array();
+
+            $sql = $this->db_connection->prepare('CALL get_attendance_setting_details(:attendance_setting_id)');
+            $sql->bindValue(':attendance_setting_id', $attendance_setting_id);
+
+            if($sql->execute()){
+                while($row = $sql->fetch()){
+                    $response[] = array(
+                        'MAX_ATTENDANCE' => $row['MAX_ATTENDANCE'],
+                        'LATE_GRACE_PERIOD' => $row['LATE_GRACE_PERIOD'],
+                        'TIME_OUT_INTERVAL' => $row['TIME_OUT_INTERVAL'],
+                        'LATE_POLICY' => $row['LATE_POLICY'],
+                        'EARLY_LEAVING_POLICY' => $row['EARLY_LEAVING_POLICY'],
+                        'OVERTIME_POLICY' => $row['OVERTIME_POLICY'],
+                        'ATTENDANCE_ADJUSTMENT_RECOMMENDATION' => $row['ATTENDANCE_ADJUSTMENT_RECOMMENDATION'],
+                        'ATTENDANCE_ADJUSTMENT_APPROVAL' => $row['ATTENDANCE_ADJUSTMENT_APPROVAL'],
+                        'ATTENDANCE_CREATION_RECOMMENDATION' => $row['ATTENDANCE_CREATION_RECOMMENDATION'],
+                        'ATTENDANCE_CREATION_APPROVAL' => $row['ATTENDANCE_CREATION_APPROVAL'],
+                        'TRANSACTION_LOG_ID' => $row['TRANSACTION_LOG_ID'],
+                        'RECORD_LOG' => $row['RECORD_LOG']
+                    );
+                }
+
+                return $response;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : get_attendance_creation_exception_details
+    # Purpose    : Gets the attendance creation exception details.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_attendance_creation_exception_details($exception_type){
+        if ($this->databaseConnection()) {
+            $response = array();
+
+            $sql = $this->db_connection->prepare('CALL get_attendance_creation_exception_details(:exception_type)');
+            $sql->bindValue(':exception_type', $exception_type);
+
+            if($sql->execute()){
+                while($row = $sql->fetch()){
+                    $response[] = array(
+                        'EMPLOYEE_ID' => $row['EMPLOYEE_ID'],
+                        'RECORD_LOG' => $row['RECORD_LOG']
+                    );
+                }
+
+                return $response;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : get_attendance_adjustment_exception_details
+    # Purpose    : Gets the attendance adjustment exception details.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_attendance_adjustment_exception_details($exception_type){
+        if ($this->databaseConnection()) {
+            $response = array();
+
+            $sql = $this->db_connection->prepare('CALL get_attendance_adjustment_exception_details(:exception_type)');
+            $sql->bindValue(':exception_type', $exception_type);
+
+            if($sql->execute()){
+                while($row = $sql->fetch()){
+                    $response[] = array(
+                        'EMPLOYEE_ID' => $row['EMPLOYEE_ID'],
                         'RECORD_LOG' => $row['RECORD_LOG']
                     );
                 }

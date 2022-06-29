@@ -1041,9 +1041,17 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                         </div>';
             }
             else if($form_type == 'regular working hours form'){
-                $form .= ' <div class="row">
+                $form .= ' <div class="row mb-3">
+                                <input type="hidden" id="working_hours_id" name="working_hours_id">
+                                <label for="employee" class="col-sm-3 col-form-label">Employee</label>
+                                <div class="col-sm-9">
+                                    <select class="form-control form-select2" multiple="multiple" id="employee" name="employee">';
+                                    $form .= $api->generate_employee_options();
+                                    $form .='</select>
+                                </div>
+                            </div>
+                            <div class="row">
                                 <div class="col-md-12">
-                                    <input type="hidden" id="working_hours_id" name="working_hours_id">
                                     <div class="mb-3">
                                         <table class="table table-borderless mb-0">
                                             <thead class="table-light">
@@ -1163,6 +1171,14 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                         <input type="text" class="form-control" id="end_date" name="end_date" autocomplete="off" data-date-format="m/dd/yyyy" data-date-container="#end-date-container" data-provide="datepicker" data-date-autoclose="true">
                                         <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
                                     </div>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label for="employee" class="col-sm-3 col-form-label">Employee</label>
+                                <div class="col-sm-9">
+                                    <select class="form-control form-select2" multiple="multiple" id="employee" name="employee">';
+                                    $form .= $api->generate_employee_options();
+                                    $form .='</select>
                                 </div>
                             </div>
                             <div class="row">
@@ -1498,6 +1514,12 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                                 <span class="d-none d-sm-block">Working Hours Schedule</span>    
                                             </a>
                                         </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" data-bs-toggle="tab" href="#employee" role="tab">
+                                                <span class="d-block d-sm-none"><i class="bx bx-user"></i></span>
+                                                <span class="d-none d-sm-block">Employee</span>    
+                                            </a>
+                                        </li>
                                     </ul>
                                     <div class="tab-content p-3 text-muted">
                                         <div class="tab-pane active" id="working_hours_schedule" role="tabpanel">
@@ -1597,6 +1619,8 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                                     </tr>
                                                 </tbody>
                                             </table>
+                                        </div>
+                                        <div class="tab-pane active" id="employee" role="tabpanel">
                                         </div>
                                     </div>
                                 </div>

@@ -1683,11 +1683,12 @@ function initialize_form_validation(form_type){
         $('#regular-working-hours-form').validate({
             submitHandler: function (form) {
                 transaction = 'submit regular working hours';
+                var employee = $('#employee').val();
 
                 $.ajax({
                     type: 'POST',
                     url: 'controller.php',
-                    data: $(form).serialize() + '&username=' + username + '&transaction=' + transaction,
+                    data: $(form).serialize() + '&username=' + username + '&employee=' + employee + '&transaction=' + transaction,
                     beforeSend: function(){
                         document.getElementById('submit-form').disabled = true;
                         $('#submit-form').html('<div class="spinner-border spinner-border-sm text-light" role="status"><span rclass="sr-only"></span></div>');
@@ -2162,11 +2163,12 @@ function initialize_form_validation(form_type){
         $('#scheduled-working-hours-form').validate({
             submitHandler: function (form) {
                 transaction = 'submit scheduled working hours';
+                var employee = $('#employee').val();
 
                 $.ajax({
                     type: 'POST',
                     url: 'controller.php',
-                    data: $(form).serialize() + '&username=' + username + '&transaction=' + transaction,
+                    data: $(form).serialize() + '&username=' + username + '&employee=' + employee + '&transaction=' + transaction,
                     beforeSend: function(){
                         document.getElementById('submit-form').disabled = true;
                         $('#submit-form').html('<div class="spinner-border spinner-border-sm text-light" role="status"><span rclass="sr-only"></span></div>');
@@ -3310,50 +3312,8 @@ function display_form_details(form_type){
                 $('#sunday_morning_work_to').val(response[0].SUNDAY_MORNING_WORK_TO);
                 $('#sunday_afternoon_work_from').val(response[0].SUNDAY_AFTERNOON_WORK_FROM);
                 $('#sunday_afternoon_work_to').val(response[0].SUNDAY_AFTERNOON_WORK_TO);
-                
-                $('#working_hours_id').val(working_hours_id);
-            }
-        });
-    }
-    else if(form_type == 'regular working hours form'){
-        transaction = 'working hours schedule details';
 
-        var working_hours_id = sessionStorage.getItem('working_hours_id');
-
-        $.ajax({
-            url: 'controller.php',
-            method: 'POST',
-            dataType: 'JSON',
-            data: {working_hours_id : working_hours_id, transaction : transaction},
-            success: function(response) {
-                $('#monday_morning_work_from').val(response[0].MONDAY_MORNING_WORK_FROM);
-                $('#monday_morning_work_to').val(response[0].MONDAY_MORNING_WORK_TO);
-                $('#monday_afternoon_work_from').val(response[0].MONDAY_AFTERNOON_WORK_FROM);
-                $('#monday_afternoon_work_to').val(response[0].MONDAY_AFTERNOON_WORK_TO);
-                $('#tuesday_morning_work_from').val(response[0].TUESDAY_MORNING_WORK_FROM);
-                $('#tuesday_morning_work_to').val(response[0].TUESDAY_MORNING_WORK_TO);
-                $('#tuesday_afternoon_work_from').val(response[0].TUESDAY_AFTERNOON_WORK_FROM);
-                $('#tuesday_afternoon_work_to').val(response[0].TUESDAY_AFTERNOON_WORK_TO);
-                $('#wednesday_morning_work_from').val(response[0].WEDNESDAY_MORNING_WORK_FROM);
-                $('#wednesday_morning_work_to').val(response[0].WEDNESDAY_MORNING_WORK_TO);
-                $('#wednesday_afternoon_work_from').val(response[0].WEDNESDAY_AFTERNOON_WORK_FROM);
-                $('#wednesday_afternoon_work_to').val(response[0].WEDNESDAY_AFTERNOON_WORK_TO);
-                $('#thursday_morning_work_from').val(response[0].THURSDAY_MORNING_WORK_FROM);
-                $('#thursday_morning_work_to').val(response[0].THURSDAY_MORNING_WORK_TO);
-                $('#thursday_afternoon_work_from').val(response[0].THURSDAY_AFTERNOON_WORK_FROM);
-                $('#thursday_afternoon_work_to').val(response[0].THURSDAY_AFTERNOON_WORK_TO);
-                $('#friday_morning_work_from').val(response[0].FRIDAY_MORNING_WORK_FROM);
-                $('#friday_morning_work_to').val(response[0].FRIDAY_MORNING_WORK_TO);
-                $('#friday_afternoon_work_from').val(response[0].FRIDAY_AFTERNOON_WORK_FROM);
-                $('#friday_afternoon_work_to').val(response[0].FRIDAY_AFTERNOON_WORK_TO);
-                $('#saturday_morning_work_from').val(response[0].SATURDAY_MORNING_WORK_FROM);
-                $('#saturday_morning_work_to').val(response[0].SATURDAY_MORNING_WORK_TO);
-                $('#saturday_afternoon_work_from').val(response[0].SATURDAY_AFTERNOON_WORK_FROM);
-                $('#saturday_afternoon_work_to').val(response[0].SATURDAY_AFTERNOON_WORK_TO);
-                $('#sunday_morning_work_from').val(response[0].SUNDAY_MORNING_WORK_FROM);
-                $('#sunday_morning_work_to').val(response[0].SUNDAY_MORNING_WORK_TO);
-                $('#sunday_afternoon_work_from').val(response[0].SUNDAY_AFTERNOON_WORK_FROM);
-                $('#sunday_afternoon_work_to').val(response[0].SUNDAY_AFTERNOON_WORK_TO);
+                check_empty(response[0].EMPLOYEE.split(','), '#employee', 'select');
                 
                 $('#working_hours_id').val(working_hours_id);
             }
@@ -3400,12 +3360,14 @@ function display_form_details(form_type){
                 $('#sunday_morning_work_to').val(response[0].SUNDAY_MORNING_WORK_TO);
                 $('#sunday_afternoon_work_from').val(response[0].SUNDAY_AFTERNOON_WORK_FROM);
                 $('#sunday_afternoon_work_to').val(response[0].SUNDAY_AFTERNOON_WORK_TO);
+
+                check_empty(response[0].EMPLOYEE.split(','), '#employee', 'select');
                 
                 $('#working_hours_id').val(working_hours_id);
             }
         });
     }
-     else if(form_type == 'working hours details'){
+    else if(form_type == 'working hours details'){
         transaction = 'working hours summary details';
 
         var working_hours_id = sessionStorage.getItem('working_hours_id');
@@ -3448,6 +3410,88 @@ function display_form_details(form_type){
                 $('#sunday_morning_work_to').text(response[0].SUNDAY_MORNING_WORK_TO);
                 $('#sunday_afternoon_work_from').text(response[0].SUNDAY_AFTERNOON_WORK_FROM);
                 $('#sunday_afternoon_work_to').text(response[0].SUNDAY_AFTERNOON_WORK_TO);
+
+                document.getElementById('employee').innerHTML = response[0].EMPLOYEE_TABLE;
+            }
+        });
+    }
+    else if(form_type == 'attendance setting form'){
+        transaction = 'attendance setting details';
+  
+        $.ajax({
+            url: 'controller.php',
+            method: 'POST',
+            dataType: 'JSON',
+            data: {transaction : transaction},
+            success: function(response) {
+                $('#maximum_attendance').val(response[0].MAX_ATTENDANCE);
+                $('#late_grace_period').val(response[0].LATE_GRACE_PERIOD);
+                $('#time_out_interval').val(response[0].TIME_OUT_INTERVAL);
+                $('#late_policy').val(response[0].LATE_POLICY);
+                $('#early_leaving_policy').val(response[0].EARLY_LEAVING_POLICY);
+                $('#overtime_policy').val(response[0].OVERTIME_POLICY);
+
+                if(response[0].ATTENDANCE_CREATION_RECOMMENDATION == 1){
+                    $('#attendance_creation_recommendation').prop('checked', true);
+                }
+                else{
+                    $('#attendance_creation_recommendation').prop('checked', false);
+                }
+
+                if(response[0].ATTENDANCE_CREATION_APPROVAL == 1){
+                    $('#attendance_creation_approval').prop('checked', true);
+                }
+                else{
+                    $('#attendance_creation_approval').prop('checked', false);
+                }
+
+                if(response[0].ATTENDANCE_ADJUSTMENT_RECOMMENDATION == 1){
+                    $('#attendance_adjustment_recommendation').prop('checked', true);
+                }
+                else{
+                    $('#attendance_adjustment_recommendation').prop('checked', false);
+                }
+
+                if(response[0].ATTENDANCE_ADJUSTMENT_APPROVAL == 1){
+                    $('#attendance_adjustment_approval').prop('checked', true);
+                }
+                else{
+                    $('#attendance_adjustment_approval').prop('checked', false);
+                }
+               
+                check_empty(response[0].ATTENDANCE_CREATION_RECOMMENDATION_EXCEPTION.split(','), '#attendance_creation_recommendation_exception', 'select');
+                check_empty(response[0].ATTENDANCE_CREATION_APPROVAL_EXCEPTION.split(','), '#attendance_creation_approval_exception', 'select');
+                check_empty(response[0].ATTENDANCE_ADJUSTMENT_RECOMMENDATION_EXCEPTION.split(','), '#attendance_adjustment_recommendation_exception', 'select');
+                check_empty(response[0].ATTENDANCE_ADJUSTMENT_APPROVAL_EXCEPTION.split(','), '#attendance_adjustment_approval_exception', 'select');
+            },
+            complete: function(){
+                if($('#attendance_creation_recommendation').is(':checked')){
+                    document.getElementById('attendance_creation_recommendation_exception').disabled = false;
+                }
+                else{
+                    document.getElementById('attendance_creation_recommendation_exception').disabled = true;
+                }
+
+                if($('#attendance_creation_approval').is(':checked')){
+                    document.getElementById('attendance_creation_approval_exception').disabled = false;
+                }
+                else{
+                    document.getElementById('attendance_creation_approval_exception').disabled = true;
+                }
+
+                if($('#attendance_adjustment_recommendation').is(':checked')){
+                    document.getElementById('attendance_adjustment_recommendation_exception').disabled = false;
+                }
+                else{
+                    document.getElementById('attendance_adjustment_recommendation_exception').disabled = true;
+                }
+
+                if($('#attendance_adjustment_approval').is(':checked')){
+                    document.getElementById('attendance_adjustment_approval_exception').disabled = false;
+                }
+                else{
+                    document.getElementById('attendance_adjustment_approval_exception').disabled = true;
+                }
             }
         });
     }

@@ -56,7 +56,7 @@
 
                         <div class="row">
                             <div class="col-sm-2">
-                                <a class="dropdown-icon-item" href="department.php">
+                                <a class="dropdown-icon-item" href="employee.php">
                                     <div class="card text-center">
                                         <div class="card-body">
                                             <div class="font-size-24 text-primary mb-2">
@@ -68,13 +68,13 @@
                                 </a>
                             </div>
                             <div class="col-sm-2">
-                                <a class="dropdown-icon-item" href="#">
+                                <a class="dropdown-icon-item" href="attendance-setting.php">
                                     <div class="card text-center">
                                         <div class="card-body">
                                             <div class="font-size-24 text-primary mb-2">
-                                                <i class="bx bx-user-plus"></i>
+                                                <i class="bx bx-time"></i>
                                             </div>
-                                            <h6>Recruitment</h6>
+                                            <h6>Attendance</h6>
                                         </div>
                                     </div>
                                 </a>
@@ -96,9 +96,9 @@
                                     <div class="card text-center">
                                         <div class="card-body">
                                             <div class="font-size-24 text-primary mb-2">
-                                                <i class="bx bx-time"></i>
+                                                <i class="bx bx-user-plus"></i>
                                             </div>
-                                            <h6>Attendance</h6>
+                                            <h6>Recruitment</h6>
                                         </div>
                                     </div>
                                 </a>
