@@ -6,9 +6,11 @@
     $api = new Api;
     $page_title = 'Employee';
 
-    $page_access = $api->check_role_permissions($username, 85);
-    $add_employee = $api->check_role_permissions($username, 86);
-	$delete_employee = $api->check_role_permissions($username, 88);
+    $page_access = $api->check_role_permissions($username, 90);
+    $add_employee = $api->check_role_permissions($username, 91);
+	$delete_employee = $api->check_role_permissions($username, 93);
+	$archive_employee = $api->check_role_permissions($username, 94);
+	$unarchive_employee = $api->check_role_permissions($username, 95);
     
     $check_user_account_status = $api->check_user_account_status($username);
 
@@ -83,6 +85,14 @@
                                                             if($delete_employee > 0){
                                                                 echo '<button type="button" class="btn btn-danger waves-effect btn-label waves-light d-none multiple" id="delete-employee"><i class="bx bx-trash label-icon"></i> Delete</button>';
                                                             } 
+
+                                                            if($unarchive_employee > 0){
+                                                                echo '<button type="button" class="btn btn-success waves-effect btn-label waves-light d-none multiple-unarchive" id="unarchive-employee"><i class="bx bx-archive-out label-icon"></i> Unarchive</button>';
+                                                            }
+
+                                                            if($archive_employee > 0){
+                                                                echo '<button type="button" class="btn btn-danger waves-effect btn-label waves-light d-none multiple-archive" id="archive-employee"><i class="bx bx-archive-in label-icon"></i> Archive</button>';
+                                                            }
                                                         ?>
 
                                                         <button type="button" class="btn btn-info waves-effect btn-label waves-light" data-bs-toggle="offcanvas" data-bs-target="#filter-off-canvas" aria-controls="filter-off-canvas"><i class="bx bx-filter-alt label-icon"></i> Filter</button>

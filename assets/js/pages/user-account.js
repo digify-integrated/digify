@@ -472,15 +472,15 @@ function initialize_click_events(){
                         data: {username : username, user_code : user_code, transaction : transaction},
                         success: function (response) {
                             if(response === 'Deactivated'){
-                              show_alert('Deactivate Multiple User Account', 'The user accounts have been deactivated.', 'success');
+                              show_alert('Deactivate Multiple User Accounts', 'The user accounts have been deactivated.', 'success');
     
                               reload_datatable('#user-account-datatable');
                             }
                             else if(response === 'Not Found'){
-                              show_alert('Deactivate Multiple User Account', 'The user account does not exist.', 'info');
+                              show_alert('Deactivate Multiple User Accounts', 'The user account does not exist.', 'info');
                             }
                             else{
-                              show_alert('Deactivate Multiple User Account', response, 'error');
+                              show_alert('Deactivate Multiple User Accounts', response, 'error');
                             }
                         }
                     });

@@ -1401,7 +1401,7 @@ class Api{
     # Returns    : Number/String
     #
     # -------------------------------------------------------------
-    public function update_user_account($user_code, $password, $password_expiry_date, $username){
+    public function update_user_account($user_code, $password, $file_as, $password_expiry_date, $username){
         if ($this->databaseConnection()) {
             $record_log = 'UPD->' . $username . '->' . date('Y-m-d h:i:s');
             $user_account_details = $this->get_user_account_details($user_code);
@@ -1416,9 +1416,10 @@ class Api{
                 $transaction_log_id = $transaction_log_system_parameter[0]['ID'];
             }
 
-            $sql = $this->db_connection->prepare('CALL update_user_account(:user_code, :password, :password_expiry_date, :transaction_log_id, :record_log)');
+            $sql = $this->db_connection->prepare('CALL update_user_account(:user_code, :password, :file_as, :password_expiry_date, :transaction_log_id, :record_log)');
             $sql->bindValue(':user_code', $user_code);
             $sql->bindValue(':password', $password);
+            $sql->bindValue(':file_as', $file_as);
             $sql->bindValue(':password_expiry_date', $password_expiry_date);
             $sql->bindValue(':transaction_log_id', $transaction_log_id);
             $sql->bindValue(':record_log', $record_log);
@@ -1538,6 +1539,42 @@ class Api{
         
             if($sql->execute()){
                 $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, $log_type, $log);
+                                    
+                if($insert_transaction_log){
+                    return true;
+                }
+                else{
+                    return $insert_transaction_log;
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : update_employee_related_user
+    # Purpose    : Updates employee related user.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function update_employee_related_user($employee_id, $user_code, $username){
+        if ($this->databaseConnection()) {
+            $record_log = 'LNK->' . $username . '->' . date('Y-m-d h:i:s');
+            $employee_details = $this->get_employee_details($employee_id);
+            $transaction_log_id = $employee_details[0]['TRANSACTION_LOG_ID'];
+
+            $sql = $this->db_connection->prepare('CALL update_employee_related_user(:employee_id, :user_code, :record_log)');
+            $sql->bindValue(':employee_id', $employee_id);
+            $sql->bindValue(':user_code', $user_code);
+            $sql->bindValue(':record_log', $record_log);
+        
+            if($sql->execute()){
+                $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Link', 'User ' . $username . ' linked user account to employee.');
                                     
                 if($insert_transaction_log){
                     return true;
@@ -3129,6 +3166,55 @@ class Api{
     }
     # -------------------------------------------------------------
 
+     # -------------------------------------------------------------
+    #
+    # Name       : update_employee_type
+    # Purpose    : Updates employee type.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function update_employee_status($employee_id, $employee_status, $offboard_date, $departure_reason, $detailed_reason, $username){
+        if ($this->databaseConnection()) {
+            $employee_details = $this->get_employee_details($employee_id);
+            $transaction_log_id = $employee_details[0]['TRANSACTION_LOG_ID'];
+
+            if($employee_status == 'ACTIVE'){
+                $record_log = 'UNARC->' . $username . '->' . date('Y-m-d h:i:s');
+                $log_type = 'Unarchive';
+                $log = 'User ' . $username . ' unarchived employee.';
+            }
+            else{
+                $record_log = 'ARC->' . $username . '->' . date('Y-m-d h:i:s');
+                $log_type = 'Archive';
+                $log = 'User ' . $username . ' archive employee.';
+            }
+            
+            $sql = $this->db_connection->prepare('CALL update_employee_status(:employee_id, :employee_status, :offboard_date, :departure_reason, :detailed_reason, :record_log)');
+            $sql->bindValue(':employee_id', $employee_id);
+            $sql->bindValue(':employee_status', $employee_status);
+            $sql->bindValue(':offboard_date', $offboard_date);
+            $sql->bindValue(':departure_reason', $departure_reason);
+            $sql->bindValue(':detailed_reason', $detailed_reason);
+            $sql->bindValue(':record_log', $record_log);
+        
+            if($sql->execute()){
+                $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, $log_type, $log);
+                                    
+                if($insert_transaction_log){
+                    return true;
+                }
+                else{
+                    return $insert_transaction_log;
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
     # -------------------------------------------------------------
     #
     # Name       : update_work_permit
@@ -3718,7 +3804,7 @@ class Api{
     # Returns    : Number/String
     #
     # -------------------------------------------------------------
-    public function insert_user_account($user_code, $password, $password_expiry_date, $username){
+    public function insert_user_account($user_code, $password, $file_as, $password_expiry_date, $username){
         if ($this->databaseConnection()) {
             $record_log = 'INS->' . $username . '->' . date('Y-m-d h:i:s');
 
@@ -3727,9 +3813,10 @@ class Api{
             $transaction_log_parameter_number = $transaction_log_system_parameter[0]['PARAMETER_NUMBER'];
             $transaction_log_id = $transaction_log_system_parameter[0]['ID'];
 
-            $sql = $this->db_connection->prepare('CALL insert_user_account(:user_code, :password, :password_expiry_date, :transaction_log_id, :record_log)');
+            $sql = $this->db_connection->prepare('CALL insert_user_account(:user_code, :password, :file_as, :password_expiry_date, :transaction_log_id, :record_log)');
             $sql->bindValue(':user_code', $user_code);
             $sql->bindValue(':password', $password);
+            $sql->bindValue(':file_as', $file_as);
             $sql->bindValue(':password_expiry_date', $password_expiry_date);
             $sql->bindValue(':transaction_log_id', $transaction_log_id);
             $sql->bindValue(':record_log', $record_log); 
@@ -6019,6 +6106,29 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : delete_all_employee_related_user
+    # Purpose    : Delete all employee related user linked to user account.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function delete_all_employee_related_user($user_code, $username){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL delete_all_employee_related_user(:user_code)');
+            $sql->bindValue(':user_code', $user_code);
+        
+            if($sql->execute()){
+                return true;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Get details methods
     # -------------------------------------------------------------
 
@@ -6041,6 +6151,7 @@ class Api{
                 while($row = $sql->fetch()){
                     $response[] = array(
                         'PASSWORD' => $row['PASSWORD'],
+                        'FILE_AS' => $row['FILE_AS'],
                         'USER_STATUS' => $row['USER_STATUS'],
                         'PASSWORD_EXPIRY_DATE' => $row['PASSWORD_EXPIRY_DATE'],
                         'FAILED_LOGIN' => $row['FAILED_LOGIN'],
@@ -8354,6 +8465,41 @@ class Api{
                         $company_name = $row['COMPANY_NAME'];
     
                         $option .= "<option value='". $company_id ."'>". $company_name ."</option>";
+                    }
+    
+                    return $option;
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : generate_departure_reason_options
+    # Purpose    : Generates departure reason options of dropdown.
+    #
+    # Returns    : String
+    #
+    # -------------------------------------------------------------
+    public function generate_departure_reason_options(){
+        if ($this->databaseConnection()) {
+            $option = '';
+            
+            $sql = $this->db_connection->prepare('CALL generate_departure_reason_options()');
+
+            if($sql->execute()){
+                $count = $sql->rowCount();
+        
+                if($count > 0){
+                    while($row = $sql->fetch()){
+                        $departure_reason_id = $row['DEPARTURE_REASON_ID'];
+                        $departure_reason = $row['DEPARTURE_REASON'];
+    
+                        $option .= "<option value='". $departure_reason_id ."'>". $departure_reason ."</option>";
                     }
     
                     return $option;

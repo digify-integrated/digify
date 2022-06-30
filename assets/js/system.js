@@ -485,6 +485,9 @@ function initialize_form_validation(form_type){
                 user_code: {
                     required: true
                 },
+                file_as: {
+                    required: true
+                },
                 password: {
                     required: function(element){
                         var update = $('#update').val();
@@ -505,6 +508,9 @@ function initialize_form_validation(form_type){
             messages: {
                 user_code: {
                     required: 'Please enter the username',
+                },
+                file_as: {
+                    required: 'Please enter the name',
                 },
                 password: {
                     required: 'Please enter the password',
@@ -2651,6 +2657,144 @@ function initialize_form_validation(form_type){
             }
         });
     }
+    else if(form_type == 'archive employee form'){
+        $('#archive-employee-form').validate({
+            submitHandler: function (form) {
+                transaction = 'archive employee';
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'controller.php',
+                    data: $(form).serialize() + '&username=' + username + '&transaction=' + transaction,
+                    beforeSend: function(){
+                        document.getElementById('submit-form').disabled = true;
+                        $('#submit-form').html('<div class="spinner-border spinner-border-sm text-light" role="status"><span rclass="sr-only"></span></div>');
+                    },
+                    success: function (response) {
+                        if(response === 'Archived'){
+                            show_alert('Archive Employee Success', 'The employee has been archived.', 'success');
+
+                            $('#System-Modal').modal('hide');
+                            reload_datatable('#employee-datatable');
+                        }
+                        else{
+                            show_alert('Archive Employee Error', response, 'error');
+                        }
+                    },
+                    complete: function(){
+                        document.getElementById('submit-form').disabled = false;
+                        $('#submit-form').html('Submit');
+                    }
+                });
+                return false;
+            },
+            rules: {
+                departure_reason: {
+                    required: true         
+                },
+                departure_date: {
+                    required: true         
+                },
+            },
+            messages: {
+                departure_reason: {
+                    required: 'Please choose the departure reason',
+                },
+                departure_date: {
+                    required: 'Please choose the departure date',
+                },
+            },
+            errorPlacement: function(label, element) {
+                if((element.hasClass('select2') || element.hasClass('form-select2')) && element.next('.select2-container').length) {
+                    label.insertAfter(element.next('.select2-container'));
+                }
+                else if(element.parent('.input-group').length){
+                    label.insertAfter(element.parent());
+                }
+                else{
+                    label.insertAfter(element);
+                }
+            },
+            highlight: function(element) {
+                $(element).parent().addClass('has-danger');
+                $(element).addClass('form-control-danger');
+            },
+            success: function(label,element) {
+                $(element).parent().removeClass('has-danger')
+                $(element).removeClass('form-control-danger')
+                label.remove();
+            }
+        });
+    }
+    else if(form_type == 'archive multiple employee form'){
+        $('#archive-multiple-employee-form').validate({
+            submitHandler: function (form) {
+                transaction = 'archive multiple employee';
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'controller.php',
+                    data: $(form).serialize() + '&username=' + username + '&transaction=' + transaction,
+                    beforeSend: function(){
+                        document.getElementById('submit-form').disabled = true;
+                        $('#submit-form').html('<div class="spinner-border spinner-border-sm text-light" role="status"><span rclass="sr-only"></span></div>');
+                    },
+                    success: function (response) {
+                        if(response === 'Archived'){
+                            show_alert('Archive Multiple Employee Success', 'The multiple employees have been archived.', 'success');
+
+                            $('#System-Modal').modal('hide');
+                            reload_datatable('#employee-datatable');
+                        }
+                        else{
+                            show_alert('Archive Multiple Employee Error', response, 'error');
+                        }
+                    },
+                    complete: function(){
+                        document.getElementById('submit-form').disabled = false;
+                        $('#submit-form').html('Submit');
+                    }
+                });
+                return false;
+            },
+            rules: {
+                departure_reason: {
+                    required: true         
+                },
+                departure_date: {
+                    required: true         
+                },
+            },
+            messages: {
+                departure_reason: {
+                    required: 'Please choose the departure reason',
+                },
+                departure_date: {
+                    required: 'Please choose the departure date',
+                },
+            },
+            errorPlacement: function(label, element) {
+                if((element.hasClass('select2') || element.hasClass('form-select2')) && element.next('.select2-container').length) {
+                    label.insertAfter(element.next('.select2-container'));
+                }
+                else if(element.parent('.input-group').length){
+                    label.insertAfter(element.parent());
+                }
+                else{
+                    label.insertAfter(element);
+                }
+            },
+            highlight: function(element) {
+                $(element).parent().addClass('has-danger');
+                $(element).addClass('form-control-danger');
+            },
+            success: function(label,element) {
+                $(element).parent().removeClass('has-danger')
+                $(element).removeClass('form-control-danger')
+                label.remove();
+            }
+        });
+    }
 }
 
 // Display functions
@@ -2762,8 +2906,10 @@ function display_form_details(form_type){
             data: {user_code : user_code, transaction : transaction},
             success: function(response) {
                 $('#user_code').val(user_code);
+                $('#file_as').val(response[0].FILE_AS);
                 $('#update').val('1');
 
+                check_empty(response[0].EMPLOYEE_ID, '#related_employee', 'select');
                 check_empty(response[0].ROLES.split(','), '#role', 'select');
             },
             complete: function(){
@@ -2783,6 +2929,7 @@ function display_form_details(form_type){
             data: {user_code : user_code, transaction : transaction},
             success: function(response) {
                 $('#user_code').text(user_code);
+                $('#file_as').text(response[0].FILE_AS);
                 $('#active').text(response[0].ACTIVE);
                 $('#password_expiry_date').html(response[0].PASSWORD_EXPIRY_DATE);
                 $('#failed_login').text(response[0].FAILED_LOGIN);
@@ -3709,6 +3856,11 @@ function generate_form(form_type, form_id, add, username){
 
                     $('#policy_id').val(policy_id);
                 }
+                else if(form_type == 'archive employee form' || form_type == 'archive multiple employee form'){
+                    var employee_id = sessionStorage.getItem('employee_id');
+
+                    $('#employee_id').val(employee_id);
+                }
             }
 
             initialize_elements();
@@ -3966,6 +4118,7 @@ function check_table_multiple_button(){
         var unpaid_array = [];
         var send_array = [];
         var print_array = [];
+        var archive_array = [];
         
         $(".datatable-checkbox-children").each(function () {
             var cancel_data = $(this).data('cancel');
@@ -3981,6 +4134,7 @@ function check_table_multiple_button(){
             var unpaid = $(this).data('unpaid');
             var send = $(this).data('send');
             var print = $(this).data('print');
+            var archive = $(this).data('archive');
 
             if($(this).prop('checked') === true){
                 lock_array.push(lock);
@@ -3996,6 +4150,7 @@ function check_table_multiple_button(){
                 unpaid_array.push(unpaid);
                 send_array.push(send);
                 print_array.push(print);
+                archive_array.push(archive);
             }
         });
 
@@ -4014,6 +4169,8 @@ function check_table_multiple_button(){
         var unpaid_checker = arr => arr.every(v => v === 1);
         var send_checker = arr => arr.every(v => v === 1);
         var print_checker = arr => arr.every(v => v === 1);
+        var archive_checker = arr => arr.every(v => v === 1);
+        var unarchive_checker = arr => arr.every(v => v === 0);
         
         if(lock_checker(lock_array) || unlock_checker(lock_array)){
             if(lock_checker(lock_array)){
@@ -4029,6 +4186,22 @@ function check_table_multiple_button(){
         else{
             $('.multiple-lock').addClass('d-none');
             $('.multiple-unlock').addClass('d-none');
+        }
+
+        if(archive_checker(archive_array) || unarchive_checker(archive_array)){
+            if(archive_checker(archive_array)){
+                $('.multiple-archive').removeClass('d-none');
+                $('.multiple-unarchive').addClass('d-none');
+            }
+
+            if(unarchive_checker(archive_array)){
+                $('.multiple-archive').addClass('d-none');
+                $('.multiple-unarchive').removeClass('d-none');
+            }
+        }
+        else{
+            $('.multiple-archive').addClass('d-none');
+            $('.multiple-unarchive').addClass('d-none');
         }
 
         if(activate_checker(active_array) || deactivate_checker(active_array)){
@@ -4225,6 +4398,8 @@ function hide_multiple_buttons(){
     $('.multiple-approve').addClass('d-none');
     $('.multiple-send').addClass('d-none');
     $('.multiple-print').addClass('d-none');
+    $('.multiple-unarchive').addClass('d-none');
+    $('.multiple-archive').addClass('d-none');
 }
 
 // Form validation rules

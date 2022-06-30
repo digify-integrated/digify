@@ -221,10 +221,12 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
     # Submit user account
     else if($transaction == 'submit user account'){
-        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['user_code']) && !empty($_POST['user_code']) && isset($_POST['password']) && isset($_POST['role'])){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['file_as']) && !empty($_POST['file_as']) && isset($_POST['user_code']) && !empty($_POST['user_code']) && isset($_POST['password']) && isset($_POST['related_employee']) && isset($_POST['role'])){
             $username = $_POST['username'];
+            $file_as = $_POST['file_as'];
             $user_code = $_POST['user_code'];
             $password = $_POST['password'];
+            $related_employee = $_POST['related_employee'];
             $roles = explode(',', $_POST['role']);
             $password_expiry_date = $api->format_date('Y-m-d', $system_date, '+6 months');
 
@@ -235,9 +237,22 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
             $check_user_account_exist = $api->check_user_account_exist($user_code);
 
             if($check_user_account_exist > 0){
-                $update_user_account = $api->update_user_account($user_code, $password, $password_expiry_date, $username);
+                $update_user_account = $api->update_user_account($user_code, $password, $file_as, $password_expiry_date, $username);
 
                 if($update_user_account){
+                    $delete_all_employee_related_user = $api->delete_all_employee_related_user($user_code, $username);
+
+                    if($delete_all_employee_related_user){
+                        $update_employee_related_user = $api->update_employee_related_user($related_employee, $user_code, $username);
+
+                        if(!$update_employee_related_user){
+                            $error = $update_employee_related_user;
+                        }
+                    }
+                    else{
+                        $error = $delete_all_user_account_role;
+                    }
+
                     $delete_all_user_account_role = $api->delete_all_user_account_role($user_code);
 
                     if($delete_all_user_account_role){
@@ -266,7 +281,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                 }
             }
             else{
-                $insert_user_account = $api->insert_user_account($user_code, $password, $password_expiry_date, $username);
+                $insert_user_account = $api->insert_user_account($user_code, $password, $file_as, $password_expiry_date, $username);
 
                 if($insert_user_account){
                     foreach($roles as $role){
@@ -1207,8 +1222,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
     # Submit employee
     else if($transaction == 'submit employee'){
-        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['employee_id']) && isset($_POST['first_name']) && !empty($_POST['first_name']) && isset($_POST['middle_name']) && isset($_POST['last_name']) && !empty($_POST['last_name'])
-        && isset($_POST['suffix']) && isset($_POST['job_position']) && isset($_POST['department']) && isset($_POST['manager']) && isset($_POST['coach']) && isset($_POST['company']) && isset($_POST['work_location']) && isset($_POST['employee_type']) && isset($_POST['working_hours']) && isset($_POST['work_email']) && isset($_POST['work_mobile']) && isset($_POST['work_telephone']) && isset($_POST['badge_id']) && isset($_POST['onboard_date']) && isset($_POST['permanency_date']) && isset($_POST['sss']) && isset($_POST['tin']) && isset($_POST['philhealth']) && isset($_POST['pagibig']) && isset($_POST['street_1']) && isset($_POST['street_2']) && isset($_POST['city']) && isset($_POST['state']) && isset($_POST['zip_code']) && isset($_POST['personal_email']) && isset($_POST['personal_mobile']) && isset($_POST['personal_telephone']) && isset($_POST['bank_account_number']) && isset($_POST['home_work_distance']) && isset($_POST['gender']) && isset($_POST['marital_status']) && isset($_POST['spouse_name']) && isset($_POST['spouse_birthday']) && isset($_POST['emergency_contact']) && isset($_POST['emergency_phone']) && isset($_POST['certificate_level']) && isset($_POST['field_of_study']) && isset($_POST['school']) && isset($_POST['identification_number']) && isset($_POST['passport_number']) && isset($_POST['birthday']) && isset($_POST['place_of_birth']) && isset($_POST['number_of_children']) && isset($_POST['nationality']) && isset($_POST['visa_number']) && isset($_POST['visa_expiry_date']) && isset($_POST['work_permit_number']) && isset($_POST['work_permit_expiry_date'])){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['employee_id']) && isset($_POST['first_name']) && !empty($_POST['first_name']) && isset($_POST['middle_name']) && isset($_POST['last_name']) && !empty($_POST['last_name']) && isset($_POST['suffix']) && isset($_POST['job_position']) && isset($_POST['department']) && isset($_POST['manager']) && isset($_POST['coach']) && isset($_POST['company']) && isset($_POST['work_location']) && isset($_POST['employee_type']) && isset($_POST['working_hours']) && isset($_POST['work_email']) && isset($_POST['work_mobile']) && isset($_POST['work_telephone']) && isset($_POST['badge_id']) && isset($_POST['onboard_date']) && isset($_POST['permanency_date']) && isset($_POST['sss']) && isset($_POST['tin']) && isset($_POST['philhealth']) && isset($_POST['pagibig']) && isset($_POST['street_1']) && isset($_POST['street_2']) && isset($_POST['city']) && isset($_POST['state']) && isset($_POST['zip_code']) && isset($_POST['personal_email']) && isset($_POST['personal_mobile']) && isset($_POST['personal_telephone']) && isset($_POST['bank_account_number']) && isset($_POST['home_work_distance']) && isset($_POST['gender']) && isset($_POST['marital_status']) && isset($_POST['spouse_name']) && isset($_POST['spouse_birthday']) && isset($_POST['emergency_contact']) && isset($_POST['emergency_phone']) && isset($_POST['certificate_level']) && isset($_POST['field_of_study']) && isset($_POST['school']) && isset($_POST['identification_number']) && isset($_POST['passport_number']) && isset($_POST['birthday']) && isset($_POST['place_of_birth']) && isset($_POST['number_of_children']) && isset($_POST['nationality']) && isset($_POST['visa_number']) && isset($_POST['visa_expiry_date']) && isset($_POST['work_permit_number']) && isset($_POST['work_permit_expiry_date'])){
             $error = '';
             $employee_image_file_type = '';
             $work_permit_file_type = '';
@@ -1429,6 +1443,9 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                     echo $error;
                 }
             }
+        }
+        else{
+            echo $_POST['company'];
         }
     }
     # -------------------------------------------------------------
@@ -3205,6 +3222,135 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #   Archive transactions
+    # -------------------------------------------------------------
+
+    # Archive employee
+    else if($transaction == 'archive employee'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['employee_id']) && !empty($_POST['employee_id']) && isset($_POST['departure_reason']) && !empty($_POST['departure_reason']) && isset($_POST['departure_date']) && !empty($_POST['departure_date']) && isset($_POST['detailed_reason'])){
+            $username = $_POST['username'];
+            $employee_id = $_POST['employee_id'];
+            $departure_reason = $_POST['departure_reason'];
+            $departure_date = $api->check_date('empty', $_POST['departure_date'], '', 'Y-m-d', '', '', '');
+            $detailed_reason = $_POST['detailed_reason'];
+
+            $check_employee_exist = $api->check_employee_exist($employee_id);
+
+            if($check_employee_exist > 0){
+                $update_employee_status = $api->update_employee_status($employee_id, 'ARCHIVED', $departure_date, $departure_reason, $detailed_reason, $username);
+    
+                if($update_employee_status){
+                    echo 'Archived';
+                }
+                else{
+                    echo $update_employee_status;
+                }
+            }
+            else{
+                echo 'Not Found';
+            }
+        }
+        else{
+            echo $_POST['departure_reason'];
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Archive multiple employee
+    else if($transaction == 'archive multiple employee'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['employee_id']) && !empty($_POST['employee_id']) && isset($_POST['departure_reason']) && !empty($_POST['departure_reason']) && isset($_POST['departure_date']) && !empty($_POST['departure_date']) && isset($_POST['detailed_reason'])){
+            $username = $_POST['username'];
+            $employee_ids = explode(',', $_POST['employee_id']);
+            $departure_reason = $_POST['departure_reason'];
+            $departure_date = $api->check_date('empty', $_POST['departure_date'], '', 'Y-m-d', '', '', '');
+            $detailed_reason = $_POST['detailed_reason'];
+
+            foreach($employee_ids as $employee_id){
+                $check_employee_exist = $api->check_employee_exist($employee_id);
+
+                if($check_employee_exist > 0){
+                    $update_employee_status = $api->update_employee_status($employee_id, 'ARCHIVED', $departure_date, $departure_reason, $detailed_reason, $username);
+                                    
+                    if(!$update_employee_status){
+                        $error = $update_employee_status;
+                    }
+                }
+                else{
+                    $error = 'Not Found';
+                }
+            }
+
+            if(empty($error)){
+                echo 'Archived';
+            }
+            else{
+                echo $error;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+     
+    # -------------------------------------------------------------
+    #   Unarchive transactions
+    # -------------------------------------------------------------
+
+    # Unarchive employee
+    else if($transaction == 'unarchive employee'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['employee_id']) && !empty($_POST['employee_id'])){
+            $username = $_POST['username'];
+            $employee_id = $_POST['employee_id'];
+
+            $check_employee_exist = $api->check_employee_exist($employee_id);
+
+            if($check_employee_exist > 0){
+                $update_employee_status = $api->update_employee_status($employee_id, 'ACTIVE', null, null, null, $username);
+    
+                if($update_employee_status){
+                    echo 'Unarchived';
+                }
+                else{
+                    echo $update_employee_status;
+                }
+            }
+            else{
+                echo 'Not Found';
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Unarchive multiple employee
+    else if($transaction == 'unarchive multiple employee'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['employee_id'])){
+            $username = $_POST['username'];
+            $employee_ids = $_POST['employee_id'];
+
+            foreach($employee_ids as $employee_id){
+                $check_employee_exist = $api->check_employee_exist($employee_id);
+
+                if($check_employee_exist > 0){
+                    $update_employee_status = $api->update_employee_status($employee_id, 'ACTIVE', null, null, null, $username);
+                                    
+                    if(!$update_employee_status){
+                        $error = $update_employee_status;
+                    }
+                }
+                else{
+                    $error = 'Not Found';
+                }
+            }
+
+            if(empty($error)){
+                echo 'Unarchived';
+            }
+            else{
+                echo $error;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Get details transactions
     # -------------------------------------------------------------
 
@@ -3277,7 +3423,9 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
         if(isset($_POST['user_code']) && !empty($_POST['user_code'])){
             $roles = '';
             $user_code = $_POST['user_code'];
+            $user_account_details = $api->get_user_account_details($user_code);
             $role_user_details = $api->get_user_account_role_details('', $user_code);
+            $employee_details = $api->get_employee_details($user_code);
 
             for($i = 0; $i < count($role_user_details); $i++) {
                 $roles .= $role_user_details[$i]['ROLE_ID'];
@@ -3288,7 +3436,9 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
             }
 
             $response[] = array(
-                'ROLES' => $roles
+                'EMPLOYEE_ID' => $employee_details[0]['EMPLOYEE_ID'] ?? null,
+                'FILE_AS' => $user_account_details[0]['FILE_AS'],
+                'ROLES' => $roles,
             );
 
             echo json_encode($response);
@@ -3318,6 +3468,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
             $account_status = $api->get_user_account_status($user_account_details[0]['USER_STATUS'])[0]['STATUS'];
 
             $response[] = array(
+                'FILE_AS' => $user_account_details[0]['FILE_AS'],
                 'ACTIVE' => $account_status,
                 'PASSWORD_EXPIRY_DATE' => $api->check_date('empty', $user_account_details[0]['PASSWORD_EXPIRY_DATE'], '', 'F d, Y', '', '', ''),
                 'FAILED_LOGIN' => $user_account_details[0]['FAILED_LOGIN'],

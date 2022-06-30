@@ -134,13 +134,30 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                             <div class="col-md-12">
                                 <div class="mb-3">
                                     <input type="hidden" id="update" value="0">
-                                    <label for="user_code" class="form-label">Username <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control form-maxlength" autocomplete="off" id="user_code" name="user_code" maxlength="50">
+                                    <label for="file_as" class="form-label">Name <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control form-maxlength" autocomplete="off" id="file_as" name="file_as" maxlength="300">
                                 </div>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label for="role" class="form-label">Related Employee</label>
+                                    <select class="form-control form-select2" id="related_employee" name="related_employee">
+                                    <option value="">--</option>';
+                                    $form .= $api->generate_employee_options();
+                                    $form .='</select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="user_code" class="form-label">Username <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control form-maxlength" autocomplete="off" id="user_code" name="user_code" maxlength="50">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="password" class="form-label">Password</label>
                                     <div class="input-group auth-pass-inputgroup">
@@ -201,7 +218,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                 <div class="mb-3">
                                     <label class="form-label">System Type <span class="text-danger">*</span></label>
                                     <select class="form-control form-select2" id="system_type" name="system_type">
-                                    <option></option>';
+                                    <option value="">--</option>';
                                     $form .= $api->generate_system_code_options('SYSTYPE');
                                     $form .='</select>
                                 </div>
@@ -356,7 +373,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                 <div class="mb-3">
                                     <label class="form-label">Country <span class="text-danger">*</span></label>
                                     <select class="form-control form-select2" id="country" name="country">
-                                    <option></option>';
+                                    <option value="">--</option>';
                                     $form .= $api->generate_country_options();
                                     $form .='</select>
                                 </div>
@@ -460,7 +477,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                 <div class="mb-3">
                                     <label class="form-label">Parent Department</label>
                                     <select class="form-control form-select2" id="parent_department" name="parent_department">
-                                    <option></option>';
+                                    <option value="">--</option>';
                                     $form .= $api->generate_system_code_options('SYSTYPE');
                                     $form .='</select>
                                 </div>
@@ -469,7 +486,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                 <div class="mb-3">
                                     <label class="form-label">Manager</label>
                                     <select class="form-control form-select2" id="manager" name="manager">
-                                    <option></option>';
+                                    <option value="">--</option>';
                                     $form .= $api->generate_system_code_options('SYSTYPE');
                                     $form .='</select>
                                 </div>
@@ -596,7 +613,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                 <div class="mb-3">
                                     <label class="form-label">Suffix</label>
                                     <select class="form-control form-select2" id="suffix" name="suffix">
-                                    <option></option>';
+                                    <option value="">--</option>';
                                     $form .= $api->generate_system_code_options('SUFFIX');
                                     $form .='</select>
                                 </div>
@@ -607,7 +624,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                 <div class="mb-3">
                                     <label for="job_position" class="form-label">Job Position</label>
                                     <select class="form-control form-select2" id="job_position" name="job_position">
-                                    <option></option>';
+                                    <option value="">--</option>';
                                     $form .= $api->generate_job_position_options();
                                     $form .='</select>
                                 </div>
@@ -645,7 +662,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                     <label for="department" class="col-sm-4 col-form-label">Department</label>
                                     <div class="col-sm-8">
                                         <select class="form-control form-select2" id="department" name="department">
-                                        <option></option>';
+                                        <option value="">--</option>';
                                         $form .= $api->generate_department_options();
                                         $form .='</select>
                                     </div>
@@ -654,7 +671,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                     <label for="manager" class="col-sm-4 col-form-label">Manager</label>
                                     <div class="col-sm-8">
                                         <select class="form-control form-select2" id="manager" name="manager">
-                                        <option></option>';
+                                        <option value="">--</option>';
                                         $form .= $api->generate_employee_options();
                                         $form .='</select>
                                     </div>
@@ -663,7 +680,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                     <label for="coach" class="col-sm-4 col-form-label">Coach</label>
                                     <div class="col-sm-8">
                                         <select class="form-control form-select2" id="coach" name="coach">
-                                        <option></option>';
+                                        <option value="">--</option>';
                                         $form .= $api->generate_employee_options();
                                         $form .='</select>
                                     </div>
@@ -707,7 +724,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                                     <label for="company" class="col-sm-3 col-form-label">Company</label>
                                                     <div class="col-sm-9">
                                                         <select class="form-control form-select2" id="company" name="company">
-                                                        <option></option>';
+                                                        <option value="">--</option>';
                                                         $form .= $api->generate_company_options();
                                                         $form .='</select>
                                                     </div>
@@ -734,7 +751,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                                     <label for="work_location" class="col-sm-3 col-form-label">Work Location</label>
                                                     <div class="col-sm-9">
                                                         <select class="form-control form-select2" id="work_location" name="work_location">
-                                                        <option></option>';
+                                                        <option value="">--</option>';
                                                         $form .= $api->generate_work_location_options();
                                                         $form .='</select>
                                                     </div>
@@ -743,7 +760,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                                     <label for="employee_type" class="col-sm-3 col-form-label">Employee Type</label>
                                                     <div class="col-sm-9">
                                                         <select class="form-control form-select2" id="employee_type" name="employee_type">
-                                                        <option></option>';
+                                                        <option value="">--</option>';
                                                         $form .= $api->generate_employee_type_options();
                                                         $form .='</select>
                                                     </div>
@@ -752,7 +769,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                                     <label for="working_hours" class="col-sm-3 col-form-label">Working Hours</label>
                                                     <div class="col-sm-9">
                                                         <select class="form-control form-select2" id="working_hours" name="working_hours">
-                                                        <option></option>';
+                                                        <option value="">--</option>';
                                                         $form .= $api->generate_working_hours_options();
                                                         $form .='</select>
                                                     </div>
@@ -859,7 +876,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                                     <label for="marital_status" class="col-sm-3 col-form-label">Marital Status</label>
                                                     <div class="col-sm-9">
                                                         <select class="form-control form-select2" id="marital_status" name="marital_status">
-                                                        <option></option>';
+                                                        <option value="">--</option>';
                                                         $form .= $api->generate_system_code_options('MARITALSTATUS');
                                                         $form .='</select>
                                                     </div>
@@ -895,7 +912,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                                     <label for="certificate_level" class="col-sm-3 col-form-label">Certificate Level</label>
                                                     <div class="col-sm-9">
                                                         <select class="form-control form-select2" id="certificate_level" name="certificate_level">
-                                                        <option></option>';
+                                                        <option value="">--</option>';
                                                         $form .= $api->generate_system_code_options('CERTIFICATELEVEL');
                                                         $form .='</select>
                                                     </div>
@@ -922,7 +939,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                                     <label for="nationality" class="col-sm-3 col-form-label">Nationality (Country)</label>
                                                     <div class="col-sm-9">
                                                         <select class="form-control form-select2" id="nationality" name="nationality">
-                                                        <option></option>';
+                                                        <option value="">--</option>';
                                                         $form .= $api->generate_country_options();
                                                         $form .='</select>
                                                     </div>
@@ -958,7 +975,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                                     <label for="gender" class="col-sm-3 col-form-label">Gender</label>
                                                     <div class="col-sm-9">
                                                         <select class="form-control form-select2" id="gender" name="gender">
-                                                        <option></option>';
+                                                        <option value="">--</option>';
                                                         $form .= $api->generate_system_code_options('GENDER');
                                                         $form .='</select>
                                                     </div>
@@ -1033,7 +1050,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                 <div class="mb-3">
                                     <label for="schedule_type" class="form-label">Schedule Type <span class="text-danger">*</span></label>
                                     <select class="form-control form-select2" id="schedule_type" name="schedule_type">
-                                    <option></option>';
+                                    <option value="">--</option>';
                                     $form .= $api->generate_system_code_options('SCHEDULETYPE');
                                     $form .='</select>
                                 </div>
@@ -1284,6 +1301,37 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                 </div>
                             </div>';
             }
+            else if($form_type == 'archive employee form' || $form_type == 'archive multiple employee form'){
+                $form .= '<div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <input type="hidden" id="employee_id" name="employee_id">
+                                    <label class="form-label">Departure Reason <span class="text-danger">*</span></label>
+                                    <select class="form-control form-select2" id="departure_reason" name="departure_reason">
+                                    <option value="">--</option>';
+                                    $form .= $api->generate_departure_reason_options();
+                                    $form .='</select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Departure Date <span class="text-danger">*</span></label>
+                                    <div class="input-group" id="departure-date-container">
+                                        <input type="text" class="form-control" id="departure_date" name="departure_date" autocomplete="off" data-date-format="m/dd/yyyy" data-date-container="#departure-date-container" data-provide="datepicker" data-date-autoclose="true">
+                                        <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label for="detailed_reason" class="form-label">Detailed Reason</label>
+                                    <textarea class="form-control form-maxlength" id="detailed_reason" name="detailed_reason" maxlength="500" rows="5"></textarea>
+                                </div>
+                            </div>
+                        </div>';
+            }
 
             $form .= '</form>';
 
@@ -1306,6 +1354,10 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
             if($element_type == 'user account details'){
                 $element = '<table class="table table-nowrap mb-0">
                                 <tbody>
+                                    <tr>
+                                        <th scope="row">Name :</th>
+                                        <td id="file_as"></td>
+                                    </tr>
                                     <tr>
                                         <th scope="row">Username :</th>
                                         <td id="user_code"></td>
@@ -1922,7 +1974,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                 $filter_start_date = $api->check_date('empty', $_POST['filter_start_date'], '', 'Y-m-d', '', '', '');
                 $filter_end_date = $api->check_date('empty', $_POST['filter_end_date'], '', 'Y-m-d', '', '', '');
 
-                $query = 'SELECT USERNAME, USER_STATUS, PASSWORD_EXPIRY_DATE, FAILED_LOGIN, TRANSACTION_LOG_ID FROM global_user_account';
+                $query = 'SELECT USERNAME, FILE_AS, USER_STATUS, PASSWORD_EXPIRY_DATE, FAILED_LOGIN, TRANSACTION_LOG_ID FROM global_user_account';
 
                 if((!empty($filter_start_date) && !empty($filter_end_date)) || $filter_user_account_status != '' || !empty($filter_user_account_lock_status)){
                     $query .= ' WHERE ';
@@ -1964,6 +2016,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                 if($sql->execute()){
                     while($row = $sql->fetch()){
                         $username = $row['USERNAME'];
+                        $file_as = $row['FILE_AS'];
                         $user_status = $row['USER_STATUS'];
                         $password_expiry_date = $api->check_date('empty', $row['PASSWORD_EXPIRY_DATE'], '', 'm/d/Y', '', '', '');
                         $failed_login = $row['FAILED_LOGIN'];
@@ -2043,7 +2096,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
     
                         $response[] = array(
                             'CHECK_BOX' => '<input class="form-check-input datatable-checkbox-children" type="checkbox" data-lock="'. $data_lock .'" data-active="'. $data_active .'" value="'. $username .'">',
-                            'FILE_AS' => $username,
+                            'FILE_AS' => $file_as . '<p class="text-muted mb-0">'. $username .'</p>',
                             'ACCOUNT_STATUS' => $account_status,
                             'LOCK_STATUS' => $lock_status,
                             'PASSWORD_EXPIRY_DATE' => $password_expiry_date . '<p class="text-muted mb-0">'. $expiry_difference .'</p>',
@@ -3016,7 +3069,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                         if($employee_status == 'ACTIVE'){
                             if($archive_employee > 0){
                                 $archive_unarchive = '<button class="btn btn-danger waves-effect waves-light archive-employee" title="Archive Employee" data-employee-id="'. $employee_id .'">
-                                <i class="bx bx-x font-size-16 align-middle"></i>
+                                <i class="bx bx-archive-in font-size-16 align-middle"></i>
                                 </button>';
                             }
                             else{
@@ -3028,7 +3081,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                         else{
                             if($unarchive_employee > 0){
                                 $archive_unarchive = '<button class="btn btn-success waves-effect waves-light unarchive-employee" title="Unarchive Employee" data-employee-id="'. $employee_id .'">
-                                <i class="bx bx-user-check font-size-16 align-middle"></i>
+                                <i class="bx bx-archive-out font-size-16 align-middle"></i>
                                 </button>';
                             }
                             else{
@@ -3052,9 +3105,6 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                             'IMAGE' => '<img class="rounded-circle avatar-xs" src="'. $employee_image .'" alt="profile">',
                             'FILE_AS' => $file_as . '<p class="text-muted mb-0">'. $job_position_name .'</p>',
                             'ACTION' => '<div class="d-flex gap-2">
-                                <button type="button" class="btn btn-primary waves-effect waves-light view-employee" data-user-code="'. $username .'" title="View Employee">
-                                    <i class="bx bx-show font-size-16 align-middle"></i>
-                                </button>
                                 '. $update .'
                                 '. $archive_unarchive .'
                                 '. $transaction_log .'

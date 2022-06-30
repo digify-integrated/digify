@@ -141,7 +141,7 @@
                                                         </div>
                                                     </div>
                                                     <div class="row mb-3">
-                                                        <label for="attendance_creation_recommendation_exception" class="col-md-3 col-form-label">Attendance Creation Recommendation Exception</label>
+                                                        <label for="attendance_creation_recommendation_exception" class="col-md-3 col-form-label">Recommendation Exception</label>
                                                         <div class="col-md-9">
                                                             <select class="form-control select2" id="attendance_creation_recommendation_exception" multiple="multiple" name="attendance_creation_recommendation_exception" disabled>
                                                                 <?php echo $api->generate_employee_options(); ?>
@@ -157,7 +157,7 @@
                                                         </div>
                                                     </div>
                                                     <div class="row mb-3">
-                                                        <label for="attendance_creation_approval_exception" class="col-md-3 col-form-label">Attendance Creation Approval Exception</label>
+                                                        <label for="attendance_creation_approval_exception" class="col-md-3 col-form-label">Approval Exception</label>
                                                         <div class="col-md-9">
                                                             <select class="form-control select2" id="attendance_creation_approval_exception" multiple="multiple" name="attendance_creation_approval_exception" disabled>
                                                                 <?php echo $api->generate_employee_options(); ?>
@@ -173,7 +173,7 @@
                                                         </div>
                                                     </div>
                                                     <div class="row mb-3">
-                                                        <label for="attendance_adjustment_recommendation_exception" class="col-md-3 col-form-label">Attendance Adjustment Recommendation Exception</label>
+                                                        <label for="attendance_adjustment_recommendation_exception" class="col-md-3 col-form-label">Recommendation Exception</label>
                                                         <div class="col-md-9">
                                                             <select class="form-control select2" id="attendance_adjustment_recommendation_exception" multiple="multiple" name="attendance_adjustment_recommendation_exception" disabled>
                                                                 <?php echo $api->generate_employee_options(); ?>
@@ -189,7 +189,7 @@
                                                         </div>
                                                     </div>
                                                     <div class="row mb-3">
-                                                        <label for="attendance_adjustment_approval_exception" class="col-md-3 col-form-label">Attendance Adjustment Approval Exception</label>
+                                                        <label for="attendance_adjustment_approval_exception" class="col-md-3 col-form-label">Approval Exception</label>
                                                         <div class="col-md-9">
                                                             <select class="form-control select2" id="attendance_adjustment_approval_exception" multiple="multiple" name="attendance_adjustment_approval_exception" disabled>
                                                                 <?php echo $api->generate_employee_options(); ?>

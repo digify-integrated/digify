@@ -3,6 +3,7 @@
 CREATE TABLE global_user_account(
 	USERNAME VARCHAR(50) PRIMARY KEY,
 	PASSWORD VARCHAR(200) NOT NULL,
+	FILE_AS VARCHAR(300) NOT NULL,
 	USER_STATUS VARCHAR(10) NOT NULL,
 	PASSWORD_EXPIRY_DATE DATE NOT NULL,
 	FAILED_LOGIN INT(1) NOT NULL,
@@ -418,7 +419,7 @@ CREATE PROCEDURE get_user_account_details(IN username VARCHAR(50))
 BEGIN
 	SET @username = username;
 
-	SET @query = 'SELECT PASSWORD, USER_STATUS, PASSWORD_EXPIRY_DATE, FAILED_LOGIN, LAST_FAILED_LOGIN, TRANSACTION_LOG_ID, RECORD_LOG FROM global_user_account WHERE USERNAME = @username';
+	SET @query = 'SELECT PASSWORD, FILE_AS, USER_STATUS, PASSWORD_EXPIRY_DATE, FAILED_LOGIN, LAST_FAILED_LOGIN, TRANSACTION_LOG_ID, RECORD_LOG FROM global_user_account WHERE USERNAME = @username';
 
 	PREPARE stmt FROM @query;
 	EXECUTE stmt;
@@ -752,18 +753,19 @@ BEGIN
 	DROP PREPARE stmt;
 END //
 
-CREATE PROCEDURE update_user_account(IN username VARCHAR(50), IN password VARCHAR(200), IN password_expiry_date DATE, IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
+CREATE PROCEDURE update_user_account(IN username VARCHAR(50), IN password VARCHAR(200), IN file_as VARCHAR (300), IN password_expiry_date DATE, IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
 BEGIN
 	SET @username = username;
 	SET @password = password;
+	SET @file_as = file_as;
 	SET @password_expiry_date = password_expiry_date;
 	SET @transaction_log_id = transaction_log_id;
 	SET @record_log = record_log;
 
 	IF @password IS NULL OR @password = '' THEN
-		SET @query = 'UPDATE global_user_account SET TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE USERNAME = @username';
+		SET @query = 'UPDATE global_user_account SET FILE_AS = @file_as, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE USERNAME = @username';
 	ELSE
-		SET @query = 'UPDATE global_user_account SET PASSWORD = @password, PASSWORD_EXPIRY_DATE = @password_expiry_date, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE USERNAME = @username';
+		SET @query = 'UPDATE global_user_account SET FILE_AS = @file_as, PASSWORD = @password, PASSWORD_EXPIRY_DATE = @password_expiry_date, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE USERNAME = @username';
     END IF;
 
 	PREPARE stmt FROM @query;
@@ -771,15 +773,16 @@ BEGIN
 	DROP PREPARE stmt;
 END //
 
-CREATE PROCEDURE insert_user_account(IN username VARCHAR(50), IN password VARCHAR(200), IN password_expiry_date DATE, IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
+CREATE PROCEDURE insert_user_account(IN username VARCHAR(50), IN password VARCHAR(200), IN file_as VARCHAR (300), IN password_expiry_date DATE, IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
 BEGIN
 	SET @username = username;
 	SET @password = password;
+	SET @file_as = file_as;
 	SET @password_expiry_date = password_expiry_date;
 	SET @transaction_log_id = transaction_log_id;
 	SET @record_log = record_log;
 
-	SET @query = 'INSERT INTO global_user_account (USERNAME, PASSWORD, USER_STATUS, PASSWORD_EXPIRY_DATE, FAILED_LOGIN, LAST_FAILED_LOGIN, TRANSACTION_LOG_ID, RECORD_LOG) VALUES(@username, @password, "ACTIVE", @password_expiry_date, 0, null, @transaction_log_id, @record_log)';
+	SET @query = 'INSERT INTO global_user_account (USERNAME, PASSWORD, FILE_AS, USER_STATUS, PASSWORD_EXPIRY_DATE, FAILED_LOGIN, LAST_FAILED_LOGIN, TRANSACTION_LOG_ID, RECORD_LOG) VALUES(@username, @password, @file_as, "ACTIVE", @password_expiry_date, 0, null, @transaction_log_id, @record_log)';
 
 	PREPARE stmt FROM @query;
 	EXECUTE stmt;
@@ -2179,6 +2182,15 @@ BEGIN
 	DROP PREPARE stmt;
 END //
 
+CREATE PROCEDURE generate_departure_reason_options()
+BEGIN
+	SET @query = 'SELECT DEPARTURE_REASON_ID, DEPARTURE_REASON FROM employee_departure_reason ORDER BY DEPARTURE_REASON';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
 CREATE PROCEDURE check_employee_exist(IN employee_id INT)
 BEGIN
 	SET @employee_id = employee_id;
@@ -2352,6 +2364,22 @@ BEGIN
 	SET @record_log = record_log;
 
 	SET @query = 'UPDATE employee_details SET EMPLOYEE_IMAGE = @employee_image, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE EMPLOYEE_ID = @employee_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE update_employee_status(IN employee_id VARCHAR(100), IN employee_status VARCHAR(100), IN offboard_date DATE, IN departure_reason VARCHAR(50), IN details_reason VARCHAR(500), IN record_log VARCHAR(100))
+BEGIN
+	SET @employee_id = employee_id;
+	SET @employee_status = employee_status;
+	SET @offboard_date = offboard_date;
+	SET @departure_reason = departure_reason;
+	SET @details_reason = details_reason;
+	SET @record_log = record_log;
+
+	SET @query = 'UPDATE employee_details SET EMPLOYEE_STATUS = @employee_status, OFFBOARD_DATE = @offboard_date, DEPARTURE_REASON = @departure_reason, DETAILED_REASON = @details_reason, RECORD_LOG = @record_log WHERE EMPLOYEE_ID = @employee_id';
 
 	PREPARE stmt FROM @query;
 	EXECUTE stmt;
@@ -2720,6 +2748,29 @@ BEGIN
 	DROP PREPARE stmt;
 END //
 
+CREATE PROCEDURE delete_all_employee_related_user(IN user_code VARCHAR(50))
+BEGIN
+	SET @user_code = user_code;
+
+	SET @query = 'UPDATE employee_details SET USERNAME = null WHERE USERNAME = @user_code';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE update_employee_related_user(IN employee_id VARCHAR(100), IN user_code VARCHAR(50), IN record_log VARCHAR(100))
+BEGIN
+	SET @employee_id = employee_id;
+	SET @user_code = user_code;
+	SET @record_log = record_log;
+
+	SET @query = 'UPDATE employee_details SET USERNAME = @user_code, RECORD_LOG = @record_log WHERE EMPLOYEE_ID = @employee_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
 
 /* Insert Transactions */
 INSERT INTO global_user_account (USERNAME, PASSWORD, USER_STATUS, PASSWORD_EXPIRY_DATE, FAILED_LOGIN, LAST_FAILED_LOGIN, TRANSACTION_LOG_ID) VALUES ('ADMIN', '68aff5412f35ed76', 'Active', '2021-12-30', 0, null, 'TL-1');

@@ -213,4 +213,124 @@ function initialize_click_events(){
         }
     });
 
+    $(document).on('click','.unarchive-employee',function() {
+        var employee_id = $(this).data('employee-id');
+        var transaction = 'unarchive employee';
+
+        Swal.fire({
+            title: 'Unarchive Employee',
+            text: 'Are you sure you want to unarchive employee?',
+            icon: 'info',
+            showCancelButton: !0,
+            confirmButtonText: 'Unarchive',
+            cancelButtonText: 'Cancel',
+            confirmButtonClass: 'btn btn-success mt-2',
+            cancelButtonClass: 'btn btn-secondary ms-2 mt-2',
+            buttonsStyling: !1
+        }).then(function(result) {
+            if (result.value) {
+                $.ajax({
+                    type: 'POST',
+                    url: 'controller.php',
+                    data: {username : username, employee_id : employee_id, transaction : transaction},
+                    success: function (response) {
+                        if(response === 'Unarchived'){
+                          show_alert('Unarchive Employee', 'The employee has been unarchived.', 'success');
+
+                          reload_datatable('#employee-datatable');
+                        }
+                        else if(response === 'Not Found'){
+                          show_alert('Unarchive Employee', 'The employee does not exist.', 'info');
+                        }
+                        else{
+                          show_alert('Unarchive Employee', response, 'error');
+                        }
+                    }
+                });
+                return false;
+            }
+        });
+    });
+
+    $(document).on('click','.archive-employee',function() {
+        var employee_id = $(this).data('employee-id');
+
+        sessionStorage.setItem('employee_id', employee_id);
+        
+        generate_modal('archive employee form', 'Archive Employee', 'R' , '0', '1', 'form', 'archive-employee-form', '1', username);
+    });
+
+    $(document).on('click','#unarchive-employee',function() {
+        var employee_id = [];
+        var transaction = 'unarchive multiple employee';
+
+        $('.datatable-checkbox-children').each(function(){
+            if($(this).is(':checked')){  
+                employee_id.push(this.value);  
+            }
+        });
+
+        if(employee_id.length > 0){
+            Swal.fire({
+                title: 'Unarchive Multiple Employee',
+                text: 'Are you sure you want to unarchive these employees?',
+                icon: 'info',
+                showCancelButton: !0,
+                confirmButtonText: 'Activate',
+                cancelButtonText: 'Cancel',
+                confirmButtonClass: 'btn btn-success mt-2',
+                cancelButtonClass: 'btn btn-secondary ms-2 mt-2',
+                buttonsStyling: !1
+            }).then(function(result) {
+                if (result.value) {
+                    $.ajax({
+                        type: 'POST',
+                        url: 'controller.php',
+                        data: {username : username, employee_id : employee_id, transaction : transaction},
+                        success: function (response) {
+                            if(response === 'Unarchived'){
+                              show_alert('Unarchive Multiple Employee', 'The employees have bee unarchived.', 'success');
+    
+                              reload_datatable('#employee-datatable');
+                            }
+                            else if(response === 'Not Found'){
+                              show_alert('Unarchive Multiple Employee', 'The employee does not exist.', 'info');
+                            }
+                            else{
+                              show_alert('Unarchive Multiple Employee', response, 'error');
+                            }
+                        }
+                    });
+                    return false;
+                }
+            });
+        }
+        else{
+            show_alert('Unarchive Multiple Employee', 'Please select the employees you want to unarchive.', 'error');
+        }
+    });
+
+    $(document).on('click','#archive-employee',function() {
+        var employee_id = [];
+
+        $('.datatable-checkbox-children').each(function(){
+            if($(this).is(':checked')){  
+                employee_id.push(this.value);  
+            }
+        });
+
+        if(employee_id.length > 0){
+            sessionStorage.setItem('employee_id', employee_id);
+            
+            generate_modal('archive multiple employee form', 'Archive Multiple Employee', 'R' , '0', '1', 'form', 'archive-multiple-employee-form', '1', username);
+        }
+        else{
+            show_alert('Archive Multiple Employees', 'Please select the employees you want to archive.', 'error');
+        }
+    });
+
+    $(document).on('click','#apply-filter',function() {
+        initialize_employee_table('#employee-datatable');
+    });
+
 }
