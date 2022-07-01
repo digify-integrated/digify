@@ -1110,7 +1110,6 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     # Submit work location
     else if($transaction == 'submit work location'){
         if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['work_location_id']) && isset($_POST['work_location']) && !empty($_POST['work_location']) && isset($_POST['street_1']) && isset($_POST['street_2']) && isset($_POST['city']) && isset($_POST['state']) && isset($_POST['zip_code']) && isset($_POST['email']) && isset($_POST['mobile']) && isset($_POST['telephone'])){
-            $file_type = '';
             $username = $_POST['username'];
             $work_location_id = $_POST['work_location_id'];
             $work_location = $_POST['work_location'];
@@ -1155,7 +1154,6 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     # Submit departure reason
     else if($transaction == 'submit departure reason'){
         if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['departure_reason_id']) && isset($_POST['departure_reason']) && !empty($_POST['departure_reason'])){
-            $file_type = '';
             $username = $_POST['username'];
             $departure_reason_id = $_POST['departure_reason_id'];
             $departure_reason = $_POST['departure_reason'];
@@ -1189,7 +1187,6 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     # Submit employee type
     else if($transaction == 'submit employee type'){
         if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['employee_type_id']) && isset($_POST['employee_type']) && !empty($_POST['employee_type'])){
-            $file_type = '';
             $username = $_POST['username'];
             $employee_type_id = $_POST['employee_type_id'];
             $employee_type = $_POST['employee_type'];
@@ -1443,9 +1440,6 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                     echo $error;
                 }
             }
-        }
-        else{
-            echo $_POST['company'];
         }
     }
     # -------------------------------------------------------------
@@ -1897,6 +1891,76 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                 }
                 else{
                     echo $error;
+                }
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Submit attendance check in
+    else if($transaction == 'submit attendance check in'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['attendance_position']) && isset($_POST['check_in_note'])){
+            $username = $_POST['username'];
+            $attendance_position = $_POST['attendance_position'];
+            $check_in_note = $_POST['check_in_note'];
+          
+            $time_in = date('Y-m-d H:i:00');
+            $time_in_behavior = $api->get_time_in_behavior($employee_id, $time_in);
+            $late = $api->get_attendance_late_total($employee_id, $time_in);
+
+            $attendance_setting_details = $api->get_attendance_setting_details(1);
+            $max_attendance = $attendance_setting_details[0]['MAX_ATTENDANCE'] ?? 1;
+            $attendance_total_by_date = $api->get_attendance_total_by_date($employee_id, date('Y-m-d'));
+            $ip_address = $api->get_ip_address();
+                
+            $notification_template_details = $api->get_notification_template_details(1);
+            $notification_title = $notification_template_details[0]['NOTIFICATION_TITLE'] ?? null;
+            $notification_message = $notification_template_details[0]['NOTIFICATION_MESSAGE'] ?? null;
+            $notification_message = str_replace('{date}', $api->check_date('empty', $time_in, '', 'F d, Y', '', '', ''), $notification_message);
+            $notification_message = str_replace('{time}', $api->check_date('empty', $time_in, '', 'h:i a', '', '', ''), $notification_message);
+    
+            if (!filter_var($ip_address, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)){
+                if($get_clock_in_total < $max_attendance){
+                    $insert_time_in = $api->insert_time_in($employee_id, $time_in, $attendance_position, $ip_address, $time_in_behavior, $time_in_note, $late, $username);
+
+                    if($insert_time_in > 0){
+                        $send_notification = $api->send_notification(1, null, $employee_id, $notification_title, $notification_message, $username);
+
+                        if($send_notification){
+                            echo 'Checked In';
+                        }
+                        else{
+                            echo $send_notification;
+                        }
+                    }
+                    else{
+                        echo $insert_time_in;
+                    }
+                }
+                else{
+                    echo 'Max Attendance';
+                }
+            }
+            else{
+                if(!empty($attendance_position)){
+                    $insert_time_in = $api->insert_time_in($employee_id, $time_in, $attendance_position, $ip_address, $time_in_behavior, $time_in_note, $late, $username);
+
+                    if($insert_time_in > 0){
+                        $send_notification = $api->send_notification(1, null, $employee_id, $notification_title, $notification_message, $username);
+
+                        if($send_notification){
+                            echo 'Checked In';
+                        }
+                        else{
+                            echo $send_notification;
+                        }
+                    }
+                    else{
+                        echo $insert_time_in;
+                    }
+                }
+                else{
+                    echo 'Location';
                 }
             }
         }

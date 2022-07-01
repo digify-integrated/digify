@@ -68,7 +68,7 @@
                                 </a>
                             </div>
                             <div class="col-sm-2">
-                                <a class="dropdown-icon-item" href="attendance-setting.php">
+                                <a class="dropdown-icon-item" href="check-in-check-out.php">
                                     <div class="card text-center">
                                         <div class="card-body">
                                             <div class="font-size-24 text-primary mb-2">

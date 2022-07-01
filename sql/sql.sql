@@ -376,6 +376,42 @@ CREATE TABLE attendance_adjustment_exception(
 	RECORD_LOG VARCHAR(100)
 );
 
+CREATE TABLE attendance_record(
+	ATTENDANCE_ID VARCHAR(100) PRIMARY KEY,
+	EMPLOYEE_ID VARCHAR(100) NOT NULL,
+	TIME_IN DATETIME,
+	TIME_IN_LOCATION VARCHAR(100),
+	TIME_IN_IP_ADDRESS VARCHAR(20),
+	TIME_IN_BY VARCHAR(100),
+	TIME_IN_BEHAVIOR VARCHAR(20),
+	TIME_IN_NOTE VARCHAR(200),
+	TIME_OUT DATETIME,
+	TIME_OUT_LOCATION VARCHAR(100),
+	TIME_OUT_IP_ADDRESS VARCHAR(20),
+	TIME_OUT_BY VARCHAR(100),
+	TIME_OUT_BEHAVIOR VARCHAR(100),
+	TIME_OUT_NOTE VARCHAR(200),
+	LATE DOUBLE,
+	EARLY_LEAVING DOUBLE,
+	OVERTIME DOUBLE,
+	TOTAL_WORKING_HOURS DOUBLE,
+	REMARKS VARCHAR(500),
+	TRANSACTION_LOG_ID VARCHAR(500),
+	RECORD_LOG VARCHAR(100)
+);
+
+CREATE TABLE global_notification(
+	NOTIFICATION_ID INT PRIMARY KEY,
+	NOTIFICATION_FROM VARCHAR(100) NOT NULL,
+	NOTIFICATION_TO VARCHAR(100),
+	STATUS INT(1),
+	NOTIFICATION_TITLE VARCHAR(200),
+	NOTIFICATION VARCHAR(1000),
+	LINK VARCHAR(500),
+	NOTIFICATION_DATE DATETIME,
+	RECORD_LOG VARCHAR(100)
+);
+
 /* Index */
 CREATE INDEX global_user_account_index ON global_user_account(USERNAME);
 CREATE INDEX global_system_parameter_index ON global_system_parameters(PARAMETER_ID);
@@ -401,6 +437,8 @@ CREATE INDEX employee_type_index ON employee_type(EMPLOYEE_TYPE_ID);
 CREATE INDEX employee_working_hours_index ON employee_working_hours(WORKING_HOURS_ID);
 CREATE INDEX employee_working_hours_schedule_index ON employee_working_hours_schedule(WORKING_HOURS_ID);
 CREATE INDEX attendance_setting_index ON attendance_setting(ATTENDANCE_SETTING_ID);
+CREATE INDEX attendance_record_index ON attendance_record(ATTENDANCE_ID);
+CREATE INDEX global_notification_index ON global_notification(NOTIFICATION_ID);
 
 /* Stored Procedure */
 
@@ -2766,6 +2804,52 @@ BEGIN
 	SET @record_log = record_log;
 
 	SET @query = 'UPDATE employee_details SET USERNAME = @user_code, RECORD_LOG = @record_log WHERE EMPLOYEE_ID = @employee_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+CREATE PROCEDURE get_recent_employee_attendance_details(IN employee_id VARCHAR(100), IN time_in DATE)
+BEGIN
+	SET @employee_id = employee_id;
+	SET @time_in = time_in;
+
+	SET @query = 'SELECT ATTENDANCE_ID, TIME_IN, TIME_IN_LOCATION, TIME_IN_IP_ADDRESS, TIME_IN_BY, TIME_IN_BEHAVIOR, TIME_IN_NOTE, TIME_OUT, TIME_OUT_LOCATION, TIME_OUT_IP_ADDRESS, TIME_OUT_BY, TIME_OUT_BEHAVIOR, TIME_OUT_NOTE, LATE, EARLY_LEAVING, OVERTIME, TOTAL_WORKING_HOURS, REMARKS, TRANSACTION_LOG_ID, RECORD_LOG FROM attendance_record WHERE EMPLOYEE_ID = @employee_id AND DATE(TIME_IN) = @time_in ORDER BY TIME_IN DESC LIMIT 1';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE get_attendance_details(IN attendance_id VARCHAR(100))
+BEGIN
+	SET @attendance_id = attendance_id;
+
+	SET @query = 'SELECT EMPLOYEE_ID, TIME_IN, TIME_IN_LOCATION, TIME_IN_IP_ADDRESS, TIME_IN_BY, TIME_IN_BEHAVIOR, TIME_IN_NOTE, TIME_OUT, TIME_OUT_LOCATION, TIME_OUT_IP_ADDRESS, TIME_OUT_BY, TIME_OUT_BEHAVIOR, TIME_OUT_NOTE, LATE, EARLY_LEAVING, OVERTIME, TOTAL_WORKING_HOURS, REMARKS, TRANSACTION_LOG_ID, RECORD_LOG FROM attendance_record WHERE ATTENDANCE_ID = @attendance_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE get_attendance_total_by_date(IN employee_id VARCHAR(100), IN time_in DATE)
+BEGIN
+	SET @employee_id = employee_id;
+	SET @time_in = time_in;
+
+	SET @query = 'SELECT COUNT(ATTENDANCE_ID) AS TOTAL FROM attendance_record WHERE EMPLOYEE_ID = @employee_id AND DATE(TIME_IN) = @time_in';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE get_notification_count(IN notification_to VARCHAR(100), IN status INT)
+BEGIN
+	SET @notification_to = notification_to;
+	SET @status = status;
+
+	SET @query = 'SELECT COUNT(NOTIFICATION_ID) AS TOTAL FROM global_notification WHERE NOTIFICATION_TO = @notification_to AND STATUS = @status';
 
 	PREPARE stmt FROM @query;
 	EXECUTE stmt;

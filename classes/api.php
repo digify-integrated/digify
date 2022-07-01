@@ -7371,6 +7371,107 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : get_recent_employee_attendance_details
+    # Purpose    : Gets the recent employee attendance details.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_recent_employee_attendance_details($employee_id, $time_in){
+        if ($this->databaseConnection()) {
+            $response = array();
+
+            $sql = $this->db_connection->prepare('CALL get_recent_employee_attendance_details(:employee_id, :time_in)');
+            $sql->bindValue(':employee_id', $employee_id);
+            $sql->bindValue(':time_in', $time_in);
+
+            if($sql->execute()){
+                while($row = $sql->fetch()){
+                    $response[] = array(
+                        'TIME_IN' => $row['TIME_IN'],
+                        'TIME_IN' => $row['TIME_IN'],
+                        'TIME_IN_LOCATION' => $row['TIME_IN_LOCATION'],
+                        'TIME_IN_IP_ADDRESS' => $row['TIME_IN_IP_ADDRESS'],
+                        'TIME_IN_BY' => $row['TIME_IN_BY'],
+                        'TIME_IN_BEHAVIOR' => $row['TIME_IN_BEHAVIOR'],
+                        'TIME_IN_NOTE' => $row['TIME_IN_NOTE'],
+                        'TIME_OUT' => $row['TIME_OUT'],
+                        'TIME_OUT_LOCATION' => $row['TIME_OUT_LOCATION'],
+                        'TIME_OUT_IP_ADDRESS' => $row['TIME_OUT_IP_ADDRESS'],
+                        'TIME_OUT_BY' => $row['TIME_OUT_BY'],
+                        'TIME_OUT_BEHAVIOR' => $row['TIME_OUT_BEHAVIOR'],
+                        'TIME_OUT_NOTE' => $row['TIME_OUT_NOTE'],
+                        'LATE' => $row['LATE'],
+                        'EARLY_LEAVING' => $row['EARLY_LEAVING'],
+                        'OVERTIME' => $row['OVERTIME'],
+                        'TOTAL_WORKING_HOURS' => $row['TOTAL_WORKING_HOURS'],
+                        'REMARKS' => $row['REMARKS'],
+                        'TRANSACTION_LOG_ID' => $row['TRANSACTION_LOG_ID'],
+                        'RECORD_LOG' => $row['RECORD_LOG']
+                    );
+                }
+
+                return $response;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : get_attendance_details
+    # Purpose    : Gets the attendance details.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_attendance_details($attendance_id){
+        if ($this->databaseConnection()) {
+            $response = array();
+
+            $sql = $this->db_connection->prepare('CALL get_attendance_details(:attendance_id)');
+            $sql->bindValue(':attendance_id', $attendance_id);
+
+            if($sql->execute()){
+                while($row = $sql->fetch()){
+                    $response[] = array(
+                        'EMPLOYEE_ID' => $row['EMPLOYEE_ID'],
+                        'TIME_IN' => $row['TIME_IN'],
+                        'TIME_IN_LOCATION' => $row['TIME_IN_LOCATION'],
+                        'TIME_IN_IP_ADDRESS' => $row['TIME_IN_IP_ADDRESS'],
+                        'TIME_IN_BY' => $row['TIME_IN_BY'],
+                        'TIME_IN_BEHAVIOR' => $row['TIME_IN_BEHAVIOR'],
+                        'TIME_IN_NOTE' => $row['TIME_IN_NOTE'],
+                        'TIME_OUT' => $row['TIME_OUT'],
+                        'TIME_OUT_LOCATION' => $row['TIME_OUT_LOCATION'],
+                        'TIME_OUT_IP_ADDRESS' => $row['TIME_OUT_IP_ADDRESS'],
+                        'TIME_OUT_BY' => $row['TIME_OUT_BY'],
+                        'TIME_OUT_BEHAVIOR' => $row['TIME_OUT_BEHAVIOR'],
+                        'TIME_OUT_NOTE' => $row['TIME_OUT_NOTE'],
+                        'LATE' => $row['LATE'],
+                        'EARLY_LEAVING' => $row['EARLY_LEAVING'],
+                        'OVERTIME' => $row['OVERTIME'],
+                        'TOTAL_WORKING_HOURS' => $row['TOTAL_WORKING_HOURS'],
+                        'REMARKS' => $row['REMARKS'],
+                        'TRANSACTION_LOG_ID' => $row['TRANSACTION_LOG_ID'],
+                        'RECORD_LOG' => $row['RECORD_LOG']
+                    );
+                }
+
+                return $response;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Get methods
     # -------------------------------------------------------------
 
@@ -7595,6 +7696,241 @@ class Api{
         }
         else{
             return $last_name . ', ' . $first_name;
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : get_attendance_total_by_date
+    # Purpose    : Gets the total attendance by date.
+    #
+    # Returns    : Number
+    #
+    # -------------------------------------------------------------
+    public function get_attendance_total_by_date($employee_id, $time_in){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL get_recent_employee_attendance_details(:employee_id, :time_in)');
+            $sql->bindValue(':employee_id', $employee_id);
+            $sql->bindValue(':time_in', $time_in);
+
+            if($sql->execute()){
+                $row = $sql->fetch();
+
+                return $row['TOTAL'] ?? 0;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : get_notification_count
+    # Purpose    : Gets the number of notifications based on employee and status.
+    #
+    # Returns    : Number
+    #
+    # -------------------------------------------------------------
+    public function get_notification_count($employee_id, $status){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL get_notification_count(:employee_id, :status)');
+            $sql->bindParam(':employee_id', $employee_id);
+            $sql->bindParam(':status', $status);
+
+            if($sql->execute()){
+                $row = $sql->fetch();
+
+                return $row['TOTAL'];
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : get_ip_address
+    # Purpose    : Returns the ip address of the client
+    #
+    # Returns    : String
+    #
+    # -------------------------------------------------------------
+    public function get_ip_address(){
+        if(!empty($_SERVER['HTTP_CLIENT_IP'])) {  
+            $ip = $_SERVER['HTTP_CLIENT_IP'];  
+        }  
+        else if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {  
+            $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];  
+        }  
+        else{  
+            $ip = $_SERVER['REMOTE_ADDR'];  
+        }  
+        
+        return $ip;  
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : get_time_in_behavior
+    # Purpose    : Returns the time in behavior.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_time_in_behavior($employee_id, $time_in){
+        $time_in_day = date('N', strtotime($time_in));
+
+        $attendance_setting_details = $this->get_attendance_setting_details(1);
+        $late_grace_period = $attendance_setting_details[0]['LATE_GRACE_PERIOD'] ?? 1;
+
+        $working_hours_schedule = $this->get_working_hours_schedule($employee_id, $time_in_date, $time_in_day);
+        $working_hours_id = $working_hours_schedule[0]['WORKING_HOURS_ID'] ?? null;
+        $morning_work_from = $working_hours_schedule[0]['MORNING_WORK_FROM'] ?? null;
+        $afternoon_work_from = $working_hours_schedule[0]['AFTERNOON_WORK_FROM'] ?? null;
+
+        if(!empty($morning_work_from)){
+            $working_hours_start = $morning_work_from;
+        }
+        else{
+            $working_hours_start = $afternoon_work_from;
+        }
+
+        $working_hours_start_late_grace_period = $this->check_date('empty', $working_hours_start, '', 'H:i:00', '+'. $late_grace_period .' minutes', '', '');
+
+        if(strtotime($time_in) < strtotime($work_shift_time_in)){
+            return 'EARLY';
+        }
+        else if(strtotime($time_in) >= strtotime($work_shift_late_allowance)){
+            return 'LATE';
+        }
+        else{
+            return 'REG';
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : get_time_out_behavior
+    # Purpose    : Returns the time out behavior.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_time_out_behavior($employee_id, $time_in_date, $time_out_date, $time_out){
+        $time_in_day = date('N', strtotime($time_in_date));        
+
+        $attendance_setting_details = $this->get_attendance_setting_details(1);
+        $overtime_policy = $attendance_setting_details[0]['OVERTIME_POLICY'] ?? 0;
+
+        $working_hours_schedule = $this->get_working_hours_schedule($employee_id, $time_in_date, $time_in_day);
+        $working_hours_id = $working_hours_schedule[0]['WORKING_HOURS_ID'] ?? null;
+        $afternoon_work_to = $working_hours_schedule[0]['AFTERNOON_WORK_TO'] ?? null;
+        $morning_work_to = $working_hours_schedule[0]['MORNING_WORK_TO'] ?? null;
+
+        if(!empty($afternoon_work_to)){
+            $working_hours_end = $afternoon_work_to;
+        }
+        else{
+            $working_hours_end = $morning_work_to;
+        }
+
+        $working_hours_start_overtime_policy = $this->check_date('empty', $working_hours_end, '', 'H:i:00', '+'. $overtime_policy .' minutes', '', '');
+
+        if(strtotime($working_hours_end) < strtotime($working_hours_end)){
+            return 'EL';
+        }
+        else if(strtotime($working_hours_end) >= strtotime($working_hours_start_overtime_policy)){
+            return 'OT';
+        }
+        else{
+            return 'REG';
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : get_working_hours_schedule
+    # Purpose    : Gets the working hours schedule.
+    #
+    # Returns    : String
+    #
+    # -------------------------------------------------------------
+    public function get_working_hours_schedule($employee_id, $date, $day){
+        if ($this->databaseConnection()) {
+            $response = array();
+
+            $employee_details = $this->get_employee_details($employee_id);
+            $working_hours = $employee_details[0]['WORKING_HOURS'];
+
+            $working_hours_details = $this->get_working_hours_details($working_hours);
+            $schedule_type = $working_hours_details[0]['SCHEDULE_TYPE'];
+
+            $work_shift_schedule_details = $this->get_working_hours_schedule_details($working_hours);
+            $start_date = $work_shift_schedule_details[0]['START_DATE'];
+            $end_date = $work_shift_schedule_details[0]['END_DATE'];
+
+            if($schedule_type == 'REGULAR' || ($schedule_type == 'SCHEDULED' && (strtotime($date) >= strtotime($start_date) && strtotime($date) <= strtotime($end_date)))){
+                switch ($day) {
+                    case 1:
+                        $morning_work_from = $work_shift_schedule_details[0]['MONDAY_MORNING_WORK_FROM'];
+                        $morning_work_to = $work_shift_schedule_details[0]['MONDAY_MORNING_WORK_TO'];
+                        $afternoon_work_from = $work_shift_schedule_details[0]['MONDAY_AFTERNOON_WORK_FROM'];
+                        $afternoon_work_to = $work_shift_schedule_details[0]['MONDAY_AFTERNOON_WORK_TO'];
+                        break;
+                    case 2:
+                        $morning_work_from = $work_shift_schedule_details[0]['TUESDAY_MORNING_WORK_FROM'];
+                        $morning_work_to = $work_shift_schedule_details[0]['TUESDAY_MORNING_WORK_TO'];
+                        $afternoon_work_from = $work_shift_schedule_details[0]['TUESDAY_AFTERNOON_WORK_FROM'];
+                        $afternoon_work_to = $work_shift_schedule_details[0]['TUESDAY_AFTERNOON_WORK_TO'];
+                        break;
+                    case 3:
+                        $morning_work_from = $work_shift_schedule_details[0]['WEDNESDAY_MORNING_WORK_FROM'];
+                        $morning_work_to = $work_shift_schedule_details[0]['WEDNESDAY_MORNING_WORK_TO'];
+                        $afternoon_work_from = $work_shift_schedule_details[0]['WEDNESDAY_AFTERNOON_WORK_FROM'];
+                        $afternoon_work_to = $work_shift_schedule_details[0]['WEDNESDAY_AFTERNOON_WORK_TO'];
+                    case 4:
+                        $morning_work_from = $work_shift_schedule_details[0]['THURSDAY_MORNING_WORK_FROM'];
+                        $morning_work_to = $work_shift_schedule_details[0]['THURSDAY_MORNING_WORK_TO'];
+                        $afternoon_work_from = $work_shift_schedule_details[0]['THURSDAY_AFTERNOON_WORK_FROM'];
+                        $afternoon_work_to = $work_shift_schedule_details[0]['THURSDAY_AFTERNOON_WORK_TO'];
+                        break;
+                    case 5:
+                        $morning_work_from = $work_shift_schedule_details[0]['FRIDAY_MORNING_WORK_FROM'];
+                        $morning_work_to = $work_shift_schedule_details[0]['FRIDAY_MORNING_WORK_TO'];
+                        $afternoon_work_from = $work_shift_schedule_details[0]['FRIDAY_AFTERNOON_WORK_FROM'];
+                        $afternoon_work_to = $work_shift_schedule_details[0]['FRIDAY_AFTERNOON_WORK_TO'];
+                        break;
+                    case 6:
+                        $morning_work_from = $work_shift_schedule_details[0]['SATURDAY_MORNING_WORK_FROM'];
+                        $morning_work_to = $work_shift_schedule_details[0]['SATURDAY_MORNING_WORK_TO'];
+                        $afternoon_work_from = $work_shift_schedule_details[0]['SATURDAY_AFTERNOON_WORK_FROM'];
+                        $afternoon_work_to = $work_shift_schedule_details[0]['SATURDAY_AFTERNOON_WORK_TO'];
+                        break;
+                    default:
+                        $morning_work_from = $work_shift_schedule_details[0]['SUNDAY_MORNING_WORK_FROM'];
+                        $morning_work_to = $work_shift_schedule_details[0]['SUNDAY_MORNING_WORK_TO'];
+                        $afternoon_work_from = $work_shift_schedule_details[0]['SUNDAY_AFTERNOON_WORK_FROM'];
+                        $afternoon_work_to = $work_shift_schedule_details[0]['SUNDAY_AFTERNOON_WORK_TO'];
+                }
+
+                $response[] = array(
+                    'WORKING_HOURS_ID' => $working_hours,
+                    'MORNING_WORK_FROM' => $morning_work_from,
+                    'MORNING_WORK_TO' => $morning_work_to,
+                    'AFTERNOON_WORK_FROM' => $afternoon_work_from,
+                    'AFTERNOON_WORK_TO' => $afternoon_work_to
+                );
+            }
+
+            return $response;
         }
     }
     # -------------------------------------------------------------
@@ -8507,6 +8843,94 @@ class Api{
             }
             else{
                 return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : generate_notification_list
+    # Purpose    : Generates employee notification list table.
+    #
+    # Returns    : String
+    #
+    # -------------------------------------------------------------
+    public function generate_notification_list($employee_id){
+        if ($this->databaseConnection()) {
+            $notification_list = '';
+            $system_date = date('Y-m-d');
+
+            $sql = $this->db_connection->prepare('SELECT NOTIFICATION_ID, NOTIFICATION_FROM, NOTIFICATION_TO, STATUS, NOTIFICATION_TITLE, NOTIFICATION, LINK, NOTIFICATION_DATE FROM global_notification WHERE NOTIFICATION_TO = :employee_id ORDER BY NOTIFICATION_DATE DESC LIMIT 20');
+            $sql->bindValue(':employee_id', $employee_id);
+        
+            if($sql->execute()){
+                $count = $sql->rowCount();
+        
+                if($count > 0){
+                    while($row = $sql->fetch()){
+                        $notification_id = trim($row['NOTIFICATION_ID']);
+                        $notification_from = trim($row['NOTIFICATION_FROM']);
+                        $notification_to = trim($row['NOTIFICATION_TO']);
+                        $status = $row['STATUS'];
+                        $notification_title = trim($row['NOTIFICATION_TITLE']);
+                        $notification = trim($row['NOTIFICATION']);
+                        $notification_date = $this->check_date('empty', $row['NOTIFICATION_DATE'], '', 'd M Y h:i:s a', '', '', '');
+                        $notification_id_encrypted = $this->encrypt_data($notification_id);
+
+                        $date_diff = round((strtotime($notification_date) - strtotime($system_date)) / (60 * 60 * 24));
+
+                        if($date_diff <= 7){
+                            $date_elapsed = $this->time_elapsed_string($notification_date);
+                        }
+                        else{
+                            $date_elapsed = $notification_date;
+                        }
+
+                        if($status == 0 || $status == 2){
+                            $text_color = 'text-primary';
+                        }
+                        else{
+                            $text_color = '';
+                        }
+
+                        if(!empty($row['LINK'])){
+                            $link = $row['LINK'];
+                        }
+                        else{
+                            $link = 'javascript: void(0);';
+                        }
+
+                        $notification_list .= '<a href="'. $link .'" class="text-reset notification-item" data-notification-id="'. $notification_id .'">
+                                                    <div class="d-flex">
+                                                        <div class="flex-shrink-0 me-3">
+                                                            <div class="avatar-xs me-3">
+                                                                <span class="avatar-title bg-info rounded-circle font-size-16">
+                                                                    <i class="bx bx-info-circle"></i>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="flex-grow-1">
+                                                            <h6 class="mb-1 '. $text_color .'" key="t-your-order">'. $notification_title .'</h6>
+                                                            <div class="font-size-12 text-muted">
+                                                                <p class="mb-1" key="t-grammer">'. $notification .'</p>
+                                                                <p class="mb-0"><i class="mdi mdi-clock-outline"></i> <span key="t-min-ago">'. $date_elapsed .'</span></p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </a>';
+                    }
+                }
+                else{
+                    $notification_list .= '<a href="javascript: void(0);" class="text-reset notification-item">
+                        <p class="mb-2 text-center" key="t-grammer">No New Notifications</p>
+                    </a>';
+                }
+
+                return $notification_list;
+            }
+            else{
+                return $sql->errorInfo();
             }
         }
     }

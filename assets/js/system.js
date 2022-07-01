@@ -2795,6 +2795,64 @@ function initialize_form_validation(form_type){
             }
         });
     }
+    else if(form_type == 'check in form'){
+        $('#check-in-form').validate({
+            submitHandler: function (form) {
+                transaction = 'submit attendance check in';
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'controller.php',
+                    data: $(form).serialize() + '&username=' + username + '&transaction=' + transaction,
+                    beforeSend: function(){
+                        document.getElementById('submit-form').disabled = true;
+                        $('#submit-form').html('<div class="spinner-border spinner-border-sm text-light" role="status"><span rclass="sr-only"></span></div>');
+                    },
+                    success: function (response) {
+                        if(response === 'Checked In'){
+                            show_alert_event('Check In Success', 'Your check in has been recorded.', 'success', 'reload');
+
+                            $('#System-Modal').modal('hide');
+                        }
+                        else if(response === 'Max Attendance'){
+                            show_alert_event('Check In Error', 'Your have reached the maximum check in for the day.', 'error', 'reload');
+                        }
+                        else if(response === 'Location'){
+                            show_alert_event('Check In Error', 'Your location cannot be determined.', 'error', 'reload');
+                        }
+                        else{
+                            show_alert('Check In Error', response, 'error');
+                        }
+                    },
+                    complete: function(){
+                        document.getElementById('submit-form').disabled = false;
+                        $('#submit-form').html('Submit');
+                    }
+                });
+                return false;
+            },
+            errorPlacement: function(label, element) {
+                if((element.hasClass('select2') || element.hasClass('form-select2')) && element.next('.select2-container').length) {
+                    label.insertAfter(element.next('.select2-container'));
+                }
+                else if(element.parent('.input-group').length){
+                    label.insertAfter(element.parent());
+                }
+                else{
+                    label.insertAfter(element);
+                }
+            },
+            highlight: function(element) {
+                $(element).parent().addClass('has-danger');
+                $(element).addClass('form-control-danger');
+            },
+            success: function(label,element) {
+                $(element).parent().removeClass('has-danger')
+                $(element).removeClass('form-control-danger')
+                label.remove();
+            }
+        });
+    }
 }
 
 // Display functions
@@ -3741,11 +3799,11 @@ function get_location(map_div) {
         if (navigator.geolocation) {
             var options = {
                 enableHighAccuracy: true,
-                timeout: 10000,
+                timeout: 1000,
                 maximumAge: 0
             };
 
-            navigator.geolocation.watchPosition(show_position, show_geolocation_error, options);
+            navigator.geolocation.getCurrentPosition(show_position, show_geolocation_error, options);
         } 
         else {
             show_alert('Geolocation Error', 'Your browser does not support geolocation.', 'error');
@@ -3784,11 +3842,11 @@ function show_position(position) {
     sessionStorage.setItem('longitude', position.coords.longitude);
 
     if ($('#attendance_position').length) {
-        $('#attendance_position').val(position.coords.longitude + ', ' + position.coords.latitude);
+        $('#attendance_position').val(position.coords.longitude + ',' + position.coords.latitude);
     }
 
     if ($('#position').length) {
-        $('#position').val(position.coords.longitude + ', ' + position.coords.latitude);
+        $('#position').val(position.coords.longitude + ',' + position.coords.latitude);
     }
 }
 
@@ -3855,6 +3913,9 @@ function generate_form(form_type, form_id, add, username){
                     var policy_id = $('#policy-id').text();
 
                     $('#policy_id').val(policy_id);
+                }
+                else if(form_type == 'check in form'){
+                    get_location('');
                 }
                 else if(form_type == 'archive employee form' || form_type == 'archive multiple employee form'){
                     var employee_id = sessionStorage.getItem('employee_id');

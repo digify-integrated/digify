@@ -1332,6 +1332,29 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                             </div>
                         </div>';
             }
+            else if($form_type == 'check in form'){
+                $form .= '<div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label for="check_in_note" class="form-label">Check In Note</label>
+                                    <input type="hidden" id="attendance_position" name="attendance_position">
+                                    <textarea class="form-control form-maxlength" id="check_in_note" name="check_in_note" maxlength="200" rows="5"></textarea>
+                                </div>
+                            </div>
+                        </div>';
+            }
+            else if($form_type == 'check out form'){
+                $form .= '<div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <input type="hidden" id="attendance_id" name="attendance_id">
+                                    <label for="check_out_note" class="form-label">Check Out Note</label>
+                                    <input type="hidden" id="attendance_position" name="attendance_position">
+                                    <textarea class="form-control form-maxlength" id="check_out_note" name="check_out_note" maxlength="200" rows="5"></textarea>
+                                </div>
+                            </div>
+                        </div>';
+            }
 
             $form .= '</form>';
 
