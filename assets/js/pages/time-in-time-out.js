@@ -9,16 +9,16 @@
 function initialize_click_events(){
     var username = $('#username').text();
 
-    $(document).on('click','#check-in',function() {
-        generate_modal('check in form', 'Check In', 'R' , '1', '1', 'form', 'check-in-form', '1', username);
+    $(document).on('click','#time-in',function() {
+        generate_modal('time in form', 'Time In', 'R' , '1', '1', 'form', 'time-in-form', '1', username);
     });
 
-    $(document).on('click','.check-out',function() {
+    $(document).on('click','.time-out',function() {
         var attendance_id = $(this).data('attendance-id');
 
         sessionStorage.setItem('attendance_id', attendance_id);
         
-        generate_modal('check out form', 'Check Out', 'R' , '1', '1', 'form', 'check-Out-form', '1', username);
+        generate_modal('time out form', 'Time Out', 'R' , '1', '1', 'form', 'time-out-form', '1', username);
     });
 
 }

@@ -91,7 +91,7 @@
                                                         <label for="late_grace_period" class="col-md-3 col-form-label">Late Grace Period <i class="bx bx-info-circle" data-bs-toggle="tooltip" data-bs-placement="top" title="This sets the grace period before the employee can be considered as late."></i> <span class="text-danger">*</span></label>
                                                         <div class="col-md-9">
                                                             <div class="input-group">
-                                                                <input id="late_grace_period" name="late_grace_period" class="form-control" type="number" min="1" value="1">
+                                                                <input id="late_grace_period" name="late_grace_period" class="form-control" type="number" min="0" value="0">
                                                                 <div class="input-group-text">minutes</div>
                                                             </div>
                                                         </div>

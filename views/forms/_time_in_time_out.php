@@ -18,25 +18,25 @@
     $time_in_details = $api->check_date('summary', $recent_employee_attendance_details[0]['TIME_IN'] ?? null, '', 'F d, Y h:i a', '', '', '');
     $time_out_details = $api->check_date('summary', $recent_employee_attendance_details[0]['TIME_OUT'] ?? null, '', 'F d, Y h:i a', '', '', '');
 
-    if($check_in_check_out > 0 && !empty($working_hours)){
+    if($time_in_time_out > 0 && !empty($working_hours)){
         $attendance_setting_details = $api->get_attendance_setting_details(1);
         $max_attendance = $attendance_setting_details[0]['MAX_ATTENDANCE'] ?? 1;
         $attendance_total_by_date = $api->get_attendance_total_by_date($employee_id, date('Y-m-d'));
 
         if($attendance_total_by_date < $max_attendance){
             if(empty($attendance_id)){
-                $attendance_guide = 'Click to check in';
+                $attendance_guide = 'Click to time in';
 
-                $button = '<button type="button" class="btn btn-success waves-effect waves-light w-lg" id="check-in">
-                                <i class="bx bx-log-in d-block font-size-16 mb-1"></i> Check In
+                $button = '<button type="button" class="btn btn-success waves-effect waves-light w-lg" id="time-in">
+                                <i class="bx bx-log-in d-block font-size-16 mb-1"></i> Time In
                             </button>';
 
             }
             else{
-                $attendance_guide = 'Click to check out';
+                $attendance_guide = 'Click to time out';
 
-                $button = '<button type="button" class="btn btn-warning waves-effect waves-light w-lg" data-attendance-id="'. $attendance_id .'" id="check-out">
-                            <i class="bx bx-log-out d-block font-size-16 mb-1"></i> Check Out
+                $button = '<button type="button" class="btn btn-warning waves-effect waves-light w-lg" data-attendance-id="'. $attendance_id .'" id="time-out">
+                            <i class="bx bx-log-out d-block font-size-16 mb-1"></i> Time Out
                         </button>';
             }
         }
@@ -75,13 +75,13 @@
                                             <div class="row">
                                                 <div class="col-6">
                                                     <div class="mb-4 text-center">
-                                                        <p class="text-muted text-truncate mb-2">Check In</p>
+                                                        <p class="text-muted text-truncate mb-2">Time In</p>
                                                         <h5 class="mb-0"><?php echo $time_in_details; ?></h5>
                                                     </div>
                                                 </div>
                                                 <div class="col-6">
                                                     <div class="mb-4 text-center">
-                                                        <p class="text-muted text-truncate mb-2">Check Out</p>
+                                                        <p class="text-muted text-truncate mb-2">Time Out</p>
                                                         <h5 class="mb-0"><?php echo $time_out_details; ?></h5>
                                                     </div>
                                                 </div>

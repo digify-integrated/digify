@@ -803,15 +803,15 @@ class Api{
 
     # -------------------------------------------------------------
     #
-    # Name       : check_interface_settings_exist
+    # Name       : time_interface_settings_exist
     # Purpose    : Checks if the interface setting exists.
     #
     # Returns    : Number
     #
     # -------------------------------------------------------------
-    public function check_interface_settings_exist($interface_setting_id){
+    public function time_interface_settings_exist($interface_setting_id){
         if ($this->databaseConnection()) {
-            $sql = $this->db_connection->prepare('CALL check_interface_settings_exist(:interface_setting_id)');
+            $sql = $this->db_connection->prepare('CALL time_interface_settings_exist(:interface_setting_id)');
             $sql->bindValue(':interface_setting_id', $interface_setting_id);
 
             if($sql->execute()){
@@ -7389,13 +7389,13 @@ class Api{
             if($sql->execute()){
                 while($row = $sql->fetch()){
                     $response[] = array(
-                        'TIME_IN' => $row['TIME_IN'],
-                        'TIME_IN' => $row['TIME_IN'],
-                        'TIME_IN_LOCATION' => $row['TIME_IN_LOCATION'],
-                        'TIME_IN_IP_ADDRESS' => $row['TIME_IN_IP_ADDRESS'],
-                        'TIME_IN_BY' => $row['TIME_IN_BY'],
-                        'TIME_IN_BEHAVIOR' => $row['TIME_IN_BEHAVIOR'],
-                        'TIME_IN_NOTE' => $row['TIME_IN_NOTE'],
+                        'time_in' => $row['time_in'],
+                        'time_in' => $row['time_in'],
+                        'time_in_LOCATION' => $row['time_in_LOCATION'],
+                        'time_in_IP_ADDRESS' => $row['time_in_IP_ADDRESS'],
+                        'time_in_BY' => $row['time_in_BY'],
+                        'time_in_BEHAVIOR' => $row['time_in_BEHAVIOR'],
+                        'time_in_NOTE' => $row['time_in_NOTE'],
                         'TIME_OUT' => $row['TIME_OUT'],
                         'TIME_OUT_LOCATION' => $row['TIME_OUT_LOCATION'],
                         'TIME_OUT_IP_ADDRESS' => $row['TIME_OUT_IP_ADDRESS'],
@@ -7440,12 +7440,12 @@ class Api{
                 while($row = $sql->fetch()){
                     $response[] = array(
                         'EMPLOYEE_ID' => $row['EMPLOYEE_ID'],
-                        'TIME_IN' => $row['TIME_IN'],
-                        'TIME_IN_LOCATION' => $row['TIME_IN_LOCATION'],
-                        'TIME_IN_IP_ADDRESS' => $row['TIME_IN_IP_ADDRESS'],
-                        'TIME_IN_BY' => $row['TIME_IN_BY'],
-                        'TIME_IN_BEHAVIOR' => $row['TIME_IN_BEHAVIOR'],
-                        'TIME_IN_NOTE' => $row['TIME_IN_NOTE'],
+                        'time_in' => $row['time_in'],
+                        'time_in_LOCATION' => $row['time_in_LOCATION'],
+                        'time_in_IP_ADDRESS' => $row['time_in_IP_ADDRESS'],
+                        'time_in_BY' => $row['time_in_BY'],
+                        'time_in_BEHAVIOR' => $row['time_in_BEHAVIOR'],
+                        'time_in_NOTE' => $row['time_in_NOTE'],
                         'TIME_OUT' => $row['TIME_OUT'],
                         'TIME_OUT_LOCATION' => $row['TIME_OUT_LOCATION'],
                         'TIME_OUT_IP_ADDRESS' => $row['TIME_OUT_IP_ADDRESS'],
@@ -7785,9 +7785,11 @@ class Api{
     # -------------------------------------------------------------
     public function get_time_in_behavior($employee_id, $time_in){
         $time_in_day = date('N', strtotime($time_in));
+        $time_in_time = $this->check_date('empty', $time_in, '', 'H:i:00', '', '', '');
+        $time_in_date = $this->check_date('empty', $time_in, '', 'Y-m-d', '', '', '');
 
         $attendance_setting_details = $this->get_attendance_setting_details(1);
-        $late_grace_period = $attendance_setting_details[0]['LATE_GRACE_PERIOD'] ?? 1;
+        $late_grace_period = $attendance_setting_details[0]['LATE_GRACE_PERIOD'] ?? 0;
 
         $working_hours_schedule = $this->get_working_hours_schedule($employee_id, $time_in_date, $time_in_day);
         $working_hours_id = $working_hours_schedule[0]['WORKING_HOURS_ID'] ?? null;
@@ -7803,10 +7805,10 @@ class Api{
 
         $working_hours_start_late_grace_period = $this->check_date('empty', $working_hours_start, '', 'H:i:00', '+'. $late_grace_period .' minutes', '', '');
 
-        if(strtotime($time_in) < strtotime($work_shift_time_in)){
+        if(strtotime($time_in_time) < strtotime($work_shift_time_in)){
             return 'EARLY';
         }
-        else if(strtotime($time_in) >= strtotime($work_shift_late_allowance)){
+        else if(strtotime($time_in_time) >= strtotime($work_shift_late_allowance)){
             return 'LATE';
         }
         else{
@@ -7823,8 +7825,11 @@ class Api{
     # Returns    : Array
     #
     # -------------------------------------------------------------
-    public function get_time_out_behavior($employee_id, $time_in_date, $time_out_date, $time_out){
-        $time_in_day = date('N', strtotime($time_in_date));        
+    public function get_time_out_behavior($employee_id, $time_in, $time_out){
+        $time_in_day = date('N', strtotime($time_in));  
+        $time_out_time = $this->check_date('empty', $time_out, '', 'H:i:00', '', '', '');     
+        $time_out_date = $this->check_date('empty', $time_out, '', 'Y-m-d', '', '', ''); 
+        $time_in_date = $this->check_date('empty', $time_in, '', 'Y-m-d', '', '', ''); 
 
         $attendance_setting_details = $this->get_attendance_setting_details(1);
         $overtime_policy = $attendance_setting_details[0]['OVERTIME_POLICY'] ?? 0;
@@ -7841,12 +7846,12 @@ class Api{
             $working_hours_end = $morning_work_to;
         }
 
-        $working_hours_start_overtime_policy = $this->check_date('empty', $working_hours_end, '', 'H:i:00', '+'. $overtime_policy .' minutes', '', '');
+        $working_hours_end_overtime_policy = $this->check_date('empty', $working_hours_end, '', 'H:i:00', '+'. $overtime_policy .' minutes', '', '');
 
-        if(strtotime($working_hours_end) < strtotime($working_hours_end)){
+        if(strtotime($time_out_date . ' ' . $time_out_time) < strtotime($time_in_date . ' ' . $working_hours_end)){
             return 'EL';
         }
-        else if(strtotime($working_hours_end) >= strtotime($working_hours_start_overtime_policy)){
+        else if(strtotime($time_out_date . ' ' . $time_out_time) >= strtotime($time_in_date . ' ' . $working_hours_end_overtime_policy)){
             return 'OT';
         }
         else{
@@ -7931,6 +7936,230 @@ class Api{
             }
 
             return $response;
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : get_attendance_late_total
+    # Purpose    : Returns the total late minutes
+    #
+    # Returns    : Number
+    #
+    # -------------------------------------------------------------
+    public function get_attendance_late_total($employee_id, $time_in){
+        if ($this->databaseConnection()) {
+            $time_in_day = date('N', strtotime($time_in));
+            $time_in_time = $this->check_date('empty', $time_in, '', 'H:i:00', '', '', '');
+            $time_in_date = $this->check_date('empty', $time_in, '', 'Y-m-d', '', '', '');
+
+            $attendance_setting_details = $this->get_attendance_setting_details(1);
+            $late_grace_period = $attendance_setting_details[0]['LATE_GRACE_PERIOD'] ?? 0;
+            $late_policy = $attendance_setting_details[0]['LATE_POLICY'] ?? 0;
+
+            $working_hours_schedule = $this->get_working_hours_schedule($employee_id, $time_in_date, $time_in_day);
+            $working_hours_id = $working_hours_schedule[0]['WORKING_HOURS_ID'] ?? null;
+            $morning_work_from = $working_hours_schedule[0]['MORNING_WORK_FROM'] ?? null;
+            $morning_work_to = $working_hours_schedule[0]['MORNING_WORK_TO'] ?? null;
+            $afternoon_work_from = $working_hours_schedule[0]['AFTERNOON_WORK_FROM'] ?? null;
+            $afternoon_work_to = $working_hours_schedule[0]['AFTERNOON_WORK_TO'] ?? null;
+
+            if(!empty($morning_work_from)){
+                $working_hours_start = $morning_work_from;
+            }
+            else{
+                $working_hours_start = $afternoon_work_from;
+            }
+
+            if(strtotime($time_in_time) >= strtotime($working_hours_start)){
+                if(!empty($morning_work_from) && !empty($morning_work_to) && !empty($afternoon_work_from) && !empty($afternoon_work_to)){
+                    if(strtotime($time_in_time) >= strtotime($afternoon_work_from)){
+                        $late = floor(((strtotime($morning_work_to) - strtotime($morning_work_from)) / 3600) * 60);
+
+                        $late = $late + floor(((strtotime($time_in_time) - strtotime($afternoon_work_from)) / 3600) * 60);
+                    }
+                    else{
+                        $late = floor(((strtotime($time_in_time) - strtotime($morning_work_from)) / 3600) * 60);
+                    }
+                }
+                else if(!empty($morning_work_from) && !empty($morning_work_to) && empty($afternoon_work_from) && empty($afternoon_work_to)){
+                    if(strtotime($time_in_time) >= strtotime($morning_work_to)){
+                        $late = floor(((strtotime($morning_work_to) - strtotime($morning_work_from)) / 3600) * 60);
+                    }
+                    else{
+                        $late = floor(((strtotime($time_in_time) - strtotime($morning_work_from)) / 3600) * 60);
+                    }
+                }
+                else if(empty($morning_work_from) && empty($morning_work_to) && !empty($afternoon_work_from) && !empty($afternoon_work_to)){
+                    if(strtotime($time_in_time) >= strtotime($afternoon_work_to)){
+                        $late = floor(((strtotime($afternoon_work_to) - strtotime($afternoon_work_from)) / 3600) * 60);
+                    }
+                    else{
+                        $late = floor(((strtotime($time_in_time) - strtotime($afternoon_work_from)) / 3600) * 60);
+                    }
+                }
+                else{
+                    $late = 0;
+                }
+
+                $late = $late - $late_grace_period;
+
+                if($late_policy > 0){
+                    if($late > $late_policy){
+                        $late = (floor(((strtotime($morning_work_to) - strtotime($morning_work_from)) / 3600) * 60) + floor(((strtotime($afternoon_work_to) - strtotime($afternoon_work_from)) / 3600) * 60)) / 2;
+                    }
+                }
+            }
+            else{
+                $late = 0;
+            }
+
+            if($late <= 0){
+                $late = 0;
+            }
+
+            return $late;
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : get_attendance_early_leaving_total
+    # Purpose    : Returns the total early leaving minutes
+    #
+    # Returns    : Number
+    #
+    # -------------------------------------------------------------
+    public function get_attendance_early_leaving_total($employee_id, $time_in, $time_out){
+        if ($this->databaseConnection()) {
+            $time_in_day = date('N', strtotime($time_in));
+            $time_out_time = $this->check_date('empty', $time_out, '', 'H:i:00', '', '', '');
+            $time_in_date = $this->check_date('empty', $time_in, '', 'Y-m-d', '', '', '');
+
+            $attendance_setting_details = $this->get_attendance_setting_details(1);
+            $early_leaving_policy = $attendance_setting_details[0]['EARLY_LEAVING_POLICY'] ?? 0;
+
+            $working_hours_schedule = $this->get_working_hours_schedule($employee_id, $time_in_date, $time_in_day);
+            $working_hours_id = $working_hours_schedule[0]['WORKING_HOURS_ID'] ?? null;
+            $morning_work_from = $working_hours_schedule[0]['MORNING_WORK_FROM'] ?? null;
+            $morning_work_to = $working_hours_schedule[0]['MORNING_WORK_TO'] ?? null;
+            $afternoon_work_from = $working_hours_schedule[0]['AFTERNOON_WORK_FROM'] ?? null;
+            $afternoon_work_to = $working_hours_schedule[0]['AFTERNOON_WORK_TO'] ?? null;
+
+            if(!empty($afternoon_work_to)){
+                $working_hours_end = $afternoon_work_to;
+            }
+            else{
+                $working_hours_end = $morning_work_to;
+            }
+
+            if((!empty($morning_work_from) && !empty($morning_work_to) && !empty($afternoon_work_from) && !empty($afternoon_work_to)) || (empty($morning_work_from) && empty($morning_work_to) && !empty($afternoon_work_from) && !empty($afternoon_work_to))){
+                $early_leaving = floor(((strtotime($afternoon_work_to) - strtotime($time_out_time)) / 3600) * 60);
+            }
+            else if(!empty($morning_work_from) && !empty($morning_work_to) && empty($afternoon_work_from) && empty($afternoon_work_to)){
+                $early_leaving = floor(((strtotime($morning_work_to) - strtotime($time_out_time)) / 3600) * 60);
+            }
+            else{
+                $early_leaving = 0;
+            }
+
+            if($early_leaving_policy > 0){
+                if($early_leaving > $early_leaving_policy){
+                    $early_leaving = (floor(((strtotime($morning_work_to) - strtotime($morning_work_from)) / 3600) * 60) + floor(((strtotime($afternoon_work_to) - strtotime($afternoon_work_from)) / 3600) * 60)) / 2;
+                }
+            }
+
+            if($early_leaving <= 0){
+                $early_leaving = 0;
+            }
+
+            return $early_leaving;
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : get_attendance_overtime_total
+    # Purpose    : Returns the total overtime minutes
+    #
+    # Returns    : Number
+    #
+    # -------------------------------------------------------------
+    public function get_attendance_overtime_total($employee_id, $time_in, $time_out){
+        if ($this->databaseConnection()) {
+            $time_in_day = date('N', strtotime($time_in));
+            $time_out_time = $this->check_date('empty', $time_out, '', 'H:i:00', '', '', '');
+            $time_in_date = $this->check_date('empty', $time_in, '', 'Y-m-d', '', '', '');
+
+            $attendance_setting_details = $this->get_attendance_setting_details(1);
+            $overtime_policy = $attendance_setting_details[0]['OVERTIME_POLICY'];
+
+            $working_hours_schedule = $this->get_working_hours_schedule($employee_id, $time_in_date, $time_in_day);
+            $working_hours_id = $working_hours_schedule[0]['WORKING_HOURS_ID'] ?? null;
+            $morning_work_from = $working_hours_schedule[0]['MORNING_WORK_FROM'] ?? null;
+            $morning_work_to = $working_hours_schedule[0]['MORNING_WORK_TO'] ?? null;
+            $afternoon_work_from = $working_hours_schedule[0]['AFTERNOON_WORK_FROM'] ?? null;
+            $afternoon_work_to = $working_hours_schedule[0]['AFTERNOON_WORK_TO'] ?? null;
+
+            if(!empty($afternoon_work_to)){
+                $working_hours_end = $afternoon_work_to;
+            }
+            else{
+                $working_hours_end = $morning_work_to;
+            }
+
+            if($overtime_policy > 0){
+                $overtime_allowance = $this->check_date('empty', $working_hours_end, '', 'Y-m-d H:i:00', '+'. $overtime_policy .' minutes', '', '');
+
+                $overtime = floor(((strtotime($time_out_time) - strtotime($overtime_allowance)) / 3600));
+            }
+            else{
+                $overtime = floor(((strtotime($time_out_time) - strtotime($working_hours_end)) / 3600));
+            }
+
+            if($overtime <= 0){
+                $overtime = 0;
+            }
+
+            return floor($overtime);
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : get_attendance_total_hours
+    # Purpose    : Returns the total hours worked
+    #
+    # Returns    : Number
+    #
+    # -------------------------------------------------------------
+    public function get_attendance_total_hours($employee_id, $time_in, $time_out){
+        if ($this->databaseConnection()) {
+            $time_in_day = date('N', strtotime($time_in));
+            $time_in_date = $this->check_date('empty', $time_in, '', 'Y-m-d', '', '', '');
+
+            $late = $this->get_attendance_late_total($employee_id, $time_in);
+            $early_leaving = $this->get_attendance_early_leaving_total($employee_id, $time_in, $time_out);
+
+            $working_hours_schedule = $this->get_working_hours_schedule($employee_id, $time_in_date, $time_in_day);
+            $working_hours_id = $working_hours_schedule[0]['WORKING_HOURS_ID'] ?? null;
+            $morning_work_from = $working_hours_schedule[0]['MORNING_WORK_FROM'] ?? null;
+            $morning_work_to = $working_hours_schedule[0]['MORNING_WORK_TO'] ?? null;
+            $afternoon_work_from = $working_hours_schedule[0]['AFTERNOON_WORK_FROM'] ?? null;
+            $afternoon_work_to = $working_hours_schedule[0]['AFTERNOON_WORK_TO'] ?? null;
+
+            $total_hours = (floor(((strtotime($morning_work_to) - strtotime($morning_work_from)) / 3600) * 60) + floor(((strtotime($afternoon_work_to) - strtotime($afternoon_work_from)) / 3600) * 60)) - ($late + $early_leaving);
+
+            if($total_hours <= 0){
+                $total_hours = 0;
+            }
+
+            return $total_hours;
+           
         }
     }
     # -------------------------------------------------------------
@@ -8177,13 +8406,13 @@ class Api{
 
     # -------------------------------------------------------------
     #
-    # Name       : check_interface_upload
+    # Name       : time_interface_upload
     # Purpose    : Checks the interface upload.
     #
     # Returns    : Number
     #
     # -------------------------------------------------------------
-    public function check_interface_upload($file, $request, $interface_setting_id, $username){
+    public function time_interface_upload($file, $request, $interface_setting_id, $username){
         $file_type = '';
         $file_name = $file['name'];
         $file_size = $file['size'];

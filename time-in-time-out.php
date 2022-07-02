@@ -4,11 +4,11 @@
     require('classes/api.php');
 
     $api = new Api;
-    $page_title = 'Check In / Check Out';
+    $page_title = 'Time In / Time Out';
 
     
     $page_access = $api->check_role_permissions($username, 111);
-    $check_in_check_out = $api->check_role_permissions($username, 112);
+    $time_in_time_out = $api->check_role_permissions($username, 112);
     
     $check_user_account_status = $api->check_user_account_status($username);
 
@@ -47,7 +47,7 @@
             <div class="main-content">
                 <div class="page-content">
                     <div class="container-fluid">
-                        <?php require('views/forms/_check_in_check_out.php'); ?>
+                        <?php require('views/forms/_time_in_time_out.php'); ?>
                     </div>
                 </div>
 
@@ -62,6 +62,6 @@
         <script src="assets/libs/sweetalert2/sweetalert2.min.js"></script>
         <script src="assets/libs/gmaps/gmaps.min.js"></script>
         <script src="assets/js/system.js?v=<?php echo rand(); ?>"></script>
-        <script src="assets/js/pages/check-in-check-out.js?v=<?php echo rand(); ?>"></script>
+        <script src="assets/js/pages/time-in-time-out.js?v=<?php echo rand(); ?>"></script>
     </body>
 </html>

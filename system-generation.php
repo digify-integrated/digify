@@ -1332,25 +1332,25 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                             </div>
                         </div>';
             }
-            else if($form_type == 'check in form'){
+            else if($form_type == 'time in form'){
                 $form .= '<div class="row">
                             <div class="col-md-12">
                                 <div class="mb-3">
-                                    <label for="check_in_note" class="form-label">Check In Note</label>
+                                    <label for="time_in_note" class="form-label">Time In Note</label>
                                     <input type="hidden" id="attendance_position" name="attendance_position">
-                                    <textarea class="form-control form-maxlength" id="check_in_note" name="check_in_note" maxlength="200" rows="5"></textarea>
+                                    <textarea class="form-control form-maxlength" id="time_in_note" name="time_in_note" maxlength="200" rows="5"></textarea>
                                 </div>
                             </div>
                         </div>';
             }
-            else if($form_type == 'check out form'){
+            else if($form_type == 'time out form'){
                 $form .= '<div class="row">
                             <div class="col-md-12">
                                 <div class="mb-3">
                                     <input type="hidden" id="attendance_id" name="attendance_id">
-                                    <label for="check_out_note" class="form-label">Check Out Note</label>
+                                    <label for="time_out_note" class="form-label">Time Out Note</label>
                                     <input type="hidden" id="attendance_position" name="attendance_position">
-                                    <textarea class="form-control form-maxlength" id="check_out_note" name="check_out_note" maxlength="200" rows="5"></textarea>
+                                    <textarea class="form-control form-maxlength" id="time_out_note" name="time_out_note" maxlength="200" rows="5"></textarea>
                                 </div>
                             </div>
                         </div>';

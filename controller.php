@@ -792,22 +792,22 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
             $username = $_POST['username'];
             $interface_setting_id = 1;
 
-            $check_interface_settings_exist = $api->check_interface_settings_exist($interface_setting_id);
+            $time_interface_settings_exist = $api->time_interface_settings_exist($interface_setting_id);
 
-            if($check_interface_settings_exist > 0){
-                $login_background_upload = $api->check_interface_upload($_FILES['login_background'], 'login background', $interface_setting_id, $username);
+            if($time_interface_settings_exist > 0){
+                $login_background_upload = $api->time_interface_upload($_FILES['login_background'], 'login background', $interface_setting_id, $username);
 
                 if($login_background_upload){
-                    $login_logo_upload = $api->check_interface_upload($_FILES['login_logo'], 'login logo', $interface_setting_id, $username);
+                    $login_logo_upload = $api->time_interface_upload($_FILES['login_logo'], 'login logo', $interface_setting_id, $username);
 
                     if($login_logo_upload){
-                        $menu_logo_upload = $api->check_interface_upload($_FILES['menu_logo'], 'menu logo', $interface_setting_id, $username);
+                        $menu_logo_upload = $api->time_interface_upload($_FILES['menu_logo'], 'menu logo', $interface_setting_id, $username);
 
                         if($menu_logo_upload){
-                            $menu_icon_upload = $api->check_interface_upload($_FILES['menu_icon'], 'menu icon', $interface_setting_id, $username);
+                            $menu_icon_upload = $api->time_interface_upload($_FILES['menu_icon'], 'menu icon', $interface_setting_id, $username);
 
                             if($menu_icon_upload){
-                                $favicon_upload = $api->check_interface_upload($_FILES['favicon'], 'favicon', $interface_setting_id, $username);
+                                $favicon_upload = $api->time_interface_upload($_FILES['favicon'], 'favicon', $interface_setting_id, $username);
 
                                 if($favicon_upload){
                                     echo 'Updated';
@@ -836,19 +836,19 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                 $insert_interface_settings = $api->insert_interface_settings($interface_setting_id, $username);
 
                 if($insert_interface_settings){
-                    $login_background_upload = $api->check_interface_upload($_FILES['login_background'], 'login background', $interface_setting_id, $username);
+                    $login_background_upload = $api->time_interface_upload($_FILES['login_background'], 'login background', $interface_setting_id, $username);
 
                     if($login_background_upload){
-                        $login_logo_upload = $api->check_interface_upload($_FILES['login_logo'], 'login logo', $interface_setting_id, $username);
+                        $login_logo_upload = $api->time_interface_upload($_FILES['login_logo'], 'login logo', $interface_setting_id, $username);
 
                         if($login_logo_upload){
-                            $menu_logo_upload = $api->check_interface_upload($_FILES['menu_logo'], 'menu logo', $interface_setting_id, $username);
+                            $menu_logo_upload = $api->time_interface_upload($_FILES['menu_logo'], 'menu logo', $interface_setting_id, $username);
 
                             if($menu_logo_upload){
-                                $menu_icon_upload = $api->check_interface_upload($_FILES['menu_icon'], 'menu icon', $interface_setting_id, $username);
+                                $menu_icon_upload = $api->time_interface_upload($_FILES['menu_icon'], 'menu icon', $interface_setting_id, $username);
 
                                 if($menu_icon_upload){
-                                    $favicon_upload = $api->check_interface_upload($_FILES['favicon'], 'logo icon dark', $interface_setting_id, $username);
+                                    $favicon_upload = $api->time_interface_upload($_FILES['favicon'], 'logo icon dark', $interface_setting_id, $username);
 
                                     if($favicon_upload){
                                         echo 'Updated';
@@ -1897,12 +1897,12 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     }
     # -------------------------------------------------------------
 
-    # Submit attendance check in
-    else if($transaction == 'submit attendance check in'){
-        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['attendance_position']) && isset($_POST['check_in_note'])){
+    # Submit attendance time in
+    else if($transaction == 'submit attendance time in'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['attendance_position']) && isset($_POST['time_in_note'])){
             $username = $_POST['username'];
             $attendance_position = $_POST['attendance_position'];
-            $check_in_note = $_POST['check_in_note'];
+            $time_in_note = $_POST['time_in_note'];
           
             $time_in = date('Y-m-d H:i:00');
             $time_in_behavior = $api->get_time_in_behavior($employee_id, $time_in);
@@ -4291,7 +4291,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
         $response[] = array(
             'MAX_ATTENDANCE' => $attendance_setting_details[0]['MAX_ATTENDANCE'] ?? 1,
-            'LATE_GRACE_PERIOD' => $attendance_setting_details[0]['LATE_GRACE_PERIOD'] ?? 1,
+            'LATE_GRACE_PERIOD' => $attendance_setting_details[0]['LATE_GRACE_PERIOD'] ?? 0,
             'TIME_OUT_INTERVAL' => $attendance_setting_details[0]['TIME_OUT_INTERVAL'] ?? 1,
             'LATE_POLICY' => $attendance_setting_details[0]['LATE_POLICY'] ?? 0,
             'EARLY_LEAVING_POLICY' => $attendance_setting_details[0]['EARLY_LEAVING_POLICY'] ?? 0,

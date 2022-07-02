@@ -2795,10 +2795,10 @@ function initialize_form_validation(form_type){
             }
         });
     }
-    else if(form_type == 'check in form'){
-        $('#check-in-form').validate({
+    else if(form_type == 'time in form'){
+        $('#time-in-form').validate({
             submitHandler: function (form) {
-                transaction = 'submit attendance check in';
+                transaction = 'submit attendance time in';
 
                 $.ajax({
                     type: 'POST',
@@ -2809,19 +2809,19 @@ function initialize_form_validation(form_type){
                         $('#submit-form').html('<div class="spinner-border spinner-border-sm text-light" role="status"><span rclass="sr-only"></span></div>');
                     },
                     success: function (response) {
-                        if(response === 'Checked In'){
-                            show_alert_event('Check In Success', 'Your check in has been recorded.', 'success', 'reload');
+                        if(response === 'Time In'){
+                            show_alert_event('Time In Success', 'Your time in has been recorded.', 'success', 'reload');
 
                             $('#System-Modal').modal('hide');
                         }
                         else if(response === 'Max Attendance'){
-                            show_alert_event('Check In Error', 'Your have reached the maximum check in for the day.', 'error', 'reload');
+                            show_alert_event('Time In Error', 'Your have reached the maximum time in for the day.', 'error', 'reload');
                         }
                         else if(response === 'Location'){
-                            show_alert_event('Check In Error', 'Your location cannot be determined.', 'error', 'reload');
+                            show_alert_event('Time In Error', 'Your location cannot be determined.', 'error', 'reload');
                         }
                         else{
-                            show_alert('Check In Error', response, 'error');
+                            show_alert('Time In Error', response, 'error');
                         }
                     },
                     complete: function(){
@@ -3914,7 +3914,7 @@ function generate_form(form_type, form_id, add, username){
 
                     $('#policy_id').val(policy_id);
                 }
-                else if(form_type == 'check in form'){
+                else if(form_type == 'time in form'){
                     get_location('');
                 }
                 else if(form_type == 'archive employee form' || form_type == 'archive multiple employee form'){
