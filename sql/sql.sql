@@ -2809,12 +2809,24 @@ BEGIN
 	EXECUTE stmt;
 	DROP PREPARE stmt;
 END //
+
 CREATE PROCEDURE get_recent_employee_attendance_details(IN employee_id VARCHAR(100), IN TIME_IN DATE)
 BEGIN
 	SET @employee_id = employee_id;
 	SET @TIME_IN = TIME_IN;
 
 	SET @query = 'SELECT ATTENDANCE_ID, TIME_IN, TIME_IN_LOCATION, TIME_IN_IP_ADDRESS, TIME_IN_BY, TIME_IN_BEHAVIOR, TIME_IN_NOTE, TIME_OUT, TIME_OUT_LOCATION, TIME_OUT_IP_ADDRESS, TIME_OUT_BY, TIME_OUT_BEHAVIOR, TIME_OUT_NOTE, LATE, EARLY_LEAVING, OVERTIME, TOTAL_WORKING_HOURS, REMARKS, TRANSACTION_LOG_ID, RECORD_LOG FROM attendance_record WHERE EMPLOYEE_ID = @employee_id AND DATE(TIME_IN) = @TIME_IN ORDER BY TIME_IN DESC LIMIT 1';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE check_attendance_exist(IN attendance_id VARCHAR(100))
+BEGIN
+	SET @attendance_id = attendance_id;
+
+	SET @query = 'SELECT COUNT(1) AS TOTAL FROM attendance_record WHERE ATTENDANCE_ID = @attendance_id';
 
 	PREPARE stmt FROM @query;
 	EXECUTE stmt;
@@ -2837,7 +2849,7 @@ BEGIN
 	SET @employee_id = employee_id;
 	SET @TIME_IN = TIME_IN;
 
-	SET @query = 'SELECT COUNT(ATTENDANCE_ID) AS TOTAL FROM attendance_record WHERE EMPLOYEE_ID = @employee_id AND DATE(TIME_IN) = @TIME_IN';
+	SET @query = 'SELECT COUNT(ATTENDANCE_ID) AS TOTAL FROM attendance_record WHERE EMPLOYEE_ID = @employee_id AND DATE(TIME_IN) = @TIME_IN AND TIME_OUT IS NOT NULL';
 
 	PREPARE stmt FROM @query;
 	EXECUTE stmt;
@@ -2850,6 +2862,79 @@ BEGIN
 	SET @status = status;
 
 	SET @query = 'SELECT COUNT(NOTIFICATION_ID) AS TOTAL FROM global_notification WHERE NOTIFICATION_TO = @notification_to AND STATUS = @status';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE check_notification_channel(IN notification_setting_id INT, IN channel VARCHAR(20))
+BEGIN
+	SET @notification_setting_id = notification_setting_id;
+	SET @channel = channel;
+
+	SET @query = 'SELECT COUNT(1) AS TOTAL FROM global_notification_channel WHERE NOTIFICATION_SETTING_ID = @notification_setting_id AND CHANNEL = @channel';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE insert_system_notification(IN notification_id INT, IN notification_from VARCHAR(100), IN notification_to VARCHAR(100), IN notification_title VARCHAR(200), IN notification VARCHAR(1000), IN link VARCHAR(500), IN notification_date DATETIME, IN record_log VARCHAR(100))
+BEGIN
+	SET @notification_id = notification_id;
+	SET @notification_from = notification_from;
+	SET @notification_to = notification_to;
+	SET @notification_title = notification_title;
+	SET @notification = notification;
+	SET @link = link;
+	SET @notification_date = notification_date;
+	SET @record_log = record_log;
+
+	SET @query = 'INSERT INTO global_notification (NOTIFICATION_ID, NOTIFICATION_FROM, NOTIFICATION_TO, STATUS, NOTIFICATION_TITLE, NOTIFICATION, LINK, NOTIFICATION_DATE, RECORD_LOG) VALUES(@notification_id, @notification_from, @notification_to, "0", @notification_title, @notification, @link, @notification_date, @record_log)';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE insert_time_in(IN attendance_id VARCHAR(100), IN employee_id VARCHAR(100), IN time_in DATETIME, IN time_in_location VARCHAR(100), IN time_in_ip_address VARCHAR(20), IN time_in_by VARCHAR(100), IN time_in_behavior VARCHAR(20), IN time_in_note VARCHAR(200), IN late DOUBLE, IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
+BEGIN
+	SET @attendance_id = attendance_id;
+	SET @employee_id = employee_id;
+	SET @time_in = time_in;
+	SET @time_in_location = time_in_location;
+	SET @time_in_ip_address = time_in_ip_address;
+	SET @time_in_by = time_in_by;
+	SET @time_in_behavior = time_in_behavior;
+	SET @time_in_note = time_in_note;
+	SET @late = late;
+	SET @transaction_log_id = transaction_log_id;
+	SET @record_log = record_log;
+
+	SET @query = 'INSERT INTO attendance_record (ATTENDANCE_ID, EMPLOYEE_ID, TIME_IN, TIME_IN_LOCATION, TIME_IN_IP_ADDRESS, TIME_IN_BY, TIME_IN_BEHAVIOR, TIME_IN_NOTE, TRANSACTION_LOG_ID, RECORD_LOG) VALUES(@attendance_id, @employee_id, @time_in, @time_in_location, @time_in_ip_address, @time_in_by, @time_in_behavior, @time_in_note, @transaction_log_id, @record_log)';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE update_time_out(IN attendance_id VARCHAR(100), IN time_out DATETIME, IN time_out_location VARCHAR(100), IN time_out_ip_address VARCHAR(20), IN time_out_by VARCHAR(100), IN time_out_behavior VARCHAR(20), IN time_out_note VARCHAR(200), IN early_leaving DOUBLE, IN overtime DOUBLE, IN total_hours DOUBLE, IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
+BEGIN
+	SET @attendance_id = attendance_id;
+	SET @time_out = time_out;
+	SET @time_out_location = time_out_location;
+	SET @time_out_ip_address = time_out_ip_address;
+	SET @time_out_by = time_out_by;
+	SET @time_out_behavior = time_out_behavior;
+	SET @time_out_note = time_out_note;
+	SET @early_leaving = early_leaving;
+	SET @overtime = overtime;
+	SET @total_hours = total_hours;
+	SET @transaction_log_id = transaction_log_id;
+	SET @record_log = record_log;
+
+	SET @query = 'UPDATE attendance_record SET TIME_OUT = @time_out, TIME_OUT_LOCATION = @time_out_location, TIME_OUT_IP_ADDRESS = @time_out_ip_address, TIME_OUT_BY = @time_out_by, TIME_OUT_BEHAVIOR = @time_out_behavior, TIME_OUT_NOTE = @time_out_note, EARLY_LEAVING = @early_leaving, OVERTIME = @overtime, TOTAL_WORKING_HOURS = @total_hours, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE ATTENDANCE_ID = @attendance_id';
 
 	PREPARE stmt FROM @query;
 	EXECUTE stmt;

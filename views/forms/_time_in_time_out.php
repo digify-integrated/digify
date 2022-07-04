@@ -40,6 +40,16 @@
                         </button>';
             }
         }
+        else{
+            $attendance_guide = '';
+
+            $button = '';
+        }
+    }
+    else{
+        $attendance_guide = '';
+
+        $button = '';
     }
 ?>
 

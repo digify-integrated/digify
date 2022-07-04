@@ -2853,6 +2853,64 @@ function initialize_form_validation(form_type){
             }
         });
     }
+    else if(form_type == 'time out form'){
+        $('#time-out-form').validate({
+            submitHandler: function (form) {
+                transaction = 'submit attendance time out';
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'controller.php',
+                    data: $(form).serialize() + '&username=' + username + '&transaction=' + transaction,
+                    beforeSend: function(){
+                        document.getElementById('submit-form').disabled = true;
+                        $('#submit-form').html('<div class="spinner-border spinner-border-sm text-light" role="status"><span rclass="sr-only"></span></div>');
+                    },
+                    success: function (response) {
+                        if(response === 'Time Out'){
+                            show_alert_event('Time Out Success', 'Your time out has been recorded.', 'success', 'reload');
+
+                            $('#System-Modal').modal('hide');
+                        }
+                        else if(response === 'Not Found'){
+                            show_alert_event('Time Out Error', 'The attendance does not exist.', 'info', 'reload');
+                          }
+                        else if(response === 'Location'){
+                            show_alert_event('Time Out Error', 'Your location cannot be determined.', 'error', 'reload');
+                        }
+                        else{
+                            show_alert('Time Out Error', response, 'error');
+                        }
+                    },
+                    complete: function(){
+                        document.getElementById('submit-form').disabled = false;
+                        $('#submit-form').html('Submit');
+                    }
+                });
+                return false;
+            },
+            errorPlacement: function(label, element) {
+                if((element.hasClass('select2') || element.hasClass('form-select2')) && element.next('.select2-container').length) {
+                    label.insertAfter(element.next('.select2-container'));
+                }
+                else if(element.parent('.input-group').length){
+                    label.insertAfter(element.parent());
+                }
+                else{
+                    label.insertAfter(element);
+                }
+            },
+            highlight: function(element) {
+                $(element).parent().addClass('has-danger');
+                $(element).addClass('form-control-danger');
+            },
+            success: function(label,element) {
+                $(element).parent().removeClass('has-danger')
+                $(element).removeClass('form-control-danger')
+                label.remove();
+            }
+        });
+    }
 }
 
 // Display functions
@@ -3916,6 +3974,12 @@ function generate_form(form_type, form_id, add, username){
                 }
                 else if(form_type == 'time in form'){
                     get_location('');
+                }
+                else if(form_type == 'time out form'){
+                    get_location('');
+                    var attendance_id = sessionStorage.getItem('attendance_id');
+
+                    $('#attendance_id').val(attendance_id);
                 }
                 else if(form_type == 'archive employee form' || form_type == 'archive multiple employee form'){
                     var employee_id = sessionStorage.getItem('employee_id');

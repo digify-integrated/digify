@@ -13,7 +13,7 @@ function initialize_click_events(){
         generate_modal('time in form', 'Time In', 'R' , '1', '1', 'form', 'time-in-form', '1', username);
     });
 
-    $(document).on('click','.time-out',function() {
+    $(document).on('click','#time-out',function() {
         var attendance_id = $(this).data('attendance-id');
 
         sessionStorage.setItem('attendance_id', attendance_id);

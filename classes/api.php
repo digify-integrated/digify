@@ -395,18 +395,18 @@ class Api{
     #
     # -------------------------------------------------------------
     public function send_notification($notification_id, $from, $sent_to, $title, $message, $username){
-        $system_notification = $this->check_system_notification_exist($notification_id, 'S');
-        $email_notification = $this->check_system_notification_exist($notification_id, 'E');
+        $system_notification = $this->check_notification_channel($notification_id, 'SYSTEM');
+        $email_notification = $this->check_notification_channel($notification_id, 'EMAIL');
 
         if($system_notification > 0 || $email_notification > 0){
             $error = '';
-            $employee_details = $this->get_employee_details($sent_to, $sent_to);
-            $email = $employee_details[0]['EMAIL'] ?? null;
-            $validate_email = $this->validate_email($email);
+            $employee_details = $this->get_employee_details($sent_to);
+            $work_email = $employee_details[0]['WORK_EMAIL'] ?? null;
+            $validate_email = $this->validate_email($work_email);
 
-            $notification_details = $this->get_notification_details($notification_id);
-            $system_link = $notification_details[0]['SYSTEM_LINK'] ?? null;
-            $web_link = $notification_details[0]['WEB_LINK'] ?? null;
+            $notification_template_details = $this->get_notification_template_details($notification_id);
+            $system_link = $notification_template_details[0]['SYSTEM_LINK'] ?? null;
+            $web_link = $notification_template_details[0]['WEB_LINK'] ?? null;
 
             if($system_notification > 0){
                 $insert_system_notification = $this->insert_system_notification($notification_id, $from, $sent_to, $title, $message, $system_link, $username);
@@ -417,7 +417,7 @@ class Api{
             }
 
             if($email_notification > 0){
-                if(!empty($email) && $validate_email){
+                if(!empty($work_email) && $validate_email){
                     $send_email_notification = $this->send_email_notification($notification_id, $email, $title, $message, $web_link, 1, 'utf-8');
     
                     if(!$send_email_notification){
@@ -1088,6 +1088,31 @@ class Api{
         if ($this->databaseConnection()) {
             $sql = $this->db_connection->prepare('CALL check_attendance_setting_exist(:attendance_setting_id)');
             $sql->bindValue(':attendance_setting_id', $attendance_setting_id);
+
+            if($sql->execute()){
+                $row = $sql->fetch();
+
+                return $row['TOTAL'];
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : check_attendance_exist
+    # Purpose    : Checks if the attendance exists.
+    #
+    # Returns    : Number
+    #
+    # -------------------------------------------------------------
+    public function check_attendance_exist($attendance_id){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL check_attendance_exist(:attendance_id)');
+            $sql->bindValue(':attendance_id', $attendance_id);
 
             if($sql->execute()){
                 $row = $sql->fetch();
@@ -3479,19 +3504,19 @@ class Api{
 
     # -------------------------------------------------------------
     #
-    # Name       : update_attendance_setting
-    # Purpose    : Updates attendance setting.
+    # Name       : update_time_out
+    # Purpose    : Update time out.
     #
     # Returns    : Number/String
     #
     # -------------------------------------------------------------
-    public function update_attendance_setting($attendance_setting_id, $maximum_attendance, $late_grace_period, $time_out_interval, $late_policy, $early_leaving_policy, $overtime_policy, $attendance_adjustment_recommendation, $attendance_adjustment_approval, $attendance_creation_recommendation, $attendance_creation_approval, $username){
+    public function update_time_out($attendance_id, $time_out, $attendance_position, $ip_address, $time_out_behavior, $time_out_note, $early_leaving, $overtime, $total_hours, $username){
         if ($this->databaseConnection()) {
             $record_log = 'UPD->' . $username . '->' . date('Y-m-d h:i:s');
-            $attendance_setting_details = $this->get_attendance_setting_details($attendance_setting_id);
+            $attendance_details = $this->get_attendance_details($attendance_id);
             
-            if(!empty($attendance_setting_details[0]['TRANSACTION_LOG_ID'])){
-                $transaction_log_id = $attendance_setting_details[0]['TRANSACTION_LOG_ID'];
+            if(!empty($attendance_details[0]['TRANSACTION_LOG_ID'])){
+                $transaction_log_id = $attendance_details[0]['TRANSACTION_LOG_ID'];
             }
             else{
                 # Get transaction log id
@@ -3500,24 +3525,23 @@ class Api{
                 $transaction_log_id = $transaction_log_system_parameter[0]['ID'];
             }
 
-            $sql = $this->db_connection->prepare('CALL update_attendance_setting(:attendance_setting_id, :maximum_attendance, :late_grace_period, :time_out_interval, :late_policy, :early_leaving_policy, :overtime_policy, :attendance_adjustment_recommendation, :attendance_adjustment_approval, :attendance_creation_recommendation, :attendance_creation_approval, :transaction_log_id, :record_log)');
-            $sql->bindValue(':attendance_setting_id', $attendance_setting_id);
-            $sql->bindValue(':maximum_attendance', $maximum_attendance);
-            $sql->bindValue(':late_grace_period', $late_grace_period);
-            $sql->bindValue(':time_out_interval', $time_out_interval);
-            $sql->bindValue(':late_policy', $late_policy);
-            $sql->bindValue(':early_leaving_policy', $early_leaving_policy);
-            $sql->bindValue(':overtime_policy', $overtime_policy);
-            $sql->bindValue(':attendance_adjustment_recommendation', $attendance_adjustment_recommendation);
-            $sql->bindValue(':attendance_adjustment_approval', $attendance_adjustment_approval);
-            $sql->bindValue(':attendance_creation_recommendation', $attendance_creation_recommendation);
-            $sql->bindValue(':attendance_creation_approval', $attendance_creation_approval);
+            $sql = $this->db_connection->prepare('CALL update_time_out(:attendance_id, :time_out, :attendance_position, :ip_address, :username, :time_out_behavior, :time_out_note, :early_leaving, :overtime, :total_hours, :transaction_log_id, :record_log)');
+            $sql->bindValue(':attendance_id', $attendance_id);
+            $sql->bindValue(':time_out', $time_out);
+            $sql->bindValue(':attendance_position', $attendance_position);
+            $sql->bindValue(':ip_address', $ip_address);
+            $sql->bindValue(':username', $username);
+            $sql->bindValue(':time_out_behavior', $time_out_behavior);
+            $sql->bindValue(':time_out_note', $time_out_note);
+            $sql->bindValue(':early_leaving', $early_leaving);
+            $sql->bindValue(':overtime', $overtime);
+            $sql->bindValue(':total_hours', $total_hours);
             $sql->bindValue(':transaction_log_id', $transaction_log_id);
             $sql->bindValue(':record_log', $record_log);
         
             if($sql->execute()){
-                if(!empty($attendance_setting_details[0]['TRANSACTION_LOG_ID'])){
-                    $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated attendance setting.');
+                if(!empty($attendance_details[0]['TRANSACTION_LOG_ID'])){
+                    $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Time Out', 'User ' . $username . ' time out.');
                                     
                     if($insert_transaction_log){
                         return true;
@@ -3531,7 +3555,7 @@ class Api{
                     $update_system_parameter_value = $this->update_system_parameter_value($transaction_log_parameter_number, 2, $username);
 
                     if($update_system_parameter_value){
-                        $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated attendance setting.');
+                        $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Time Out', 'User ' . $username . ' time out.');
                                     
                         if($insert_transaction_log){
                             return true;
@@ -5342,6 +5366,120 @@ class Api{
         
             if($sql->execute()){
                 return true;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : insert_time_in
+    # Purpose    : Insert time in.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function insert_time_in($employee_id, $time_in, $attendance_position, $ip_address, $time_in_behavior, $time_in_note, $late, $username){
+        if ($this->databaseConnection()) {
+            $record_log = 'INS->' . $username . '->' . date('Y-m-d h:i:s');
+
+            # Get system parameter id
+            $system_parameter = $this->get_system_parameter(18, 1);
+            $parameter_number = $system_parameter[0]['PARAMETER_NUMBER'];
+            $id = $system_parameter[0]['ID'];
+
+            # Get transaction log id
+            $transaction_log_system_parameter = $this->get_system_parameter(2, 1);
+            $transaction_log_parameter_number = $transaction_log_system_parameter[0]['PARAMETER_NUMBER'];
+            $transaction_log_id = $transaction_log_system_parameter[0]['ID'];
+
+            $sql = $this->db_connection->prepare('CALL insert_time_in(:id, :employee_id, :time_in, :attendance_position, :ip_address, :username, :time_in_behavior, :time_in_note, :late, :transaction_log_id, :record_log)');
+            $sql->bindValue(':id', $id);
+            $sql->bindValue(':employee_id', $employee_id);
+            $sql->bindValue(':time_in', $time_in);
+            $sql->bindValue(':attendance_position', $attendance_position);
+            $sql->bindValue(':ip_address', $ip_address);
+            $sql->bindValue(':username', $username);
+            $sql->bindValue(':time_in_behavior', $time_in_behavior);
+            $sql->bindValue(':time_in_note', $time_in_note);
+            $sql->bindValue(':late', $late);
+            $sql->bindValue(':transaction_log_id', $transaction_log_id);
+            $sql->bindValue(':record_log', $record_log); 
+        
+            if($sql->execute()){
+                # Update system parameter value
+                $update_system_parameter_value = $this->update_system_parameter_value($parameter_number, 18, $username);
+
+                if($update_system_parameter_value){
+                    # Update transaction log value
+                    $update_system_parameter_value = $this->update_system_parameter_value($transaction_log_parameter_number, 2, $username);
+
+                    if($update_system_parameter_value){
+                        $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Time In', 'User ' . $username . ' time in.');
+                                    
+                        if($insert_transaction_log){
+                            return true;
+                        }
+                        else{
+                            return $insert_transaction_log;
+                        }
+                    }
+                    else{
+                        return $update_system_parameter_value;
+                    }
+                }
+                else{
+                    return $update_system_parameter_value;
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : insert_system_notification
+    # Purpose    : Insert system notification.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function insert_system_notification($notification_id, $notification_from, $notification_to, $title, $message, $link, $username){
+        if ($this->databaseConnection()) {
+            $record_log = 'INS->' . $username . '->' . date('Y-m-d h:i:s');
+            $notification_date = date('Y-m-d H:i:s');
+
+            # Get system parameter id
+            $system_parameter = $this->get_system_parameter(19, 1);
+            $parameter_number = $system_parameter[0]['PARAMETER_NUMBER'];
+            $id = $system_parameter[0]['ID'];
+
+            $sql = $this->db_connection->prepare('CALL insert_system_notification(:id, :notification_from, :notification_to, :title, :message, :link, :notification_date, :record_log)');
+            $sql->bindValue(':id', $id);
+            $sql->bindValue(':notification_from', $notification_from);
+            $sql->bindValue(':notification_to', $notification_to);
+            $sql->bindValue(':title', $title);
+            $sql->bindValue(':message', $message);
+            $sql->bindValue(':link', $link);
+            $sql->bindValue(':notification_date', $notification_date);
+            $sql->bindValue(':record_log', $record_log); 
+        
+            if($sql->execute()){
+                # Update system parameter value
+                $update_system_parameter_value = $this->update_system_parameter_value($parameter_number, 19, $username);
+
+                if($update_system_parameter_value){
+                    return true;
+                }
+                else{
+                    return $update_system_parameter_value;
+                }
             }
             else{
                 return $sql->errorInfo()[2];
@@ -7389,13 +7527,13 @@ class Api{
             if($sql->execute()){
                 while($row = $sql->fetch()){
                     $response[] = array(
-                        'time_in' => $row['time_in'],
-                        'time_in' => $row['time_in'],
-                        'time_in_LOCATION' => $row['time_in_LOCATION'],
-                        'time_in_IP_ADDRESS' => $row['time_in_IP_ADDRESS'],
-                        'time_in_BY' => $row['time_in_BY'],
-                        'time_in_BEHAVIOR' => $row['time_in_BEHAVIOR'],
-                        'time_in_NOTE' => $row['time_in_NOTE'],
+                        'ATTENDANCE_ID' => $row['ATTENDANCE_ID'],
+                        'TIME_IN' => $row['TIME_IN'],
+                        'TIME_IN_LOCATION' => $row['TIME_IN_LOCATION'],
+                        'TIME_IN_IP_ADDRESS' => $row['TIME_IN_IP_ADDRESS'],
+                        'TIME_IN_BY' => $row['TIME_IN_BY'],
+                        'TIME_IN_BEHAVIOR' => $row['TIME_IN_BEHAVIOR'],
+                        'TIME_IN_NOTE' => $row['TIME_IN_NOTE'],
                         'TIME_OUT' => $row['TIME_OUT'],
                         'TIME_OUT_LOCATION' => $row['TIME_OUT_LOCATION'],
                         'TIME_OUT_IP_ADDRESS' => $row['TIME_OUT_IP_ADDRESS'],
@@ -7440,12 +7578,12 @@ class Api{
                 while($row = $sql->fetch()){
                     $response[] = array(
                         'EMPLOYEE_ID' => $row['EMPLOYEE_ID'],
-                        'time_in' => $row['time_in'],
-                        'time_in_LOCATION' => $row['time_in_LOCATION'],
-                        'time_in_IP_ADDRESS' => $row['time_in_IP_ADDRESS'],
-                        'time_in_BY' => $row['time_in_BY'],
-                        'time_in_BEHAVIOR' => $row['time_in_BEHAVIOR'],
-                        'time_in_NOTE' => $row['time_in_NOTE'],
+                        'TIME_IN' => $row['TIME_IN'],
+                        'TIME_IN_LOCATION' => $row['TIME_IN_LOCATION'],
+                        'TIME_IN_IP_ADDRESS' => $row['TIME_IN_IP_ADDRESS'],
+                        'TIME_IN_BY' => $row['TIME_IN_BY'],
+                        'TIME_IN_BEHAVIOR' => $row['TIME_IN_BEHAVIOR'],
+                        'TIME_IN_NOTE' => $row['TIME_IN_NOTE'],
                         'TIME_OUT' => $row['TIME_OUT'],
                         'TIME_OUT_LOCATION' => $row['TIME_OUT_LOCATION'],
                         'TIME_OUT_IP_ADDRESS' => $row['TIME_OUT_IP_ADDRESS'],
@@ -7710,7 +7848,7 @@ class Api{
     # -------------------------------------------------------------
     public function get_attendance_total_by_date($employee_id, $time_in){
         if ($this->databaseConnection()) {
-            $sql = $this->db_connection->prepare('CALL get_recent_employee_attendance_details(:employee_id, :time_in)');
+            $sql = $this->db_connection->prepare('CALL get_attendance_total_by_date(:employee_id, :time_in)');
             $sql->bindValue(':employee_id', $employee_id);
             $sql->bindValue(':time_in', $time_in);
 
@@ -7805,10 +7943,10 @@ class Api{
 
         $working_hours_start_late_grace_period = $this->check_date('empty', $working_hours_start, '', 'H:i:00', '+'. $late_grace_period .' minutes', '', '');
 
-        if(strtotime($time_in_time) < strtotime($work_shift_time_in)){
+        if(strtotime($time_in_time) < strtotime($working_hours_start)){
             return 'EARLY';
         }
-        else if(strtotime($time_in_time) >= strtotime($work_shift_late_allowance)){
+        else if(strtotime($time_in_time) >= strtotime($working_hours_start_late_grace_period)){
             return 'LATE';
         }
         else{
@@ -8178,7 +8316,6 @@ class Api{
     # -------------------------------------------------------------
     public function check_role_permissions($username, $permission_id){
         if ($this->databaseConnection()) {
-            $response = array();
             $total = 0;
 
             $sql = $this->db_connection->prepare('SELECT ROLE_ID FROM global_role_user_account WHERE USERNAME = :username');
@@ -8512,6 +8649,32 @@ class Api{
         }
         else{
             return false;
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : check_notification_channel
+    # Purpose    : Checks if the notification channel is enabled.
+    #
+    # Returns    : Number
+    #
+    # -------------------------------------------------------------
+    public function check_notification_channel($notification_id, $channel){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL check_notification_channel(:notification_id, :channel)');
+            $sql->bindValue(':notification_id', $notification_id);
+            $sql->bindValue(':channel', $channel);
+
+            if($sql->execute()){
+                $row = $sql->fetch();
+
+                return $row['TOTAL'];
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
         }
     }
     # -------------------------------------------------------------

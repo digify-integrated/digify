@@ -1901,6 +1901,8 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     else if($transaction == 'submit attendance time in'){
         if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['attendance_position']) && isset($_POST['time_in_note'])){
             $username = $_POST['username'];
+            $employee_details = $api->get_employee_details($username);
+            $employee_id = $employee_details[0]['EMPLOYEE_ID'];
             $attendance_position = $_POST['attendance_position'];
             $time_in_note = $_POST['time_in_note'];
           
@@ -1912,6 +1914,8 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
             $max_attendance = $attendance_setting_details[0]['MAX_ATTENDANCE'] ?? 1;
             $attendance_total_by_date = $api->get_attendance_total_by_date($employee_id, date('Y-m-d'));
             $ip_address = $api->get_ip_address();
+
+            $attendance_total_by_date = $api->get_attendance_total_by_date($employee_id, date('Y-m-d'));
                 
             $notification_template_details = $api->get_notification_template_details(1);
             $notification_title = $notification_template_details[0]['NOTIFICATION_TITLE'] ?? null;
@@ -1920,14 +1924,14 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
             $notification_message = str_replace('{time}', $api->check_date('empty', $time_in, '', 'h:i a', '', '', ''), $notification_message);
     
             if (!filter_var($ip_address, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)){
-                if($get_clock_in_total < $max_attendance){
+                if($attendance_total_by_date < $max_attendance){
                     $insert_time_in = $api->insert_time_in($employee_id, $time_in, $attendance_position, $ip_address, $time_in_behavior, $time_in_note, $late, $username);
 
                     if($insert_time_in > 0){
                         $send_notification = $api->send_notification(1, null, $employee_id, $notification_title, $notification_message, $username);
 
                         if($send_notification){
-                            echo 'Checked In';
+                            echo 'Time In';
                         }
                         else{
                             echo $send_notification;
@@ -1949,7 +1953,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                         $send_notification = $api->send_notification(1, null, $employee_id, $notification_title, $notification_message, $username);
 
                         if($send_notification){
-                            echo 'Checked In';
+                            echo 'Time In';
                         }
                         else{
                             echo $send_notification;
@@ -1962,6 +1966,82 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                 else{
                     echo 'Location';
                 }
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Submit attendance time out
+    else if($transaction == 'submit attendance time out'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['attendance_id']) && !empty($_POST['attendance_id']) && isset($_POST['attendance_position']) && isset($_POST['time_out_note'])){
+            $username = $_POST['username'];
+            $employee_details = $api->get_employee_details($username);
+            $employee_id = $employee_details[0]['EMPLOYEE_ID'];
+            $attendance_id = $_POST['attendance_id'];
+            $attendance_position = $_POST['attendance_position'];
+            $time_out_note = $_POST['time_out_note'];
+
+            $attendance_details = $api->get_attendance_details($attendance_id);
+            $time_in = $attendance_details[0]['TIME_IN'];
+          
+            $time_out = date('Y-m-d H:i:00');
+            $time_out_behavior = $api->get_time_out_behavior($employee_id, $time_in, $time_out);
+            $early_leaving = $api->get_attendance_early_leaving_total($employee_id, $time_in, $time_out);
+            $overtime = $api->get_attendance_overtime_total($employee_id, $time_in, $time_out);
+            $total_hours = $api->get_attendance_total_hours($employee_id, $time_in, $time_out);
+            $ip_address = $api->get_ip_address();
+                
+            $notification_template_details = $api->get_notification_template_details(2);
+            $notification_title = $notification_template_details[0]['NOTIFICATION_TITLE'] ?? null;
+            $notification_message = $notification_template_details[0]['NOTIFICATION_MESSAGE'] ?? null;
+            $notification_message = str_replace('{date}', $api->check_date('empty', $time_in, '', 'F d, Y', '', '', ''), $notification_message);
+            $notification_message = str_replace('{time}', $api->check_date('empty', $time_in, '', 'h:i a', '', '', ''), $notification_message);
+
+            $check_attendance_exist = $api->check_attendance_exist($attendance_id);
+ 
+            if($check_attendance_exist > 0){
+                if (!filter_var($ip_address, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)){
+                    $update_time_out = $api->update_time_out($attendance_id, $time_out, $attendance_position, $ip_address, $time_out_behavior, $time_out_note, $early_leaving, $overtime, $total_hours, $username);
+    
+                    if($update_time_out > 0){
+                        $send_notification = $api->send_notification(2, null, $employee_id, $notification_title, $notification_message, $username);
+    
+                        if($send_notification){
+                            echo 'Time Out';
+                        }
+                        else{
+                            echo $send_notification;
+                        }
+                    }
+                    else{
+                        echo $update_time_out;
+                    }
+                }
+                else{
+                    if(!empty($attendance_position)){
+                        $update_time_out = $api->update_time_out($attendance_id, $time_out, $attendance_position, $ip_address, $time_out_behavior, $time_out_note, $early_leaving, $overtime, $total_hours, $username);
+    
+                        if($update_time_out > 0){
+                            $send_notification = $api->send_notification(2, null, $employee_id, $notification_title, $notification_message, $username);
+        
+                            if($send_notification){
+                                echo 'Time Out';
+                            }
+                            else{
+                                echo $send_notification;
+                            }
+                        }
+                        else{
+                            echo $update_time_out;
+                        }
+                    }
+                    else{
+                        echo 'Location';
+                    }
+                }
+            }
+            else{
+                echo 'Not Found';
             }
         }
     }
