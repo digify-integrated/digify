@@ -3504,6 +3504,31 @@ class Api{
 
     # -------------------------------------------------------------
     #
+    # Name       : update_notification_status
+    # Purpose    : Updates notification status.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function update_notification_status($employee_id, $notification_id, $status){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL update_notification_status(:employee_id, :notification_id, :status)');
+            $sql->bindValue(':employee_id', $employee_id);
+            $sql->bindValue(':notification_id', $notification_id);
+            $sql->bindValue(':status', $status);
+        
+            if($sql->execute()){
+                return true;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
     # Name       : update_time_out
     # Purpose    : Update time out.
     #
@@ -8299,6 +8324,82 @@ class Api{
             return $total_hours;
            
         }
+    }
+    # -------------------------------------------------------------
+
+     # -------------------------------------------------------------
+    #
+    # Name       : get_time_in_behavior_status
+    # Purpose    : Returns the status, badge
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_time_in_behavior_status($stat){
+        $response = array();
+
+        switch ($stat) {
+            case 'REG':
+                $status = 'Regular';
+                $button_class = 'bg-success';
+                break;
+            case 'EARLY':
+                $status = 'Early';
+                $button_class = 'bg-info';
+                break;
+            case 'LATE':
+                $status = 'Late';
+                $button_class = 'bg-danger';
+                break;
+            default:
+                $status = '--';
+                $button_class = 'bg-info';
+        }
+
+        $response[] = array(
+            'STATUS' => $status,
+            'BADGE' => '<span class="badge '. $button_class .'">'. $status .'</span>'
+        );
+
+        return $response;
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : get_time_out_behavior_status
+    # Purpose    : Returns the status, badge
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_time_out_behavior_status($stat){
+        $response = array();
+
+        switch ($stat) {
+            case 'REG':
+                $status = 'Regular';
+                $button_class = 'bg-success';
+                break;
+            case 'OT':
+                $status = 'Overtime';
+                $button_class = 'bg-warning';
+                break;
+            case 'EL':
+                $status = 'Early Leaving';
+                $button_class = 'bg-danger';
+                break;
+            default:
+                $status = '--';
+                $button_class = 'bg-info';
+        }
+
+        $response[] = array(
+            'STATUS' => $status,
+            'BADGE' => '<span class="badge '. $button_class .'">'. $status .'</span>'
+        );
+
+        return $response;
     }
     # -------------------------------------------------------------
 

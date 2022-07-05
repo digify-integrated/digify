@@ -2912,7 +2912,7 @@ BEGIN
 	SET @transaction_log_id = transaction_log_id;
 	SET @record_log = record_log;
 
-	SET @query = 'INSERT INTO attendance_record (ATTENDANCE_ID, EMPLOYEE_ID, TIME_IN, TIME_IN_LOCATION, TIME_IN_IP_ADDRESS, TIME_IN_BY, TIME_IN_BEHAVIOR, TIME_IN_NOTE, TRANSACTION_LOG_ID, RECORD_LOG) VALUES(@attendance_id, @employee_id, @time_in, @time_in_location, @time_in_ip_address, @time_in_by, @time_in_behavior, @time_in_note, @transaction_log_id, @record_log)';
+	SET @query = 'INSERT INTO attendance_record (ATTENDANCE_ID, EMPLOYEE_ID, TIME_IN, TIME_IN_LOCATION, TIME_IN_IP_ADDRESS, TIME_IN_BY, TIME_IN_BEHAVIOR, TIME_IN_NOTE, LATE, TRANSACTION_LOG_ID, RECORD_LOG) VALUES(@attendance_id, @employee_id, @time_in, @time_in_location, @time_in_ip_address, @time_in_by, @time_in_behavior, @time_in_note, @late, @transaction_log_id, @record_log)';
 
 	PREPARE stmt FROM @query;
 	EXECUTE stmt;
@@ -2935,6 +2935,23 @@ BEGIN
 	SET @record_log = record_log;
 
 	SET @query = 'UPDATE attendance_record SET TIME_OUT = @time_out, TIME_OUT_LOCATION = @time_out_location, TIME_OUT_IP_ADDRESS = @time_out_ip_address, TIME_OUT_BY = @time_out_by, TIME_OUT_BEHAVIOR = @time_out_behavior, TIME_OUT_NOTE = @time_out_note, EARLY_LEAVING = @early_leaving, OVERTIME = @overtime, TOTAL_WORKING_HOURS = @total_hours, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE ATTENDANCE_ID = @attendance_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE update_notification_status(IN employee_id VARCHAR(100), IN notification_id INT, IN status INT)
+BEGIN
+	SET @employee_id = employee_id;
+	SET @status = status;
+	SET @notification_id = notification_id;
+
+	IF @status = 2 THEN
+		SET @query = 'UPDATE global_notification SET STATUS = @status WHERE NOTIFICATION_TO = @employee_id AND STATUS = 0';
+	ELSE
+		SET @query = 'UPDATE global_notification SET STATUS = @status WHERE NOTIFICATION_TO = @employee_id AND NOTIFICATION_ID = @notification_id';
+    END IF;
 
 	PREPARE stmt FROM @query;
 	EXECUTE stmt;

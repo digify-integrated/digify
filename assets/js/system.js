@@ -2911,6 +2911,92 @@ function initialize_form_validation(form_type){
             }
         });
     }
+    else if(form_type == 'attendance form'){
+        $('#attendance-form').validate({
+            submitHandler: function (form) {
+                transaction = 'submit attendance';
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'controller.php',
+                    data: $(form).serialize() + '&username=' + username + '&transaction=' + transaction,
+                    beforeSend: function(){
+                        document.getElementById('submit-form').disabled = true;
+                        $('#submit-form').html('<div class="spinner-border spinner-border-sm text-light" role="status"><span rclass="sr-only"></span></div>');
+                    },
+                    success: function (response) {
+                        if(response === 'Updated' || response === 'Inserted'){
+                            if(response === 'Inserted'){
+                                show_alert('Insert Attendance Success', 'The attendance has been inserted.', 'success');
+                            }
+                            else{
+                                show_alert('Update Attendance Success', 'The attendance has been updated.', 'success');
+                            }
+
+                            $('#System-Modal').modal('hide');
+                            reload_datatable('#attendance-datatable');
+                        }
+                        else if(response === 'Max Attendance'){
+                            show_alert('Attendance Error', 'The employee reached the maximum time in for this date.', 'error');
+                        }
+                        else if(response === 'Working Hours'){
+                            show_alert('Attendance Error', 'The employee does not have a working hours.', 'error');
+                        }
+                        else{
+                            show_alert('Attendance Error', response, 'error');
+                        }
+                    },
+                    complete: function(){
+                        document.getElementById('submit-form').disabled = false;
+                        $('#submit-form').html('Submit');
+                    }
+                });
+                return false;
+            },
+            rules: {
+                employee_id: {
+                    required: true
+                },
+                time_in_date: {
+                    required: true
+                },
+                time_in_time: {
+                    required: true
+                },
+            },
+            messages: {
+                employee_id: {
+                    required: 'Please choose the employee',
+                },
+                time_in_date: {
+                    required: 'Please choose the time in date',
+                },
+                time_in_time: {
+                    required: 'Please choose the time in',
+                },
+            },
+            errorPlacement: function(label, element) {
+                if((element.hasClass('select2') || element.hasClass('form-select2')) && element.next('.select2-container').length) {
+                    label.insertAfter(element.next('.select2-container'));
+                }
+                else if(element.parent('.input-group').length){
+                    label.insertAfter(element.parent());
+                }
+                else{
+                    label.insertAfter(element);
+                }
+            },
+            highlight: function(element) {
+                $(element).parent().addClass('has-danger');
+                $(element).addClass('form-control-danger');
+            },
+            success: function(label,element) {
+                $(element).parent().removeClass('has-danger')
+                $(element).removeClass('form-control-danger')
+                label.remove();
+            }
+        });
+    }
 }
 
 // Display functions
@@ -3755,6 +3841,31 @@ function display_form_details(form_type){
                 else{
                     document.getElementById('attendance_adjustment_approval_exception').disabled = true;
                 }
+            }
+        });
+    }
+    else if(form_type == 'attendance form'){
+        transaction = 'attendance details';
+
+        var attendance_id = sessionStorage.getItem('attendance_id');
+
+        $.ajax({
+            url: 'controller.php',
+            method: 'POST',
+            dataType: 'JSON',
+            data: {attendance_id : attendance_id, transaction : transaction},
+            success: function(response) {
+                $('#time_in_date').val(response[0].TIME_IN_DATE);
+                $('#time_in_time').val(response[0].TIME_IN);
+                $('#time_out_date').val(response[0].TIME_OUT_DATE);
+                $('#time_out_time').val(response[0].TIME_OUT);
+                $('#remarks').val(response[0].REMARKS);
+                $('#attendance_id').val(attendance_id);
+
+                check_option_exist('#employee_id', response[0].EMPLOYEE_ID, '');
+            },
+            complete: function(){
+                document.getElementById('employee_id').disabled = true;
             }
         });
     }

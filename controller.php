@@ -2047,6 +2047,30 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     }
     # -------------------------------------------------------------
 
+    # Submit attendance
+    else if($transaction == 'submit attendance'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['attendance_id']) && isset($_POST['employee_id']) && !empty($_POST['employee_id']) && isset($_POST['time_in_date']) && !empty($_POST['time_in_date']) && isset($_POST['time_in_time']) && !empty($_POST['time_in_time']) && isset($_POST['time_out_date']) && isset($_POST['time_out_time']) && isset($_POST['remarks'])){
+            $username = $_POST['username'];
+            $attendance_id = $_POST['attendance_id'];
+            $employee_id = $_POST[0]['employee_id'];
+            $time_in = $api->check_date('empty', $_POST['time_in_date'] . ' ' $_POST['time_in_time'], '', 'Y-m-d H:i:00', '', '', '');
+            $time_out = $api->check_date('empty', $_POST['time_out_date'] . ' ' $_POST['time_out_time'], '', 'Y-m-d H:i:00', '', '', '');
+          
+            $time_in_behavior = $api->get_time_in_behavior($employee_id, $time_in);
+            $late = $api->get_attendance_late_total($employee_id, $time_in);
+
+            $attendance_setting_details = $api->get_attendance_setting_details(1);
+            $max_attendance = $attendance_setting_details[0]['MAX_ATTENDANCE'] ?? 1;
+            $attendance_total_by_date = $api->get_attendance_total_by_date($employee_id, date('Y-m-d'));
+            $ip_address = $api->get_ip_address();
+
+            $attendance_total_by_date = $api->get_attendance_total_by_date($employee_id, date('Y-m-d'));
+    
+            
+        }
+    }
+    # -------------------------------------------------------------
+
     # -------------------------------------------------------------
     #   Delete transactions
     # -------------------------------------------------------------
@@ -3495,6 +3519,49 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #   Notification transactions
+    # -------------------------------------------------------------
+
+    # Partial notification status
+    else if($transaction == 'partial notification status'){
+        if(isset($_POST['username']) && !empty($_POST['username'])){
+            $username = $_POST['username'];
+            $employee_details = $api->get_employee_details($username);
+            $employee_id = $employee_details[0]['EMPLOYEE_ID'];
+           
+            $update_notification_status = $api->update_notification_status($employee_id, '', 2);
+
+            if($update_notification_status){
+                echo 'Updated';
+            }
+            else{
+                echo $update_notification_status;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Read notification status
+    else if($transaction == 'read notification status'){
+        if(isset($_POST['username']) && !empty($_POST['username'])){
+            $username = $_POST['username'];
+            $notification_id = $_POST['notification_id'];
+            $employee_details = $api->get_employee_details($username);
+            $employee_id = $employee_details[0]['EMPLOYEE_ID'];
+           
+            $update_notification_status = $api->update_notification_status($employee_id, $notification_id, 1);
+
+            if($update_notification_status){
+                echo 'Updated';
+            }
+            else{
+                echo $update_notification_status;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Get details transactions
     # -------------------------------------------------------------
 
@@ -4387,6 +4454,27 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
         );
 
         echo json_encode($response);
+    }
+    # -------------------------------------------------------------
+
+    # Attendance details
+    else if($transaction == 'attendance details'){
+        if(isset($_POST['attendance_id']) && !empty($_POST['attendance_id'])){
+            $attendance_id = $_POST['attendance_id'];
+
+            $attendance_details = $api->get_attendance_details($attendance_id);
+
+            $response[] = array(
+                'EMPLOYEE_ID' => $attendance_details[0]['EMPLOYEE_ID'],
+                'TIME_IN_DATE' => $api->check_date('empty', $attendance_details[0]['TIME_IN'], '', 'n/d/Y', '', '', ''),
+                'TIME_IN' => $api->check_date('empty', $attendance_details[0]['TIME_IN'], '', 'H:i:00', '', '', ''),
+                'TIME_OUT_DATE' => $api->check_date('empty', $attendance_details[0]['TIME_OUT'], '', 'n/d/Y', '', '', ''),
+                'TIME_OUT' => $api->check_date('empty', $attendance_details[0]['TIME_OUT'], '', 'H:i:00', '', '', ''),
+                'REMARKS' => $attendance_details[0]['REMARKS']
+            );
+
+            echo json_encode($response);
+        }
     }
     # -------------------------------------------------------------
 

@@ -133,6 +133,11 @@
                                         echo $api->generate_notification_list($employee_id);
                                     ?>
                                 </div>
+                                <div class="p-2 border-top d-grid">
+                                    <a class="btn btn-sm btn-link font-size-14 text-center" href="notification.php">
+                                        <i class="mdi mdi-arrow-right-circle me-1"></i> <span key="t-view-more">View More..</span> 
+                                    </a>
+                                </div>
                             </div>
                         </div>
 
