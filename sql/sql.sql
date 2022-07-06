@@ -2958,6 +2958,71 @@ BEGIN
 	DROP PREPARE stmt;
 END //
 
+CREATE PROCEDURE insert_attedance(IN attendance_id VARCHAR(100), IN employee_id VARCHAR(100), IN time_in DATETIME, IN time_in_ip_address VARCHAR(20), IN time_in_by VARCHAR(100), IN time_in_behavior VARCHAR(20), IN time_out DATETIME, IN time_out_ip_address VARCHAR(20), IN time_out_by VARCHAR(100), IN time_out_behavior VARCHAR(20), IN late DOUBLE, IN early_leaving DOUBLE, IN overtime DOUBLE, IN total_hours DOUBLE, IN remarks VARCHAR(500), IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
+BEGIN
+	SET @attendance_id = attendance_id;
+	SET @employee_id = employee_id;
+	SET @time_in = time_in;
+	SET @time_in_ip_address = time_in_ip_address;
+	SET @time_in_by = time_in_by;
+	SET @time_in_behavior = time_in_behavior;
+	SET @time_out = time_out;
+	SET @time_out_ip_address = time_out_ip_address;
+	SET @time_out_by = time_out_by;
+	SET @time_out_behavior = time_out_behavior;
+	SET @late = late;
+	SET @early_leaving = early_leaving;
+	SET @overtime = overtime;
+	SET @total_hours = total_hours;
+	SET @remarks = remarks;
+	SET @transaction_log_id = transaction_log_id;
+	SET @record_log = record_log;
+
+	SET @query = 'INSERT INTO attendance_record (ATTENDANCE_ID, EMPLOYEE_ID, TIME_IN, TIME_IN_IP_ADDRESS, TIME_IN_BY, TIME_IN_BEHAVIOR, TIME_OUT, TIME_OUT_IP_ADDRESS, TIME_OUT_BY, TIME_OUT_BEHAVIOR, LATE, EARLY_LEAVING, OVERTIME, TOTAL_WORKING_HOURS, REMARKS, TRANSACTION_LOG_ID, RECORD_LOG) VALUES(@attendance_id, @employee_id, @time_in, @time_in_ip_address, @time_in_by, @time_in_behavior, @time_out, @time_out_ip_address, @time_out_by, @time_out_behavior, @late, @early_leaving, @overtime, @total_hours, @remarks, @transaction_log_id, @record_log)';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE update_attendance(IN attendance_id VARCHAR(100), IN time_in DATETIME, IN time_in_ip_address VARCHAR(20), IN time_in_by VARCHAR(100), IN time_in_behavior VARCHAR(20), IN time_out DATETIME, IN time_out_ip_address VARCHAR(20), IN time_out_by VARCHAR(100), IN time_out_behavior VARCHAR(20), IN late DOUBLE, IN early_leaving DOUBLE, IN overtime DOUBLE, IN total_hours DOUBLE, IN remarks VARCHAR(500), IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
+BEGIN
+	SET @attendance_id = attendance_id;
+	SET @time_in = time_in;
+	SET @time_in_ip_address = time_in_ip_address;
+	SET @time_in_by = time_in_by;
+	SET @time_in_behavior = time_in_behavior;
+	SET @time_out = time_out;
+	SET @time_out_ip_address = time_out_ip_address;
+	SET @time_out_by = time_out_by;
+	SET @time_out_behavior = time_out_behavior;
+	SET @late = late;
+	SET @early_leaving = early_leaving;
+	SET @overtime = overtime;
+	SET @total_hours = total_hours;
+	SET @remarks = remarks;
+	SET @transaction_log_id = transaction_log_id;
+	SET @record_log = record_log;
+
+	SET @query = 'UPDATE attendance_record SET TIME_IN = @time_in, TIME_IN_IP_ADDRESS = @time_in_ip_address, TIME_IN_BY = @time_in_by, TIME_IN_BEHAVIOR = @time_in_behavior, TIME_OUT = @time_out, TIME_OUT_IP_ADDRESS = @time_out_ip_address, TIME_OUT_BY = @time_out_by, TIME_OUT_BEHAVIOR = @time_out_behavior, LATE = @late, EARLY_LEAVING = @early_leaving, OVERTIME = @overtime, TOTAL_WORKING_HOURS = @total_hours, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE ATTENDANCE_ID = @attendance_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE delete_attendance(IN attendance_id VARCHAR(100))
+BEGIN
+	SET @attendance_id = attendance_id;
+
+	SET @query = 'DELETE FROM attendance_record WHERE ATTENDANCE_ID = @attendance_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+
 /* Insert Transactions */
 INSERT INTO global_user_account (USERNAME, PASSWORD, USER_STATUS, PASSWORD_EXPIRY_DATE, FAILED_LOGIN, LAST_FAILED_LOGIN, TRANSACTION_LOG_ID) VALUES ('ADMIN', '68aff5412f35ed76', 'Active', '2021-12-30', 0, null, 'TL-1');
 INSERT INTO global_system_parameters (PARAMETER_ID, PARAMETER, PARAMETER_DESCRIPTION, PARAMETER_EXTENSION, PARAMETER_NUMBER, TRANSACTION_LOG_ID) VALUES ('1', 'System Parameter', 'Parameter for system parameters.', '', 3, 'TL-2');

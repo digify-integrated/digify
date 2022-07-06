@@ -3191,7 +3191,7 @@ class Api{
     }
     # -------------------------------------------------------------
 
-     # -------------------------------------------------------------
+    # -------------------------------------------------------------
     #
     # Name       : update_employee_type
     # Purpose    : Updates employee type.
@@ -3529,6 +3529,81 @@ class Api{
 
     # -------------------------------------------------------------
     #
+    # Name       : update_attendance_setting
+    # Purpose    : Updates attendance setting.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function update_attendance_setting($attendance_setting_id, $maximum_attendance, $late_grace_period, $time_out_interval, $late_policy, $early_leaving_policy, $overtime_policy, $attendance_adjustment_recommendation, $attendance_adjustment_approval, $attendance_creation_recommendation, $attendance_creation_approval, $username){
+        if ($this->databaseConnection()) {
+            $record_log = 'UPD->' . $username . '->' . date('Y-m-d h:i:s');
+            $attendance_setting_details = $this->get_attendance_setting_details($attendance_setting_id);
+            
+            if(!empty($attendance_setting_details[0]['TRANSACTION_LOG_ID'])){
+                $transaction_log_id = $attendance_setting_details[0]['TRANSACTION_LOG_ID'];
+            }
+            else{
+                # Get transaction log id
+                $transaction_log_system_parameter = $this->get_system_parameter(2, 1);
+                $transaction_log_parameter_number = $transaction_log_system_parameter[0]['PARAMETER_NUMBER'];
+                $transaction_log_id = $transaction_log_system_parameter[0]['ID'];
+            }
+
+            $sql = $this->db_connection->prepare('CALL update_attendance_setting(:attendance_setting_id, :maximum_attendance, :late_grace_period, :time_out_interval, :late_policy, :early_leaving_policy, :overtime_policy, :attendance_adjustment_recommendation, :attendance_adjustment_approval, :attendance_creation_recommendation, :attendance_creation_approval, :transaction_log_id, :record_log)');
+            $sql->bindValue(':attendance_setting_id', $attendance_setting_id);
+            $sql->bindValue(':maximum_attendance', $maximum_attendance);
+            $sql->bindValue(':late_grace_period', $late_grace_period);
+            $sql->bindValue(':time_out_interval', $time_out_interval);
+            $sql->bindValue(':late_policy', $late_policy);
+            $sql->bindValue(':early_leaving_policy', $early_leaving_policy);
+            $sql->bindValue(':overtime_policy', $overtime_policy);
+            $sql->bindValue(':attendance_adjustment_recommendation', $attendance_adjustment_recommendation);
+            $sql->bindValue(':attendance_adjustment_approval', $attendance_adjustment_approval);
+            $sql->bindValue(':attendance_creation_recommendation', $attendance_creation_recommendation);
+            $sql->bindValue(':attendance_creation_approval', $attendance_creation_approval);
+            $sql->bindValue(':transaction_log_id', $transaction_log_id);
+            $sql->bindValue(':record_log', $record_log);
+        
+            if($sql->execute()){
+                if(!empty($attendance_setting_details[0]['TRANSACTION_LOG_ID'])){
+                    $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated attendance setting.');
+                                    
+                    if($insert_transaction_log){
+                        return true;
+                    }
+                    else{
+                        return $insert_transaction_log;
+                    }
+                }
+                else{
+                    # Update transaction log value
+                    $update_system_parameter_value = $this->update_system_parameter_value($transaction_log_parameter_number, 2, $username);
+
+                    if($update_system_parameter_value){
+                        $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated attendance setting.');
+                                    
+                        if($insert_transaction_log){
+                            return true;
+                        }
+                        else{
+                            return $insert_transaction_log;
+                        }
+                    }
+                    else{
+                        return $update_system_parameter_value;
+                    }
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
     # Name       : update_time_out
     # Purpose    : Update time out.
     #
@@ -3581,6 +3656,84 @@ class Api{
 
                     if($update_system_parameter_value){
                         $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Time Out', 'User ' . $username . ' time out.');
+                                    
+                        if($insert_transaction_log){
+                            return true;
+                        }
+                        else{
+                            return $insert_transaction_log;
+                        }
+                    }
+                    else{
+                        return $update_system_parameter_value;
+                    }
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : update_attendance
+    # Purpose    : Update attendance.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function update_attendance($attendance_id, $time_in, $time_in_ip_address, $time_in_by, $time_in_behavior, $time_out, $time_out_ip_address, $time_out_by, $time_out_behavior, $late, $early_leaving, $overtime, $total_hours, $remarks, $username){
+        if ($this->databaseConnection()) {
+            $record_log = 'UPD->' . $username . '->' . date('Y-m-d h:i:s');
+            $attendance_details = $this->get_attendance_details($attendance_id);
+            
+            if(!empty($attendance_details[0]['TRANSACTION_LOG_ID'])){
+                $transaction_log_id = $attendance_details[0]['TRANSACTION_LOG_ID'];
+            }
+            else{
+                # Get transaction log id
+                $transaction_log_system_parameter = $this->get_system_parameter(2, 1);
+                $transaction_log_parameter_number = $transaction_log_system_parameter[0]['PARAMETER_NUMBER'];
+                $transaction_log_id = $transaction_log_system_parameter[0]['ID'];
+            }
+
+            $sql = $this->db_connection->prepare('CALL update_attendance(:attendance_id, :time_in, :time_in_ip_address, :time_in_by, :time_in_behavior, :time_out, :time_out_ip_address, :time_out_by, :time_out_behavior, :late, :early_leaving, :overtime, :total_hours, :remarks, :transaction_log_id, :record_log)');
+            $sql->bindValue(':attendance_id', $attendance_id);
+            $sql->bindValue(':time_in', $time_in);
+            $sql->bindValue(':time_in_ip_address', $time_in_ip_address);
+            $sql->bindValue(':time_in_by', $time_in_by);
+            $sql->bindValue(':time_in_behavior', $time_in_behavior);
+            $sql->bindValue(':time_out', $time_out);
+            $sql->bindValue(':time_out_ip_address', $time_out_ip_address);
+            $sql->bindValue(':time_out_by', $time_out_by);
+            $sql->bindValue(':time_out_behavior', $time_out_behavior);
+            $sql->bindValue(':late', $late);
+            $sql->bindValue(':early_leaving', $early_leaving);
+            $sql->bindValue(':overtime', $overtime);
+            $sql->bindValue(':total_hours', $total_hours);
+            $sql->bindValue(':remarks', $remarks);
+            $sql->bindValue(':transaction_log_id', $transaction_log_id);
+            $sql->bindValue(':record_log', $record_log);
+        
+            if($sql->execute()){
+                if(!empty($attendance_details[0]['TRANSACTION_LOG_ID'])){
+                    $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated the attendance.');
+                                    
+                    if($insert_transaction_log){
+                        return true;
+                    }
+                    else{
+                        return $insert_transaction_log;
+                    }
+                }
+                else{
+                    # Update transaction log value
+                    $update_system_parameter_value = $this->update_system_parameter_value($transaction_log_parameter_number, 2, $username);
+
+                    if($update_system_parameter_value){
+                        $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated the attendance.');
                                     
                         if($insert_transaction_log){
                             return true;
@@ -5514,6 +5667,80 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : insert_attendance
+    # Purpose    : Insert attendance.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function insert_attendance($employee_id, $time_in, $time_in_ip_address, $time_in_by, $time_in_behavior, $time_out, $time_out_ip_address, $time_out_by, $time_out_behavior, $late, $early_leaving, $overtime, $total_hours, $remarks, $username){
+        if ($this->databaseConnection()) {
+            $record_log = 'INS->' . $username . '->' . date('Y-m-d h:i:s');
+
+            # Get system parameter id
+            $system_parameter = $this->get_system_parameter(18, 1);
+            $parameter_number = $system_parameter[0]['PARAMETER_NUMBER'];
+            $id = $system_parameter[0]['ID'];
+
+            # Get transaction log id
+            $transaction_log_system_parameter = $this->get_system_parameter(2, 1);
+            $transaction_log_parameter_number = $transaction_log_system_parameter[0]['PARAMETER_NUMBER'];
+            $transaction_log_id = $transaction_log_system_parameter[0]['ID'];
+
+            $sql = $this->db_connection->prepare('CALL insert_attendance(:id, :employee_id, :time_in, :time_in_ip_address, :time_in_by, :time_in_behavior, :time_out, :time_out_ip_address, :time_out_by, :time_out_behavior, :late, :early_leaving, :overtime, :total_hours, :remarks, :transaction_log_id, :record_log)');
+            $sql->bindValue(':id', $id);
+            $sql->bindValue(':employee_id', $employee_id);
+            $sql->bindValue(':time_in', $time_in);
+            $sql->bindValue(':time_in_ip_address', $time_in_ip_address);
+            $sql->bindValue(':time_in_by', $time_in_by);
+            $sql->bindValue(':time_in_behavior', $time_in_behavior);
+            $sql->bindValue(':time_out', $time_out);
+            $sql->bindValue(':time_out_ip_address', $time_out_ip_address);
+            $sql->bindValue(':time_out_by', $time_out_by);
+            $sql->bindValue(':time_out_behavior', $time_out_behavior);
+            $sql->bindValue(':late', $late);
+            $sql->bindValue(':early_leaving', $early_leaving);
+            $sql->bindValue(':overtime', $overtime);
+            $sql->bindValue(':total_hours', $total_hours);
+            $sql->bindValue(':remarks', $remarks);
+            $sql->bindValue(':transaction_log_id', $transaction_log_id);
+            $sql->bindValue(':record_log', $record_log); 
+        
+            if($sql->execute()){
+                # Update system parameter value
+                $update_system_parameter_value = $this->update_system_parameter_value($parameter_number, 18, $username);
+
+                if($update_system_parameter_value){
+                    # Update transaction log value
+                    $update_system_parameter_value = $this->update_system_parameter_value($transaction_log_parameter_number, 2, $username);
+
+                    if($update_system_parameter_value){
+                        $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Insert', 'User ' . $username . ' inserted the attendance.');
+                                    
+                        if($insert_transaction_log){
+                            return true;
+                        }
+                        else{
+                            return $insert_transaction_log;
+                        }
+                    }
+                    else{
+                        return $update_system_parameter_value;
+                    }
+                }
+                else{
+                    return $update_system_parameter_value;
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Delete methods
     # -------------------------------------------------------------
 
@@ -6282,6 +6509,29 @@ class Api{
             $sql->bindValue(':user_code', $user_code);
         
             if($sql->execute()){
+                return true;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : delete_attendance
+    # Purpose    : Delete attendance.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function delete_attendance($attendance_id, $username){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL delete_attendance(:attendance_id)');
+            $sql->bindValue(':attendance_id', $attendance_id);
+        
+            if($sql->execute()){ 
                 return true;
             }
             else{
@@ -7971,7 +8221,7 @@ class Api{
         if(strtotime($time_in_time) < strtotime($working_hours_start)){
             return 'EARLY';
         }
-        else if(strtotime($time_in_time) >= strtotime($working_hours_start_late_grace_period)){
+        else if(strtotime($time_in_time) > strtotime($working_hours_start_late_grace_period)){
             return 'LATE';
         }
         else{
@@ -8014,7 +8264,7 @@ class Api{
         if(strtotime($time_out_date . ' ' . $time_out_time) < strtotime($time_in_date . ' ' . $working_hours_end)){
             return 'EL';
         }
-        else if(strtotime($time_out_date . ' ' . $time_out_time) >= strtotime($time_in_date . ' ' . $working_hours_end_overtime_policy)){
+        else if(strtotime($time_out_date . ' ' . $time_out_time) > strtotime($time_in_date . ' ' . $working_hours_end_overtime_policy)){
             return 'OT';
         }
         else{
@@ -8219,10 +8469,10 @@ class Api{
             }
 
             if((!empty($morning_work_from) && !empty($morning_work_to) && !empty($afternoon_work_from) && !empty($afternoon_work_to)) || (empty($morning_work_from) && empty($morning_work_to) && !empty($afternoon_work_from) && !empty($afternoon_work_to))){
-                $early_leaving = floor(((strtotime($afternoon_work_to) - strtotime($time_out_time)) / 3600) * 60);
+                $early_leaving = floor(((strtotime($time_in_date . ' ' . $afternoon_work_to) - strtotime($time_out)) / 3600) * 60);
             }
             else if(!empty($morning_work_from) && !empty($morning_work_to) && empty($afternoon_work_from) && empty($afternoon_work_to)){
-                $early_leaving = floor(((strtotime($morning_work_to) - strtotime($time_out_time)) / 3600) * 60);
+                $early_leaving = floor(((strtotime($time_in_date . ' ' . $morning_work_to) - strtotime($time_out)) / 3600) * 60);
             }
             else{
                 $early_leaving = 0;
@@ -8254,7 +8504,6 @@ class Api{
     public function get_attendance_overtime_total($employee_id, $time_in, $time_out){
         if ($this->databaseConnection()) {
             $time_in_day = date('N', strtotime($time_in));
-            $time_out_time = $this->check_date('empty', $time_out, '', 'H:i:00', '', '', '');
             $time_in_date = $this->check_date('empty', $time_in, '', 'Y-m-d', '', '', '');
 
             $attendance_setting_details = $this->get_attendance_setting_details(1);
@@ -8275,12 +8524,12 @@ class Api{
             }
 
             if($overtime_policy > 0){
-                $overtime_allowance = $this->check_date('empty', $working_hours_end, '', 'Y-m-d H:i:00', '+'. $overtime_policy .' minutes', '', '');
+                $overtime_allowance = $this->check_date('empty', $time_in_date . ' ' . $working_hours_end, '', 'Y-m-d H:i:00', '+'. $overtime_policy .' minutes', '', '');
 
-                $overtime = floor(((strtotime($time_out_time) - strtotime($overtime_allowance)) / 3600));
+                $overtime = floor(((strtotime($time_out) - strtotime($overtime_allowance)) / 3600));
             }
             else{
-                $overtime = floor(((strtotime($time_out_time) - strtotime($working_hours_end)) / 3600));
+                $overtime = floor(((strtotime($time_out) - strtotime($time_in_date . ' ' . $working_hours_end)) / 3600));
             }
 
             if($overtime <= 0){
@@ -8315,7 +8564,7 @@ class Api{
             $afternoon_work_from = $working_hours_schedule[0]['AFTERNOON_WORK_FROM'] ?? null;
             $afternoon_work_to = $working_hours_schedule[0]['AFTERNOON_WORK_TO'] ?? null;
 
-            $total_hours = (floor(((strtotime($morning_work_to) - strtotime($morning_work_from)) / 3600) * 60) + floor(((strtotime($afternoon_work_to) - strtotime($afternoon_work_from)) / 3600) * 60)) - ($late + $early_leaving);
+            $total_hours = (floor(((strtotime($morning_work_to) - strtotime($morning_work_from)) / 3600)) + floor(((strtotime($afternoon_work_to) - strtotime($afternoon_work_from)) / 3600))) - ($late + $early_leaving);
 
             if($total_hours <= 0){
                 $total_hours = 0;
@@ -8327,7 +8576,7 @@ class Api{
     }
     # -------------------------------------------------------------
 
-     # -------------------------------------------------------------
+    # -------------------------------------------------------------
     #
     # Name       : get_time_in_behavior_status
     # Purpose    : Returns the status, badge
@@ -8776,6 +9025,29 @@ class Api{
             else{
                 return $sql->errorInfo()[2];
             }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : check_attendance_validation
+    # Purpose    : Checks attendance validation.
+    #
+    # Returns    : String/null
+    #
+    # -------------------------------------------------------------
+    public function check_attendance_validation($time_in, $time_out){
+        if(!empty($time_in) && !empty($time_out)){
+            if(strtotime($time_in) > strtotime($time_out) || strtotime($time_out) < strtotime($time_in)){
+                return 'Invalid';
+            }
+            else{
+                return null;
+            }
+        }
+        else{
+            return null;
         }
     }
     # -------------------------------------------------------------

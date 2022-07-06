@@ -43,7 +43,7 @@
 
             <?php 
                 require('views/_top_bar.php');
-                require('views/menu/_employee_menu.php');
+                require('views/menu/_attendance_menu.php');
             ?>
 
             <div class="main-content">

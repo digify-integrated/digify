@@ -135,7 +135,6 @@ function initialize_click_events(){
         generate_modal('attendance details', 'Attendance Details', 'R' , '1', '0', 'element', '', '0', username);
     });
 
-
     $(document).on('click','#add-attendance',function() {
         generate_modal('attendance form', 'Attendance', 'R' , '0', '1', 'form', 'attendance-form', '1', username);
     });

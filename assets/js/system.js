@@ -2915,6 +2915,8 @@ function initialize_form_validation(form_type){
         $('#attendance-form').validate({
             submitHandler: function (form) {
                 transaction = 'submit attendance';
+                
+                document.getElementById('employee_id').disabled = false;
 
                 $.ajax({
                     type: 'POST',
@@ -2935,6 +2937,9 @@ function initialize_form_validation(form_type){
 
                             $('#System-Modal').modal('hide');
                             reload_datatable('#attendance-datatable');
+                        }
+                        else if(response === 'Invalid'){
+                            show_alert('Attendance Error', 'The time in cannot be greater than the time out.', 'error');
                         }
                         else if(response === 'Max Attendance'){
                             show_alert('Attendance Error', 'The employee reached the maximum time in for this date.', 'error');

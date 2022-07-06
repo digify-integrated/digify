@@ -2052,9 +2052,10 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
         if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['attendance_id']) && isset($_POST['employee_id']) && !empty($_POST['employee_id']) && isset($_POST['time_in_date']) && !empty($_POST['time_in_date']) && isset($_POST['time_in_time']) && !empty($_POST['time_in_time']) && isset($_POST['time_out_date']) && isset($_POST['time_out_time']) && isset($_POST['remarks'])){
             $username = $_POST['username'];
             $attendance_id = $_POST['attendance_id'];
-            $employee_id = $_POST[0]['employee_id'];
-            $time_in = $api->check_date('empty', $_POST['time_in_date'] . ' ' $_POST['time_in_time'], '', 'Y-m-d H:i:00', '', '', '');
-            $time_out = $api->check_date('empty', $_POST['time_out_date'] . ' ' $_POST['time_out_time'], '', 'Y-m-d H:i:00', '', '', '');
+            $employee_id = $_POST['employee_id'];
+            $remarks = $_POST['remarks'];
+            $time_in = $api->check_date('empty', $_POST['time_in_date'] . ' ' . $_POST['time_in_time'], '', 'Y-m-d H:i:00', '', '', '');
+            $time_out = $api->check_date('empty', $_POST['time_out_date'] . ' ' . $_POST['time_out_time'], '', 'Y-m-d H:i:00', '', '', '');
           
             $time_in_behavior = $api->get_time_in_behavior($employee_id, $time_in);
             $late = $api->get_attendance_late_total($employee_id, $time_in);
@@ -2062,11 +2063,68 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
             $attendance_setting_details = $api->get_attendance_setting_details(1);
             $max_attendance = $attendance_setting_details[0]['MAX_ATTENDANCE'] ?? 1;
             $attendance_total_by_date = $api->get_attendance_total_by_date($employee_id, date('Y-m-d'));
-            $ip_address = $api->get_ip_address();
+            $time_in_ip_address = $api->get_ip_address();
 
             $attendance_total_by_date = $api->get_attendance_total_by_date($employee_id, date('Y-m-d'));
+
+            if(!empty($time_out)){
+                $time_out_behavior = $api->get_time_out_behavior($employee_id, $time_in, $time_out);
+                $early_leaving = $api->get_attendance_early_leaving_total($employee_id, $time_in, $time_out);
+                $overtime = $api->get_attendance_overtime_total($employee_id, $time_in, $time_out);
+                $total_hours = $api->get_attendance_total_hours($employee_id, $time_in, $time_out);
+                $time_out_ip_address = $api->get_ip_address();
+                $time_out_by = $username;
+            }
+            else{
+                $time_out_behavior = '';
+                $early_leaving = 0;
+                $overtime = 0;
+                $total_hours = 0;
+                $time_out_ip_address = '';
+                $time_out_by = '';
+            }
+
+            $check_attendance_exist = $api->check_attendance_exist($attendance_id);
+
+            if($check_attendance_exist > 0){
+                $check_attendance_validation = $api->check_attendance_validation($time_in, $time_out);
+
+                if(empty($check_attendance_validation)){
+                    $update_attendance = $api->update_attendance($attendance_id, $time_in, $time_in_ip_address, $username, $time_in_behavior, $time_out, $time_out_ip_address, $time_out_by, $time_out_behavior, $late, $early_leaving, $overtime, $total_hours, $remarks, $username);
     
-            
+                    if($update_attendance > 0){
+                        echo 'Updated';
+                    }
+                    else{
+                        echo $update_attendance;
+                    }
+                }
+                else{
+                    echo $check_attendance_validation;
+                }
+            }
+            else{
+                $check_attendance_validation = $api->check_attendance_validation($time_in, $time_out);
+
+                if(empty($check_attendance_validation)){
+                    if($attendance_total_by_date < $max_attendance){
+                        $insert_attendance = $api->insert_attendance($employee_id, $time_in, $time_in_ip_address, $username, $time_in_behavior, $time_out, $time_out_ip_address, $time_out_by, $time_out_behavior, $late, $early_leaving, $overtime, $total_hours, $remarks, $username);
+    
+                        if($insert_attendance > 0){
+                            echo 'Inserted';
+                        }
+                        else{
+                            echo $insert_attendance;
+                        }
+                    }
+                    else{
+                        echo 'Max Attendance';
+                    }
+                }
+                else{
+                    echo $check_attendance_validation;
+                }
+            }
         }
     }
     # -------------------------------------------------------------
@@ -3132,6 +3190,62 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                     }
                     else{
                         $error = $delete_working_hours;
+                    }
+                }
+                else{
+                    $error = 'Not Found';
+                }
+            }
+
+            if(empty($error)){
+                echo 'Deleted';
+            }
+            else{
+                echo $error;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Delete attendance
+    else if($transaction == 'delete attendance'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['attendance_id']) && !empty($_POST['attendance_id'])){
+            $username = $_POST['username'];
+            $attendance_id = $_POST['attendance_id'];
+
+            $check_attendance_exist = $api->check_attendance_exist($attendance_id);
+
+            if($check_attendance_exist > 0){
+                $delete_attendance = $api->delete_attendance($attendance_id, $username);
+                                    
+                if($delete_attendance){
+                    echo 'Deleted';
+                }
+                else{
+                    echo $delete_attendance;
+                }
+            }
+            else{
+                echo 'Not Found';
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Delete multiple attendance
+    else if($transaction == 'delete multiple attendance'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['attendance_id'])){
+            $username = $_POST['username'];
+            $attendance_ids = $_POST['attendance_id'];
+
+            foreach($attendance_ids as $attendance_id){
+                $check_attendance_exist = $api->check_attendance_exist($attendance_id);
+
+                if($check_attendance_exist > 0){
+                    $delete_attendance = $api->delete_attendance($attendance_id, $username);
+                                    
+                    if(!$delete_attendance){
+                        $error = $delete_attendance;
                     }
                 }
                 else{
