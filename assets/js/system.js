@@ -3874,6 +3874,38 @@ function display_form_details(form_type){
             }
         });
     }
+    else if(form_type == 'attendance details'){
+        transaction = 'attendance summary details';
+
+        var attendance_id = sessionStorage.getItem('attendance_id');
+
+        $.ajax({
+            url: 'controller.php',
+            method: 'POST',
+            dataType: 'JSON',
+            data: {attendance_id : attendance_id, transaction : transaction},
+            success: function(response) {
+                $('#employee').text(response[0].EMPLOYEE);
+                $('#late').text(response[0].LATE);
+                $('#early_leave').text(response[0].EARLY_LEAVING);
+                $('#overtime').text(response[0].OVERTIME);
+                $('#total_working_hours').text(response[0].TOTAL_WORKING_HOURS);
+                $('#remarks').text(response[0].REMARKS);
+                $('#time_in').text(response[0].TIME_IN);
+                document.getElementById('time_in_behavior').innerHTML = response[0].TIME_IN_BEHAVIOR;
+                document.getElementById('time_in_location').innerHTML = response[0].TIME_IN_LOCATION;
+                $('#time_in_ip_address').text(response[0].TIME_IN_IP_ADDRESS);
+                $('#time_in_by').text(response[0].TIME_IN_BY);
+                $('#time_in_note').text(response[0].TIME_IN_NOTE);
+                $('#time_out').text(response[0].TIME_OUT);
+                document.getElementById('time_out_behavior').innerHTML = response[0].TIME_OUT_BEHAVIOR;
+                document.getElementById('time_out_location').innerHTML = response[0].TIME_OUT_LOCATION;
+                $('#time_out_ip_address').text(response[0].TIME_OUT_IP_ADDRESS);
+                $('#time_out_by').text(response[0].TIME_OUT_BY);
+                $('#time_out_note').text(response[0].TIMEOUT_NOTE);
+            }
+        });
+    }
 }
 
 function initialize_transaction_log_table(datatable_name, buttons = false, show_all = false){
@@ -4016,11 +4048,11 @@ function show_position(position) {
     sessionStorage.setItem('longitude', position.coords.longitude);
 
     if ($('#attendance_position').length) {
-        $('#attendance_position').val(position.coords.longitude + ',' + position.coords.latitude);
+        $('#attendance_position').val(position.coords.latitude + ', ' + position.coords.longitude);
     }
 
     if ($('#position').length) {
-        $('#position').val(position.coords.longitude + ',' + position.coords.latitude);
+        $('#position').val(position.coords.latitude + ', ' + position.coords.longitude);
     }
 }
 
@@ -4139,7 +4171,7 @@ function generate_element(element_type, value, container, modal, username){
             if(modal == '1'){
                 $('#System-Modal').modal('show');
 
-                if(element_type == 'user account details' || element_type == 'system parameter details' || element_type == 'company details' || element_type == 'job position details' || element_type == 'work location details' || element_type == 'working hours details'){
+                if(element_type == 'user account details' || element_type == 'system parameter details' || element_type == 'company details' || element_type == 'job position details' || element_type == 'work location details' || element_type == 'working hours details' || element_type == 'attendance details'){
                     display_form_details(element_type);
                 }
                 else if(element_type == 'transaction log'){

@@ -132,7 +132,7 @@ function initialize_click_events(){
 
         sessionStorage.setItem('attendance_id', attendance_id);
 
-        generate_modal('attendance details', 'Attendance Details', 'R' , '1', '0', 'element', '', '0', username);
+        generate_modal('attendance details', 'Attendance Details', 'XL' , '1', '0', 'element', '', '0', username);
     });
 
     $(document).on('click','#add-attendance',function() {

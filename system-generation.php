@@ -1757,6 +1757,87 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                 </div>
                             </div>';
             }
+            else if($element_type == 'attendance details'){
+                $element = '<div class="row">
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <table class="table table-nowrap mb-0">
+                                            <tbody>
+                                                <tr>
+                                                    <th scope="row">Employee :</th>
+                                                    <td id="employee" colspan="3"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">Late :</th>
+                                                    <td id="late"></td>
+                                                    <th scope="row">Early Leave :</th>
+                                                    <td id="early_leave"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">Overtime :</th>
+                                                    <td id="overtime"></td>
+                                                    <th scope="row">Total Working Hours :</th>
+                                                    <td id="total_working_hours"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">Remarks :</th>
+                                                    <td id="remarks" colspan="3"></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <ul class="nav nav-tabs" role="tablist">
+                                        <li class="nav-item">
+                                            <a class="nav-link active" data-bs-toggle="tab" href="#attendance_record" role="tab">
+                                                <span class="d-block d-sm-none"><i class="bx bx-time"></i></span>
+                                                <span class="d-none d-sm-block">Attendance Record</span>    
+                                            </a>
+                                        </li>
+                                    </ul>
+                                    <div class="tab-content p-3 text-muted">
+                                        <div class="tab-pane active" id="attendance_record" role="tabpanel">
+                                            <table class="table table-bordered mb-0">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th>Time In / Time Out</th>
+                                                        <th>Attendance Record</th>
+                                                        <th>Behavior</th>
+                                                        <th>Location</th>
+                                                        <th>IP Address</th>
+                                                        <th>Attendance By</th>
+                                                        <th>Note</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <th scope="row">Time In</th>
+                                                        <td id="time_in"></td>
+                                                        <td id="time_in_behavior"></td>
+                                                        <td id="time_in_location"></td>
+                                                        <td id="time_in_ip_address"></td>
+                                                        <td id="time_in_by"></td>
+                                                        <td id="time_in_note"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row">Time Out</th>
+                                                        <td id="time_out"></td>
+                                                        <td id="time_out_behavior"></td>
+                                                        <td id="time_out_location"></td>
+                                                        <td id="time_out_ip_address"></td>
+                                                        <td id="time_out_by"></td>
+                                                        <td id="time_out_note"></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>';
+            }
 
             $response[] = array(
                 'ELEMENT' => $element
@@ -3441,6 +3522,9 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                             'OVERTIME' => $overtime,
                             'TOTAL_WORKING_HOURS' => $total_working_hours,
                             'ACTION' => '<div class="d-flex gap-2">
+                                <button type="button" class="btn btn-primary waves-effect waves-light view-attendance" data-attendance-id="'. $attendance_id .'" title="View Attendance">
+                                    <i class="bx bx-show font-size-16 align-middle"></i>
+                                </button>
                                 '. $update .'
                                 '. $transaction_log .'
                                 '. $delete .'

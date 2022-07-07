@@ -4592,6 +4592,80 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     }
     # -------------------------------------------------------------
 
+    # Attendance summary details
+    else if($transaction == 'attendance summary details'){
+        if(isset($_POST['attendance_id']) && !empty($_POST['attendance_id'])){
+            $attendance_id = $_POST['attendance_id'];
+
+            $attendance_details = $api->get_attendance_details($attendance_id);
+
+            $time_in_behavior = $api->get_time_in_behavior_status($attendance_details[0]['TIME_IN_BEHAVIOR'])[0]['BADGE'];
+            $time_out_behavior = $api->get_time_out_behavior_status($attendance_details[0]['TIME_OUT_BEHAVIOR'])[0]['BADGE'];
+
+            $employee_id = $attendance_details[0]['EMPLOYEE_ID'];
+            $time_in_location = $attendance_details[0]['TIME_IN_LOCATION'];
+            $time_out_location = $attendance_details[0]['TIME_OUT_LOCATION'];
+            $employee_details = $api->get_employee_details($employee_id);
+            $file_as = $employee_details[0]['FILE_AS'];
+
+            if(!empty($attendance_details[0]['TIME_IN_BY'])){
+                $time_in_by = $attendance_details[0]['TIME_IN_BY'];
+                $time_in_by_details = $api->get_employee_details($time_in_by);
+                $time_in_by_name = $time_in_by_details[0]['FILE_AS'];
+            }
+            else{
+                $time_in_by_name = '--';
+            }
+
+            if(!empty($attendance_details[0]['TIME_OUT_BY'])){
+                $time_out_by = $attendance_details[0]['TIME_OUT_BY'];
+                $time_out_by_details = $api->get_employee_details($time_out_by);
+                $time_out_by_name = $time_out_by_details[0]['FILE_AS'];
+            }
+            else{
+                $time_out_by_name = '--';
+            }
+
+            if(!empty($time_in_location)){
+                $time_in_location = '<a href="https://maps.google.com/?q=' . $time_in_location . '" target="_blank">View Location</a>';
+            }
+            else{
+                $time_in_location = 'No location available';
+            }
+
+            if(!empty($time_out_location)){
+                $time_out_location = '<a href="https://maps.google.com/?q=' . $time_out_location . '" target="_blank">View Location</a>';
+            }
+            else{
+                $time_out_location = 'No location available';
+            }
+
+            $response[] = array(
+                'EMPLOYEE' => $file_as,
+                'TIME_IN' => $api->check_date('empty', $attendance_details[0]['TIME_IN'], '', 'F d, Y H:i:00', '', '', ''),
+                'TIME_OUT' => $api->check_date('empty', $attendance_details[0]['TIME_OUT'], '', 'F d, Y H:i:00', '', '', ''),
+                'TIME_IN_NOTE' => $attendance_details[0]['TIME_IN_NOTE'],
+                'TIME_IN_IP_ADDRESS' => $attendance_details[0]['TIME_IN_IP_ADDRESS'],
+                'TIME_OUT_IP_ADDRESS' => $attendance_details[0]['TIME_OUT_IP_ADDRESS'],
+                'TIME_IN_LOCATION' => $time_in_location,
+                'TIME_OUT_LOCATION' => $time_out_location,
+                'TIME_IN_BY' => $time_in_behavior,
+                'TIME_IN_BEHAVIOR' => $time_in_behavior,
+                'TIME_OUT_BEHAVIOR' => $time_out_behavior,
+                'TIME_IN_BY' => $time_in_by_name,
+                'TIME_OUT_BY' => $time_out_by_name,
+                'REMARKS' => $attendance_details[0]['REMARKS'],
+                'LATE' => $attendance_details[0]['LATE'] . ' minute(s)',
+                'EARLY_LEAVING' => $attendance_details[0]['EARLY_LEAVING'] . ' minute(s)',
+                'OVERTIME' => $attendance_details[0]['OVERTIME'] . ' minute(s)',
+                'TOTAL_WORKING_HOURS' => $attendance_details[0]['TOTAL_WORKING_HOURS'] . ' hour(s)'
+            );
+
+            echo json_encode($response);
+        }
+    }
+    # -------------------------------------------------------------
+
 }
 
 ?>
