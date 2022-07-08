@@ -418,6 +418,18 @@ CREATE TABLE global_notification(
 	RECORD_LOG VARCHAR(100)
 );
 
+CREATE TABLE attendance_adjustment(
+	ADJUSTMENT_ID VARCHAR(100) PRIMARY KEY,
+	ATTENDANCE_ID VARCHAR(100) NOT NULL,
+	EMPLOYEE_ID VARCHAR(100) NOT NULL,
+	TIME_IN DATETIME,
+	TIME_OUT DATETIME,
+	REASON VARCHAR(500) NOT NULL,
+	ATTACHMENT VARCHAR(500),
+	TRANSACTION_LOG_ID VARCHAR(500),
+	RECORD_LOG VARCHAR(100)
+);
+
 /* Index */
 CREATE INDEX global_user_account_index ON global_user_account(USERNAME);
 CREATE INDEX global_system_parameter_index ON global_system_parameters(PARAMETER_ID);
@@ -445,6 +457,7 @@ CREATE INDEX employee_working_hours_schedule_index ON employee_working_hours_sch
 CREATE INDEX attendance_setting_index ON attendance_setting(ATTENDANCE_SETTING_ID);
 CREATE INDEX attendance_record_index ON attendance_record(ATTENDANCE_ID);
 CREATE INDEX global_notification_index ON global_notification(NOTIFICATION_ID);
+CREATE INDEX attendance_adjustment_index ON attendance_adjustment(ADJUSTMENT_ID);
 
 /* Stored Procedure */
 

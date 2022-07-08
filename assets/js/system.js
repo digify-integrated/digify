@@ -3906,6 +3906,44 @@ function display_form_details(form_type){
             }
         });
     }
+    else if(form_type == 'request full attendance adustment form'){
+        transaction = 'attendance details';
+
+        var attendance_id = sessionStorage.getItem('attendance_id');
+
+        $.ajax({
+            url: 'controller.php',
+            method: 'POST',
+            dataType: 'JSON',
+            data: {attendance_id : attendance_id, transaction : transaction},
+            success: function(response) {
+                $('#time_in_date').val(response[0].TIME_IN_DATE);
+                $('#time_in_time').val(response[0].TIME_IN);
+                $('#time_out_date').val(response[0].TIME_OUT_DATE);
+                $('#time_out_time').val(response[0].TIME_OUT);
+                $('#employee_id').val(response[0].EMPLOYEE_ID);
+                $('#attendance_id').val(attendance_id);
+            }
+        });
+    }
+    else if(form_type == 'request partial attendance adustment form'){
+        transaction = 'attendance details';
+
+        var attendance_id = sessionStorage.getItem('attendance_id');
+
+        $.ajax({
+            url: 'controller.php',
+            method: 'POST',
+            dataType: 'JSON',
+            data: {attendance_id : attendance_id, transaction : transaction},
+            success: function(response) {
+                $('#time_in_date').val(response[0].TIME_IN_DATE);
+                $('#time_in_time').val(response[0].TIME_IN);
+                $('#employee_id').val(response[0].EMPLOYEE_ID);
+                $('#attendance_id').val(attendance_id);
+            }
+        });
+    }
 }
 
 function initialize_transaction_log_table(datatable_name, buttons = false, show_all = false){

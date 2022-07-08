@@ -8774,6 +8774,14 @@ class Api{
                 return null;
             }
         }
+        else if($type == 'attendance empty'){
+            if(!empty($date) && $date != ' '){
+                return $this->format_date($format, $date, $modify);
+            }
+            else{
+                return null;
+            }
+        }
         else if($type == 'summary'){
             if(!empty($date)){
                 return $this->format_date($format, $date, $modify);

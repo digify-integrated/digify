@@ -2054,8 +2054,8 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
             $attendance_id = $_POST['attendance_id'];
             $employee_id = $_POST['employee_id'];
             $remarks = $_POST['remarks'];
-            $time_in = $api->check_date('empty', $_POST['time_in_date'] . ' ' . $_POST['time_in_time'], '', 'Y-m-d H:i:00', '', '', '');
-            $time_out = $api->check_date('empty', $_POST['time_out_date'] . ' ' . $_POST['time_out_time'], '', 'Y-m-d H:i:00', '', '', '');
+            $time_in = $api->check_date('attendance empty', $_POST['time_in_date'] . ' ' . $_POST['time_in_time'], '', 'Y-m-d H:i:00', '', '', '');
+            $time_out = $api->check_date('attendance empty', $_POST['time_out_date'] . ' ' . $_POST['time_out_time'], '', 'Y-m-d H:i:00', '', '', '');
           
             $time_in_behavior = $api->get_time_in_behavior($employee_id, $time_in);
             $late = $api->get_attendance_late_total($employee_id, $time_in);
