@@ -4,7 +4,7 @@
     require('classes/api.php');
 
     $api = new Api;
-    $page_title = 'Employee Attendance';
+    $page_title = 'My Attendance';
 
     $page_access = $api->check_role_permissions($username, 118);
 	$request_attendance = $api->check_role_permissions($username, 120);
@@ -71,7 +71,7 @@
                                             <div class="col-md-12">
                                                 <div class="d-flex align-items-start">
                                                     <div class="flex-grow-1 align-self-center">
-                                                        <h4 class="card-title">Employee Attendance List</h4>
+                                                        <h4 class="card-title">My Attendance List</h4>
                                                     </div>
                                                     <div class="d-flex gap-2">
                                                     <?php
@@ -130,17 +130,17 @@
                                         </div>
                                         <div class="row mt-4">
                                             <div class="col-md-12">
-                                                <table id="employee-attendance-datatable" class="table table-bordered align-middle mb-0 table-hover table-striped dt-responsive nowrap w-100">
+                                                <table id="my-attendance-datatable" class="table table-bordered align-middle mb-0 table-hover table-striped dt-responsive nowrap w-100">
                                                     <thead>
                                                         <tr>
                                                             <th class="all">Time In</th>
                                                             <th class="all">Behavior</th>
                                                             <th class="all">Time Out</th>
                                                             <th class="all">Behavior</th>
-                                                            <th class="all">Late</th>
-                                                            <th class="all">Early Leave</th>
-                                                            <th class="all">Overtime</th>
-                                                            <th class="all">Total Hours</th>
+                                                            <th>Late</th>
+                                                            <th>Early Leave</th>
+                                                            <th>Overtime</th>
+                                                            <th>Total Hours</th>
                                                             <th class="all">Action</th>
                                                         </tr>
                                                     </thead>
@@ -171,6 +171,6 @@
         <script src="assets/libs/select2/js/select2.min.js"></script>
         <script src="assets/libs/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
         <script src="assets/js/system.js?v=<?php echo rand(); ?>"></script>
-        <script src="assets/js/pages/employee-attendance.js?v=<?php echo rand(); ?>"></script>
+        <script src="assets/js/pages/my-attendance.js?v=<?php echo rand(); ?>"></script>
     </body>
 </html>

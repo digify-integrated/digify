@@ -5,22 +5,22 @@
     $attendance_setting_page = $api->check_role_permissions($username, 108);
     $time_in_time_out_page = $api->check_role_permissions($username, 111);
     $attendance_page = $api->check_role_permissions($username, 113);
-    $employee_attendance = $api->check_role_permissions($username, 118);
+    $my_attendance = $api->check_role_permissions($username, 118);
 
-    if($attendance_setting_page > 0 || $time_in_time_out_page > 0 || $attendance_page > 0 || $employee_attendance > 0){
+    if($attendance_setting_page > 0 || $time_in_time_out_page > 0 || $attendance_page > 0 || $my_attendance > 0){
         if($time_in_time_out_page > 0){
             $menu .= '<li class="nav-item dropdown"><a href="time-in-time-out.php" class="nav-link">Time In / Time Out</a></li>';
         }
 
-        if($employee_attendance > 0){
+        if($my_attendance > 0){
             $menu .= '<li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle arrow-none" href="javascript: void(0);" id="topnav-user-access" role="button">
-                            <span key="t-user-access">My Attendance</span> <div class="arrow-down"></div>
+                            <span key="t-user-access">Attendance Record</span> <div class="arrow-down"></div>
                         </a>
                         <div class="dropdown-menu" aria-labelledby="topnav-user-access">';
 
-                            if($employee_attendance > 0){
-                                $menu .= '<a href="employee-attendance.php" class="dropdown-item" key="t-policy">Employee Attendance</a>';
+                            if($my_attendance > 0){
+                                $menu .= '<a href="my-attendance.php" class="dropdown-item" key="t-policy">My Attendance</a>';
                             }
 
                 $menu .= '</div>

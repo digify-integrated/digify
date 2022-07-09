@@ -426,6 +426,7 @@ CREATE TABLE attendance_adjustment(
 	TIME_OUT DATETIME,
 	REASON VARCHAR(500) NOT NULL,
 	ATTACHMENT VARCHAR(500),
+	STATUS VARCHAR(10) NOT NULL,
 	TRANSACTION_LOG_ID VARCHAR(500),
 	RECORD_LOG VARCHAR(100)
 );
@@ -3035,6 +3036,99 @@ BEGIN
 	SET @attendance_id = attendance_id;
 
 	SET @query = 'DELETE FROM attendance_record WHERE ATTENDANCE_ID = @attendance_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE TABLE attendance_adjustment(
+	ADJUSTMENT_ID VARCHAR(100) PRIMARY KEY,
+	ATTENDANCE_ID VARCHAR(100) NOT NULL,
+	EMPLOYEE_ID VARCHAR(100) NOT NULL,
+	TIME_IN DATETIME,
+	TIME_OUT DATETIME,
+	REASON VARCHAR(500) NOT NULL,
+	ATTACHMENT VARCHAR(500),
+	STATUS VARCHAR(10) NOT NULL,
+	TRANSACTION_LOG_ID VARCHAR(500),
+	RECORD_LOG VARCHAR(100)
+);
+
+CREATE PROCEDURE check_attendance_adjustment_exist(IN adjustment_id VARCHAR(100))
+BEGIN
+	SET @ADJUSTMENT_ID = ADJUSTMENT_ID;
+
+	SET @query = 'SELECT COUNT(1) AS TOTAL FROM attendance_adjustment WHERE ADJUSTMENT_ID = @ADJUSTMENT_ID';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE update_attendance_adjustment(IN adjustment_id VARCHAR(100), IN time_in DATETIME, IN time_out DATETIME, IN reason VARCHAR(500), IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
+BEGIN
+	SET @adjustment_id = adjustment_id;
+	SET @time_in = time_in;
+	SET @time_out = time_out;
+	SET @reason = reason;
+	SET @transaction_log_id = transaction_log_id;
+	SET @record_log = record_log;
+
+	SET @query = 'UPDATE attendance_adjustment SET TIME_IN = @time_in, TIME_OUT = @time_out, REASON = @reason, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE ADJUSTMENT_ID = @adjustment_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE insert_attendance_adjustment(IN adjustment_id VARCHAR(100), IN attendance_id VARCHAR(100), IN employee_id VARCHAR(100), IN time_in DATETIME, IN time_out DATETIME, IN reason VARCHAR(500), IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
+BEGIN
+	SET @adjustment_id = adjustment_id;
+	SET @attendance_id = attendance_id;
+	SET @employee_id = employee_id;
+	SET @time_in = time_in;
+	SET @time_out = time_out;
+	SET @reason = reason;
+	SET @transaction_log_id = transaction_log_id;
+	SET @record_log = record_log;
+
+	SET @query = 'INSERT INTO attendance_adjustment (ADJUSTMENT_ID, ATTENDANCE_ID, EMPLOYEE_ID, TIME_IN, TIME_OUT, REASON, STATUS, TRANSACTION_LOG_ID, RECORD_LOG) VALUES(@adjustment_id, @attendance_id, @employee_id, @time_in, @time_out, @reason, "PEN", @transaction_log_id, @record_log)';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE get_attendance_adjustment_details(IN adjustment_id VARCHAR(100))
+BEGIN
+	SET @adjustment_id = adjustment_id;
+
+	SET @query = 'SELECT ATTENDANCE_ID, EMPLOYEE_ID, TIME_IN, TIME_OUT, REASON, ATTACHMENT, STATUS, TRANSACTION_LOG_ID, RECORD_LOG FROM attendance_adjustment WHERE ADJUSTMENT_ID = @adjustment_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE delete_attendance_adjustment(IN adjustment_id VARCHAR(100))
+BEGIN
+	SET @adjustment_id = adjustment_id;
+
+	SET @query = 'DELETE FROM attendance_adjustment WHERE ADJUSTMENT_ID = @adjustment_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE update_attendance_adjustment_attachment(IN adjustment_id VARCHAR(100), IN attachment VARCHAR(500), IN record_log VARCHAR(100))
+BEGIN
+	SET @adjustment_id = adjustment_id;
+	SET @attachment = attachment;
+	SET @record_log = record_log;
+
+	SET @query = 'UPDATE attendance_adjustment SET ATTACHMENT = @attachment, RECORD_LOG = @record_log WHERE ADJUSTMENT_ID = @adjustment_id';
 
 	PREPARE stmt FROM @query;
 	EXECUTE stmt;

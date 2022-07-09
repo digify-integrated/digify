@@ -2,15 +2,15 @@
     'use strict';
 
     $(function() {
-        if($('#employee-attendance-datatable').length){
-            initialize_employee_attendance_table('#employee-attendance-datatable');
+        if($('#my-attendance-datatable').length){
+            initialize_my_attendance_table('#my-attendance-datatable');
         }
 
         initialize_click_events();
     });
 })(jQuery);
 
-function initialize_employee_attendance_table(datatable_name, buttons = false, show_all = false){
+function initialize_my_attendance_table(datatable_name, buttons = false, show_all = false){
     hide_multiple_buttons();
     
     var username = $('#username').text();
@@ -18,7 +18,7 @@ function initialize_employee_attendance_table(datatable_name, buttons = false, s
     var filter_end_date = $('#filter_end_date').val();
     var filter_time_in_behavior = $('#filter_time_in_behavior').val();
     var filter_time_out_behavior = $('#filter_time_out_behavior').val();
-    var type = 'employee attendance table';
+    var type = 'my attendance table';
     var settings;
 
     var column = [ 
@@ -34,10 +34,10 @@ function initialize_employee_attendance_table(datatable_name, buttons = false, s
     ];
 
     var column_definition = [
-        { 'width': '10%', 'aTargets': 0 },
-        { 'width': '10%', 'aTargets': 1 },
-        { 'width': '10%', 'aTargets': 2 },
-        { 'width': '10%', 'aTargets': 3 },
+        { 'width': '12%', 'aTargets': 0 },
+        { 'width': '8%', 'aTargets': 1 },
+        { 'width': '12%', 'aTargets': 2 },
+        { 'width': '8%', 'aTargets': 3 },
         { 'width': '10%', 'aTargets': 4 },
         { 'width': '10%', 'aTargets': 5 },
         { 'width': '10%', 'aTargets': 6 },
@@ -127,6 +127,10 @@ function initialize_click_events(){
         generate_modal('attendance details', 'Attendance Details', 'XL' , '1', '0', 'element', '', '0', username);
     });
 
+    $(document).on('click','#request-attendance',function() {        
+        generate_modal('request attendance form', 'Request Attendance', 'R' , '0', '1', 'form', 'request-attendance-form', '1', username);
+    });
+
     $(document).on('click','.request-attendance-adjustment',function() {
         var attendance_id = $(this).data('attendance-id');
         var adjustment_type = $(this).data('adjustment-type');
@@ -142,7 +146,7 @@ function initialize_click_events(){
     });
 
     $(document).on('click','#apply-filter',function() {
-        initialize_employee_attendance_table('#employee-attendancedatatable');
+        initialize_my_attendance_table('#my-attendance-datatable');
     });
 
 }
