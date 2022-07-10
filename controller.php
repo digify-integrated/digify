@@ -2253,6 +2253,72 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     }
     # -------------------------------------------------------------
 
+    # Submit attendance request
+    else if($transaction == 'submit attendance request'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['time_in_date']) && !empty($_POST['time_in_date']) && isset($_POST['time_in_time']) && !empty($_POST['time_in_time']) && isset($_POST['time_out_date']) && isset($_POST['time_out_time'])){
+            $file_type = '';
+            $username = $_POST['username'];
+            $employee_details = $api->get_employee_details($username);
+            $employee_id = $employee_details[0]['EMPLOYEE_ID'];
+            $reason = $_POST['reason'];
+            $time_in = $api->check_date('attendance empty', $_POST['time_in_date'] . ' ' . $_POST['time_in_time'], '', 'Y-m-d H:i:00', '', '', '');
+            $time_out = $api->check_date('attendance empty', $_POST['time_out_date'] . ' ' . $_POST['time_out_time'], '', 'Y-m-d H:i:00', '', '', '');
+
+            $attachment_name = $_FILES['attachment']['name'];
+            $attachment_size = $_FILES['attachment']['size'];
+            $attachment_error = $_FILES['attachment']['error'];
+            $attachment_tmp_name = $_FILES['attachment']['tmp_name'];
+            $attachment_ext = explode('.', $attachment_name);
+            $attachment_actual_ext = strtolower(end($attachment_ext));
+
+            $upload_setting_details = $api->get_upload_setting_details(11);
+            $upload_file_type_details = $api->get_upload_file_type_details(11);
+            $file_max_size = $upload_setting_details[0]['MAX_FILE_SIZE'] * 1048576;
+
+            for($i = 0; $i < count($upload_file_type_details); $i++) {
+                $file_type .= $upload_file_type_details[$i]['FILE_TYPE'];
+
+                if($i != (count($upload_file_type_details) - 1)){
+                    $file_type .= ',';
+                }
+            }
+
+            $allowed_ext = explode(',', $file_type);
+
+            if(in_array($attachment_actual_ext, $allowed_ext)){
+                if(!$attachment_error){
+                    if($attachment_size < $file_max_size){
+                        $check_attendance_validation = $api->check_attendance_validation($time_in, $time_out);
+
+                        if(empty($check_attendance_validation)){
+                            $insert_attendance_creation = $api->insert_attendance_creation($attachment_tmp_name, $attachment_actual_ext, $employee_id, $time_in, $time_out, $reason, $username);
+
+                            if($insert_attendance_creation){
+                                echo 'Inserted';
+                            }
+                            else{
+                                echo $insert_attendance_creation;
+                            }
+                        }
+                        else{
+                            echo $check_attendance_validation;
+                        }
+                    }
+                    else{
+                        echo 'File Size';
+                    }
+                }
+                else{
+                    echo 'There was an error uploading the file.';
+                }
+            }
+            else{
+                echo 'File Type';
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
     # -------------------------------------------------------------
     #   Delete transactions
     # -------------------------------------------------------------
@@ -3426,6 +3492,62 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                                     
                     if(!$delete_job_position){
                         $error = $delete_attendance_adjustment;
+                    }
+                }
+                else{
+                    $error = 'Not Found';
+                }
+            }
+
+            if(empty($error)){
+                echo 'Deleted';
+            }
+            else{
+                echo $error;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Delete attendance creation
+    else if($transaction == 'delete attendance creation'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['creation_id']) && !empty($_POST['creation_id'])){
+            $username = $_POST['username'];
+            $creation_id = $_POST['creation_id'];
+
+            $check_attendance_creation_exist = $api->check_attendance_creation_exist($creation_id);
+
+            if($check_attendance_creation_exist > 0){
+                $delete_attendance_creation = $api->delete_attendance_creation($creation_id, $username);
+                                    
+                if($delete_attendance_creation){
+                    echo 'Deleted';
+                }
+                else{
+                    echo $delete_attendance_creation;
+                }
+            }
+            else{
+                echo 'Not Found';
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Delete multiple attendance creation
+    else if($transaction == 'delete multiple attendance creation'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['creation_id'])){
+            $username = $_POST['username'];
+            $creation_ids = $_POST['creation_id'];
+
+            foreach($creation_ids as $creation_id){
+                $check_attendance_creation_exist = $api->check_attendance_creation_exist($creation_id);
+
+                if($check_attendance_creation_exist > 0){
+                    $delete_attendance_creation = $api->delete_attendance_creation($creation_id, $username);
+                                    
+                    if(!$delete_job_position){
+                        $error = $delete_attendance_creation;
                     }
                 }
                 else{
@@ -4859,6 +4981,26 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                 'TIME_OUT_DATE' => $api->check_date('empty', $attendance_adjustment_details[0]['TIME_OUT'], '', 'n/d/Y', '', '', ''),
                 'TIME_OUT' => $api->check_date('empty', $attendance_adjustment_details[0]['TIME_OUT'], '', 'H:i:00', '', '', ''),
                 'REASON' => $attendance_adjustment_details[0]['REASON']
+            );
+
+            echo json_encode($response);
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Attendance creation details
+    else if($transaction == 'attendance creation details'){
+        if(isset($_POST['creation_id']) && !empty($_POST['creation_id'])){
+            $creation_id = $_POST['creation_id'];
+
+            $attendance_creation_details = $api->get_attendance_creation_details($creation_id);
+
+            $response[] = array(
+                'TIME_IN_DATE' => $api->check_date('empty', $attendance_creation_details[0]['TIME_IN'], '', 'n/d/Y', '', '', ''),
+                'TIME_IN' => $api->check_date('empty', $attendance_creation_details[0]['TIME_IN'], '', 'H:i:00', '', '', ''),
+                'TIME_OUT_DATE' => $api->check_date('empty', $attendance_creation_details[0]['TIME_OUT'], '', 'n/d/Y', '', '', ''),
+                'TIME_OUT' => $api->check_date('empty', $attendance_creation_details[0]['TIME_OUT'], '', 'H:i:00', '', '', ''),
+                'REASON' => $attendance_creation_details[0]['REASON']
             );
 
             echo json_encode($response);

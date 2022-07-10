@@ -3203,6 +3203,102 @@ function initialize_form_validation(form_type){
             }
         });
     }
+    else if(form_type == 'request attendance form'){
+        $('#request-attendance-form').validate({
+            submitHandler: function (form) {
+                var transaction = 'submit attendance request';
+                var username = $('#username').text();
+                
+                var formData = new FormData(form);
+                formData.append('username', username);
+                formData.append('transaction', transaction);
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'controller.php',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    beforeSend: function(){
+                        document.getElementById('submit-form').disabled = true;
+                        $('#submit-form').html('<div class="spinner-border spinner-border-sm text-light" role="status"><span rclass="sr-only"></span></div>');
+                    },
+                    success: function (response) {
+                        if(response === 'Requested' || response === 'Inserted'){
+                            show_alert('Request Attendance Success', 'The attendance has been requested.', 'success');
+
+                            $('#System-Modal').modal('hide');
+                        }
+                        else if(response === 'Invalid'){
+                            show_alert('Request Attendance Error', 'The time in cannot be greater than the time out.', 'error');
+                        }
+                        else if(response === 'File Size'){
+                            show_alert('Request Attendance Error', 'The file uploaded exceeds the maximum file size.', 'error');
+                        }
+                        else if(response === 'File Type'){
+                            show_alert('Request Attendance Error', 'The file uploaded is not supported.', 'error');
+                        }
+                        else{
+                            show_alert('Request Attendance Error', response, 'error');
+                        }
+                    },
+                    complete: function(){
+                        document.getElementById('submit-form').disabled = false;
+                        $('#submit-form').html('Submit');
+                    }
+                });
+                return false;
+            },
+            rules: {
+                time_in_date: {
+                    required: true
+                },
+                time_in_time: {
+                    required: true
+                },
+                attachment: {
+                    required: true
+                },
+                reason: {
+                    required: true
+                }
+            },
+            messages: {
+                time_in_date: {
+                    required: 'Please choose the time in date',
+                },
+                time_in_time: {
+                    required: 'Please choose the time in',
+                },
+                attachment: {
+                    required: 'Please choose the attachment',
+                },
+                reason: {
+                    required: 'Please enter the reason',
+                }
+            },
+            errorPlacement: function(label, element) {
+                if((element.hasClass('select2') || element.hasClass('form-select2')) && element.next('.select2-container').length) {
+                    label.insertAfter(element.next('.select2-container'));
+                }
+                else if(element.parent('.input-group').length){
+                    label.insertAfter(element.parent());
+                }
+                else{
+                    label.insertAfter(element);
+                }
+            },
+            highlight: function(element) {
+                $(element).parent().addClass('has-danger');
+                $(element).addClass('form-control-danger');
+            },
+            success: function(label,element) {
+                $(element).parent().removeClass('has-danger')
+                $(element).removeClass('form-control-danger')
+                label.remove();
+            }
+        });
+    }
 }
 
 // Display functions

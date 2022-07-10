@@ -1127,6 +1127,56 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : check_attendance_adjustment_exist
+    # Purpose    : Checks if the attendance adjustment exists.
+    #
+    # Returns    : Number
+    #
+    # -------------------------------------------------------------
+    public function check_attendance_adjustment_exist($adjustment_id){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL check_attendance_adjustment_exist(:adjustment_id)');
+            $sql->bindValue(':adjustment_id', $adjustment_id);
+
+            if($sql->execute()){
+                $row = $sql->fetch();
+
+                return $row['TOTAL'];
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+     # -------------------------------------------------------------
+    #
+    # Name       : check_attendance_creation_exist
+    # Purpose    : Checks if the attendance creation exists.
+    #
+    # Returns    : Number
+    #
+    # -------------------------------------------------------------
+    public function check_attendance_creation_exist($creation_id){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL check_attendance_creation_exist(:creation_id)');
+            $sql->bindValue(':creation_id', $creation_id);
+
+            if($sql->execute()){
+                $row = $sql->fetch();
+
+                return $row['TOTAL'];
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Update methods
     # -------------------------------------------------------------
     
@@ -3912,6 +3962,163 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : update_attendance_creation_attachment
+    # Purpose    : Updates attendance creation attachment.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function update_attendance_creation_attachment($attachment_tmp_name, $attachment_actual_ext, $attendance_creation_attachment_id, $username){
+        if ($this->databaseConnection()) {
+            $record_log = 'UPD->' . $username . '->' . date('Y-m-d h:i:s');
+
+            $file_name = $this->generate_file_name(10);
+            $file_new = $file_name . '.' . $attachment_actual_ext;
+
+            $directory = './company/employee/attendance_creation/';
+            $file_destination = $_SERVER['DOCUMENT_ROOT'] . '/digify/company/employee/attendance_creation/' . $file_new;
+            $file_path = $directory . $file_new;
+
+            $directory_checker = $this->directory_checker($directory);
+
+            if($directory_checker){
+                $job_position_details = $this->get_attendance_creation_details($attendance_creation_attachment_id);
+                $attachment = $job_position_details[0]['ATTACHMENT'];
+                $transaction_log_id = $job_position_details[0]['TRANSACTION_LOG_ID'];
+    
+                    if(file_exists($attachment)){
+                        if (unlink($attachment)) {
+                            if(move_uploaded_file($attachment_tmp_name, $file_destination)){
+                                $sql = $this->db_connection->prepare('CALL update_attendance_creation_attachment(:attendance_creation_attachment_id, :file_path, :record_log)');
+                                $sql->bindValue(':attendance_creation_attachment_id', $attendance_creation_attachment_id);
+                                $sql->bindValue(':file_path', $file_path);
+                                $sql->bindValue(':record_log', $record_log);
+                            
+                                if($sql->execute()){
+                                    $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated attendance creation attachment.');
+                                        
+                                    if($insert_transaction_log){
+                                        return true;
+                                    }
+                                    else{
+                                        return $insert_transaction_log;
+                                    }
+                                }
+                                else{
+                                    return $sql->errorInfo()[2];
+                                }
+                            }
+                            else{
+                                return 'There was an error uploading your file.';
+                            }
+                        }
+                        else {
+                            return $attachment . ' cannot be deleted due to an error.';
+                        }
+                    }
+                    else{
+                        if(move_uploaded_file($attachment_tmp_name, $file_destination)){
+                            $sql = $this->db_connection->prepare('CALL update_attendance_creation_attachment(:attendance_creation_attachment_id, :file_path, :record_log)');
+                            $sql->bindValue(':attendance_creation_attachment_id', $attendance_creation_attachment_id);
+                            $sql->bindValue(':file_path', $file_path);
+                            $sql->bindValue(':record_log', $record_log);
+                        
+                            if($sql->execute()){
+                                $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated attendance creation attachment.');
+                                    
+                                if($insert_transaction_log){
+                                    return true;
+                                }
+                                else{
+                                    return $insert_transaction_log;
+                                }
+                            }
+                            else{
+                                return $sql->errorInfo()[2];
+                            }
+                        }
+                        else{
+                            return 'There was an error uploading your file.';
+                        }
+                    }
+                }
+                else{
+                    return $directory_checker;
+                }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : update_attendance_creation
+    # Purpose    : Updates attendance creation.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function update_attendance_creation($creation_id, $time_in, $time_out, $reason, $username){
+        if ($this->databaseConnection()) {
+            $record_log = 'UPD->' . $username . '->' . date('Y-m-d h:i:s');
+            $attendance_creation_details = $this->get_attendance_creation_details($job_position_id);
+            
+            if(!empty($attendance_creation_details[0]['TRANSACTION_LOG_ID'])){
+                $transaction_log_id = $attendance_creation_details[0]['TRANSACTION_LOG_ID'];
+            }
+            else{
+                # Get transaction log id
+                $transaction_log_system_parameter = $this->get_system_parameter(2, 1);
+                $transaction_log_parameter_number = $transaction_log_system_parameter[0]['PARAMETER_NUMBER'];
+                $transaction_log_id = $transaction_log_system_parameter[0]['ID'];
+            }
+
+            $sql = $this->db_connection->prepare('CALL update_attendance_creation(:creation_id, :time_in, :time_out, :reason, :transaction_log_id, :record_log)');
+            $sql->bindValue(':creation_id', $creation_id);
+            $sql->bindValue(':time_in', $time_in);
+            $sql->bindValue(':time_out', $time_out);
+            $sql->bindValue(':reason', $reason);
+            $sql->bindValue(':transaction_log_id', $transaction_log_id);
+            $sql->bindValue(':record_log', $record_log);
+        
+            if($sql->execute()){
+                if(!empty($attendance_creation_details[0]['TRANSACTION_LOG_ID'])){
+                    $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated attendance creation.');
+                                    
+                    if($insert_transaction_log){
+                        return true;
+                    }
+                    else{
+                        return $insert_transaction_log;
+                    }
+                }
+                else{
+                    # Update transaction log value
+                    $update_system_parameter_value = $this->update_system_parameter_value($transaction_log_parameter_number, 2, $username);
+
+                    if($update_system_parameter_value){
+                        $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated attendance creation.');
+                                    
+                        if($insert_transaction_log){
+                            return true;
+                        }
+                        else{
+                            return $insert_transaction_log;
+                        }
+                    }
+                    else{
+                        return $update_system_parameter_value;
+                    }
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Insert methods
     # -------------------------------------------------------------
     
@@ -5970,6 +6177,77 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : insert_attendance_creation
+    # Purpose    : Insert attendance creation.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function insert_attendance_creation($attachment_tmp_name, $attachment_actual_ext, $employee_id, $time_in, $time_out, $reason, $username){
+        if ($this->databaseConnection()) {
+            $record_log = 'INS->' . $username . '->' . date('Y-m-d h:i:s');
+
+            # Get system parameter id
+            $system_parameter = $this->get_system_parameter(21, 1);
+            $parameter_number = $system_parameter[0]['PARAMETER_NUMBER'];
+            $id = $system_parameter[0]['ID'];
+
+            # Get transaction log id
+            $transaction_log_system_parameter = $this->get_system_parameter(2, 1);
+            $transaction_log_parameter_number = $transaction_log_system_parameter[0]['PARAMETER_NUMBER'];
+            $transaction_log_id = $transaction_log_system_parameter[0]['ID'];
+
+            $sql = $this->db_connection->prepare('CALL insert_attendance_creation(:id, :employee_id, :time_in, :time_out, :reason, :transaction_log_id, :record_log)');
+            $sql->bindValue(':id', $id);
+            $sql->bindValue(':employee_id', $employee_id);
+            $sql->bindValue(':time_in', $time_in);
+            $sql->bindValue(':time_out', $time_out);
+            $sql->bindValue(':reason', $reason);
+            $sql->bindValue(':transaction_log_id', $transaction_log_id);
+            $sql->bindValue(':record_log', $record_log); 
+        
+            if($sql->execute()){
+                # Update system parameter value
+                $update_system_parameter_value = $this->update_system_parameter_value($parameter_number, 21, $username);
+
+                if($update_system_parameter_value){
+                    # Update transaction log value
+                    $update_system_parameter_value = $this->update_system_parameter_value($transaction_log_parameter_number, 2, $username);
+
+                    if($update_system_parameter_value){
+                        $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Request', 'User ' . $username . ' requested an attendance creation.');
+                                    
+                        if($insert_transaction_log){
+                            $update_attendance_creation_attachment = $this->update_attendance_creation_attachment($attachment_tmp_name, $attachment_actual_ext, $id, $username);
+        
+                            if($update_attendance_creation_attachment){
+                                return true;
+                            }
+                            else{
+                                return $update_attendance_creation_attachment;
+                            }
+                        }
+                        else{
+                            return $insert_transaction_log;
+                        }
+                    }
+                    else{
+                        return $update_system_parameter_value;
+                    }
+                }
+                else{
+                    return $update_system_parameter_value;
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Delete methods
     # -------------------------------------------------------------
 
@@ -6785,6 +7063,47 @@ class Api{
 
             $sql = $this->db_connection->prepare('CALL delete_attendance_adjustment(:adjustment_id)');
             $sql->bindValue(':adjustment_id', $adjustment_id);
+        
+            if($sql->execute()){ 
+                if(!empty($attachment)){
+                    if(file_exists($attachment)){
+                        if (unlink($attachment)) {
+                            return true;
+                        }
+                        else {
+                            return $attachment . ' cannot be deleted due to an error.';
+                        }
+                    }
+                    else{
+                        return true;
+                    }
+                }
+                else{
+                    return true;
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : delete_attendance_creation
+    # Purpose    : Delete attendance creation.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function delete_attendance_creation($creation_id, $username){
+        if ($this->databaseConnection()) {
+            $attendance_creation_details = $this->get_attendance_creation_details($creation_id);
+            $attachment = $attendance_creation_details[0]['ATTACHMENT'];
+
+            $sql = $this->db_connection->prepare('CALL delete_attendance_creation(:creation_id)');
+            $sql->bindValue(':creation_id', $creation_id);
         
             if($sql->execute()){ 
                 if(!empty($attachment)){
@@ -8162,12 +8481,12 @@ class Api{
     # Returns    : Array
     #
     # -------------------------------------------------------------
-    public function get_attendance_adjustment_details($attendance_adjustment_attachment_id){
+    public function get_attendance_adjustment_details($adjustment_id){
         if ($this->databaseConnection()) {
             $response = array();
 
-            $sql = $this->db_connection->prepare('CALL get_attendance_adjustment_details(:attendance_adjustment_attachment_id)');
-            $sql->bindValue(':attendance_adjustment_attachment_id', $attendance_adjustment_attachment_id);
+            $sql = $this->db_connection->prepare('CALL get_attendance_adjustment_details(:adjustment_id)');
+            $sql->bindValue(':adjustment_id', $adjustment_id);
 
             if($sql->execute()){
                 while($row = $sql->fetch()){
@@ -8179,6 +8498,58 @@ class Api{
                         'REASON' => $row['REASON'],
                         'ATTACHMENT' => $row['ATTACHMENT'],
                         'STATUS' => $row['STATUS'],
+                        'FOR_RECOMMENDATION_DATE' => $row['FOR_RECOMMENDATION_DATE'],
+                        'RECOMMENDATION_DATE' => $row['RECOMMENDATION_DATE'],
+                        'RECOMMENDATION_BY' => $row['RECOMMENDATION_BY'],
+                        'RECOMMENDATION_REMARKS' => $row['RECOMMENDATION_REMARKS'],
+                        'DECISION_DATE' => $row['DECISION_DATE'],
+                        'DECISION_BY' => $row['DECISION_BY'],
+                        'DECISION_REMARKS' => $row['DECISION_REMARKS'],
+                        'TRANSACTION_LOG_ID' => $row['TRANSACTION_LOG_ID'],
+                        'RECORD_LOG' => $row['RECORD_LOG']
+                    );
+                }
+
+                return $response;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : get_attendance_creation_details
+    # Purpose    : Gets the attendance creation details.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_attendance_creation_details($creation_id){
+        if ($this->databaseConnection()) {
+            $response = array();
+
+            $sql = $this->db_connection->prepare('CALL get_attendance_creation_details(:creation_id)');
+            $sql->bindValue(':creation_id', $creation_id);
+
+            if($sql->execute()){
+                while($row = $sql->fetch()){
+                    $response[] = array(
+                        'EMPLOYEE_ID' => $row['EMPLOYEE_ID'],
+                        'TIME_IN' => $row['TIME_IN'],
+                        'TIME_OUT' => $row['TIME_OUT'],
+                        'REASON' => $row['REASON'],
+                        'ATTACHMENT' => $row['ATTACHMENT'],
+                        'STATUS' => $row['STATUS'],
+                        'FOR_RECOMMENDATION_DATE' => $row['FOR_RECOMMENDATION_DATE'],
+                        'RECOMMENDATION_DATE' => $row['RECOMMENDATION_DATE'],
+                        'RECOMMENDATION_BY' => $row['RECOMMENDATION_BY'],
+                        'RECOMMENDATION_REMARKS' => $row['RECOMMENDATION_REMARKS'],
+                        'DECISION_DATE' => $row['DECISION_DATE'],
+                        'DECISION_BY' => $row['DECISION_BY'],
+                        'DECISION_REMARKS' => $row['DECISION_REMARKS'],
                         'TRANSACTION_LOG_ID' => $row['TRANSACTION_LOG_ID'],
                         'RECORD_LOG' => $row['RECORD_LOG']
                     );
