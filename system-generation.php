@@ -3843,29 +3843,29 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                 $filter_status = $_POST['filter_status'];
                 $filter_sanction = $_POST['filter_sanction'];
 
-                $query = 'SELECT ATTENDANCE_ID, EMPLOYEE_ID, TIME_IN, TIME_OUT, STATUS, SANCTION, TRANSACTION_LOG_ID FROM attendance_adjustment WHERE EMPLOYEE_ID = :employee_id';
+                $query = 'SELECT ATTENDANCE_ID, TIME_IN, TIME_OUT, STATUS, SANCTION, TRANSACTION_LOG_ID FROM attendance_adjustment WHERE EMPLOYEE_ID = :employee_id';
 
                 if((!empty($filter_for_recommendation_start_date) && !empty($filter_for_recommendation_end_date)) || (!empty($filter_recommendation_start_date) && !empty($filter_recommendation_end_date)) || (!empty($filter_decision_start_date) && !empty($filter_decision_end_date)) || !empty($filter_status) || $filter_sanction != ''){
                     $query .= ' AND ';
 
                     if(!empty($filter_for_recommendation_start_date) && !empty($filter_for_recommendation_end_date)){
-                        $filter[] = 'DATE(TIME_IN) BETWEEN :filter_for_recommendation_start_date AND :filter_for_recommendation_end_date';
+                        $filter[] = 'DATE(FOR_RECOMMENDATION_DATE) BETWEEN :filter_for_recommendation_start_date AND :filter_for_recommendation_end_date';
                     }
 
                     if(!empty($filter_recommendation_start_date) && !empty($filter_recommendation_end_date)){
-                        $filter[] = 'DATE(TIME_IN) BETWEEN :filter_recommendation_start_date AND :filter_recommendation_end_date';
+                        $filter[] = 'DATE(RECOMMENDATION_DATE) BETWEEN :filter_recommendation_start_date AND :filter_recommendation_end_date';
                     }
 
                     if(!empty($filter_decision_start_date) && !empty($filter_decision_end_date)){
-                        $filter[] = 'DATE(TIME_IN) BETWEEN :filter_decision_start_date AND :filter_decision_end_date';
+                        $filter[] = 'DATE(DECISION_DATE) BETWEEN :filter_decision_start_date AND :filter_decision_end_date';
                     }
 
                     if(!empty($filter_status)){
-                        $filter[] = 'TIME_IN_BEHAVIOR = :filter_status';
+                        $filter[] = 'STATUS = :filter_status';
                     }
 
                     if($filter_sanction != ''){
-                        $filter[] = 'TIME_OUT_BEHAVIOR = :filter_sanction';
+                        $filter[] = 'SANCTION = :filter_sanction';
                     }
 
                     if(!empty($filter)){
@@ -3907,21 +3907,9 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                         $attendance_id = $row['ATTENDANCE_ID'];
                         $time_in = $api->check_date('empty', $row['TIME_IN'], '', 'm/d/Y h:i:s a', '', '', '');
                         $time_out = $api->check_date('empty', $row['TIME_OUT'], '', 'm/d/Y h:i:s a', '', '', '');
-                        $late = number_format($row['LATE'], 2);
-                        $early_leaving = number_format($row['EARLY_LEAVING'], 2);
-                        $overtime = number_format($row['OVERTIME'], 2);
-                        $total_working_hours = number_format($row['TOTAL_WORKING_HOURS'], 2);
+                        $status = $row['STATUS'];
+                        $sanction = $row['SANCTION'];
                         $transaction_log_id = $row['TRANSACTION_LOG_ID'];
-
-                        $time_in_behavior = $api->get_time_in_behavior_status($row['TIME_IN_BEHAVIOR'])[0]['BADGE'];
-                        $time_out_behavior = $api->get_time_out_behavior_status($row['TIME_OUT_BEHAVIOR'])[0]['BADGE'];
-
-                        $employee_details = $api->get_employee_details($employee_id);
-                        $file_as = $employee_details[0]['FILE_AS'];
-                        $job_position = $employee_details[0]['JOB_POSITION'];
-
-                        $job_position_details = $api->get_job_position_details($job_position);
-                        $job_position_name = $job_position_details[0]['JOB_POSITION'] ?? null;
 
                         if(!empty($time_out)){
                             $adjustment_type = 'full';
