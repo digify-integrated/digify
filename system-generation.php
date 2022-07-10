@@ -3911,6 +3911,8 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                         $sanction = $row['SANCTION'];
                         $transaction_log_id = $row['TRANSACTION_LOG_ID'];
 
+                        
+
                         if(!empty($time_out)){
                             $adjustment_type = 'full';
                         }
@@ -3946,7 +3948,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                             'OVERTIME' => $overtime,
                             'TOTAL_WORKING_HOURS' => $total_working_hours,
                             'ACTION' => '<div class="d-flex gap-2">
-                                <button type="button" class="btn btn-primary waves-effect waves-light view-attendance" data-attendance-id="'. $attendance_id .'" title="View Attendance">
+                                <button type="button" class="btn btn-primary waves-effect waves-light view-attendance" data-attendance-id="'. $attendance_id .'" title="View Attendance Adjustment">
                                     <i class="bx bx-show font-size-16 align-middle"></i>
                                 </button>
                                 '. $attendance_adjustment .'
