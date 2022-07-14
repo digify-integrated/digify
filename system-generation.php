@@ -1554,6 +1554,161 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                 </div>
                             </div>';
             }
+            else if($form_type == 'request attendance adjustment form'){
+                $form .= '<div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <input type="hidden" id="employee_id" name="employee_id">
+                                    <input type="hidden" id="request_type" name="request_type">
+                                    <label class="form-label">Attendance <span class="text-danger">*</span></label>
+                                    <select class="form-control form-select2" id="attendance_id" name="attendance_id">
+                                        <option value="">--</option>';
+                                    $form .= $api->generate_employee_attendance_options($username);
+                                    $form .='</select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        
+                                        <label for="time_in_date" class="form-label">Time In Date <span class="text-danger">*</span></label>
+                                        <div class="input-group" id="time-in-date-container">
+                                            <input type="text" class="form-control" id="time_in_date" name="time_in_date" autocomplete="off" data-date-format="m/dd/yyyy" data-date-container="#time-in-date-container" data-provide="datepicker" data-date-autoclose="true" readonly>
+                                            <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="time_in_time" class="form-label">Time In <span class="text-danger">*</span></label>
+                                        <input type="time" id="time_in_time" name="time_in_time" class="form-control" autocomplete="off">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row d-none" id="time-out-section">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="time_out_date" class="form-label">Time Out Date <span class="text-danger">*</span></label>
+                                        <div class="input-group" id="time-out-date-container">
+                                            <input type="text" class="form-control" id="time_out_date" name="time_out_date" autocomplete="off" data-date-format="m/dd/yyyy" data-date-container="#time-out-date-container" data-provide="datepicker" data-date-autoclose="true">
+                                            <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="time_out_time" class="form-label">Time Out <span class="text-danger">*</span></label>
+                                        <input type="time" id="time_out_time" name="time_out_time" class="form-control" autocomplete="off">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <label for="attachment" class="form-label">Attachment <span class="text-danger">*</span></label>
+                                        <input class="form-control" type="file" name="attachment" id="attachment">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <label for="reason" class="form-label">Reason <span class="text-danger">*</span></label>
+                                        <textarea class="form-control form-maxlength" id="reason" name="reason" maxlength="500" rows="5"></textarea>
+                                    </div>
+                                </div>
+                            </div>';
+            }
+            else if($form_type == 'update full attendance adustment form'){
+                $form .= '<div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <input type="hidden" id="adjustment_id" name="adjustment_id">
+                                        <label for="time_in_date" class="form-label">Time In Date <span class="text-danger">*</span></label>
+                                        <div class="input-group" id="time-in-date-container">
+                                            <input type="text" class="form-control" id="time_in_date" name="time_in_date" autocomplete="off" data-date-format="m/dd/yyyy" data-date-container="#time-in-date-container" data-provide="datepicker" data-date-autoclose="true" readonly>
+                                            <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="time_in_time" class="form-label">Time In <span class="text-danger">*</span></label>
+                                        <input type="time" id="time_in_time" name="time_in_time" class="form-control" autocomplete="off">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="time_out_date" class="form-label">Time Out Date <span class="text-danger">*</span></label>
+                                        <div class="input-group" id="time-out-date-container">
+                                            <input type="text" class="form-control" id="time_out_date" name="time_out_date" autocomplete="off" data-date-format="m/dd/yyyy" data-date-container="#time-out-date-container" data-provide="datepicker" data-date-autoclose="true">
+                                            <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="time_out_time" class="form-label">Time Out <span class="text-danger">*</span></label>
+                                        <input type="time" id="time_out_time" name="time_out_time" class="form-control" autocomplete="off">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <label for="attachment" class="form-label">Attachment</label>
+                                        <input class="form-control" type="file" name="attachment" id="attachment">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <label for="reason" class="form-label">Reason <span class="text-danger">*</span></label>
+                                        <textarea class="form-control form-maxlength" id="reason" name="reason" maxlength="500" rows="5"></textarea>
+                                    </div>
+                                </div>
+                            </div>';
+            }
+            else if($form_type == 'update partial attendance adustment form'){
+                $form .= '<div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <input type="hidden" id="adjustment_id" name="adjustment_id">
+                                        <label for="time_in_date" class="form-label">Time In Date <span class="text-danger">*</span></label>
+                                        <div class="input-group" id="time-in-date-container">
+                                            <input type="text" class="form-control" id="time_in_date" name="time_in_date" autocomplete="off" data-date-format="m/dd/yyyy" data-date-container="#time-in-date-container" data-provide="datepicker" data-date-autoclose="true" readonly>
+                                            <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="time_in_time" class="form-label">Time In <span class="text-danger">*</span></label>
+                                        <input type="time" id="time_in_time" name="time_in_time" class="form-control" autocomplete="off">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <label for="attachment" class="form-label">Attachment</label>
+                                        <input class="form-control" type="file" name="attachment" id="attachment">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <label for="reason" class="form-label">Reason <span class="text-danger">*</span></label>
+                                        <textarea class="form-control form-maxlength" id="reason" name="reason" maxlength="500" rows="5"></textarea>
+                                    </div>
+                                </div>
+                            </div>';
+            }
 
             $form .= '</form>';
 
@@ -3682,9 +3837,6 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                 }
             }
         }
-        else{
-            echo $_POST['filter_time_in_behavior'];
-        }
     }
     # -------------------------------------------------------------
 
@@ -3817,9 +3969,6 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                 }
             }
         }
-        else{
-            echo $_POST['filter_time_in_behavior'];
-        }
     }
     # -------------------------------------------------------------
 
@@ -3828,11 +3977,14 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
         if(isset($_POST['filter_for_recommendation_start_date']) && isset($_POST['filter_for_recommendation_end_date']) && isset($_POST['filter_recommendation_start_date']) && isset($_POST['filter_recommendation_end_date']) && isset($_POST['filter_decision_start_date']) && isset($_POST['filter_decision_end_date']) && isset($_POST['filter_status']) && isset($_POST['filter_sanction'])){
             if ($api->databaseConnection()) {
                 # Get permission
-                $request_attendance_adjustment = $api->check_role_permissions($username, 119);
-                $view_transaction_log = $api->check_role_permissions($username, 117);
+                $update_attendance_adjustment = $api->check_role_permissions($username, 124);
+                $cancel_attendance_adjustment = $api->check_role_permissions($username, 125);
+	            $tag_attendance_adjustment_for_recommendation = $api->check_role_permissions($username, 126);
+                $delete_attendance_adjustment = $api->check_role_permissions($username, 127);
+                $view_transaction_log = $api->check_role_permissions($username, 128);
 
                 $employee_details = $api->get_employee_details($username);
-                $employee_id = $employee_details[0]['EMPLOYEE_ID'];
+                $employee_id = $employee_details[0]['EMPLOYEE_ID'] ?? null;
 
                 $filter_for_recommendation_start_date = $api->check_date('empty', $_POST['filter_for_recommendation_start_date'], '', 'Y-m-d', '', '', '');
                 $filter_for_recommendation_end_date = $api->check_date('empty', $_POST['filter_for_recommendation_end_date'], '', 'Y-m-d', '', '', '');
@@ -3843,7 +3995,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                 $filter_status = $_POST['filter_status'];
                 $filter_sanction = $_POST['filter_sanction'];
 
-                $query = 'SELECT ATTENDANCE_ID, TIME_IN, TIME_OUT, STATUS, SANCTION, TRANSACTION_LOG_ID FROM attendance_adjustment WHERE EMPLOYEE_ID = :employee_id';
+                $query = 'SELECT ADJUSTMENT_ID, ATTENDANCE_ID, TIME_IN, TIME_OUT, STATUS, SANCTION, TRANSACTION_LOG_ID FROM attendance_adjustment WHERE EMPLOYEE_ID = :employee_id';
 
                 if((!empty($filter_for_recommendation_start_date) && !empty($filter_for_recommendation_end_date)) || (!empty($filter_recommendation_start_date) && !empty($filter_recommendation_end_date)) || (!empty($filter_decision_start_date) && !empty($filter_decision_end_date)) || !empty($filter_status) || $filter_sanction != ''){
                     $query .= ' AND ';
@@ -3904,6 +4056,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
     
                 if($sql->execute()){
                     while($row = $sql->fetch()){
+                        $adjustment_id = $row['ADJUSTMENT_ID'];
                         $attendance_id = $row['ATTENDANCE_ID'];
                         $time_in = $api->check_date('empty', $row['TIME_IN'], '', 'm/d/Y h:i:s a', '', '', '');
                         $time_out = $api->check_date('empty', $row['TIME_OUT'], '', 'm/d/Y h:i:s a', '', '', '');
@@ -3911,22 +4064,61 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                         $sanction = $row['SANCTION'];
                         $transaction_log_id = $row['TRANSACTION_LOG_ID'];
 
-                        
+                        $status_name = $api->get_attendance_adjustment_status($status)[0]['BADGE'];
+                        $sanction_name = $api->get_attendance_adjustment_sanction_status($sanction)[0]['BADGE'];
+
+                        $attendance_details = $api->get_attendance_details($attendance_id);
+                        $attendance_time_in = $api->check_date('empty', $attendance_details[0]['TIME_IN'], '', 'm/d/Y h:i:s a', '', '', '');
+                        $attendance_time_out = $api->check_date('empty', $attendance_details[0]['TIME_OUT'], '', 'm/d/Y h:i:s a', '', '', '');
+
+                        if(strtotime($time_in) != strtotime($attendance_time_in)){
+                            $time_in_details = $attendance_time_in . ' -> ' . $time_in;
+                        }
+                        else{
+                            $time_in_details = $time_in;
+                        }
 
                         if(!empty($time_out)){
                             $adjustment_type = 'full';
+
+                            if(strtotime($time_out) != strtotime($attendance_time_out)){
+                                $time_out_details = $attendance_time_out . ' -> ' . $time_out;
+                            }
+                            else{
+                                $time_out_details = $time_out;
+                            }
                         }
                         else{
                             $adjustment_type = 'partial';
+                            $time_out_details = '--';
                         }
 
-                        if($request_attendance_adjustment > 0){
-                            $attendance_adjustment = '<button type="button" class="btn btn-success waves-effect waves-light request-attendance-adjustment" data-adjustment-type="'. $adjustment_type .'" data-attendance-id="'. $attendance_id .'" title="Request Attendance Adjustment">
-                                            <i class="bx bx-time-five font-size-16 align-middle"></i>
-                                        </button>';
+                        if($cancel_attendance_adjustment > 0 && ($status == 'PEN' || $status == 'REC' || $status == 'FORREC')){
+                            $cancel = '<button type="button" class="btn btn-warning waves-effect waves-light cancel-attendance-adjustment" data-adjustment-id="'. $adjustment_id .'" title="Cancel Attendance Adjustment">
+                                        <i class="bx bx-calendar-x font-size-16 align-middle"></i>
+                                    </button>';
                         }
                         else{
-                            $attendance_adjustment = '';
+                            $cancel = '';
+                        }
+
+                        if(($update_attendance_adjustment > 0 || $tag_attendance_adjustment_for_recommendation > 0 || $delete_attendance_adjustment > 0) && $status == 'PEN'){
+                            $update = '<button type="button" class="btn btn-info waves-effect waves-light update-attendance-adjustment" data-adjustment-type="'. $adjustment_type .'" data-adjustment-id="'. $adjustment_id .'" title="Update Attendance Adjustment">
+                                    <i class="bx bx-pencil font-size-16 align-middle"></i>
+                                </button>';
+
+                            $for_recommendation = '<button type="button" class="btn btn-success waves-effect waves-light for-recommend-attendance-adjustment" data-adjustment-id="'. $adjustment_id .'" title="Tag Attendance Adjustment For Recommendation">
+                                            <i class="bx bx-check font-size-16 align-middle"></i>
+                                        </button>';
+
+                            $delete = '<button type="button" class="btn btn-danger waves-effect waves-light delete-attendance-adjustment" data-adjustment-id="'. $adjustment_id .'" title="Delete Attendance Adjustment">
+                                        <i class="bx bx-trash font-size-16 align-middle"></i>
+                                    </button>';
+                        }
+                        else{
+                            $update = '';
+                            $for_recommendation = '';
+                            $delete = '';
                         }
 
                         if($view_transaction_log > 0 && !empty($transaction_log_id)){
@@ -3937,22 +4129,40 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                         else{
                             $transaction_log = '';
                         }
+
+                        if($status == 'PEN' || $status == 'REC' || $status == 'FORREC'){
+                            $data_cancel = 1;
+
+                            if($status == 'PEN'){
+                                $data_for_recommendation = 1;
+                                $data_delete = 1;
+                            }
+                            else{
+                                $data_for_recommendation = 0;
+                                $data_delete = 0;
+                            }
+
+                            $check_box = '<input class="form-check-input datatable-checkbox-children" data-cancel="'. $data_cancel .'" data-delete="'. $data_delete .'" data-for-recommendation="'. $data_for_recommendation .'" type="checkbox" value="'. $adjustment_id .'">';
+                        }
+                        else{
+                            $check_box = '';
+                        }
     
                         $response[] = array(
-                            'TIME_IN' => $time_in,
-                            'TIME_IN_BEHAVIOR' => $time_in_behavior,
-                            'TIME_OUT' => $time_out,
-                            'TIME_OUT_BEHAVIOR' => $time_out_behavior,
-                            'LATE' => $late,
-                            'EARLY_LEAVING' => $early_leaving,
-                            'OVERTIME' => $overtime,
-                            'TOTAL_WORKING_HOURS' => $total_working_hours,
+                            'CHECK_BOX' => $check_box,
+                            'TIME_IN' => $time_in_details,
+                            'TIME_OUT' => $time_out_details,
+                            'STATUS' => $status_name,
+                            'SANCTION' => $sanction_name,
                             'ACTION' => '<div class="d-flex gap-2">
-                                <button type="button" class="btn btn-primary waves-effect waves-light view-attendance" data-attendance-id="'. $attendance_id .'" title="View Attendance Adjustment">
+                                <button type="button" class="btn btn-primary waves-effect waves-light view-attendance-adjustment" data-adjustment-id="'. $adjustment_id .'" title="View Attendance Adjustment">
                                     <i class="bx bx-show font-size-16 align-middle"></i>
                                 </button>
-                                '. $attendance_adjustment .'
+                                '. $update .'
+                                '. $for_recommendation .'
+                                '. $cancel .'
                                 '. $transaction_log .'
+                                '. $delete .'
                             </div>'
                         );
                     }
@@ -3963,9 +4173,6 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                     echo $sql->errorInfo()[2];
                 }
             }
-        }
-        else{
-            echo $_POST['filter_time_in_behavior'];
         }
     }
     # -------------------------------------------------------------

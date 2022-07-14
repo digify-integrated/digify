@@ -3231,6 +3231,17 @@ BEGIN
 	DROP PREPARE stmt;
 END //
 
+CREATE PROCEDURE generate_employee_attendance_options(IN employee_id VARCHAR(100))
+BEGIN
+	SET @employee_id = employee_id;
+
+	SET @query = 'SELECT ATTENDANCE_ID, TIME_IN, TIME_OUT FROM attendance_record WHERE EMPLOYEE_ID = @employee_id ORDER BY TIME_IN DESC';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
 /* Insert Transactions */
 INSERT INTO global_user_account (USERNAME, PASSWORD, USER_STATUS, PASSWORD_EXPIRY_DATE, FAILED_LOGIN, LAST_FAILED_LOGIN, TRANSACTION_LOG_ID) VALUES ('ADMIN', '68aff5412f35ed76', 'Active', '2021-12-30', 0, null, 'TL-1');
 INSERT INTO global_system_parameters (PARAMETER_ID, PARAMETER, PARAMETER_DESCRIPTION, PARAMETER_EXTENSION, PARAMETER_NUMBER, TRANSACTION_LOG_ID) VALUES ('1', 'System Parameter', 'Parameter for system parameters.', '', 3, 'TL-2');

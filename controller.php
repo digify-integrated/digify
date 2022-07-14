@@ -17,7 +17,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
             $authenticate = $api->authenticate($username, $password);
             
-            if($authenticate == 1){
+            if($authenticate){
                 $_SESSION['lock'] = 0;
                 $_SESSION['logged_in'] = 1;
                 $_SESSION['username'] = $username;
@@ -2130,7 +2130,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     # -------------------------------------------------------------
 
     # Submit full attendance adjustment
-    else if($transaction == 'submit full attendance adjustment'){
+    else if($transaction == 'submit full attendance adjustment' || $transaction == 'submit attendance adjustment'){
         if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['attendance_id']) && !empty($_POST['attendance_id']) && isset($_POST['employee_id']) && !empty($_POST['employee_id']) && isset($_POST['time_in_date']) && !empty($_POST['time_in_date']) && isset($_POST['time_in_time']) && !empty($_POST['time_in_time']) && isset($_POST['time_out_date']) && !empty($_POST['time_out_date']) && isset($_POST['time_out_time']) && !empty($_POST['time_out_time'])){
             $file_type = '';
             $username = $_POST['username'];
@@ -2197,7 +2197,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
     # Submit partial attendance adjustment
     else if($transaction == 'submit partial attendance adjustment'){
-        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['attendance_id']) && !empty($_POST['attendance_id']) && isset($_POST['employee_id']) && !empty($_POST['employee_id']) && isset($_POST['time_in_date']) && !empty($_POST['time_in_date']) && isset($_POST['time_in_time']) && !empty($_POST['time_in_time']) && isset($_POST['time_out_time']) && !empty($_POST['time_out_time'])){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['attendance_id']) && !empty($_POST['attendance_id']) && isset($_POST['employee_id']) && !empty($_POST['employee_id']) && isset($_POST['time_in_date']) && !empty($_POST['time_in_date']) && isset($_POST['time_in_time']) && !empty($_POST['time_in_time'])){
             $file_type = '';
             $username = $_POST['username'];
             $attendance_id = $_POST['attendance_id'];
@@ -2302,6 +2302,156 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                         }
                         else{
                             echo $check_attendance_validation;
+                        }
+                    }
+                    else{
+                        echo 'File Size';
+                    }
+                }
+                else{
+                    echo 'There was an error uploading the file.';
+                }
+            }
+            else{
+                echo 'File Type';
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Submit full attendance adjustment update
+    else if($transaction == 'submit full attendance adjustment update'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['adjustment_id']) && !empty($_POST['adjustment_id']) && isset($_POST['time_in_date']) && !empty($_POST['time_in_date']) && isset($_POST['time_in_time']) && !empty($_POST['time_in_time']) && isset($_POST['time_out_date']) && !empty($_POST['time_out_date']) && isset($_POST['time_out_time']) && !empty($_POST['time_out_time'])){
+            $file_type = '';
+            $username = $_POST['username'];
+            $adjustment_id = $_POST['adjustment_id'];
+            $reason = $_POST['reason'];
+            $time_in = $api->check_date('attendance empty', $_POST['time_in_date'] . ' ' . $_POST['time_in_time'], '', 'Y-m-d H:i:00', '', '', '');
+            $time_out = $api->check_date('attendance empty', $_POST['time_out_date'] . ' ' . $_POST['time_out_time'], '', 'Y-m-d H:i:00', '', '', '');
+
+            $attachment_name = $_FILES['attachment']['name'];
+            $attachment_size = $_FILES['attachment']['size'];
+            $attachment_error = $_FILES['attachment']['error'];
+            $attachment_tmp_name = $_FILES['attachment']['tmp_name'];
+            $attachment_ext = explode('.', $attachment_name);
+            $attachment_actual_ext = strtolower(end($attachment_ext));
+
+            $upload_setting_details = $api->get_upload_setting_details(10);
+            $upload_file_type_details = $api->get_upload_file_type_details(10);
+            $file_max_size = $upload_setting_details[0]['MAX_FILE_SIZE'] * 1048576;
+
+            for($i = 0; $i < count($upload_file_type_details); $i++) {
+                $file_type .= $upload_file_type_details[$i]['FILE_TYPE'];
+
+                if($i != (count($upload_file_type_details) - 1)){
+                    $file_type .= ',';
+                }
+            }
+
+            $allowed_ext = explode(',', $file_type);
+
+            $attendance_adjustment_details = $api->get_attendance_adjustment_details($adjustment_id);
+            $attendance_adjustment_status = $attendance_adjustment_details[0]['STATUS'];
+
+            if($attendance_adjustment_status == 'PEN'){
+                $check_attendance_adjustment_exist = $api->check_attendance_adjustment_exist($adjustment_id);
+ 
+                if($check_attendance_adjustment_exist > 0){
+                    if(!empty($attachment_tmp_name)){
+                        if(in_array($attachment_actual_ext, $allowed_ext)){
+                            if(!$attachment_error){
+                                if($attachment_size < $file_max_size){
+                                    $check_attendance_validation = $api->check_attendance_validation($time_in, $time_out);
+            
+                                    if(empty($check_attendance_validation)){
+                                        $update_attendance_adjustment = $api->update_attendance_adjustment($adjustment_id, $time_in, $time_out, $reason, $username);
+            
+                                        if($update_attendance_adjustment){
+                                            echo 'Inserted';
+                                        }
+                                        else{
+                                            echo $update_attendance_adjustment;
+                                        }
+                                    }
+                                    else{
+                                        echo $check_attendance_validation;
+                                    }
+                                }
+                                else{
+                                    echo 'File Size';
+                                }
+                            }
+                            else{
+                                echo 'There was an error uploading the file.';
+                            }
+                        }
+                        else{
+                            echo 'File Type';
+                        }
+                    }
+                    else{
+                        $update_job_position = $api->update_job_position($job_position_id, $job_position, $username);
+
+                        if($update_job_position){
+                            echo 'Updated';
+                        }
+                        else{
+                            echo $update_job_position;
+                        }
+                    }
+                }
+                else{
+                    echo 'Not Found';
+                }
+            }
+            else{
+                echo 'Status';
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Submit partial attendance adjustment update
+    else if($transaction == 'submit partial attendance adjustment update'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['attendance_id']) && !empty($_POST['attendance_id']) && isset($_POST['employee_id']) && !empty($_POST['employee_id']) && isset($_POST['time_in_date']) && !empty($_POST['time_in_date']) && isset($_POST['time_in_time']) && !empty($_POST['time_in_time'])){
+            $file_type = '';
+            $username = $_POST['username'];
+            $attendance_id = $_POST['attendance_id'];
+            $employee_id = $_POST['employee_id'];
+            $reason = $_POST['reason'];
+            $time_in = $api->check_date('attendance empty', $_POST['time_in_date'] . ' ' . $_POST['time_in_time'], '', 'Y-m-d H:i:00', '', '', '');
+
+            $attachment_name = $_FILES['attachment']['name'];
+            $attachment_size = $_FILES['attachment']['size'];
+            $attachment_error = $_FILES['attachment']['error'];
+            $attachment_tmp_name = $_FILES['attachment']['tmp_name'];
+            $attachment_ext = explode('.', $attachment_name);
+            $attachment_actual_ext = strtolower(end($attachment_ext));
+
+            $upload_setting_details = $api->get_upload_setting_details(10);
+            $upload_file_type_details = $api->get_upload_file_type_details(10);
+            $file_max_size = $upload_setting_details[0]['MAX_FILE_SIZE'] * 1048576;
+
+            for($i = 0; $i < count($upload_file_type_details); $i++) {
+                $file_type .= $upload_file_type_details[$i]['FILE_TYPE'];
+
+                if($i != (count($upload_file_type_details) - 1)){
+                    $file_type .= ',';
+                }
+            }
+
+            $allowed_ext = explode(',', $file_type);
+
+            if(in_array($attachment_actual_ext, $allowed_ext)){
+                if(!$attachment_error){
+                    if($attachment_size < $file_max_size){
+                        $insert_attendance_adjustment = $api->insert_attendance_adjustment($attachment_tmp_name, $attachment_actual_ext, $attendance_id, $employee_id, $time_in, null, $reason, $username);
+
+                        if($insert_attendance_adjustment){
+                            echo 'Inserted';
+                        }
+                        else{
+                            echo $insert_attendance_adjustment;
                         }
                     }
                     else{
@@ -5007,7 +5157,6 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
         }
     }
     # -------------------------------------------------------------
-
 }
 
 ?>

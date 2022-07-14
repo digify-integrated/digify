@@ -4,10 +4,12 @@
     require('classes/api.php');
 
     $api = new Api;
-    $page_title = 'My Attendance';
+    $page_title = 'My Attendance Adjustment';
 
     $page_access = $api->check_role_permissions($username, 118);
-	$request_attendance = $api->check_role_permissions($username, 120);
+	$request_attendance_adjustment = $api->check_role_permissions($username, 123);
+	$cancel_attendance_adjustment = $api->check_role_permissions($username, 125);
+	$tag_attendance_adjustment_for_recommendation = $api->check_role_permissions($username, 126);
     
     $check_user_account_status = $api->check_user_account_status($username);
 
@@ -71,12 +73,20 @@
                                             <div class="col-md-12">
                                                 <div class="d-flex align-items-start">
                                                     <div class="flex-grow-1 align-self-center">
-                                                        <h4 class="card-title">My Attendance List</h4>
+                                                        <h4 class="card-title">My Attendance Adjustment List</h4>
                                                     </div>
                                                     <div class="d-flex gap-2">
                                                     <?php
-                                                        if($request_attendance > 0){
-                                                            echo '<button type="button" class="btn btn-primary waves-effect btn-label waves-light" id="request-attendance"><i class="bx bx-plus label-icon"></i> Add</button>';
+                                                        if($request_attendance_adjustment > 0){
+                                                            echo '<button type="button" class="btn btn-primary waves-effect btn-label waves-light" id="request-attendance-adjustment"><i class="bx bx-plus label-icon"></i> Add</button>';
+                                                        }
+
+                                                        if($tag_attendance_adjustment_for_recommendation > 0){
+                                                            echo '<button type="button" class="btn btn-success waves-effect btn-label waves-light d-none multiple-for-recommendation" id="tag-for-recommendation-attendance-adjustment"><i class="bx bx-check label-icon"></i> For Recommendation</button>';
+                                                        }
+
+                                                        if($cancel_attendance_adjustment > 0){
+                                                            echo '<button type="button" class="btn btn-warning waves-effect btn-label waves-light d-none multiple-cancel" id="cancel-attendance-adjustment"><i class="bx bx-calendar-x label-icon"></i> Cancel</button>';
                                                         }
                                                     ?>
                                                     <button type="button" class="btn btn-info waves-effect btn-label waves-light" data-bs-toggle="offcanvas" data-bs-target="#filter-off-canvas" aria-controls="filter-off-canvas"><i class="bx bx-filter-alt label-icon"></i> Filter</button>
@@ -145,7 +155,7 @@
 
                                                             <select class="form-control filter-select2" id="filter_sanction">
                                                                 <option value="">All Sanction</option>
-                                                                <option value="1" selected>True</option>
+                                                                <option value="1">True</option>
                                                                 <option value="0">False</option>
                                                             </select>
                                                         </div>
@@ -161,6 +171,11 @@
                                                 <table id="my-attendance-adjustment-datatable" class="table table-bordered align-middle mb-0 table-hover table-striped dt-responsive nowrap w-100">
                                                     <thead>
                                                         <tr>
+                                                            <th class="all">
+                                                                <div class="form-check">
+                                                                    <input class="form-check-input" id="datatable-checkbox" type="checkbox">
+                                                                </div>
+                                                            </th>
                                                             <th class="all">Time In</th>
                                                             <th class="all">Time Out</th>
                                                             <th class="all">Status</th>

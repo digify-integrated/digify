@@ -80,27 +80,24 @@
                                                     </div>
                                                     <div class="d-flex gap-2">
                                                         <?php
-                                                            if($add_user_account > 0 || $lock_user_account > 0 || $unlock_user_account > 0 || $activate_user_account > 0 || $deactivate_user_account > 0){
+                                                            if($add_user_account > 0){
+                                                                echo '<button type="button" class="btn btn-primary waves-effect btn-label waves-light" id="add-user-account"><i class="bx bx-plus label-icon"></i> Add</button>';
+                                                            }
 
-                                                                if($add_user_account > 0){
-                                                                    echo '<button type="button" class="btn btn-primary waves-effect btn-label waves-light" id="add-user-account"><i class="bx bx-plus label-icon"></i> Add</button>';
-                                                                }
+                                                            if($lock_user_account > 0){
+                                                                echo '<button type="button" class="btn btn-warning waves-effect btn-label waves-light d-none multiple-lock" id="lock-user-account"><i class="bx bx-lock-alt label-icon"></i> Lock</button>';
+                                                            }
 
-                                                                if($lock_user_account > 0){
-                                                                    echo '<button type="button" class="btn btn-warning waves-effect btn-label waves-light d-none multiple-lock" id="lock-user-account"><i class="bx bx-lock-alt label-icon"></i> Lock</button>';
-                                                                }
+                                                            if($unlock_user_account > 0){
+                                                                echo '<button type="button" class="btn btn-info waves-effect btn-label waves-light d-none multiple-unlock" id="unlock-user-account"><i class="bx bx-lock-open-alt label-icon"></i> Unlock</button>';
+                                                            }
 
-                                                                if($unlock_user_account > 0){
-                                                                    echo '<button type="button" class="btn btn-info waves-effect btn-label waves-light d-none multiple-unlock" id="unlock-user-account"><i class="bx bx-lock-open-alt label-icon"></i> Unlock</button>';
-                                                                }
+                                                            if($activate_user_account > 0){
+                                                                echo '<button type="button" class="btn btn-success waves-effect btn-label waves-light d-none multiple-activate" id="activate-user-account"><i class="bx bx bx-user-check label-icon"></i> Activate</button>';
+                                                            }
 
-                                                                if($activate_user_account > 0){
-                                                                    echo '<button type="button" class="btn btn-success waves-effect btn-label waves-light d-none multiple-activate" id="activate-user-account"><i class="bx bx bx-user-check label-icon"></i> Activate</button>';
-                                                                }
-
-                                                                if($deactivate_user_account > 0){
-                                                                    echo '<button type="button" class="btn btn-danger waves-effect btn-label waves-light d-none multiple-deactivate" id="deactivate-user-account"><i class="bx bx bx-user-check label-icon"></i> Deactivate</button>';
-                                                                }
+                                                            if($deactivate_user_account > 0){
+                                                                echo '<button type="button" class="btn btn-danger waves-effect btn-label waves-light d-none multiple-deactivate" id="deactivate-user-account"><i class="bx bx bx-user-check label-icon"></i> Deactivate</button>';
                                                             }
                                                         ?>
                                                         <button type="button" class="btn btn-info waves-effect btn-label waves-light" data-bs-toggle="offcanvas" data-bs-target="#filter-off-canvas" aria-controls="filter-off-canvas"><i class="bx bx-filter-alt label-icon"></i> Filter</button>

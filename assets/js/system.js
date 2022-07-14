@@ -3299,6 +3299,349 @@ function initialize_form_validation(form_type){
             }
         });
     }
+    else if(form_type == 'request attendance adjustment form'){
+        $('#request-attendance-adjustment-form').validate({
+            submitHandler: function (form) {
+                var transaction = 'submit attendance adjustment';
+                var username = $('#username').text();
+                
+                var formData = new FormData(form);
+                formData.append('username', username);
+                formData.append('transaction', transaction);
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'controller.php',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    beforeSend: function(){
+                        document.getElementById('submit-form').disabled = true;
+                        $('#submit-form').html('<div class="spinner-border spinner-border-sm text-light" role="status"><span rclass="sr-only"></span></div>');
+                    },
+                    success: function (response) {
+                        if(response === 'Requested' || response === 'Inserted'){
+                            show_alert('Request Attendance Adjustment Success', 'The attendance adjustment has been requested.', 'success');
+
+                            $('#System-Modal').modal('hide');
+                            reload_datatable('#my-attendance-adjustment-datatable');
+                        }
+                        else if(response === 'Invalid'){
+                            show_alert('Request Attendance Adjustment Error', 'The time in cannot be greater than the time out.', 'error');
+                        }
+                        else if(response === 'File Size'){
+                            show_alert('Request Attendance Adjustment Error', 'The file uploaded exceeds the maximum file size.', 'error');
+                        }
+                        else if(response === 'File Type'){
+                            show_alert('Request Attendance Adjustment Error', 'The file uploaded is not supported.', 'error');
+                        }
+                        else{
+                            show_alert('Request Attendance Adjustment Error', response, 'error');
+                        }
+                    },
+                    complete: function(){
+                        document.getElementById('submit-form').disabled = false;
+                        $('#submit-form').html('Submit');
+                    }
+                });
+                return false;
+            },
+            rules: {
+                attendance_id: {
+                    required: true
+                },
+                time_in_date: {
+                    required: true
+                },
+                time_in_time: {
+                    required: true
+                },
+                time_out_date: {
+                    required: function(element){
+                        var request_type = $('#request_type').val();
+
+                        if(request_type == 'full'){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    },
+                },
+                time_out_time: {
+                    required: function(element){
+                        var request_type = $('#request_type').val();
+
+                        if(request_type == 'full'){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    },
+                },
+                attachment: {
+                    required: true
+                },
+                reason: {
+                    required: true
+                }
+            },
+            messages: {
+                attendance_id: {
+                    required: 'Please choose the attendance',
+                },
+                time_in_date: {
+                    required: 'Please choose the time in date',
+                },
+                time_in_time: {
+                    required: 'Please choose the time in',
+                },
+                time_out_date: {
+                    required: 'Please choose the time out date',
+                },
+                time_out_time: {
+                    required: 'Please choose the time out',
+                },
+                attachment: {
+                    required: 'Please choose the attachment',
+                },
+                reason: {
+                    required: 'Please enter the reason',
+                }
+            },
+            errorPlacement: function(label, element) {
+                if((element.hasClass('select2') || element.hasClass('form-select2')) && element.next('.select2-container').length) {
+                    label.insertAfter(element.next('.select2-container'));
+                }
+                else if(element.parent('.input-group').length){
+                    label.insertAfter(element.parent());
+                }
+                else{
+                    label.insertAfter(element);
+                }
+            },
+            highlight: function(element) {
+                $(element).parent().addClass('has-danger');
+                $(element).addClass('form-control-danger');
+            },
+            success: function(label,element) {
+                $(element).parent().removeClass('has-danger')
+                $(element).removeClass('form-control-danger')
+                label.remove();
+            }
+        });
+    }
+    else if(form_type == 'update full attendance adustment form'){
+        $('#full-attendance-adjustment-form').validate({
+            submitHandler: function (form) {
+                var transaction = 'submit full attendance adjustment update';
+                var username = $('#username').text();
+                
+                var formData = new FormData(form);
+                formData.append('username', username);
+                formData.append('transaction', transaction);
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'controller.php',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    beforeSend: function(){
+                        document.getElementById('submit-form').disabled = true;
+                        $('#submit-form').html('<div class="spinner-border spinner-border-sm text-light" role="status"><span rclass="sr-only"></span></div>');
+                    },
+                    success: function (response) {
+                        if(response === 'Updated' || response === 'Status' || response === 'Not Found'){
+                            if(response === 'Updated'){
+                                show_alert('Update Attendance Adjustment Success', 'The attendance adjustment has been updated.', 'success');
+                            }
+                            else if(response === 'Not Found'){
+                                show_alert('Update Attendance Adjustment Error', 'The attendance adjustment does not exist.', 'info');
+                            }
+                            else{
+                                show_alert('Update Attendance Adjustment Error', 'The attendance adjustment is not pending.', 'error');
+                            }                   
+
+                            $('#System-Modal').modal('hide');
+                            reload_datatable('#my-attendance-adjustment-datatable');
+                        }
+                        else if(response === 'Invalid'){
+                            show_alert('Update Attendance Adjustment Error', 'The time in cannot be greater than the time out.', 'error');
+                        }
+                        else if(response === 'File Size'){
+                            show_alert('Update Attendance Adjustment Error', 'The file uploaded exceeds the maximum file size.', 'error');
+                        }
+                        else if(response === 'File Type'){
+                            show_alert('Update Attendance Adjustment Error', 'The file uploaded is not supported.', 'error');
+                        }
+                        else{
+                            show_alert('Update Attendance Adjustment Error', response, 'error');
+                        }
+                    },
+                    complete: function(){
+                        document.getElementById('submit-form').disabled = false;
+                        $('#submit-form').html('Submit');
+                    }
+                });
+                return false;
+            },
+            rules: {
+                time_in_date: {
+                    required: true
+                },
+                time_in_time: {
+                    required: true
+                },
+                time_out_date: {
+                    required: true
+                },
+                time_out_time: {
+                    required: true
+                },
+                reason: {
+                    required: true
+                }
+            },
+            messages: {
+                time_in_date: {
+                    required: 'Please choose the time in date',
+                },
+                time_in_time: {
+                    required: 'Please choose the time in',
+                },
+                time_out_date: {
+                    required: 'Please enter the time out date',
+                },
+                time_out_time: {
+                    required: 'Please choose the time out',
+                },
+                reason: {
+                    required: 'Please enter the reason',
+                }
+            },
+            errorPlacement: function(label, element) {
+                if((element.hasClass('select2') || element.hasClass('form-select2')) && element.next('.select2-container').length) {
+                    label.insertAfter(element.next('.select2-container'));
+                }
+                else if(element.parent('.input-group').length){
+                    label.insertAfter(element.parent());
+                }
+                else{
+                    label.insertAfter(element);
+                }
+            },
+            highlight: function(element) {
+                $(element).parent().addClass('has-danger');
+                $(element).addClass('form-control-danger');
+            },
+            success: function(label,element) {
+                $(element).parent().removeClass('has-danger')
+                $(element).removeClass('form-control-danger')
+                label.remove();
+            }
+        });
+    }
+    else if(form_type == 'update partial attendance adustment form'){
+        $('#partial-attendance-adjustment-form').validate({
+            submitHandler: function (form) {
+                var transaction = 'submit partial attendance adjustment update';
+                var username = $('#username').text();
+                
+                var formData = new FormData(form);
+                formData.append('username', username);
+                formData.append('transaction', transaction);
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'controller.php',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    beforeSend: function(){
+                        document.getElementById('submit-form').disabled = true;
+                        $('#submit-form').html('<div class="spinner-border spinner-border-sm text-light" role="status"><span rclass="sr-only"></span></div>');
+                    },
+                    success: function (response) {
+                        if(response === 'Updated' || response === 'Status' || response === 'Not Found'){
+                            if(response === 'Updated'){
+                                show_alert('Update Attendance Adjustment Success', 'The attendance adjustment has been updated.', 'success');
+                            }
+                            else if(response === 'Not Found'){
+                                show_alert('Update Attendance Adjustment Error', 'The attendance adjustment does not exist.', 'info');
+                            }
+                            else{
+                                show_alert('Update Attendance Adjustment Error', 'The attendance adjustment is not pending.', 'error');
+                            }                   
+
+                            $('#System-Modal').modal('hide');
+                            reload_datatable('#my-attendance-adjustment-datatable');
+                        }
+                        else if(response === 'Invalid'){
+                            show_alert('Update Attendance Adjustment Error', 'The time in cannot be greater than the time out.', 'error');
+                        }
+                        else if(response === 'File Size'){
+                            show_alert('Update Attendance Adjustment Error', 'The file uploaded exceeds the maximum file size.', 'error');
+                        }
+                        else if(response === 'File Type'){
+                            show_alert('Update Attendance Adjustment Error', 'The file uploaded is not supported.', 'error');
+                        }
+                        else{
+                            show_alert('Update Attendance Adjustment Error', response, 'error');
+                        }
+                    },
+                    complete: function(){
+                        document.getElementById('submit-form').disabled = false;
+                        $('#submit-form').html('Submit');
+                    }
+                });
+                return false;
+            },
+            rules: {
+                time_in_date: {
+                    required: true
+                },
+                time_in_time: {
+                    required: true
+                },
+                reason: {
+                    required: true
+                }
+            },
+            messages: {
+                time_in_date: {
+                    required: 'Please choose the time in date',
+                },
+                time_in_time: {
+                    required: 'Please choose the time in',
+                },
+                reason: {
+                    required: 'Please enter the reason',
+                }
+            },
+            errorPlacement: function(label, element) {
+                if((element.hasClass('select2') || element.hasClass('form-select2')) && element.next('.select2-container').length) {
+                    label.insertAfter(element.next('.select2-container'));
+                }
+                else if(element.parent('.input-group').length){
+                    label.insertAfter(element.parent());
+                }
+                else{
+                    label.insertAfter(element);
+                }
+            },
+            highlight: function(element) {
+                $(element).parent().addClass('has-danger');
+                $(element).addClass('form-control-danger');
+            },
+            success: function(label,element) {
+                $(element).parent().removeClass('has-danger')
+                $(element).removeClass('form-control-danger')
+                label.remove();
+            }
+        });
+    }
 }
 
 // Display functions
@@ -4238,6 +4581,71 @@ function display_form_details(form_type){
                 $('#time_in_time').val(response[0].TIME_IN);
                 $('#employee_id').val(response[0].EMPLOYEE_ID);
                 $('#attendance_id').val(attendance_id);
+            }
+        });
+    }
+    else if(form_type == 'request attendance adjustment form'){
+        transaction = 'attendance details';
+
+        var attendance_id = sessionStorage.getItem('attendance_id');
+
+        $.ajax({
+            url: 'controller.php',
+            method: 'POST',
+            dataType: 'JSON',
+            data: {attendance_id : attendance_id, transaction : transaction},
+            success: function(response) {
+                $('#time_in_date').val(response[0].TIME_IN_DATE);
+                $('#time_in_time').val(response[0].TIME_IN);
+                $('#time_out_date').val(response[0].TIME_OUT_DATE);
+                $('#time_out_time').val(response[0].TIME_OUT);
+                $('#employee_id').val(response[0].EMPLOYEE_ID);
+                $('#attendance_id').val(attendance_id);
+
+                if(response[0].TIME_OUT_DATE && response[0].TIME_OUT){
+                    $('#time-out-section').removeClass('d-none');
+                    $('#request_type').val('full');
+                }
+                else{
+                    $('#time-out-section').addClass('d-none');
+                    $('#request_type').val('partial');
+                }
+            }
+        });
+    }
+    else if(form_type == 'update full attendance adustment form'){
+        transaction = 'attendance adjustment details';
+
+        var adjustment_id = sessionStorage.getItem('adjustment_id');
+
+        $.ajax({
+            url: 'controller.php',
+            method: 'POST',
+            dataType: 'JSON',
+            data: {adjustment_id : adjustment_id, transaction : transaction},
+            success: function(response) {
+                $('#time_in_date').val(response[0].TIME_IN_DATE);
+                $('#time_in_time').val(response[0].TIME_IN);
+                $('#time_out_date').val(response[0].TIME_OUT_DATE);
+                $('#time_out_time').val(response[0].TIME_OUT);
+                $('#adjustment_id').val(adjustment_id);
+            }
+        });
+    }
+    else if(form_type == 'update partial attendance adustment form'){
+        transaction = 'attendance adjustment details';
+
+        var adjustment_id = sessionStorage.getItem('adjustment_id');
+
+        $.ajax({
+            url: 'controller.php',
+            method: 'POST',
+            dataType: 'JSON',
+            data: {adjustment_id : adjustment_id, transaction : transaction},
+            success: function(response) {
+                $('#time_in_date').val(response[0].TIME_IN_DATE);
+                $('#time_in_time').val(response[0].TIME_IN);
+                $('#adjustment_id').val(adjustment_id);
             }
         });
     }

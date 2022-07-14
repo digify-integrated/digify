@@ -9333,6 +9333,82 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : get_attendance_adjustment_status
+    # Purpose    : Returns the status, badge
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_attendance_adjustment_status($stat){
+        $response = array();
+
+        switch ($stat) {
+            case 'PEN':
+                $status = 'Pending';
+                $button_class = 'bg-primary';
+                break;
+            case 'FORREC':
+                $status = 'For Recommendation';
+                $button_class = 'bg-info';
+                break;
+            case 'REC':
+                $status = 'Recommended';
+                $button_class = 'bg-info';
+                break;
+            case 'APV':
+                $status = 'Approved';
+                $button_class = 'bg-success';
+                break;
+            case 'REJ':
+                $status = 'Rejected';
+                $button_class = 'bg-danger';
+                break;
+            default:
+                $status = 'Cancelled';
+                $button_class = 'bg-warning';
+        }
+
+        $response[] = array(
+            'STATUS' => $status,
+            'BADGE' => '<span class="badge '. $button_class .'">'. $status .'</span>'
+        );
+
+        return $response;
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : get_attendance_adjustment_sanction_status
+    # Purpose    : Returns the status, badge
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_attendance_adjustment_sanction_status($stat){
+        $response = array();
+
+        switch ($stat) {
+            case 1:
+                $status = 'True';
+                $button_class = 'bg-danger';
+                break;
+            default:
+                $status = 'False';
+                $button_class = 'bg-warning';
+        }
+
+        $response[] = array(
+            'STATUS' => $status,
+            'BADGE' => '<span class="badge '. $button_class .'">'. $status .'</span>'
+        );
+
+        return $response;
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Check methods
     # -------------------------------------------------------------
 
@@ -10384,6 +10460,53 @@ class Api{
             }
             else{
                 return $sql->errorInfo();
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : generate_employee_attendance_options
+    # Purpose    : Generates employee attendance options of dropdown.
+    #
+    # Returns    : String
+    #
+    # -------------------------------------------------------------
+    public function generate_employee_attendance_options($username){
+        if ($this->databaseConnection()) {
+            $option = '';
+
+            $employee_details = $this->get_employee_details($username);
+            $employee_id = $employee_details[0]['EMPLOYEE_ID'];
+            
+            $sql = $this->db_connection->prepare('CALL generate_employee_attendance_options(:employee_id)');
+            $sql->bindValue(':employee_id', $employee_id);
+
+            if($sql->execute()){
+                $count = $sql->rowCount();
+        
+                if($count > 0){
+                    while($row = $sql->fetch()){
+                        $attendance_id = $row['ATTENDANCE_ID'];
+                        $time_in = $this->check_date('empty', $row['TIME_IN'], '', 'm/d/Y h:i:s a', '', '', '');
+                        $time_out = $this->check_date('empty', $row['TIME_OUT'], '', 'm/d/Y h:i:s a', '', '', '');
+
+                        if(!empty($time_out)){
+                            $attendance_details = $time_in . ' - ' . $time_out;
+                        }
+                        else{
+                            $attendance_details = $time_in;
+                        }
+    
+                        $option .= "<option value='". $attendance_id ."'>". $attendance_details ."</option>";
+                    }
+    
+                    return $option;
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
             }
         }
     }
