@@ -3433,7 +3433,7 @@ function initialize_form_validation(form_type){
         });
     }
     else if(form_type == 'update full attendance adustment form'){
-        $('#full-attendance-adjustment-form').validate({
+        $('#update-full-attendance-adjustment-form').validate({
             submitHandler: function (form) {
                 var transaction = 'submit full attendance adjustment update';
                 var username = $('#username').text();
@@ -3544,7 +3544,7 @@ function initialize_form_validation(form_type){
         });
     }
     else if(form_type == 'update partial attendance adustment form'){
-        $('#partial-attendance-adjustment-form').validate({
+        $('#update-partial-attendance-adjustment-form').validate({
             submitHandler: function (form) {
                 var transaction = 'submit partial attendance adjustment update';
                 var username = $('#username').text();
@@ -4628,6 +4628,7 @@ function display_form_details(form_type){
                 $('#time_in_time').val(response[0].TIME_IN);
                 $('#time_out_date').val(response[0].TIME_OUT_DATE);
                 $('#time_out_time').val(response[0].TIME_OUT);
+                $('#reason').val(response[0].REASON);
                 $('#adjustment_id').val(adjustment_id);
             }
         });
@@ -4645,6 +4646,7 @@ function display_form_details(form_type){
             success: function(response) {
                 $('#time_in_date').val(response[0].TIME_IN_DATE);
                 $('#time_in_time').val(response[0].TIME_IN);
+                $('#reason').val(response[0].REASON);
                 $('#adjustment_id').val(adjustment_id);
             }
         });

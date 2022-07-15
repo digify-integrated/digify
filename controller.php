@@ -2367,7 +2367,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                                         $update_attendance_adjustment = $api->update_attendance_adjustment($adjustment_id, $time_in, $time_out, $reason, $username);
             
                                         if($update_attendance_adjustment){
-                                            echo 'Inserted';
+                                            echo 'Updated';
                                         }
                                         else{
                                             echo $update_attendance_adjustment;
@@ -2390,13 +2390,13 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                         }
                     }
                     else{
-                        $update_job_position = $api->update_job_position($job_position_id, $job_position, $username);
-
-                        if($update_job_position){
+                        $update_attendance_adjustment = $api->update_attendance_adjustment($adjustment_id, $time_in, $time_out, $reason, $username);
+            
+                        if($update_attendance_adjustment){
                             echo 'Updated';
                         }
                         else{
-                            echo $update_job_position;
+                            echo $update_attendance_adjustment;
                         }
                     }
                 }
@@ -2442,28 +2442,62 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
             $allowed_ext = explode(',', $file_type);
 
-            if(in_array($attachment_actual_ext, $allowed_ext)){
-                if(!$attachment_error){
-                    if($attachment_size < $file_max_size){
-                        $insert_attendance_adjustment = $api->insert_attendance_adjustment($attachment_tmp_name, $attachment_actual_ext, $attendance_id, $employee_id, $time_in, null, $reason, $username);
+            $attendance_adjustment_details = $api->get_attendance_adjustment_details($adjustment_id);
+            $attendance_adjustment_status = $attendance_adjustment_details[0]['STATUS'];
 
-                        if($insert_attendance_adjustment){
-                            echo 'Inserted';
+            if($attendance_adjustment_status == 'PEN'){
+                $check_attendance_adjustment_exist = $api->check_attendance_adjustment_exist($adjustment_id);
+ 
+                if($check_attendance_adjustment_exist > 0){
+                    if(!empty($attachment_tmp_name)){
+                        if(in_array($attachment_actual_ext, $allowed_ext)){
+                            if(!$attachment_error){
+                                if($attachment_size < $file_max_size){
+                                    $check_attendance_validation = $api->check_attendance_validation($time_in, null);
+            
+                                    if(empty($check_attendance_validation)){
+                                        $update_attendance_adjustment = $api->update_attendance_adjustment($adjustment_id, $time_in, null, $reason, $username);
+            
+                                        if($update_attendance_adjustment){
+                                            echo 'Updated';
+                                        }
+                                        else{
+                                            echo $update_attendance_adjustment;
+                                        }
+                                    }
+                                    else{
+                                        echo $check_attendance_validation;
+                                    }
+                                }
+                                else{
+                                    echo 'File Size';
+                                }
+                            }
+                            else{
+                                echo 'There was an error uploading the file.';
+                            }
                         }
                         else{
-                            echo $insert_attendance_adjustment;
+                            echo 'File Type';
                         }
                     }
                     else{
-                        echo 'File Size';
+                        $update_attendance_adjustment = $api->update_attendance_adjustment($adjustment_id, $time_in, null, $reason, $username);
+            
+                        if($update_attendance_adjustment){
+                            echo 'Updated';
+                        }
+                        else{
+                            echo $update_attendance_adjustment;
+                        }
                     }
                 }
                 else{
-                    echo 'There was an error uploading the file.';
+                    echo 'Not Found';
                 }
             }
             else{
-                echo 'File Type';
+                echo 'Status';
             }
         }
     }

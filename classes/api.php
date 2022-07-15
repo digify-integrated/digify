@@ -3904,7 +3904,7 @@ class Api{
     public function update_attendance_adjustment($adjustment_id, $time_in, $time_out, $reason, $username){
         if ($this->databaseConnection()) {
             $record_log = 'UPD->' . $username . '->' . date('Y-m-d h:i:s');
-            $attendance_adjustment_details = $this->get_attendance_adjustment_details($job_position_id);
+            $attendance_adjustment_details = $this->get_attendance_adjustment_details($adjustment_id);
             
             if(!empty($attendance_adjustment_details[0]['TRANSACTION_LOG_ID'])){
                 $transaction_log_id = $attendance_adjustment_details[0]['TRANSACTION_LOG_ID'];
