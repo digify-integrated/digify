@@ -428,6 +428,7 @@ CREATE TABLE attendance_adjustment(
 	ATTACHMENT VARCHAR(500),
 	STATUS VARCHAR(10) NOT NULL,
 	SANCTION INT(1) NOT NULL,
+	CREATED_DATE DATETIME,
 	FOR_RECOMMENDATION_DATE DATETIME,
 	RECOMMENDATION_DATE DATETIME,
 	RECOMMENDATION_BY VARCHAR(100),
@@ -448,6 +449,7 @@ CREATE TABLE attendance_creation(
 	ATTACHMENT VARCHAR(500),
 	STATUS VARCHAR(10) NOT NULL,
 	SANCTION INT(1) NOT NULL,
+	CREATED_DATE DATETIME,
 	FOR_RECOMMENDATION_DATE DATETIME,
 	RECOMMENDATION_DATE DATETIME,
 	RECOMMENDATION_BY VARCHAR(100),
@@ -455,10 +457,12 @@ CREATE TABLE attendance_creation(
 	DECISION_DATE DATETIME,
 	DECISION_BY VARCHAR(100),
 	DECISION_REMARKS VARCHAR(500),
-	DECISION_REMARKS VARCHAR(500),
 	TRANSACTION_LOG_ID VARCHAR(500),
 	RECORD_LOG VARCHAR(100)
 );
+
+CREATE INDEX attendance_adjustment_index ON attendance_adjustment(ADJUSTMENT_ID);
+CREATE INDEX attendance_creation_index ON attendance_creation(CREATION_ID);
 
 /* Index */
 CREATE INDEX global_user_account_index ON global_user_account(USERNAME);
@@ -3099,7 +3103,7 @@ BEGIN
 	DROP PREPARE stmt;
 END //
 
-CREATE PROCEDURE insert_attendance_adjustment(IN adjustment_id VARCHAR(100), IN attendance_id VARCHAR(100), IN employee_id VARCHAR(100), IN time_in DATETIME, IN time_out DATETIME, IN reason VARCHAR(500), IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
+CREATE PROCEDURE insert_attendance_adjustment(IN adjustment_id VARCHAR(100), IN attendance_id VARCHAR(100), IN employee_id VARCHAR(100), IN time_in DATETIME, IN time_out DATETIME, IN reason VARCHAR(500), IN created_date DATETIME, IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
 BEGIN
 	SET @adjustment_id = adjustment_id;
 	SET @attendance_id = attendance_id;
@@ -3107,10 +3111,11 @@ BEGIN
 	SET @time_in = time_in;
 	SET @time_out = time_out;
 	SET @reason = reason;
+	SET @created_date = created_date;
 	SET @transaction_log_id = transaction_log_id;
 	SET @record_log = record_log;
 
-	SET @query = 'INSERT INTO attendance_adjustment (ADJUSTMENT_ID, ATTENDANCE_ID, EMPLOYEE_ID, TIME_IN, TIME_OUT, REASON, STATUS, TRANSACTION_LOG_ID, RECORD_LOG) VALUES(@adjustment_id, @attendance_id, @employee_id, @time_in, @time_out, @reason, "PEN", @transaction_log_id, @record_log)';
+	SET @query = 'INSERT INTO attendance_adjustment (ADJUSTMENT_ID, ATTENDANCE_ID, EMPLOYEE_ID, TIME_IN, TIME_OUT, REASON, CREATED_DATE, STATUS, TRANSACTION_LOG_ID, RECORD_LOG) VALUES(@adjustment_id, @attendance_id, @employee_id, @time_in, @time_out, @reason, @created_date, "PEN", @transaction_log_id, @record_log)';
 
 	PREPARE stmt FROM @query;
 	EXECUTE stmt;
@@ -3121,7 +3126,7 @@ CREATE PROCEDURE get_attendance_adjustment_details(IN adjustment_id VARCHAR(100)
 BEGIN
 	SET @adjustment_id = adjustment_id;
 
-	SET @query = 'SELECT ATTENDANCE_ID, EMPLOYEE_ID, TIME_IN, TIME_OUT, REASON, ATTACHMENT, STATUS, SANCTION, FOR_RECOMMENDATION_DATE, RECOMMENDATION_DATE, RECOMMENDATION_BY, RECOMMENDATION_REMARKS, DECISION_DATE, DECISION_BY, DECISION_REMARKS, TRANSACTION_LOG_ID, RECORD_LOG FROM attendance_adjustment WHERE ADJUSTMENT_ID = @adjustment_id';
+	SET @query = 'SELECT ATTENDANCE_ID, EMPLOYEE_ID, TIME_IN, TIME_OUT, REASON, ATTACHMENT, STATUS, SANCTION, CREATED_DATE, FOR_RECOMMENDATION_DATE, RECOMMENDATION_DATE, RECOMMENDATION_BY, RECOMMENDATION_REMARKS, DECISION_DATE, DECISION_BY, DECISION_REMARKS, TRANSACTION_LOG_ID, RECORD_LOG FROM attendance_adjustment WHERE ADJUSTMENT_ID = @adjustment_id';
 
 	PREPARE stmt FROM @query;
 	EXECUTE stmt;
@@ -3179,17 +3184,18 @@ BEGIN
 	DROP PREPARE stmt;
 END //
 
-CREATE PROCEDURE insert_attendance_creation(IN creation_id VARCHAR(100), IN employee_id VARCHAR(100), IN time_in DATETIME, IN time_out DATETIME, IN reason VARCHAR(500), IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
+CREATE PROCEDURE insert_attendance_creation(IN creation_id VARCHAR(100), IN employee_id VARCHAR(100), IN time_in DATETIME, IN time_out DATETIME, IN reason VARCHAR(500), IN created_date DATETIME, IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
 BEGIN
 	SET @creation_id = creation_id;
 	SET @employee_id = employee_id;
 	SET @time_in = time_in;
 	SET @time_out = time_out;
 	SET @reason = reason;
+	SET @created_date = created_date;
 	SET @transaction_log_id = transaction_log_id;
 	SET @record_log = record_log;
 
-	SET @query = 'INSERT INTO attendance_creation (CREATION_ID, EMPLOYEE_ID, TIME_IN, TIME_OUT, REASON, STATUS, TRANSACTION_LOG_ID, RECORD_LOG) VALUES(@creation_id, @employee_id, @time_in, @time_out, @reason, "PEN", @transaction_log_id, @record_log)';
+	SET @query = 'INSERT INTO attendance_creation (CREATION_ID, EMPLOYEE_ID, TIME_IN, TIME_OUT, REASON, CREATED_DATE, STATUS, TRANSACTION_LOG_ID, RECORD_LOG) VALUES(@creation_id, @employee_id, @time_in, @time_out, @reason, @created_date, "PEN", @transaction_log_id, @record_log)';
 
 	PREPARE stmt FROM @query;
 	EXECUTE stmt;
@@ -3200,7 +3206,7 @@ CREATE PROCEDURE get_attendance_creation_details(IN creation_id VARCHAR(100))
 BEGIN
 	SET @creation_id = creation_id;
 
-	SET @query = 'SELECT EMPLOYEE_ID, TIME_IN, TIME_OUT, REASON, ATTACHMENT, STATUS, SANCTION, FOR_RECOMMENDATION_DATE, RECOMMENDATION_DATE, RECOMMENDATION_BY, RECOMMENDATION_REMARKS, DECISION_DATE, DECISION_BY, DECISION_REMARKS, TRANSACTION_LOG_ID, RECORD_LOG FROM attendance_creation WHERE CREATION_ID = @creation_id';
+	SET @query = 'SELECT EMPLOYEE_ID, TIME_IN, TIME_OUT, REASON, ATTACHMENT, STATUS, SANCTION, CREATED_DATE, FOR_RECOMMENDATION_DATE, RECOMMENDATION_DATE, RECOMMENDATION_BY, RECOMMENDATION_REMARKS, DECISION_DATE, DECISION_BY, DECISION_REMARKS, TRANSACTION_LOG_ID, RECORD_LOG FROM attendance_creation WHERE CREATION_ID = @creation_id';
 
 	PREPARE stmt FROM @query;
 	EXECUTE stmt;
@@ -3236,6 +3242,50 @@ BEGIN
 	SET @employee_id = employee_id;
 
 	SET @query = 'SELECT ATTENDANCE_ID, TIME_IN, TIME_OUT FROM attendance_record WHERE EMPLOYEE_ID = @employee_id ORDER BY TIME_IN DESC';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE update_attendance_adjustment_status(IN adjustment_id VARCHAR(100), IN status VARCHAR(10), IN sanction INT(1), IN decision_remarks VARCHAR(500), IN decision_date DATETIME, IN decision_by VARCHAR(50), IN transaction_log_id VARCHAR(500), IN record_log VARCHAR(100))
+BEGIN
+	SET @adjustment_id = adjustment_id;
+	SET @status = status;
+	SET @sanction = sanction;
+	SET @decision_remarks = decision_remarks;
+	SET @decision_date = decision_date;
+	SET @decision_by = decision_by;
+	SET @transaction_log_id = transaction_log_id;
+	SET @record_log = record_log;
+
+	IF @status = 'APV' OR @status = 'REJ' OR @status = 'CAN' THEN
+		SET @query = 'UPDATE attendance_adjustment SET STATUS = @status, SANCTION = @sanction, DECISION_REMARKS = @decision_remarks, DECISION_DATE = @decision_date, DECISION_BY = @decision_by, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE ADJUSTMENT_ID = @adjustment_id';
+	ELSE
+		SET @query = 'UPDATE attendance_adjustment SET STATUS = @status, SANCTION = @sanction, DECISION_REMARKS = null, DECISION_DATE = null, DECISION_BY = null, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE ADJUSTMENT_ID = @adjustment_id';
+    END IF;
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE update_attendance_creation_status(IN creation_id VARCHAR(100), IN status VARCHAR(10), IN sanction INT(1), IN decision_remarks VARCHAR(500), IN decision_date DATETIME, IN decision_by VARCHAR(50), IN transaction_log_id VARCHAR(500), IN record_log VARCHAR(100))
+BEGIN
+	SET @creation_id = creation_id;
+	SET @status = status;
+	SET @sanction = sanction;
+	SET @decision_remarks = decision_remarks;
+	SET @decision_date = decision_date;
+	SET @decision_by = decision_by;
+	SET @transaction_log_id = transaction_log_id;
+	SET @record_log = record_log;
+
+	IF @status = 'APV' OR @status = 'REJ' OR @status = 'CAN' THEN
+		SET @query = 'UPDATE attendance_creation SET STATUS = @status, SANCTION = @sanction, DECISION_REMARKS = @decision_remarks, DECISION_DATE = @decision_date, DECISION_BY = @decision_by, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE CREATION_ID = @creation_id';
+	ELSE
+		SET @query = 'UPDATE attendance_creation SET STATUS = @status, SANCTION = @sanction, DECISION_REMARKS = null, DECISION_DATE = null, DECISION_BY = null, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE CREATION_ID = @creation_id';
+    END IF;
 
 	PREPARE stmt FROM @query;
 	EXECUTE stmt;
