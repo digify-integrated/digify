@@ -144,13 +144,15 @@ function initialize_click_events(){
                     url: 'controller.php',
                     data: {username : username, work_location_id : work_location_id, transaction : transaction},
                     success: function (response) {
-                        if(response === 'Deleted'){
-                          show_alert('Delete Work Location', 'The work location has been deleted.', 'success');
+                        if(response === 'Deleted' || response === 'Not Found'){
+                            if(response === 'Deleted'){
+                                show_alert('Delete Work Location', 'The work location has been deleted.', 'success');
+                            }
+                            else{
+                                show_alert('Delete Work Location', 'The work location does not exist.', 'info');
+                            }
 
-                          reload_datatable('#work-location-datatable');
-                        }
-                        else if(response === 'Not Found'){
-                          show_alert('Delete Work Location', 'The work location does not exist.', 'info');
+                            reload_datatable('#work-location-datatable');
                         }
                         else{
                           show_alert('Delete Work Location', response, 'error');
@@ -191,13 +193,15 @@ function initialize_click_events(){
                         url: 'controller.php',
                         data: {username : username, work_location_id : work_location_id, transaction : transaction},
                         success: function (response) {
-                            if(response === 'Deleted'){
-                                show_alert('Delete Multiple Work Locations', 'The work locations have been deleted.', 'success');
+                            if(response === 'Deleted' || response === 'Not Found'){
+                                if(response === 'Deleted'){
+                                    show_alert('Delete Multiple Work Locations', 'The work locations have been deleted.', 'success');
+                                }
+                                else{
+                                    show_alert('Delete Multiple Work Locations', 'The work location does not exist.', 'info');
+                                }
     
                                 reload_datatable('#work-location-datatable');
-                            }
-                            else if(response === 'Not Found'){
-                                show_alert('Delete Multiple Work Locations', 'The work location does not exist.', 'info');
                             }
                             else{
                                 show_alert('Delete Multiple Work Locations', response, 'error');

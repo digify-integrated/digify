@@ -146,16 +146,18 @@ function initialize_click_events(){
                     url: 'controller.php',
                     data: {username : username, company_id : company_id, transaction : transaction},
                     success: function (response) {
-                        if(response === 'Deleted'){
-                          show_alert('Delete Company', 'The company has been deleted.', 'success');
+                        if(response === 'Deleted' || response === 'Not Found'){
+                            if(response === 'Deleted'){
+                                show_alert('Delete Company', 'The company has been deleted.', 'success');
+                            }
+                            else{
+                                show_alert('Delete Company', 'The company does not exist.', 'info');
+                            }
 
-                          reload_datatable('#company-datatable');
-                        }
-                        else if(response === 'Not Found'){
-                          show_alert('Delete Company', 'The company does not exist.', 'info');
+                            reload_datatable('#company-datatable');
                         }
                         else{
-                          show_alert('Delete Company', response, 'error');
+                            show_alert('Delete Company', response, 'error');
                         }
                     }
                 });
@@ -193,13 +195,15 @@ function initialize_click_events(){
                         url: 'controller.php',
                         data: {username : username, company_id : company_id, transaction : transaction},
                         success: function (response) {
-                            if(response === 'Deleted'){
-                                show_alert('Delete Multiple Companies', 'The companies have been deleted.', 'success');
+                            if(response === 'Deleted' || response === 'Not Found'){
+                                if(response === 'Deleted'){
+                                    show_alert('Delete Multiple Companies', 'The companies have been deleted.', 'success');
+                                }
+                                else{
+                                    show_alert('Delete Multiple Companies', 'The company does not exist.', 'info');
+                                }
     
                                 reload_datatable('#company-datatable');
-                            }
-                            else if(response === 'Not Found'){
-                                show_alert('Delete Multiple Companies', 'The company does not exist.', 'info');
                             }
                             else{
                                 show_alert('Delete Multiple Companies', response, 'error');

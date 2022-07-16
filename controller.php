@@ -2350,13 +2350,13 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
             $allowed_ext = explode(',', $file_type);
 
-            $attendance_adjustment_details = $api->get_attendance_adjustment_details($adjustment_id);
-            $attendance_adjustment_status = $attendance_adjustment_details[0]['STATUS'];
-
-            if($attendance_adjustment_status == 'PEN'){
-                $check_attendance_adjustment_exist = $api->check_attendance_adjustment_exist($adjustment_id);
+            $check_attendance_adjustment_exist = $api->check_attendance_adjustment_exist($adjustment_id);
  
-                if($check_attendance_adjustment_exist > 0){
+            if($check_attendance_adjustment_exist > 0){
+                $attendance_adjustment_details = $api->get_attendance_adjustment_details($adjustment_id);
+                $attendance_adjustment_status = $attendance_adjustment_details[0]['STATUS'];
+
+                if($attendance_adjustment_status == 'PEN'){
                     if(!empty($attachment_tmp_name)){
                         if(in_array($attachment_actual_ext, $allowed_ext)){
                             if(!$attachment_error){
@@ -2367,7 +2367,14 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                                         $update_attendance_adjustment = $api->update_attendance_adjustment($adjustment_id, $time_in, $time_out, $reason, $username);
             
                                         if($update_attendance_adjustment){
-                                            echo 'Updated';
+                                            $update_attendance_adjustment_attachment = $api->update_attendance_adjustment_attachment($attachment_tmp_name, $attachment_actual_ext, $adjustment_id, $username);
+            
+                                            if($update_attendance_adjustment_attachment){
+                                                echo 'Updated';
+                                            }
+                                            else{
+                                                echo $update_attendance_adjustment_attachment;
+                                            }
                                         }
                                         else{
                                             echo $update_attendance_adjustment;
@@ -2390,34 +2397,40 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                         }
                     }
                     else{
-                        $update_attendance_adjustment = $api->update_attendance_adjustment($adjustment_id, $time_in, $time_out, $reason, $username);
+                        $check_attendance_validation = $api->check_attendance_validation($time_in, $time_out);
             
-                        if($update_attendance_adjustment){
-                            echo 'Updated';
+                        if(empty($check_attendance_validation)){
+                            $update_attendance_adjustment = $api->update_attendance_adjustment($adjustment_id, $time_in, $time_out, $reason, $username);
+            
+                            if($update_attendance_adjustment){
+                                echo 'Updated';
+                            }
+                            else{
+                                echo $update_attendance_adjustment;
+                            }
                         }
                         else{
-                            echo $update_attendance_adjustment;
+                            echo $check_attendance_validation;
                         }
                     }
                 }
                 else{
-                    echo 'Not Found';
+                    echo 'Status';
                 }
             }
             else{
-                echo 'Status';
-            }
+                echo 'Not Found';
+            }           
         }
     }
     # -------------------------------------------------------------
 
     # Submit partial attendance adjustment update
     else if($transaction == 'submit partial attendance adjustment update'){
-        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['attendance_id']) && !empty($_POST['attendance_id']) && isset($_POST['employee_id']) && !empty($_POST['employee_id']) && isset($_POST['time_in_date']) && !empty($_POST['time_in_date']) && isset($_POST['time_in_time']) && !empty($_POST['time_in_time'])){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['adjustment_id']) && !empty($_POST['adjustment_id']) && isset($_POST['time_in_date']) && !empty($_POST['time_in_date']) && isset($_POST['time_in_time']) && !empty($_POST['time_in_time'])){
             $file_type = '';
             $username = $_POST['username'];
-            $attendance_id = $_POST['attendance_id'];
-            $employee_id = $_POST['employee_id'];
+            $adjustment_id = $_POST['adjustment_id'];
             $reason = $_POST['reason'];
             $time_in = $api->check_date('attendance empty', $_POST['time_in_date'] . ' ' . $_POST['time_in_time'], '', 'Y-m-d H:i:00', '', '', '');
 
@@ -2442,13 +2455,13 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
             $allowed_ext = explode(',', $file_type);
 
-            $attendance_adjustment_details = $api->get_attendance_adjustment_details($adjustment_id);
-            $attendance_adjustment_status = $attendance_adjustment_details[0]['STATUS'];
-
-            if($attendance_adjustment_status == 'PEN'){
-                $check_attendance_adjustment_exist = $api->check_attendance_adjustment_exist($adjustment_id);
+            $check_attendance_adjustment_exist = $api->check_attendance_adjustment_exist($adjustment_id);
  
-                if($check_attendance_adjustment_exist > 0){
+            if($check_attendance_adjustment_exist > 0){
+                $attendance_adjustment_details = $api->get_attendance_adjustment_details($adjustment_id);
+                $attendance_adjustment_status = $attendance_adjustment_details[0]['STATUS'];
+
+                if($attendance_adjustment_status == 'PEN'){
                     if(!empty($attachment_tmp_name)){
                         if(in_array($attachment_actual_ext, $allowed_ext)){
                             if(!$attachment_error){
@@ -2459,7 +2472,14 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                                         $update_attendance_adjustment = $api->update_attendance_adjustment($adjustment_id, $time_in, null, $reason, $username);
             
                                         if($update_attendance_adjustment){
-                                            echo 'Updated';
+                                            $update_attendance_adjustment_attachment = $api->update_attendance_adjustment_attachment($attachment_tmp_name, $attachment_actual_ext, $adjustment_id, $username);
+            
+                                            if($update_attendance_adjustment_attachment){
+                                                echo 'Updated';
+                                            }
+                                            else{
+                                                echo $update_attendance_adjustment_attachment;
+                                            }
                                         }
                                         else{
                                             echo $update_attendance_adjustment;
@@ -2482,23 +2502,30 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                         }
                     }
                     else{
-                        $update_attendance_adjustment = $api->update_attendance_adjustment($adjustment_id, $time_in, null, $reason, $username);
+                        $check_attendance_validation = $api->check_attendance_validation($time_in, null);
             
-                        if($update_attendance_adjustment){
-                            echo 'Updated';
+                        if(empty($check_attendance_validation)){
+                            $update_attendance_adjustment = $api->update_attendance_adjustment($adjustment_id, $time_in, null, $reason, $username);
+
+                            if($update_attendance_adjustment){
+                                echo 'Updated';
+                            }
+                            else{
+                                echo $update_attendance_adjustment;
+                            }
                         }
                         else{
-                            echo $update_attendance_adjustment;
+                            echo $check_attendance_validation;
                         }
                     }
                 }
                 else{
-                    echo 'Not Found';
+                    echo 'Status';
                 }
             }
             else{
-                echo 'Status';
-            }
+                echo 'Not Found';
+            }           
         }
     }
     # -------------------------------------------------------------
@@ -4119,6 +4146,79 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #   Cancel transactions
+    # -------------------------------------------------------------
+
+    # Cancel attendance adjustment
+    else if($transaction == 'cancel attendance adjustment'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['adjustment_id']) && !empty($_POST['adjustment_id']) && isset($_POST['decision_remarks']) && !empty($_POST['decision_remarks'])){
+            $username = $_POST['username'];
+            $adjustment_id = $_POST['adjustment_id'];
+            $decision_remarks = $_POST['decision_remarks'];
+
+            $check_attendance_adjustment_exist = $api->check_attendance_adjustment_exist($adjustment_id);
+
+            if($check_attendance_adjustment_exist > 0){
+                $update_attendance_adjustment_status = $api->update_attendance_adjustment_status($adjustment_id, 'CAN', $decision_remarks, null, $username);
+    
+                if($update_attendance_adjustment_status){
+                    echo 'Cancelled';
+                }
+                else{
+                    echo $update_attendance_adjustment_status;
+                }
+            }
+            else{
+                echo 'Not Found';
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Cancel multiple attendance adjustment
+    else if($transaction == 'cancel multiple attendance adjustment'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['adjustment_id']) && !empty($_POST['adjustment_id']) && isset($_POST['decision_remarks']) && !empty($_POST['decision_remarks'])){
+            $username = $_POST['username'];
+            $adjustment_ids = explode(',', $_POST['adjustment_id']);
+            $decision_remarks = $_POST['decision_remarks'];
+            $error_count = 0;
+            $error = '';
+
+            foreach($adjustment_ids as $adjustment_id){
+                $check_attendance_adjustment_exist = $api->check_attendance_adjustment_exist($adjustment_id);
+
+                if($check_attendance_adjustment_exist > 0){
+                    $update_attendance_adjustment_status = $api->update_attendance_adjustment_status($adjustment_id, 'CAN', $decision_remarks, null, $username);
+        
+                    if(!$update_attendance_adjustment_status){
+                        $error_count = $error_count + 1;
+                    }
+                }
+                else{
+                    $error_count = $error_count + 1;
+                }
+            }
+
+            if($error_count > 0){
+                if($error_count){
+                    $error = 'There was an error cancelling '. number_format($error_count) .' attendance adjustment.<br/>';
+                }
+                else{
+                    $error = 'There was an error cancelling '. number_format($error_count) .' attendance adjustment.<br/>';
+                }
+            }
+
+            if(empty($error)){
+                echo 'Cancelled';
+            }
+            else{
+                echo $error;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Notification transactions
     # -------------------------------------------------------------
 
@@ -5185,6 +5285,99 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                 'TIME_OUT_DATE' => $api->check_date('empty', $attendance_creation_details[0]['TIME_OUT'], '', 'n/d/Y', '', '', ''),
                 'TIME_OUT' => $api->check_date('empty', $attendance_creation_details[0]['TIME_OUT'], '', 'H:i:00', '', '', ''),
                 'REASON' => $attendance_creation_details[0]['REASON']
+            );
+
+            echo json_encode($response);
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Attendance adjustment summary details
+    else if($transaction == 'attendance adjustment summary details'){
+        if(isset($_POST['adjustment_id']) && !empty($_POST['adjustment_id'])){
+            $adjustment_id = $_POST['adjustment_id'];
+
+            $attendance_adjustment_details = $api->get_attendance_adjustment_details($adjustment_id);
+            $attendance_id = $attendance_adjustment_details[0]['ATTENDANCE_ID'];
+            $employee_id = $attendance_adjustment_details[0]['EMPLOYEE_ID'];
+            $status = $attendance_adjustment_details[0]['STATUS'];
+            $sanction = $attendance_adjustment_details[0]['SANCTION'];
+            $attachment = $attendance_adjustment_details[0]['ATTACHMENT'];
+            $recommendation_by = $attendance_adjustment_details[0]['RECOMMENDATION_BY'];
+            $decision_by = $attendance_adjustment_details[0]['DECISION_BY'];
+            $time_in = $api->check_date('summary', $attendance_adjustment_details[0]['TIME_IN'], '', 'F d, Y h:i:s a', '', '', '');
+            $time_out = $api->check_date('summary', $attendance_adjustment_details[0]['TIME_OUT'], '', 'F d, Y h:i:s a', '', '', '');
+
+            $attendance_details = $api->get_attendance_details($attendance_id);
+            $attendance_time_in = $api->check_date('summary', $attendance_details[0]['TIME_IN'], '', 'F d, Y h:i:s a', '', '', '');
+            $attendance_time_out = $api->check_date('summary', $attendance_details[0]['TIME_OUT'], '', 'F d, Y h:i:s a', '', '', '');
+
+            $status_name = $api->get_attendance_adjustment_status($status)[0]['BADGE'];
+            $sanction_name = $api->get_attendance_adjustment_sanction_status($sanction)[0]['BADGE'];
+
+            $employee_details = $api->get_employee_details($employee_id);
+            $file_as = $employee_details[0]['FILE_AS'];
+
+            if(!empty($recommendation_by)){
+                $recommendation_by_details = $api->get_employee_details($recommendation_by);
+                $recommendation_by_file_as = $recommendation_by_details[0]['FILE_AS'];
+            }
+            else{
+                $recommendation_by_file_as = '--';
+            }
+
+            if(!empty($decision_by)){
+                $decision_by_details = $api->get_employee_details($decision_by);
+                $decision_by_file_as = $decision_by_details[0]['FILE_AS'];
+            }
+            else{
+                $decision_by_file_as = '--';
+            }
+
+            if(strtotime($time_in) != strtotime($attendance_time_in)){
+                $time_in_details = $attendance_time_in . ' -> ' . $time_in;
+            }
+            else{
+                $time_in_details = $time_in;
+            }
+
+            if(!empty($time_out)){
+                $adjustment_type = 'full';
+
+                if(strtotime($time_out) != strtotime($attendance_time_out)){
+                    $time_out_details = $attendance_time_out . ' -> ' . $time_out;
+                }
+                else{
+                    $time_out_details = $time_out;
+                }
+            }
+            else{
+                $time_out_details = '--';
+            }
+
+            if(!empty($attachment)){
+                $attachment = '<a href="'. $attachment .'" target="_blank">View Attachment</a>';
+            }
+            else{
+                $attachment = '';
+            }
+
+            $response[] = array(
+                'EMPLOYEE' => $file_as,
+                'TIME_IN' => $time_in_details,
+                'TIME_OUT' => $time_out_details,
+                'CREATED_DATE' => $api->check_date('summary', $attendance_adjustment_details[0]['CREATED_DATE'], '', 'F d, Y h:i:s a', '', '', ''),
+                'FOR_RECOMMENDATION_DATE' => $api->check_date('summary', $attendance_adjustment_details[0]['FOR_RECOMMENDATION_DATE'], '', 'F d, Y h:i:s a', '', '', ''),
+                'RECOMMENDATION_DATE' => $api->check_date('summary', $attendance_adjustment_details[0]['RECOMMENDATION_DATE'], '', 'F d, Y h:i:s a', '', '', ''),
+                'DECISION_DATE' => $api->check_date('summary', $attendance_adjustment_details[0]['DECISION_DATE'], '', 'F d, Y h:i:s a', '', '', ''),
+                'STATUS' => $status_name,
+                'SANCTION' => $sanction_name,
+                'ATTACHMENT' => $attachment,
+                'RECOMMENDATION_REMARKS' => $attendance_adjustment_details[0]['RECOMMENDATION_REMARKS'],
+                'RECOMMENDATION_BY' => $recommendation_by_file_as,
+                'DECISION_BY' => $decision_by_file_as,
+                'DECISION_REMARKS' => $attendance_adjustment_details[0]['DECISION_REMARKS'],
+                'REASON' => $attendance_adjustment_details[0]['REASON']
             );
 
             echo json_encode($response);

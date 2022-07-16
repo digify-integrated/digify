@@ -138,16 +138,18 @@ function initialize_click_events(){
                     url: 'controller.php',
                     data: {username : username, country_id : country_id, transaction : transaction},
                     success: function (response) {
-                        if(response === 'Deleted'){
-                          show_alert('Delete Country', 'The country has been deleted.', 'success');
+                        if(response === 'Deleted' || response === 'Not Found'){
+                            if(response === 'Deleted'){
+                                show_alert('Delete Country', 'The country has been deleted.', 'success');
+                            }
+                            else{
+                                show_alert('Delete Country', 'The country does not exist.', 'info');
+                            }
 
-                          reload_datatable('#country-datatable');
-                        }
-                        else if(response === 'Not Found'){
-                          show_alert('Delete Country', 'The country does not exist.', 'info');
+                            reload_datatable('#country-datatable');
                         }
                         else{
-                          show_alert('Delete Country', response, 'error');
+                            show_alert('Delete Country', response, 'error');
                         }
                     }
                 });
@@ -185,13 +187,15 @@ function initialize_click_events(){
                         url: 'controller.php',
                         data: {username : username, country_id : country_id, transaction : transaction},
                         success: function (response) {
-                            if(response === 'Deleted'){
-                                show_alert('Delete Multiple Countries', 'The countries have been deleted.', 'success');
+                            if(response === 'Deleted' || response === 'Not Found'){
+                                if(response === 'Deleted'){
+                                    show_alert('Delete Multiple Countries', 'The countries have been deleted.', 'success');
+                                }
+                                else{
+                                    show_alert('Delete Multiple Countries', 'The country does not exist.', 'info');
+                                }
     
                                 reload_datatable('#country-datatable');
-                            }
-                            else if(response === 'Not Found'){
-                                show_alert('Delete Multiple Countries', 'The country does not exist.', 'info');
                             }
                             else{
                                 show_alert('Delete Multiple Countries', response, 'error');

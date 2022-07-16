@@ -141,13 +141,15 @@ function initialize_click_events(){
                     url: 'controller.php',
                     data: {username : username, state_id : state_id, transaction : transaction},
                     success: function (response) {
-                        if(response === 'Deleted'){
-                          show_alert('Delete State', 'The state has been deleted.', 'success');
+                        if(response === 'Deleted' || response === 'Not Found'){
+                            if(response === 'Deleted'){
+                                show_alert('Delete State', 'The state has been deleted.', 'success');
+                            }
+                            else{
+                                show_alert('Delete State', 'The state does not exist.', 'info');
+                            }
 
-                          reload_datatable('#state-datatable');
-                        }
-                        else if(response === 'Not Found'){
-                          show_alert('Delete State', 'The state does not exist.', 'info');
+                            reload_datatable('#state-datatable');
                         }
                         else{
                           show_alert('Delete State', response, 'error');
@@ -188,13 +190,15 @@ function initialize_click_events(){
                         url: 'controller.php',
                         data: {username : username, state_id : state_id, transaction : transaction},
                         success: function (response) {
-                            if(response === 'Deleted'){
-                                show_alert('Delete Multiple States', 'The states have been deleted.', 'success');
+                            if(response === 'Deleted' || response === 'Not Found'){
+                                if(response === 'Deleted'){
+                                    show_alert('Delete Multiple States', 'The states have been deleted.', 'success');
+                                }
+                                else{
+                                    show_alert('Delete Multiple States', 'The state does not exist.', 'info');
+                                }
     
                                 reload_datatable('#state-datatable');
-                            }
-                            else if(response === 'Not Found'){
-                                show_alert('Delete Multiple States', 'The state does not exist.', 'info');
                             }
                             else{
                                 show_alert('Delete Multiple States', response, 'error');

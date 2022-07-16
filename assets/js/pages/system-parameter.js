@@ -146,13 +146,15 @@ function initialize_click_events(){
                     url: 'controller.php',
                     data: {username : username, parameter_id : parameter_id, transaction : transaction},
                     success: function (response) {
-                        if(response === 'Deleted'){
-                          show_alert('Delete System Parameter', 'The system parameter has been deleted.', 'success');
+                        if(response === 'Deleted' || response === 'Not Found'){
+                            if(response === 'Deleted'){
+                                show_alert('Delete System Parameter', 'The system parameter has been deleted.', 'success');
+                            }
+                            else{
+                                show_alert('Delete System Parameter', 'The system parameter does not exist.', 'info');
+                            }
 
-                          reload_datatable('#system-parameter-datatable');
-                        }
-                        else if(response === 'Not Found'){
-                          show_alert('Delete System Parameter', 'The system parameter does not exist.', 'info');
+                            reload_datatable('#system-parameter-datatable');
                         }
                         else{
                           show_alert('Delete System Parameter', response, 'error');
@@ -193,13 +195,15 @@ function initialize_click_events(){
                         url: 'controller.php',
                         data: {username : username, parameter_id : parameter_id, transaction : transaction},
                         success: function (response) {
-                            if(response === 'Deleted'){
-                                show_alert('Delete Multiple System Parameters', 'The system parameters have been deleted.', 'success');
+                            if(response === 'Deleted' || response === 'Not Found'){
+                                if(response === 'Deleted'){
+                                    show_alert('Delete Multiple System Parameters', 'The system parameters have been deleted.', 'success');
+                                }
+                                else{
+                                    show_alert('Delete Multiple System Parameters', 'The system parameter does not exist.', 'info');
+                                }
     
                                 reload_datatable('#system-parameter-datatable');
-                            }
-                            else if(response === 'Not Found'){
-                                show_alert('Delete Multiple System Parameters', 'The system parameter does not exist.', 'info');
                             }
                             else{
                                 show_alert('Delete Multiple System Parameters', response, 'error');

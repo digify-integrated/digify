@@ -1419,7 +1419,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                         <input type="hidden" id="attendance_id" name="attendance_id">
                                         <label for="time_in_date" class="form-label">Time In Date <span class="text-danger">*</span></label>
                                         <div class="input-group" id="time-in-date-container">
-                                            <input type="text" class="form-control" id="time_in_date" name="time_in_date" autocomplete="off" data-date-format="m/dd/yyyy" data-date-container="#time-in-date-container" data-provide="datepicker" data-date-autoclose="true" readonly>
+                                            <input type="text" class="form-control" id="time_in_date" name="time_in_date" autocomplete="off" data-date-format="m/dd/yyyy" data-date-container="#time-in-date-container" data-provide="datepicker" data-date-autoclose="true" disabled>
                                             <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
                                         </div>
                                     </div>
@@ -1473,7 +1473,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                         <input type="hidden" id="attendance_id" name="attendance_id">
                                         <label for="time_in_date" class="form-label">Time In Date <span class="text-danger">*</span></label>
                                         <div class="input-group" id="time-in-date-container">
-                                            <input type="text" class="form-control" id="time_in_date" name="time_in_date" autocomplete="off" data-date-format="m/dd/yyyy" data-date-container="#time-in-date-container" data-provide="datepicker" data-date-autoclose="true" readonly>
+                                            <input type="text" class="form-control" id="time_in_date" name="time_in_date" autocomplete="off" data-date-format="m/dd/yyyy" data-date-container="#time-in-date-container" data-provide="datepicker" data-date-autoclose="true" disabled>
                                             <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
                                         </div>
                                     </div>
@@ -1574,7 +1574,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                         
                                         <label for="time_in_date" class="form-label">Time In Date <span class="text-danger">*</span></label>
                                         <div class="input-group" id="time-in-date-container">
-                                            <input type="text" class="form-control" id="time_in_date" name="time_in_date" autocomplete="off" data-date-format="m/dd/yyyy" data-date-container="#time-in-date-container" data-provide="datepicker" data-date-autoclose="true" readonly>
+                                            <input type="text" class="form-control" id="time_in_date" name="time_in_date" autocomplete="off" data-date-format="m/dd/yyyy" data-date-container="#time-in-date-container" data-provide="datepicker" data-date-autoclose="true" disabled>
                                             <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
                                         </div>
                                     </div>
@@ -1627,7 +1627,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                         <input type="hidden" id="adjustment_id" name="adjustment_id">
                                         <label for="time_in_date" class="form-label">Time In Date <span class="text-danger">*</span></label>
                                         <div class="input-group" id="time-in-date-container">
-                                            <input type="text" class="form-control" id="time_in_date" name="time_in_date" autocomplete="off" data-date-format="m/dd/yyyy" data-date-container="#time-in-date-container" data-provide="datepicker" data-date-autoclose="true" readonly>
+                                            <input type="text" class="form-control" id="time_in_date" name="time_in_date" autocomplete="off" data-date-format="m/dd/yyyy" data-date-container="#time-in-date-container" data-provide="datepicker" data-date-autoclose="true" disabled>
                                             <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
                                         </div>
                                     </div>
@@ -1680,7 +1680,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                         <input type="hidden" id="adjustment_id" name="adjustment_id">
                                         <label for="time_in_date" class="form-label">Time In Date <span class="text-danger">*</span></label>
                                         <div class="input-group" id="time-in-date-container">
-                                            <input type="text" class="form-control" id="time_in_date" name="time_in_date" autocomplete="off" data-date-format="m/dd/yyyy" data-date-container="#time-in-date-container" data-provide="datepicker" data-date-autoclose="true" readonly>
+                                            <input type="text" class="form-control" id="time_in_date" name="time_in_date" autocomplete="off" data-date-format="m/dd/yyyy" data-date-container="#time-in-date-container" data-provide="datepicker" data-date-autoclose="true" disabled>
                                             <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
                                         </div>
                                     </div>
@@ -1705,6 +1705,17 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                     <div class="mb-3">
                                         <label for="reason" class="form-label">Reason <span class="text-danger">*</span></label>
                                         <textarea class="form-control form-maxlength" id="reason" name="reason" maxlength="500" rows="5"></textarea>
+                                    </div>
+                                </div>
+                            </div>';
+            }
+            else if($form_type == 'cancel attendance adjustment form' || $form_type == 'cancel multiple attendance adjustment form'){
+                $form .= '<div class="row">
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <label for="decision_remarks" class="form-label">Cancellation Remarks <span class="text-danger">*</span></label>
+                                        <input type="hidden" id="adjustment_id" name="adjustment_id">
+                                        <textarea class="form-control form-maxlength" id="decision_remarks" name="decision_remarks" maxlength="500" rows="3"></textarea>
                                     </div>
                                 </div>
                             </div>';
@@ -2135,6 +2146,72 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                     </div>
                                 </div>
                             </div>';
+            }
+            else if($element_type == 'attendance adjustment details'){
+                $element = '<table class="table table-nowrap mb-0">
+                                <tbody>
+                                    <tr>
+                                        <th scope="row">Employee :</th>
+                                        <td id="employee"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Time In :</th>
+                                        <td id="time_in"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Time Out :</th>
+                                        <td id="time_out"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Reason :</th>
+                                        <td id="reason"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Status :</th>
+                                        <td id="adjustment_status"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Sanction :</th>
+                                        <td id="sanction"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Attachment :</th>
+                                        <td id="attachment"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Created Date :</th>
+                                        <td id="created_date"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">For Recommendation Date :</th>
+                                        <td id="for_recommendation_date"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Recommendation Date :</th>
+                                        <td id="recommendation_date"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Recommendation By :</th>
+                                        <td id="recommendation_by"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Recommendation Remarks :</th>
+                                        <td id="recommendation_remarks"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Decision Date :</th>
+                                        <td id="decision_date"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Decision By :</th>
+                                        <td id="decision_by"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Decision Remarks :</th>
+                                        <td id="decision_remarks"></td>
+                                    </tr>
+                                </tbody>
+                            </table>';
             }
 
             $response[] = array(

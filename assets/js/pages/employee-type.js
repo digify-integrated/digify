@@ -136,13 +136,15 @@ function initialize_click_events(){
                     url: 'controller.php',
                     data: {username : username, employee_type_id : employee_type_id, transaction : transaction},
                     success: function (response) {
-                        if(response === 'Deleted'){
-                          show_alert('Delete Employee Type', 'The employee type has been deleted.', 'success');
+                        if(response === 'Deleted' || response === 'Not Found'){
+                            if(response === 'Deleted'){
+                                show_alert('Delete Employee Type', 'The employee type has been deleted.', 'success');
+                            }
+                            else{
+                                show_alert('Delete Employee Type', 'The employee type does not exist.', 'info');
+                            }
 
-                          reload_datatable('#employee-type-datatable');
-                        }
-                        else if(response === 'Not Found'){
-                          show_alert('Delete Employee Type', 'The employee type does not exist.', 'info');
+                            reload_datatable('#employee-type-datatable');
                         }
                         else{
                           show_alert('Delete Employee Type', response, 'error');
@@ -183,13 +185,15 @@ function initialize_click_events(){
                         url: 'controller.php',
                         data: {username : username, employee_type_id : employee_type_id, transaction : transaction},
                         success: function (response) {
-                            if(response === 'Deleted'){
-                                show_alert('Delete Multiple Employee Types', 'The employee types have been deleted.', 'success');
+                            if(response === 'Deleted' || response === 'Not Found'){
+                                if(response === 'Deleted'){
+                                    show_alert('Delete Multiple Employee Types', 'The employee types have been deleted.', 'success');
+                                }
+                                else{
+                                    show_alert('Delete Multiple Employee Types', 'The employee type does not exist.', 'info');
+                                }
     
                                 reload_datatable('#employee-type-datatable');
-                            }
-                            else if(response === 'Not Found'){
-                                show_alert('Delete Multiple Employee Types', 'The employee type does not exist.', 'info');
                             }
                             else{
                                 show_alert('Delete Multiple Employee Types', response, 'error');

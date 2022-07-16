@@ -429,7 +429,7 @@ function initialize_form_validation(form_type){
                             $('#System-Modal').modal('hide');
                         }
                         else if(response === 'Not Found'){
-                            show_alert('Role Permission Update Error', 'The role does not exist.', 'error');
+                            show_alert_event('Role Permission Update Error', 'The role does not exist.', 'error', 'reload');
                         }
                         else{
                             show_alert('Role Permission Update Error', response, 'error');
@@ -3007,6 +3007,8 @@ function initialize_form_validation(form_type){
             submitHandler: function (form) {
                 var transaction = 'submit full attendance adjustment';
                 var username = $('#username').text();
+
+                document.getElementById('time_in_date').disabled = false;
                 
                 var formData = new FormData(form);
                 formData.append('username', username);
@@ -3115,6 +3117,8 @@ function initialize_form_validation(form_type){
             submitHandler: function (form) {
                 var transaction = 'submit partial attendance adjustment';
                 var username = $('#username').text();
+
+                document.getElementById('time_in_date').disabled = false;
                 
                 var formData = new FormData(form);
                 formData.append('username', username);
@@ -3304,6 +3308,8 @@ function initialize_form_validation(form_type){
             submitHandler: function (form) {
                 var transaction = 'submit attendance adjustment';
                 var username = $('#username').text();
+
+                document.getElementById('time_in_date').disabled = false;
                 
                 var formData = new FormData(form);
                 formData.append('username', username);
@@ -3437,6 +3443,8 @@ function initialize_form_validation(form_type){
             submitHandler: function (form) {
                 var transaction = 'submit full attendance adjustment update';
                 var username = $('#username').text();
+
+                document.getElementById('time_in_date').disabled = false;
                 
                 var formData = new FormData(form);
                 formData.append('username', username);
@@ -3548,6 +3556,8 @@ function initialize_form_validation(form_type){
             submitHandler: function (form) {
                 var transaction = 'submit partial attendance adjustment update';
                 var username = $('#username').text();
+
+                document.getElementById('time_in_date').disabled = false;
                 
                 var formData = new FormData(form);
                 formData.append('username', username);
@@ -3619,6 +3629,148 @@ function initialize_form_validation(form_type){
                 reason: {
                     required: 'Please enter the reason',
                 }
+            },
+            errorPlacement: function(label, element) {
+                if((element.hasClass('select2') || element.hasClass('form-select2')) && element.next('.select2-container').length) {
+                    label.insertAfter(element.next('.select2-container'));
+                }
+                else if(element.parent('.input-group').length){
+                    label.insertAfter(element.parent());
+                }
+                else{
+                    label.insertAfter(element);
+                }
+            },
+            highlight: function(element) {
+                $(element).parent().addClass('has-danger');
+                $(element).addClass('form-control-danger');
+            },
+            success: function(label,element) {
+                $(element).parent().removeClass('has-danger')
+                $(element).removeClass('form-control-danger')
+                label.remove();
+            }
+        });
+    }
+    else if(form_type == 'cancel attendance adjustment form'){
+        $('#cancel-attendance-adjustment-form').validate({
+            submitHandler: function (form) {
+                transaction = 'cancel attendance adjustment';
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'controller.php',
+                    data: $(form).serialize() + '&username=' + username + '&transaction=' + transaction,
+                    beforeSend: function(){
+                        document.getElementById('submit-form').disabled = true;
+                        $('#submit-form').html('<div class="spinner-border spinner-border-sm text-light" role="status"><span rclass="sr-only"></span></div>');
+                    },
+                    success: function (response) {
+                        if(response === 'Cancelled' || response === 'Not Found'){
+                            if(response === 'Cancelled'){
+                                show_alert('Attendance Adjustment Cancellation Success', 'The attendance adjustment has been cancelled.', 'success');
+                            }
+                            else{
+                                show_alert('Attendance Adjustment Cancellation Error', 'The attendance adjustment does not exist.', 'info');
+                            }
+
+                            $('#System-Modal').modal('hide');
+
+                            if($('#my-attendance-adjustment-datatable').length){
+                                reload_datatable('#my-attendance-adjustment-datatable');
+                            }
+                        }
+                        else{
+                            show_alert('Attendance Adjustment Cancellation Error', response, 'error');
+                        }
+                    },
+                    complete: function(){
+                        document.getElementById('submit-form').disabled = false;
+                        $('#submit-form').html('Submit');
+                    }
+                });
+                return false;
+            },
+            rules: {
+                decision_remarks: {
+                    required: true
+                },
+            },
+            messages: {
+                decision_remarks: {
+                    required: 'Please enter the cancellation remarks',
+                },
+            },
+            errorPlacement: function(label, element) {
+                if((element.hasClass('select2') || element.hasClass('form-select2')) && element.next('.select2-container').length) {
+                    label.insertAfter(element.next('.select2-container'));
+                }
+                else if(element.parent('.input-group').length){
+                    label.insertAfter(element.parent());
+                }
+                else{
+                    label.insertAfter(element);
+                }
+            },
+            highlight: function(element) {
+                $(element).parent().addClass('has-danger');
+                $(element).addClass('form-control-danger');
+            },
+            success: function(label,element) {
+                $(element).parent().removeClass('has-danger')
+                $(element).removeClass('form-control-danger')
+                label.remove();
+            }
+        });
+    }
+    else if(form_type == 'cancel multiple attendance adjustment form'){
+        $('#cancel-multiple-attendance-adjustment-form').validate({
+            submitHandler: function (form) {
+                transaction = 'cancel multiple attendance adjustment';
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'controller.php',
+                    data: $(form).serialize() + '&username=' + username + '&transaction=' + transaction,
+                    beforeSend: function(){
+                        document.getElementById('submit-form').disabled = true;
+                        $('#submit-form').html('<div class="spinner-border spinner-border-sm text-light" role="status"><span rclass="sr-only"></span></div>');
+                    },
+                    success: function (response) {
+                        if(response === 'Cancelled' || response === 'Not Found'){
+                            if(response === 'Cancelled'){
+                                show_alert('Attendance Adjustment Cancellation Success', 'The attendance adjustments have been cancelled.', 'success');
+                            }
+                            else{
+                                show_alert('Attendance Adjustment Cancellation Error', 'The attendance adjustment does not exist.', 'info');
+                            }
+
+                            $('#System-Modal').modal('hide');
+
+                            if($('#my-attendance-adjustment-datatable').length){
+                                reload_datatable('#my-attendance-adjustment-datatable');
+                            }
+                        }
+                        else{
+                            show_alert('Multiple Attendance Adjustment Cancellation Error', response, 'error');
+                        }
+                    },
+                    complete: function(){
+                        document.getElementById('submit-form').disabled = false;
+                        $('#submit-form').html('Submit');
+                    }
+                });
+                return false;
+            },
+            rules: {
+                decision_remarks: {
+                    required: true
+                },
+            },
+            messages: {
+                decision_remarks: {
+                    required: 'Please enter the cancellation remarks',
+                },
             },
             errorPlacement: function(label, element) {
                 if((element.hasClass('select2') || element.hasClass('form-select2')) && element.next('.select2-container').length) {
@@ -4651,6 +4803,36 @@ function display_form_details(form_type){
             }
         });
     }
+    else if(form_type == 'attendance adjustment details'){
+        transaction = 'attendance adjustment summary details';
+
+        var adjustment_id = sessionStorage.getItem('adjustment_id');
+
+        $.ajax({
+            url: 'controller.php',
+            method: 'POST',
+            dataType: 'JSON',
+            data: {adjustment_id : adjustment_id, transaction : transaction},
+            success: function(response) {
+                $('#employee').text(response[0].EMPLOYEE);
+                $('#time_in').text(response[0].TIME_IN);
+                $('#time_out').text(response[0].TIME_OUT);
+                $('#reason').text(response[0].REASON);
+                $('#created_date').text(response[0].CREATED_DATE);
+                $('#for_recommendation_date').text(response[0].FOR_RECOMMENDATION_DATE);
+                $('#recommendation_date').text(response[0].RECOMMENDATION_DATE);
+                $('#recommendation_by').text(response[0].RECOMMENDATION_BY);
+                $('#recommendation_remarks').text(response[0].RECOMMENDATION_REMARKS);
+                $('#decision_date').text(response[0].DECISION_DATE);
+                $('#decision_by').text(response[0].DECISION_BY);
+                $('#decision_remarks').text(response[0].DECISION_REMARKS);
+                
+                document.getElementById('attachment').innerHTML = response[0].ATTACHMENT;
+                document.getElementById('adjustment_status').innerHTML = response[0].STATUS;
+                document.getElementById('sanction').innerHTML = response[0].SANCTION;
+            }
+        });
+    }
 }
 
 function initialize_transaction_log_table(datatable_name, buttons = false, show_all = false){
@@ -4879,6 +5061,10 @@ function generate_form(form_type, form_id, add, username){
 
                     $('#employee_id').val(employee_id);
                 }
+                else if(form_type == 'cancel attendance adjustment form' || form_type == 'cancel multiple attendance adjustment form'){
+                    var adjustment_id = sessionStorage.getItem('adjustment_id');
+                    $('#adjustment_id').val(adjustment_id);
+                }
             }
 
             initialize_elements();
@@ -4916,7 +5102,7 @@ function generate_element(element_type, value, container, modal, username){
             if(modal == '1'){
                 $('#System-Modal').modal('show');
 
-                if(element_type == 'user account details' || element_type == 'system parameter details' || element_type == 'company details' || element_type == 'job position details' || element_type == 'work location details' || element_type == 'working hours details' || element_type == 'attendance details'){
+                if(element_type == 'user account details' || element_type == 'system parameter details' || element_type == 'company details' || element_type == 'job position details' || element_type == 'work location details' || element_type == 'working hours details' || element_type == 'attendance details' || element_type == 'attendance adjustment details'){
                     display_form_details(element_type);
                 }
                 else if(element_type == 'transaction log'){

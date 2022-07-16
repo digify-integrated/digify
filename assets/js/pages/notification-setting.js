@@ -146,13 +146,15 @@ function initialize_click_events(){
                     url: 'controller.php',
                     data: {username : username, notification_setting_id : notification_setting_id, transaction : transaction},
                     success: function (response) {
-                        if(response === 'Deleted'){
-                          show_alert('Delete Notification Setting', 'The notification setting has been deleted.', 'success');
+                        if(response === 'Deleted' || response === 'Not Found'){
+                            if(response === 'Deleted'){
+                                show_alert('Delete Notification Setting', 'The notification setting has been deleted.', 'success');
+                            }
+                            else{
+                                show_alert('Delete Notification Setting', 'The notification setting does not exist.', 'info');
+                            }
 
-                          reload_datatable('#notification-setting-datatable');
-                        }
-                        else if(response === 'Not Found'){
-                          show_alert('Delete Notification Setting', 'The notification setting does not exist.', 'info');
+                            reload_datatable('#notification-setting-datatable');
                         }
                         else{
                           show_alert('Delete Notification Setting', response, 'error');
@@ -193,13 +195,15 @@ function initialize_click_events(){
                         url: 'controller.php',
                         data: {username : username, notification_setting_id : notification_setting_id, transaction : transaction},
                         success: function (response) {
-                            if(response === 'Deleted'){
-                                show_alert('Delete Multiple Notification Settings', 'The notification settings have been deleted.', 'success');
+                            if(response === 'Deleted' || response === 'Not Found'){
+                                if(response === 'Deleted'){
+                                    show_alert('Delete Multiple Notification Settings', 'The notification settings have been deleted.', 'success');
+                                }
+                                else{
+                                    show_alert('Delete Multiple Notification Settings', 'The notification setting does not exist.', 'info');
+                                }
     
                                 reload_datatable('#notification-setting-datatable');
-                            }
-                            else if(response === 'Not Found'){
-                                show_alert('Delete Multiple Notification Settings', 'The notification setting does not exist.', 'info');
                             }
                             else{
                                 show_alert('Delete Multiple Notification Settings', response, 'error');

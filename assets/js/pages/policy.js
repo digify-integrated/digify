@@ -138,13 +138,15 @@ function initialize_click_events(){
                     url: 'controller.php',
                     data: {username : username, policy_id : policy_id, transaction : transaction},
                     success: function (response) {
-                        if(response === 'Deleted'){
-                          show_alert('Delete Policy', 'The policy has been deleted.', 'success');
+                        if(response === 'Deleted' || response === 'Not Found'){
+                            if(response === 'Deleted'){
+                                show_alert('Delete Policy', 'The policy has been deleted.', 'success');
+                            }
+                            else{
+                                show_alert('Delete Policy', 'The policy does not exist.', 'info');
+                            }
 
-                          reload_datatable('#policy-datatable');
-                        }
-                        else if(response === 'Not Found'){
-                          show_alert('Delete Policy', 'The policy does not exist.', 'info');
+                            reload_datatable('#policy-datatable');
                         }
                         else{
                           show_alert('Delete Policy', response, 'error');
@@ -185,13 +187,15 @@ function initialize_click_events(){
                         url: 'controller.php',
                         data: {username : username, policy_id : policy_id, transaction : transaction},
                         success: function (response) {
-                            if(response === 'Deleted'){
-                                show_alert('Delete Multiple Policies', 'The policies have been deleted.', 'success');
+                            if(response === 'Deleted' || response === 'Not Found'){
+                                if(response === 'Deleted'){
+                                    show_alert('Delete Multiple Policies', 'The policies have been deleted.', 'success');
+                                }
+                                else{
+                                    show_alert('Delete Multiple Policies', 'The policy does not exist.', 'info');
+                                }
     
                                 reload_datatable('#policy-datatable');
-                            }
-                            else if(response === 'Not Found'){
-                                show_alert('Delete Multiple Policies', 'The policy does not exist.', 'info');
                             }
                             else{
                                 show_alert('Delete Multiple Policies', response, 'error');

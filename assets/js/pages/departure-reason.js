@@ -136,13 +136,15 @@ function initialize_click_events(){
                     url: 'controller.php',
                     data: {username : username, departure_reason_id : departure_reason_id, transaction : transaction},
                     success: function (response) {
-                        if(response === 'Deleted'){
-                          show_alert('Delete Departure Reason', 'The departure reason has been deleted.', 'success');
+                        if(response === 'Deleted' || response === 'Not Found'){
+                            if(response === 'Deleted'){
+                                show_alert('Delete Departure Reason', 'The departure reason has been deleted.', 'success');
+                            }
+                            else{
+                                show_alert('Delete Departure Reason', 'The departure reason does not exist.', 'info');
+                            }
 
-                          reload_datatable('#departure-reason-datatable');
-                        }
-                        else if(response === 'Not Found'){
-                          show_alert('Delete Departure Reason', 'The departure reason does not exist.', 'info');
+                            reload_datatable('#departure-reason-datatable');
                         }
                         else{
                           show_alert('Delete Departure Reason', response, 'error');
@@ -183,13 +185,15 @@ function initialize_click_events(){
                         url: 'controller.php',
                         data: {username : username, departure_reason_id : departure_reason_id, transaction : transaction},
                         success: function (response) {
-                            if(response === 'Deleted'){
-                                show_alert('Delete Multiple Departure Reasons', 'The departure reasons have been deleted.', 'success');
+                            if(response === 'Deleted' || response === 'Not Found'){
+                                if(response === 'Deleted'){
+                                    show_alert('Delete Multiple Departure Reasons', 'The departure reasons have been deleted.', 'success');
+                                }
+                                else{
+                                    show_alert('Delete Multiple Departure Reasons', 'The departure reason does not exist.', 'info');
+                                }
     
                                 reload_datatable('#departure-reason-datatable');
-                            }
-                            else if(response === 'Not Found'){
-                                show_alert('Delete Multiple Departure Reasons', 'The departure reason does not exist.', 'info');
                             }
                             else{
                                 show_alert('Delete Multiple Departure Reasons', response, 'error');

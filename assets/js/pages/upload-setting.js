@@ -142,13 +142,15 @@ function initialize_click_events(){
                     url: 'controller.php',
                     data: {username : username, upload_setting_id : upload_setting_id, transaction : transaction},
                     success: function (response) {
-                        if(response === 'Deleted'){
-                          show_alert('Delete Upload Setting', 'The upload setting has been deleted.', 'success');
+                        if(response === 'Deleted' || response === 'Not Found'){
+                            if(response === 'Deleted'){
+                                show_alert('Delete Upload Setting', 'The upload setting has been deleted.', 'success');
+                            }
+                            else{
+                                show_alert('Delete Upload Setting', 'The upload setting does not exist.', 'info');
+                            }
 
-                          reload_datatable('#upload-setting-datatable');
-                        }
-                        else if(response === 'Not Found'){
-                          show_alert('Delete Upload Setting', 'The upload setting does not exist.', 'info');
+                            reload_datatable('#upload-setting-datatable');
                         }
                         else{
                           show_alert('Delete Upload Setting', response, 'error');
@@ -189,13 +191,15 @@ function initialize_click_events(){
                         url: 'controller.php',
                         data: {username : username, upload_setting_id : upload_setting_id, transaction : transaction},
                         success: function (response) {
-                            if(response === 'Deleted'){
-                                show_alert('Delete Multiple Upload Settings', 'The upload settings have been deleted.', 'success');
+                            if(response === 'Deleted' || response === 'Not Found'){
+                                if(response === 'Deleted'){
+                                    show_alert('Delete Multiple Upload Settings', 'The upload settings have been deleted.', 'success');
+                                }
+                                else{
+                                    show_alert('Delete Multiple Upload Settings', 'The upload setting does not exist.', 'info');
+                                }
     
                                 reload_datatable('#upload-setting-datatable');
-                            }
-                            else if(response === 'Not Found'){
-                                show_alert('Delete Multiple Upload Settings', 'The upload setting does not exist.', 'info');
                             }
                             else{
                                 show_alert('Delete Multiple Upload Settings', response, 'error');

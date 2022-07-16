@@ -161,13 +161,15 @@ function initialize_click_events(){
                     url: 'controller.php',
                     data: {username : username, working_hours_id : working_hours_id, transaction : transaction},
                     success: function (response) {
-                        if(response === 'Deleted'){
-                          show_alert('Delete Working Hours', 'The working hours has been deleted.', 'success');
+                        if(response === 'Deleted' || response === 'Not Found'){
+                            if(response === 'Deleted'){
+                                show_alert('Delete Working Hours', 'The working hours has been deleted.', 'success');
+                            }
+                            else{
+                                show_alert('Delete Working Hours', 'The working hours does not exist.', 'info');
+                            }
 
-                          reload_datatable('#working-hours-datatable');
-                        }
-                        else if(response === 'Not Found'){
-                          show_alert('Delete Working Hours', 'The working hours does not exist.', 'info');
+                            reload_datatable('#working-hours-datatable');
                         }
                         else{
                           show_alert('Delete Working Hours', response, 'error');
@@ -208,13 +210,15 @@ function initialize_click_events(){
                         url: 'controller.php',
                         data: {username : username, working_hours_id : working_hours_id, transaction : transaction},
                         success: function (response) {
-                            if(response === 'Deleted'){
-                                show_alert('Delete Multiple Working Hours', 'The working hours have been deleted.', 'success');
+                            if(response === 'Deleted' || response === 'Not Found'){
+                                if(response === 'Deleted'){
+                                    show_alert('Delete Multiple Working Hours', 'The working hours have been deleted.', 'success');
+                                }
+                                else{
+                                    show_alert('Delete Multiple Working Hours', 'The working hours does not exist.', 'info');
+                                }
     
                                 reload_datatable('#working-hours-datatable');
-                            }
-                            else if(response === 'Not Found'){
-                                show_alert('Delete Multiple Working Hours', 'The working hours does not exist.', 'info');
                             }
                             else{
                                 show_alert('Delete Multiple Working Hours', response, 'error');

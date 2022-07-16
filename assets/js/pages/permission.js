@@ -139,13 +139,15 @@ function initialize_click_events(){
                     url: 'controller.php',
                     data: {username : username, permission_id : permission_id, transaction : transaction},
                     success: function (response) {
-                        if(response === 'Deleted'){
-                          show_alert('Delete Permission', 'The permission has been deleted.', 'success');
+                        if(response === 'Deleted' || response === 'Not Found'){
+                            if(response === 'Deleted'){
+                                show_alert('Delete Permission', 'The permission has been deleted.', 'success');
+                            }
+                            else{
+                                show_alert('Delete Permission', 'The permission does not exist.', 'info');
+                            }
 
-                          reload_datatable('#permission-datatable');
-                        }
-                        else if(response === 'Not Found'){
-                          show_alert('Delete Permission', 'The permission does not exist.', 'info');
+                            reload_datatable('#permission-datatable');
                         }
                         else{
                           show_alert('Delete Permission', response, 'error');
@@ -186,13 +188,15 @@ function initialize_click_events(){
                         url: 'controller.php',
                         data: {username : username, permission_id : permission_id, transaction : transaction},
                         success: function (response) {
-                            if(response === 'Deleted'){
-                                show_alert('Delete Multiple Permissions', 'The permissions have been deleted.', 'success');
+                            if(response === 'Deleted' || response === 'Not Found'){
+                                if(response === 'Deleted'){
+                                    show_alert('Delete Multiple Permissions', 'The permissions have been deleted.', 'success');
+                                }
+                                else{
+                                    show_alert('Delete Multiple Permissions', 'The permission does not exist.', 'info');
+                                }
     
                                 reload_datatable('#permission-datatable');
-                            }
-                            else if(response === 'Not Found'){
-                                show_alert('Delete Multiple Permissions', 'The permission does not exist.', 'info');
                             }
                             else{
                                 show_alert('Delete Multiple Permissions', response, 'error');

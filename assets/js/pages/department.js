@@ -142,13 +142,15 @@ function initialize_click_events(){
                     url: 'controller.php',
                     data: {username : username, department_id : department_id, transaction : transaction},
                     success: function (response) {
-                        if(response === 'Deleted'){
-                          show_alert('Delete Department', 'The department has been deleted.', 'success');
+                        if(response === 'Deleted' || response === 'Not Found'){
+                            if(response === 'Deleted'){
+                                show_alert('Delete Department', 'The department has been deleted.', 'success');
+                            }
+                            else{
+                                show_alert('Delete Department', 'The department does not exist.', 'info');
+                            }
 
-                          reload_datatable('#department-datatable');
-                        }
-                        else if(response === 'Not Found'){
-                          show_alert('Delete Department', 'The department does not exist.', 'info');
+                            reload_datatable('#department-datatable');
                         }
                         else{
                           show_alert('Delete Department', response, 'error');
@@ -189,13 +191,15 @@ function initialize_click_events(){
                         url: 'controller.php',
                         data: {username : username, department_id : department_id, transaction : transaction},
                         success: function (response) {
-                            if(response === 'Deleted'){
-                                show_alert('Delete Multiple Departments', 'The departments have been deleted.', 'success');
+                            if(response === 'Deleted' || response === 'Not Found'){
+                                if(response === 'Deleted'){
+                                    show_alert('Delete Multiple Departments', 'The departments have been deleted.', 'success');
+                                }
+                                else{
+                                    show_alert('Delete Multiple Departments', 'The department does not exist.', 'info');
+                                }
     
                                 reload_datatable('#department-datatable');
-                            }
-                            else if(response === 'Not Found'){
-                                show_alert('Delete Multiple Departments', 'The department does not exist.', 'info');
                             }
                             else{
                                 show_alert('Delete Multiple Departments', response, 'error');

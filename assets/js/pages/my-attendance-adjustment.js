@@ -64,7 +64,7 @@ function initialize_my_attendance_adjustment_table(datatable_name, buttons = fal
             buttons: [
                 'csv', 'excel', 'pdf'
             ],
-            'order': [[ 0, 'asc' ]],
+            'order': [[ 1, 'desc' ]],
             'columns' : column,
             'scrollY': false,
             'scrollX': true,
@@ -91,7 +91,7 @@ function initialize_my_attendance_adjustment_table(datatable_name, buttons = fal
                 'data': {'type' : type, 'username' : username, 'filter_for_recommendation_start_date' : filter_for_recommendation_start_date, 'filter_for_recommendation_end_date' : filter_for_recommendation_end_date, 'filter_recommendation_start_date' : filter_recommendation_start_date, 'filter_recommendation_end_date' : filter_recommendation_end_date, 'filter_decision_start_date' : filter_decision_start_date, 'filter_decision_end_date' : filter_decision_end_date, 'filter_status' : filter_status, 'filter_sanction' : filter_sanction},
                 'dataSrc' : ''
             },
-            'order': [[ 0, 'asc' ]],
+            'order': [[ 1, 'desc' ]],
             'columns' : column,
             'scrollY': false,
             'scrollX': true,
@@ -123,7 +123,7 @@ function initialize_click_events(){
 
         sessionStorage.setItem('adjustment_id', adjustment_id);
 
-        generate_modal('attendance adjustment details', 'Attendance Adjustment Details', 'XL' , '1', '0', 'element', '', '0', username);
+        generate_modal('attendance adjustment details', 'Attendance Adjustment Details', 'LG' , '1', '0', 'element', '', '0', username);
     });
 
     $(document).on('click','#request-attendance-adjustment',function() {        
@@ -142,6 +142,30 @@ function initialize_click_events(){
         else{
             generate_modal('update partial attendance adustment form', 'Request Attendance Adjustment', 'R' , '0', '1', 'form', 'update-partial-attendance-adjustment-form', '0', username);
         }
+    });
+
+    $(document).on('click','.cancel-attendance-adjustment',function() {
+        var adjustment_id = $(this).data('adjustment-id');
+
+        sessionStorage.setItem('adjustment_id', adjustment_id);
+        
+        generate_modal('cancel attendance adjustment form', 'Cancel Attendance Adjustment', 'R' , '0', '1', 'form', 'cancel-attendance-adjustment-form', '1', username);
+    });
+
+    $(document).on('click','#cancel-attendance-adjustment',function() {
+        var adjustment_id = [];
+
+        $('.datatable-checkbox-children').each(function(){
+            if($(this).is(':checked')){  
+                adjustment_id.push(this.value);  
+            }
+        });
+
+        if(adjustment_id.length > 0){
+            sessionStorage.setItem('adjustment_id', adjustment_id);
+        }
+
+        generate_modal('cancel multiple attendance adjustment form', 'Cancel Multiple Attendance Adjustment', 'R' , '0', '1', 'form', 'cancel-multiple-attendance-adjustment-form', '1', username);
     });
 
     $(document).on('click','#apply-filter',function() {

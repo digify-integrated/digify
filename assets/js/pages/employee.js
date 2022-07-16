@@ -143,13 +143,15 @@ function initialize_click_events(){
                     url: 'controller.php',
                     data: {username : username, employee_id : employee_id, transaction : transaction},
                     success: function (response) {
-                        if(response === 'Deleted'){
-                          show_alert('Delete Employee', 'The employee has been deleted.', 'success');
+                        if(response === 'Deleted' || response === 'Not Found'){
+                            if(response === 'Deleted'){
+                                show_alert('Delete Employee', 'The employee has been deleted.', 'success');
+                            }
+                            else{
+                                show_alert('Delete Employee', 'The employee does not exist.', 'info');
+                            }
 
-                          reload_datatable('#employee-datatable');
-                        }
-                        else if(response === 'Not Found'){
-                          show_alert('Delete Employee', 'The employee does not exist.', 'info');
+                            reload_datatable('#employee-datatable');
                         }
                         else{
                           show_alert('Delete Employee', response, 'error');
@@ -190,13 +192,15 @@ function initialize_click_events(){
                         url: 'controller.php',
                         data: {username : username, employee_id : employee_id, transaction : transaction},
                         success: function (response) {
-                            if(response === 'Deleted'){
-                                show_alert('Delete Multiple Employees', 'The employees have been deleted.', 'success');
+                            if(response === 'Deleted' || response === 'Not Found'){
+                                if(response === 'Deleted'){
+                                    show_alert('Delete Multiple Employees', 'The employees have been deleted.', 'success');
+                                }
+                                else{
+                                    show_alert('Delete Multiple Employees', 'The employee does not exist.', 'info');
+                                }
     
                                 reload_datatable('#employee-datatable');
-                            }
-                            else if(response === 'Not Found'){
-                                show_alert('Delete Multiple Employees', 'The employee does not exist.', 'info');
                             }
                             else{
                                 show_alert('Delete Multiple Employees', response, 'error');
@@ -234,13 +238,15 @@ function initialize_click_events(){
                     url: 'controller.php',
                     data: {username : username, employee_id : employee_id, transaction : transaction},
                     success: function (response) {
-                        if(response === 'Unarchived'){
-                          show_alert('Unarchive Employee', 'The employee has been unarchived.', 'success');
+                        if(response === 'Unarchived' || response === 'Not Found'){
+                            if(response === 'Unarchived'){
+                                show_alert('Unarchive Employee', 'The employee has been unarchived.', 'success');
+                            }
+                            else{
+                                show_alert('Unarchive Employee', 'The employee does not exist.', 'info');
+                            }
 
-                          reload_datatable('#employee-datatable');
-                        }
-                        else if(response === 'Not Found'){
-                          show_alert('Unarchive Employee', 'The employee does not exist.', 'info');
+                            reload_datatable('#employee-datatable');
                         }
                         else{
                           show_alert('Unarchive Employee', response, 'error');
@@ -288,13 +294,15 @@ function initialize_click_events(){
                         url: 'controller.php',
                         data: {username : username, employee_id : employee_id, transaction : transaction},
                         success: function (response) {
-                            if(response === 'Unarchived'){
-                              show_alert('Unarchive Multiple Employee', 'The employees have bee unarchived.', 'success');
+                            if(response === 'Unarchived' || response === 'Not Found'){
+                                if(response === 'Unarchived'){
+                                    show_alert('Unarchive Multiple Employee', 'The employees have bee unarchived.', 'success');
+                                }
+                                else{
+                                    show_alert('Unarchive Multiple Employee', 'The employee does not exist.', 'info');
+                                }
     
-                              reload_datatable('#employee-datatable');
-                            }
-                            else if(response === 'Not Found'){
-                              show_alert('Unarchive Multiple Employee', 'The employee does not exist.', 'info');
+                                reload_datatable('#employee-datatable');
                             }
                             else{
                               show_alert('Unarchive Multiple Employee', response, 'error');

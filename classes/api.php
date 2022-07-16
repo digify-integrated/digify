@@ -3812,7 +3812,7 @@ class Api{
     # Returns    : Number/String
     #
     # -------------------------------------------------------------
-    public function update_attendance_adjustment_attachment($attachment_tmp_name, $attachment_actual_ext, $attendance_adjustment_attachment_id, $username){
+    public function update_attendance_adjustment_attachment($attachment_tmp_name, $attachment_actual_ext, $adjustment_id, $username){
         if ($this->databaseConnection()) {
             $record_log = 'UPD->' . $username . '->' . date('Y-m-d h:i:s');
 
@@ -3826,15 +3826,15 @@ class Api{
             $directory_checker = $this->directory_checker($directory);
 
             if($directory_checker){
-                $job_position_details = $this->get_attendance_adjustment_details($attendance_adjustment_attachment_id);
+                $job_position_details = $this->get_attendance_adjustment_details($adjustment_id);
                 $attachment = $job_position_details[0]['ATTACHMENT'];
                 $transaction_log_id = $job_position_details[0]['TRANSACTION_LOG_ID'];
     
                     if(file_exists($attachment)){
                         if (unlink($attachment)) {
                             if(move_uploaded_file($attachment_tmp_name, $file_destination)){
-                                $sql = $this->db_connection->prepare('CALL update_attendance_adjustment_attachment(:attendance_adjustment_attachment_id, :file_path, :record_log)');
-                                $sql->bindValue(':attendance_adjustment_attachment_id', $attendance_adjustment_attachment_id);
+                                $sql = $this->db_connection->prepare('CALL update_attendance_adjustment_attachment(:adjustment_id, :file_path, :record_log)');
+                                $sql->bindValue(':adjustment_id', $adjustment_id);
                                 $sql->bindValue(':file_path', $file_path);
                                 $sql->bindValue(':record_log', $record_log);
                             
@@ -3862,8 +3862,8 @@ class Api{
                     }
                     else{
                         if(move_uploaded_file($attachment_tmp_name, $file_destination)){
-                            $sql = $this->db_connection->prepare('CALL update_attendance_adjustment_attachment(:attendance_adjustment_attachment_id, :file_path, :record_log)');
-                            $sql->bindValue(':attendance_adjustment_attachment_id', $attendance_adjustment_attachment_id);
+                            $sql = $this->db_connection->prepare('CALL update_attendance_adjustment_attachment(:adjustment_id, :file_path, :record_log)');
+                            $sql->bindValue(':adjustment_id', $adjustment_id);
                             $sql->bindValue(':file_path', $file_path);
                             $sql->bindValue(':record_log', $record_log);
                         
@@ -4109,6 +4109,154 @@ class Api{
                     else{
                         return $update_system_parameter_value;
                     }
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : update_attendance_creation_status
+    # Purpose    : Update attendance creation status.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function update_attendance_creation_status($creation_id, $status, $decision_remarks, $sanction, $username){
+        if ($this->databaseConnection()) {
+            
+            $system_date_time = date('Y-m-d H:i:s');
+
+            if($status == 'APV'){
+                $record_log = 'APV->' . $username . '->' . date('Y-m-d h:i:s');
+                $log_type = 'Approve';
+                $log = 'User ' . $username . ' approved attendance creation (' . $creation_id . ').';
+            }
+            else if($status == 'CAN'){
+                $record_log = 'CAN->' . $username . '->' . date('Y-m-d h:i:s');
+                $log_type = 'Cancel';
+                $log = 'User ' . $username . ' cancelled attendance creation (' . $creation_id . ').';
+            }
+            else if($status == 'FORREC'){
+                $record_log = 'FORREC->' . $username . '->' . date('Y-m-d h:i:s');
+                $log_type = 'For Recommendation';
+                $log = 'User ' . $username . ' tagged the attendance creation for recommendation (' . $creation_id . ').';
+            }
+            else if($status == 'REC'){
+                $record_log = 'REC->' . $username . '->' . date('Y-m-d h:i:s');
+                $log_type = 'Recommend';
+                $log = 'User ' . $username . ' recommended attendance creation (' . $creation_id . ').';
+            }
+            else if($status == 'PEN'){
+                $record_log = 'PEN->' . $username . '->' . date('Y-m-d h:i:s');
+                $log_type = 'Pending';
+                $log = 'User ' . $username . ' tagged the attendance creation as pending (' . $creation_id . ').';
+            }
+            else{
+                $record_log = 'REJ->' . $username . '->' . date('Y-m-d h:i:s');
+                $log_type = 'Reject';
+                $log = 'User ' . $username . ' rejected attendance creation (' . $creation_id . ').';
+            }
+
+            $attendance_creation_details = $this->get_attendance_creation_details($creation_id);
+            $transaction_log_id = $attendance_creation_details[0]['TRANSACTION_LOG_ID'];
+
+            $sql = $this->db_connection->prepare("CALL update_attendance_creation_status(:creation_id, :status, :sanction, :decision_remarks, :system_date_time, :username, :transaction_log_id, :record_log)");
+            $sql->bindValue(':creation_id', $creation_id);
+            $sql->bindValue(':status', $status);
+            $sql->bindValue(':sanction', $sanction);
+            $sql->bindValue(':decision_remarks', $decision_remarks);
+            $sql->bindValue(':system_date_time', $system_date_time);
+            $sql->bindValue(':username', $username);
+            $sql->bindValue(':transaction_log_id', $transaction_log_id);
+            $sql->bindValue(':record_log', $record_log);
+        
+            if($sql->execute()){
+                $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, $log_type, $log);
+
+                if($insert_transaction_log){
+                    return true;
+                }
+                else{
+                    return $insert_transaction_log;
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : update_attendance_adjustment_status
+    # Purpose    : Update attendance adjustment status.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function update_attendance_adjustment_status($adjustment_id, $status, $decision_remarks, $sanction, $username){
+        if ($this->databaseConnection()) {
+            
+            $system_date_time = date('Y-m-d H:i:s');
+
+            if($status == 'APV'){
+                $record_log = 'APV->' . $username . '->' . date('Y-m-d h:i:s');
+                $log_type = 'Approve';
+                $log = 'User ' . $username . ' approved attendance adjustment (' . $adjustment_id . ').';
+            }
+            else if($status == 'CAN'){
+                $record_log = 'CAN->' . $username . '->' . date('Y-m-d h:i:s');
+                $log_type = 'Cancel';
+                $log = 'User ' . $username . ' cancelled attendance adjustment (' . $adjustment_id . ').';
+            }
+            else if($status == 'FORREC'){
+                $record_log = 'FORREC->' . $username . '->' . date('Y-m-d h:i:s');
+                $log_type = 'For Recommendation';
+                $log = 'User ' . $username . ' tagged the attendance adjustment for recommendation (' . $adjustment_id . ').';
+            }
+            else if($status == 'REC'){
+                $record_log = 'REC->' . $username . '->' . date('Y-m-d h:i:s');
+                $log_type = 'Recommend';
+                $log = 'User ' . $username . ' recommended attendance adjustment (' . $adjustment_id . ').';
+            }
+            else if($status == 'PEN'){
+                $record_log = 'PEN->' . $username . '->' . date('Y-m-d h:i:s');
+                $log_type = 'Pending';
+                $log = 'User ' . $username . ' tagged the attendance adjustment as pending (' . $adjustment_id . ').';
+            }
+            else{
+                $record_log = 'REJ->' . $username . '->' . date('Y-m-d h:i:s');
+                $log_type = 'Reject';
+                $log = 'User ' . $username . ' rejected attendance adjustment (' . $adjustment_id . ').';
+            }
+
+            $attendance_adjustment_details = $this->get_attendance_adjustment_details($adjustment_id);
+            $transaction_log_id = $attendance_adjustment_details[0]['TRANSACTION_LOG_ID'];
+
+            $sql = $this->db_connection->prepare("CALL update_attendance_adjustment_status(:adjustment_id, :status, :sanction, :decision_remarks, :system_date_time, :username, :transaction_log_id, :record_log)");
+            $sql->bindValue(':adjustment_id', $adjustment_id);
+            $sql->bindValue(':status', $status);
+            $sql->bindValue(':sanction', $sanction);
+            $sql->bindValue(':decision_remarks', $decision_remarks);
+            $sql->bindValue(':system_date_time', $system_date_time);
+            $sql->bindValue(':username', $username);
+            $sql->bindValue(':transaction_log_id', $transaction_log_id);
+            $sql->bindValue(':record_log', $record_log);
+        
+            if($sql->execute()){
+                $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, $log_type, $log);
+
+                if($insert_transaction_log){
+                    return true;
+                }
+                else{
+                    return $insert_transaction_log;
                 }
             }
             else{
@@ -6115,6 +6263,7 @@ class Api{
     public function insert_attendance_adjustment($attachment_tmp_name, $attachment_actual_ext, $attendance_id, $employee_id, $time_in, $time_out, $reason, $username){
         if ($this->databaseConnection()) {
             $record_log = 'INS->' . $username . '->' . date('Y-m-d h:i:s');
+            $system_date_time = date('Y-m-d H:i:s');
 
             # Get system parameter id
             $system_parameter = $this->get_system_parameter(20, 1);
@@ -6126,13 +6275,14 @@ class Api{
             $transaction_log_parameter_number = $transaction_log_system_parameter[0]['PARAMETER_NUMBER'];
             $transaction_log_id = $transaction_log_system_parameter[0]['ID'];
 
-            $sql = $this->db_connection->prepare('CALL insert_attendance_adjustment(:id, :attendance_id, :employee_id, :time_in, :time_out, :reason, :transaction_log_id, :record_log)');
+            $sql = $this->db_connection->prepare('CALL insert_attendance_adjustment(:id, :attendance_id, :employee_id, :time_in, :time_out, :reason, :system_date_time, :transaction_log_id, :record_log)');
             $sql->bindValue(':id', $id);
             $sql->bindValue(':attendance_id', $attendance_id);
             $sql->bindValue(':employee_id', $employee_id);
             $sql->bindValue(':time_in', $time_in);
             $sql->bindValue(':time_out', $time_out);
             $sql->bindValue(':reason', $reason);
+            $sql->bindValue(':system_date_time', $system_date_time);
             $sql->bindValue(':transaction_log_id', $transaction_log_id);
             $sql->bindValue(':record_log', $record_log); 
         
@@ -6187,6 +6337,7 @@ class Api{
     public function insert_attendance_creation($attachment_tmp_name, $attachment_actual_ext, $employee_id, $time_in, $time_out, $reason, $username){
         if ($this->databaseConnection()) {
             $record_log = 'INS->' . $username . '->' . date('Y-m-d h:i:s');
+            $system_date_time = date('Y-m-d H:i:s');
 
             # Get system parameter id
             $system_parameter = $this->get_system_parameter(21, 1);
@@ -6198,12 +6349,13 @@ class Api{
             $transaction_log_parameter_number = $transaction_log_system_parameter[0]['PARAMETER_NUMBER'];
             $transaction_log_id = $transaction_log_system_parameter[0]['ID'];
 
-            $sql = $this->db_connection->prepare('CALL insert_attendance_creation(:id, :employee_id, :time_in, :time_out, :reason, :transaction_log_id, :record_log)');
+            $sql = $this->db_connection->prepare('CALL insert_attendance_creation(:id, :employee_id, :time_in, :time_out, :reason, :system_date_time, :transaction_log_id, :record_log)');
             $sql->bindValue(':id', $id);
             $sql->bindValue(':employee_id', $employee_id);
             $sql->bindValue(':time_in', $time_in);
             $sql->bindValue(':time_out', $time_out);
             $sql->bindValue(':reason', $reason);
+            $sql->bindValue(':system_date_time', $system_date_time);
             $sql->bindValue(':transaction_log_id', $transaction_log_id);
             $sql->bindValue(':record_log', $record_log); 
         
@@ -8498,6 +8650,8 @@ class Api{
                         'REASON' => $row['REASON'],
                         'ATTACHMENT' => $row['ATTACHMENT'],
                         'STATUS' => $row['STATUS'],
+                        'SANCTION' => $row['SANCTION'],
+                        'CREATED_DATE' => $row['CREATED_DATE'],
                         'FOR_RECOMMENDATION_DATE' => $row['FOR_RECOMMENDATION_DATE'],
                         'RECOMMENDATION_DATE' => $row['RECOMMENDATION_DATE'],
                         'RECOMMENDATION_BY' => $row['RECOMMENDATION_BY'],
@@ -8543,6 +8697,7 @@ class Api{
                         'REASON' => $row['REASON'],
                         'ATTACHMENT' => $row['ATTACHMENT'],
                         'STATUS' => $row['STATUS'],
+                        'CREATED_DATE' => $row['CREATED_DATE'],
                         'FOR_RECOMMENDATION_DATE' => $row['FOR_RECOMMENDATION_DATE'],
                         'RECOMMENDATION_DATE' => $row['RECOMMENDATION_DATE'],
                         'RECOMMENDATION_BY' => $row['RECOMMENDATION_BY'],

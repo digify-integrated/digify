@@ -142,13 +142,15 @@ function initialize_click_events(){
                     url: 'controller.php',
                     data: {username : username, system_type : system_type, system_code : system_code, transaction : transaction},
                     success: function (response) {
-                        if(response === 'Deleted'){
-                          show_alert('Delete System Code', 'The system code has been deleted.', 'success');
+                        if(response === 'Deleted' || response === 'Not Found'){
+                            if(response === 'Deleted'){
+                                show_alert('Delete System Code', 'The system code has been deleted.', 'success');
+                            }
+                            else{
+                                show_alert('Delete System Code', 'The system code does not exist.', 'info');
+                            }
 
-                          reload_datatable('#system-code-datatable');
-                        }
-                        else if(response === 'Not Found'){
-                          show_alert('Delete System Code', 'The system code does not exist.', 'info');
+                            reload_datatable('#system-code-datatable');
                         }
                         else{
                           show_alert('Delete System Code', response, 'error');
@@ -191,13 +193,15 @@ function initialize_click_events(){
                         url: 'controller.php',
                         data: {username : username, system_type : system_type, system_code : system_code, transaction : transaction},
                         success: function (response) {
-                            if(response === 'Deleted'){
-                                show_alert('Delete Multiple System Codes', 'The system codes have been deleted.', 'success');
+                            if(response === 'Deleted' || response === 'Not Found'){
+                                if(response === 'Deleted'){
+                                    show_alert('Delete Multiple System Codes', 'The system codes have been deleted.', 'success');
+                                }
+                                else{
+                                    show_alert('Delete Multiple System Codes', 'The system code does not exist.', 'info');
+                                }
     
                                 reload_datatable('#system-code-datatable');
-                            }
-                            else if(response === 'Not Found'){
-                                show_alert('Delete Multiple System Codes', 'The system code does not exist.', 'info');
                             }
                             else{
                                 show_alert('Delete Multiple System Codes', response, 'error');

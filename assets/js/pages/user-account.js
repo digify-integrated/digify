@@ -158,13 +158,15 @@ function initialize_click_events(){
                     url: 'controller.php',
                     data: {username : username, user_code : user_code, transaction : transaction},
                     success: function (response) {
-                        if(response === 'Unlocked'){
-                          show_alert('Unlock User Account', 'The user account has been unlocked.', 'success');
+                        if(response === 'Unlocked' || response === 'Not Found'){
+                            if(response === 'Unlocked'){
+                                show_alert('Unlock User Account', 'The user account has been unlocked.', 'success');
+                            }
+                            else{
+                                show_alert('Unlock User Account', 'The user account does not exist.', 'info');
+                            }
 
-                          reload_datatable('#user-account-datatable');
-                        }
-                        else if(response === 'Not Found'){
-                          show_alert('Unlock User Account', 'The user account does not exist.', 'info');
+                            reload_datatable('#user-account-datatable');
                         }
                         else{
                           show_alert('Unlock User Account', response, 'error');
@@ -197,13 +199,15 @@ function initialize_click_events(){
                     url: 'controller.php',
                     data: {username : username, user_code : user_code, transaction : transaction},
                     success: function (response) {
-                        if(response === 'Locked'){
-                          show_alert('Lock User Account', 'The user account has been locked.', 'success');
+                        if(response === 'Locked' || response === 'Not Found'){
+                            if(response === 'Locked'){
+                                show_alert('Lock User Account', 'The user account has been locked.', 'success');
+                            }
+                            else{
+                                show_alert('Lock User Account', 'The user account does not exist.', 'info');
+                            }
 
-                          reload_datatable('#user-account-datatable');
-                        }
-                        else if(response === 'Not Found'){
-                          show_alert('Lock User Account', 'The user account does not exist.', 'info');
+                            reload_datatable('#user-account-datatable');
                         }
                         else{
                           show_alert('Lock User Account', response, 'error');
@@ -243,16 +247,18 @@ function initialize_click_events(){
                         url: 'controller.php',
                         data: {username : username, user_code : user_code, transaction : transaction},
                         success: function (response) {
-                            if(response === 'Locked'){
-                              show_alert('Lock User Accounts', 'The user accounts have been locked.', 'success');
+                            if(response === 'Locked' || response === 'Not Found'){
+                                if(response === 'Locked'){
+                                    show_alert('Lock Multiple User Accounts', 'The user accounts have been locked.', 'success');
+                                }
+                                else{
+                                    show_alert('Lock Multiple User Accounts', 'The user account does not exist.', 'info');
+                                }
     
-                              reload_datatable('#user-account-datatable');
-                            }
-                            else if(response === 'Not Found'){
-                              show_alert('Lock User Accounts', 'The user account does not exist.', 'info');
+                                reload_datatable('#user-account-datatable');
                             }
                             else{
-                              show_alert('Lock User Accounts', response, 'error');
+                              show_alert('Lock Multiple User Accounts', response, 'error');
                             }
                         }
                     });
@@ -293,16 +299,18 @@ function initialize_click_events(){
                         url: 'controller.php',
                         data: {username : username, user_code : user_code, transaction : transaction},
                         success: function (response) {
-                            if(response === 'Unlocked'){
-                              show_alert('Unlock User Accounts', 'The user accounts have been unlocked.', 'success');
+                            if(response === 'Unlocked' || response === 'Not Found'){
+                                if(response === 'Unlocked'){
+                                    show_alert('Unlock Multiple User Accounts', 'The user accounts have been unlocked.', 'success');
+                                }
+                                else{
+                                    show_alert('Unlock Multiple User Accounts', 'The user account does not exist.', 'info');
+                                }
     
-                              reload_datatable('#user-account-datatable');
-                            }
-                            else if(response === 'Not Found'){
-                              show_alert('Unlock User Accounts', 'The user account does not exist.', 'info');
+                                reload_datatable('#user-account-datatable');
                             }
                             else{
-                              show_alert('Unlock User Accounts', response, 'error');
+                              show_alert('Unlock Multiple User Accounts', response, 'error');
                             }
                         }
                     });
@@ -336,13 +344,15 @@ function initialize_click_events(){
                     url: 'controller.php',
                     data: {username : username, user_code : user_code, transaction : transaction},
                     success: function (response) {
-                        if(response === 'Activated'){
-                          show_alert('Activate User Account', 'The user account has been activated.', 'success');
+                        if(response === 'Activated' || response === 'Not Found'){
+                            if(response === 'Activated'){
+                                show_alert('Activate User Account', 'The user account has been activated.', 'success');
+                            }
+                            else{
+                                show_alert('Activate User Account', 'The user account does not exist.', 'info');
+                            }
 
-                          reload_datatable('#user-account-datatable');
-                        }
-                        else if(response === 'Not Found'){
-                          show_alert('Activate User Account', 'The user account does not exist.', 'info');
+                            reload_datatable('#user-account-datatable');
                         }
                         else{
                           show_alert('Activate User Account', response, 'error');
@@ -375,13 +385,15 @@ function initialize_click_events(){
                     url: 'controller.php',
                     data: {username : username, user_code : user_code, transaction : transaction},
                     success: function (response) {
-                        if(response === 'Deactivated'){
-                          show_alert('Deactivate User Account', 'The user account has been deactivated.', 'success');
+                        if(response === 'Deactivated' || response === 'Not Found'){
+                            if(response === 'Deactivated'){
+                                show_alert('Deactivate User Account', 'The user account has been deactivated.', 'success');
+                            }
+                            else{
+                                show_alert('Deactivate User Account', 'The user account does not exist.', 'info');
+                            }
 
-                          reload_datatable('#user-account-datatable');
-                        }
-                        else if(response === 'Not Found'){
-                          show_alert('Deactivate User Account', 'The user account does not exist.', 'info');
+                            reload_datatable('#user-account-datatable');
                         }
                         else{
                           show_alert('Deactivate User Account', response, 'error');
@@ -421,13 +433,15 @@ function initialize_click_events(){
                         url: 'controller.php',
                         data: {username : username, user_code : user_code, transaction : transaction},
                         success: function (response) {
-                            if(response === 'Activated'){
-                              show_alert('Activate Multiple User Accounts', 'The user accounts have been activated.', 'success');
+                            if(response === 'Activated' || response === 'Not Found'){
+                                if(response === 'Activated'){
+                                    show_alert('Activate Multiple User Accounts', 'The user accounts have been activated.', 'success');
+                                }
+                                else{
+                                    show_alert('Activate Multiple User Accounts', 'The user account does not exist.', 'info');
+                                }
     
-                              reload_datatable('#user-account-datatable');
-                            }
-                            else if(response === 'Not Found'){
-                              show_alert('Activate Multiple User Accounts', 'The user account does not exist.', 'info');
+                                reload_datatable('#user-account-datatable');
                             }
                             else{
                               show_alert('Activate Multiple User Accounts', response, 'error');
@@ -471,13 +485,15 @@ function initialize_click_events(){
                         url: 'controller.php',
                         data: {username : username, user_code : user_code, transaction : transaction},
                         success: function (response) {
-                            if(response === 'Deactivated'){
-                              show_alert('Deactivate Multiple User Accounts', 'The user accounts have been deactivated.', 'success');
+                            if(response === 'Deactivated' || response === 'Not Found'){
+                                if(response === 'Deactivated'){
+                                    show_alert('Deactivate Multiple User Accounts', 'The user accounts have been deactivated.', 'success');
+                                }
+                                else{
+                                    show_alert('Deactivate Multiple User Accounts', 'The user account does not exist.', 'info');
+                                }
     
-                              reload_datatable('#user-account-datatable');
-                            }
-                            else if(response === 'Not Found'){
-                              show_alert('Deactivate Multiple User Accounts', 'The user account does not exist.', 'info');
+                                reload_datatable('#user-account-datatable');
                             }
                             else{
                               show_alert('Deactivate Multiple User Accounts', response, 'error');

@@ -152,13 +152,15 @@ function initialize_click_events(){
                     url: 'controller.php',
                     data: {username : username, role_id : role_id, transaction : transaction},
                     success: function (response) {
-                        if(response === 'Deleted'){
-                          show_alert('Delete Role', 'The role has been deleted.', 'success');
+                        if(response === 'Deleted' || response === 'Not Found'){
+                            if(response === 'Deleted'){
+                                show_alert('Delete Role', 'The role has been deleted.', 'success');
+                            }
+                            else{
+                                show_alert('Delete Role', 'The role does not exist.', 'info');
+                            }
 
-                          reload_datatable('#role-datatable');
-                        }
-                        else if(response === 'Not Found'){
-                          show_alert('Delete Role', 'The role does not exist.', 'info');
+                            reload_datatable('#role-datatable');
                         }
                         else{
                           show_alert('Delete Role', response, 'error');
@@ -199,13 +201,15 @@ function initialize_click_events(){
                         url: 'controller.php',
                         data: {username : username, role_id : role_id, transaction : transaction},
                         success: function (response) {
-                            if(response === 'Deleted'){
-                                show_alert('Delete Multiple Roles', 'The roles have been deleted.', 'success');
+                            if(response === 'Deleted' || response === 'Not Found'){
+                                if(response === 'Deleted'){
+                                    show_alert('Delete Multiple Roles', 'The roles have been deleted.', 'success');
+                                }
+                                else{
+                                    show_alert('Delete Multiple Roles', 'The roles does not exist.', 'info');
+                                }
     
                                 reload_datatable('#role-datatable');
-                            }
-                            else if(response === 'Not Found'){
-                                show_alert('Delete Multiple Roles', 'The roles does not exist.', 'info');
                             }
                             else{
                                 show_alert('Delete Multiple Roles', response, 'error');

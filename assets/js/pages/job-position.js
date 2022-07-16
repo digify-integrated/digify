@@ -145,13 +145,15 @@ function initialize_click_events(){
                     url: 'controller.php',
                     data: {username : username, job_position_id : job_position_id, transaction : transaction},
                     success: function (response) {
-                        if(response === 'Deleted'){
-                          show_alert('Delete Job Position', 'The job position has been deleted.', 'success');
+                        if(response === 'Deleted' || response === 'Not Found'){
+                            if(response === 'Deleted'){
+                                show_alert('Delete Job Position', 'The job position has been deleted.', 'success');
+                            }
+                            else{
+                                show_alert('Delete Job Position', 'The job position does not exist.', 'info');
+                            }
 
-                          reload_datatable('#job-position-datatable');
-                        }
-                        else if(response === 'Not Found'){
-                          show_alert('Delete Job Position', 'The job position does not exist.', 'info');
+                            reload_datatable('#job-position-datatable');
                         }
                         else{
                           show_alert('Delete Job Position', response, 'error');
@@ -192,13 +194,15 @@ function initialize_click_events(){
                         url: 'controller.php',
                         data: {username : username, job_position_id : job_position_id, transaction : transaction},
                         success: function (response) {
-                            if(response === 'Deleted'){
-                                show_alert('Delete Multiple Job Positions', 'The job positions have been deleted.', 'success');
+                            if(response === 'Deleted' || response === 'Not Found'){
+                                if(response === 'Deleted'){
+                                    show_alert('Delete Multiple Job Positions', 'The job positions have been deleted.', 'success');
+                                }
+                                else{
+                                    show_alert('Delete Multiple Job Positions', 'The job positions does not exist.', 'info');
+                                }
     
                                 reload_datatable('#job-position-datatable');
-                            }
-                            else if(response === 'Not Found'){
-                                show_alert('Delete Multiple Job Positions', 'The job positions does not exist.', 'info');
                             }
                             else{
                                 show_alert('Delete Multiple Job Positions', response, 'error');

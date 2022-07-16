@@ -168,16 +168,18 @@ function initialize_click_events(){
                     url: 'controller.php',
                     data: {username : username, attendance_id : attendance_id, transaction : transaction},
                     success: function (response) {
-                        if(response === 'Deleted'){
-                          show_alert('Delete Attendance', 'The attendance has been deleted.', 'success');
+                        if(response === 'Deleted' || response === 'Not Found'){
+                            if(response === 'Deleted'){
+                                show_alert('Delete Attendance', 'The attendance has been deleted.', 'success');
+                            }
+                            else{
+                                show_alert('Delete Attendance', 'The attendance does not exist.', 'info');
+                            }
 
-                          reload_datatable('#attendance-datatable');
-                        }
-                        else if(response === 'Not Found'){
-                          show_alert('Delete Attendance', 'The attendance does not exist.', 'info');
+                            reload_datatable('#attendance-datatable');
                         }
                         else{
-                          show_alert('Delete Attendance', response, 'error');
+                            show_alert('Delete Attendance', response, 'error');
                         }
                     }
                 });
@@ -215,13 +217,15 @@ function initialize_click_events(){
                         url: 'controller.php',
                         data: {username : username, attendance_id : attendance_id, transaction : transaction},
                         success: function (response) {
-                            if(response === 'Deleted'){
-                                show_alert('Delete Multiple Attendances', 'The attendances have been deleted.', 'success');
+                            if(response === 'Deleted' || response === 'Not Found'){
+                                if(response === 'Deleted'){
+                                    show_alert('Delete Multiple Attendances', 'The attendances have been deleted.', 'success');
+                                }
+                                else{
+                                    show_alert('Delete Multiple Attendances', 'The attendances does not exist.', 'info');
+                                }
     
                                 reload_datatable('#attendance-datatable');
-                            }
-                            else if(response === 'Not Found'){
-                                show_alert('Delete Multiple Attendances', 'The attendances does not exist.', 'info');
                             }
                             else{
                                 show_alert('Delete Multiple Attendances', response, 'error');
