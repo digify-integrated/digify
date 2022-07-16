@@ -2,8 +2,8 @@
     'use strict';
 
     $(function() {
-        if($('#my-attendance-adjustment-datatable').length){
-            initialize_my_attendance_adjustment_table('#my-attendance-adjustment-datatable');
+        if($('#my-attendance-creation-datatable').length){
+            initialize_my_attendance_creation_table('#my-attendance-creation-datatable');
         }
 
         initialize_click_events();
@@ -11,7 +11,7 @@
     });
 })(jQuery);
 
-function initialize_my_attendance_adjustment_table(datatable_name, buttons = false, show_all = false){
+function initialize_my_attendance_creation_table(datatable_name, buttons = false, show_all = false){
     hide_multiple_buttons();
     
     var username = $('#username').text();
@@ -23,7 +23,7 @@ function initialize_my_attendance_adjustment_table(datatable_name, buttons = fal
     var filter_decision_end_date = $('#filter_decision_end_date').val();
     var filter_status = $('#filter_status').val();
     var filter_sanction = $('#filter_sanction').val();
-    var type = 'my attendance adjustment table';
+    var type = 'my attendance creation table';
     var settings;
 
     var column = [ 
@@ -118,63 +118,57 @@ function initialize_my_attendance_adjustment_table(datatable_name, buttons = fal
 function initialize_click_events(){
     var username = $('#username').text();
 
-    $(document).on('click','.view-attendance-adjustment',function() {
-        var adjustment_id = $(this).data('adjustment-id');
+    $(document).on('click','.view-attendance-creation',function() {
+        var creation_id = $(this).data('creation-id');
 
-        sessionStorage.setItem('adjustment_id', adjustment_id);
+        sessionStorage.setItem('creation_id', creation_id);
 
-        generate_modal('attendance adjustment details', 'Attendance Adjustment Details', 'LG' , '1', '0', 'element', '', '0', username);
+        generate_modal('attendance creation details', 'Attendance Creation Details', 'LG' , '1', '0', 'element', '', '0', username);
     });
 
-    $(document).on('click','#request-attendance-adjustment',function() {        
-        generate_modal('request attendance adjustment form', 'Request Attendance Adjustment', 'R' , '0', '1', 'form', 'request-attendance-adjustment-form', '1', username);
+    $(document).on('click','#request-attendance-creation',function() {        
+        generate_modal('request attendance creation form', 'Request Attendance Creation', 'R' , '0', '1', 'form', 'request-attendance-creation-form', '1', username);
     });
 
-    $(document).on('click','.update-attendance-adjustment',function() {
-        var adjustment_id = $(this).data('adjustment-id');
-        var adjustment_type = $(this).data('adjustment-type');
+    $(document).on('click','.update-attendance-creation',function() {
+        var creation_id = $(this).data('creation-id');
 
-        sessionStorage.setItem('adjustment_id', adjustment_id);
+        sessionStorage.setItem('creation_id', creation_id);
         
-        if(adjustment_type == 'full'){
-            generate_modal('update full attendance adustment form', 'Request Attendance Adjustment', 'R' , '0', '1', 'form', 'update-full-attendance-adjustment-form', '0', username);
-        }
-        else{
-            generate_modal('update partial attendance adustment form', 'Request Attendance Adjustment', 'R' , '0', '1', 'form', 'update-partial-attendance-adjustment-form', '0', username);
-        }
+        generate_modal('update attendance creation form', 'Request Attendance Creation', 'R' , '0', '1', 'form', 'update-attendance-creation-form', '0', username);
     });
 
-    $(document).on('click','.cancel-attendance-adjustment',function() {
-        var adjustment_id = $(this).data('adjustment-id');
+    $(document).on('click','.cancel-attendance-creation',function() {
+        var creation_id = $(this).data('creation-id');
 
-        sessionStorage.setItem('adjustment_id', adjustment_id);
+        sessionStorage.setItem('creation_id', creation_id);
         
-        generate_modal('cancel attendance adjustment form', 'Cancel Attendance Adjustment', 'R' , '0', '1', 'form', 'cancel-attendance-adjustment-form', '1', username);
+        generate_modal('cancel attendance creation form', 'Cancel Attendance Creation', 'R' , '0', '1', 'form', 'cancel-attendance-creation-form', '1', username);
     });
 
-    $(document).on('click','#cancel-attendance-adjustment',function() {
-        var adjustment_id = [];
+    $(document).on('click','#cancel-attendance-creation',function() {
+        var creation_id = [];
 
         $('.datatable-checkbox-children').each(function(){
             if($(this).is(':checked')){  
-                adjustment_id.push(this.value);  
+                creation_id.push(this.value);  
             }
         });
 
-        if(adjustment_id.length > 0){
-            sessionStorage.setItem('adjustment_id', adjustment_id);
+        if(creation_id.length > 0){
+            sessionStorage.setItem('creation_id', creation_id);
         }
 
-        generate_modal('cancel multiple attendance adjustment form', 'Cancel Multiple Attendance Adjustment', 'R' , '0', '1', 'form', 'cancel-multiple-attendance-adjustment-form', '1', username);
+        generate_modal('cancel multiple attendance creation form', 'Cancel Multiple Attendance Creation', 'R' , '0', '1', 'form', 'cancel-multiple-attendance-creation-form', '1', username);
     });
 
-    $(document).on('click','.delete-attendance-adjustment',function() {
-        var adjustment_id = $(this).data('adjustment-id');
-        var transaction = 'delete attendance adjustment';
+    $(document).on('click','.delete-attendance-creation',function() {
+        var creation_id = $(this).data('creation-id');
+        var transaction = 'delete attendance creation';
 
         Swal.fire({
-            title: 'Delete Attendance Adjustment',
-            text: 'Are you sure you want to delete this attendance adjustment?',
+            title: 'Delete Attendance Creation',
+            text: 'Are you sure you want to delete this attendance creation?',
             icon: 'warning',
             showCancelButton: !0,
             confirmButtonText: 'Delete',
@@ -187,20 +181,20 @@ function initialize_click_events(){
                 $.ajax({
                     type: 'POST',
                     url: 'controller.php',
-                    data: {username : username, adjustment_id : adjustment_id, transaction : transaction},
+                    data: {username : username, creation_id : creation_id, transaction : transaction},
                     success: function (response) {
                         if(response === 'Deleted' || response === 'Not Found'){
                             if(response === 'Deleted'){
-                                show_alert('Delete Attendance Adjustment', 'The attendance adjustment has been deleted.', 'success');
+                                show_alert('Delete Attendance Creation', 'The attendance creation has been deleted.', 'success');
                             }
                             else{
-                                show_alert('Delete Attendance Adjustment', 'The attendance adjustment does not exist.', 'info');
+                                show_alert('Delete Attendance Creation', 'The attendance creation does not exist.', 'info');
                             }
 
-                            reload_datatable('#my-attendance-adjustment-datatable');
+                            reload_datatable('#my-attendance-creation-datatable');
                         }
                         else{
-                          show_alert('Delete Attendance Adjustment', response, 'error');
+                          show_alert('Delete Attendance Creation', response, 'error');
                         }
                     }
                 });
@@ -209,20 +203,20 @@ function initialize_click_events(){
         });
     });
 
-    $(document).on('click','#delete-attendance-adjustment',function() {
-        var adjustment_id = [];
-        var transaction = 'delete multiple attendance adjustment';
+    $(document).on('click','#delete-attendance-creation',function() {
+        var creation_id = [];
+        var transaction = 'delete multiple attendance creation';
 
         $('.datatable-checkbox-children').each(function(){
             if($(this).is(':checked')){  
-                adjustment_id.push(this.value);  
+                creation_id.push(this.value);  
             }
         });
 
-        if(adjustment_id.length > 0){
+        if(creation_id.length > 0){
             Swal.fire({
-                title: 'Delete Multiple Attendance Adjustments',
-                text: 'Are you sure you want to delete these attendance adjustments?',
+                title: 'Delete Multiple Attendance Creations',
+                text: 'Are you sure you want to delete these attendance creations?',
                 icon: 'warning',
                 showCancelButton: !0,
                 confirmButtonText: 'Delete',
@@ -236,20 +230,20 @@ function initialize_click_events(){
                     $.ajax({
                         type: 'POST',
                         url: 'controller.php',
-                        data: {username : username, adjustment_id : adjustment_id, transaction : transaction},
+                        data: {username : username, creation_id : creation_id, transaction : transaction},
                         success: function (response) {
                             if(response === 'Deleted' || response === 'Not Found'){
                                 if(response === 'Deleted'){
-                                    show_alert('Delete Multiple Attendance Adjustments', 'The attendance adjustments have been deleted.', 'success');
+                                    show_alert('Delete Multiple Attendance Creations', 'The attendance creations have been deleted.', 'success');
                                 }
                                 else{
-                                    show_alert('Delete Multiple Attendance Adjustments', 'The attendance adjustments does not exist.', 'info');
+                                    show_alert('Delete Multiple Attendance Creations', 'The attendance creations does not exist.', 'info');
                                 }
     
-                                reload_datatable('#my-attendance-adjustment-datatable');
+                                reload_datatable('#my-attendance-creation-datatable');
                             }
                             else{
-                                show_alert('Delete Multiple Attendance Adjustments', response, 'error');
+                                show_alert('Delete Multiple Attendance Creations', response, 'error');
                             }
                         }
                     });
@@ -259,17 +253,17 @@ function initialize_click_events(){
             });
         }
         else{
-            show_alert('Delete Multiple Attendance Adjustments', 'Please select the attendance adjustments you want to delete.', 'error');
+            show_alert('Delete Multiple Attendance Creations', 'Please select the attendance creations you want to delete.', 'error');
         }
     });
 
-    $(document).on('click','.for-recommend-attendance-adjustment',function() {
-        var adjustment_id = $(this).data('adjustment-id');
-        var transaction = 'for recommendation attendance adjustment';
+    $(document).on('click','.for-recommend-attendance-creation',function() {
+        var creation_id = $(this).data('creation-id');
+        var transaction = 'for recommendation attendance creation';
 
         Swal.fire({
-            title: 'Tag Attendance Adjustment For Recommendation',
-            text: 'Are you sure you want to tag this attendance adjustment for recommendation?',
+            title: 'Tag Attendance Creation For Recommendation',
+            text: 'Are you sure you want to tag this attendance creation for recommendation?',
             icon: 'info',
             showCancelButton: !0,
             confirmButtonText: 'For Recommendation',
@@ -282,20 +276,20 @@ function initialize_click_events(){
                 $.ajax({
                     type: 'POST',
                     url: 'controller.php',
-                    data: {username : username, adjustment_id : adjustment_id, transaction : transaction},
+                    data: {username : username, creation_id : creation_id, transaction : transaction},
                     success: function (response) {
                         if(response === 'For Recommendation' || response === 'Not Found'){
                           if(response === 'For Recommendation'){
-                            show_alert('Tag Attendance Adjustment For Recommendation', 'The attendance adjustment has been tagged for recommendation.', 'success');
+                            show_alert('Tag Attendance Creation For Recommendation', 'The attendance creation has been tagged for recommendation.', 'success');
                           }
                           else{
-                            show_alert('Tag Attendance Adjustment For Recommendation', 'The attendance adjustment does not exist.', 'info');
+                            show_alert('Tag Attendance Creation For Recommendation', 'The attendance creation does not exist.', 'info');
                           }
 
-                          reload_datatable('#my-attendance-adjustment-datatable');
+                          reload_datatable('#my-attendance-creation-datatable');
                         }
                         else{
-                          show_alert('Tag Attendance Adjustment For Recommendation', response, 'error');
+                          show_alert('Tag Attendance Creation For Recommendation', response, 'error');
                         }
                     }
                 });
@@ -304,20 +298,20 @@ function initialize_click_events(){
         });
     });
 
-    $(document).on('click','#for-recommend-attendance-adjustment',function() {
-        var adjustment_id = [];
-        var transaction = 'for recommendation multiple attendance adjustment';
+    $(document).on('click','#for-recommend-attendance-creation',function() {
+        var creation_id = [];
+        var transaction = 'for recommendation multiple attendance creation';
 
         $('.datatable-checkbox-children').each(function(){
             if($(this).is(':checked')){  
-                adjustment_id.push(this.value);  
+                creation_id.push(this.value);  
             }
         });
 
-        if(adjustment_id.length > 0){
+        if(creation_id.length > 0){
             Swal.fire({
-                title: 'Tag Multiple Attendance Adjustments For Recommendation',
-                text: 'Are you sure you want to delete these attendance adjustments?',
+                title: 'Tag Multiple Attendance Creations For Recommendation',
+                text: 'Are you sure you want to delete these attendance creations?',
                 icon: 'info',
                 showCancelButton: !0,
                 confirmButtonText: 'For Recommendation',
@@ -331,20 +325,20 @@ function initialize_click_events(){
                     $.ajax({
                         type: 'POST',
                         url: 'controller.php',
-                        data: {username : username, adjustment_id : adjustment_id, transaction : transaction},
+                        data: {username : username, creation_id : creation_id, transaction : transaction},
                         success: function (response) {
                             if(response === 'For Recommendation' || response === 'Not Found'){
                                 if(response === 'For Recommendation'){
-                                    show_alert('Tag Multiple Attendance Adjustments For Recommendation', 'The attendance adjustments have been tagged for recommendation.', 'success');
+                                    show_alert('Tag Multiple Attendance Creations For Recommendation', 'The attendance creations have been tagged for recommendation.', 'success');
                                 }
                                 else{
-                                    show_alert('Tag Multiple Attendance Adjustments For Recommendation', 'The attendance adjustment does not exist.', 'info');
+                                    show_alert('Tag Multiple Attendance Creations For Recommendation', 'The attendance creation does not exist.', 'info');
                                 }
       
-                                reload_datatable('#my-attendance-adjustment-datatable');
+                                reload_datatable('#my-attendance-creation-datatable');
                             }
                             else{
-                                show_alert('Tag Multiple Attendance Adjustments For Recommendation', response, 'error');
+                                show_alert('Tag Multiple Attendance Creations For Recommendation', response, 'error');
                             }
                         }
                     });
@@ -354,12 +348,12 @@ function initialize_click_events(){
             });
         }
         else{
-            show_alert('Tag Multiple Attendance Adjustments For Recommendation', 'Please select the attendance adjustments you want to delete.', 'error');
+            show_alert('Tag Multiple Attendance Creations For Recommendation', 'Please select the attendance creations you want to delete.', 'error');
         }
     });
 
     $(document).on('click','#apply-filter',function() {
-        initialize_my_attendance_adjustment_table('#my-attendance-adjustment-datatable');
+        initialize_my_attendance_creation_table('#my-attendance-creation-datatable');
     });
 
 }
@@ -368,6 +362,6 @@ function initialize_on_change_events(){
     $(document).on('change','#attendance_id',function() {
         sessionStorage.setItem('attendance_id', this.value);
 
-        display_form_details('request attendance adjustment form');
+        display_form_details('request attendance creation form');
     });
 }

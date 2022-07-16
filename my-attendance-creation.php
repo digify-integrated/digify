@@ -4,13 +4,13 @@
     require('classes/api.php');
 
     $api = new Api;
-    $page_title = 'My Attendance Adjustment';
+    $page_title = 'My Attendance Creation';
 
-    $page_access = $api->check_role_permissions($username, 118);
-	$request_attendance_adjustment = $api->check_role_permissions($username, 123);
-	$cancel_attendance_adjustment = $api->check_role_permissions($username, 125);
-	$tag_attendance_adjustment_for_recommendation = $api->check_role_permissions($username, 126);
-	$delete_attendance_adjustment = $api->check_role_permissions($username, 127);
+    $page_access = $api->check_role_permissions($username, 129);
+	$request_attendance_creation = $api->check_role_permissions($username, 130);
+	$cancel_attendance_creation = $api->check_role_permissions($username, 132);
+	$tag_attendance_creation_for_recommendation = $api->check_role_permissions($username, 133);
+	$delete_attendance_creation = $api->check_role_permissions($username, 134);
     
     $check_user_account_status = $api->check_user_account_status($username);
 
@@ -74,24 +74,24 @@
                                             <div class="col-md-12">
                                                 <div class="d-flex align-items-start">
                                                     <div class="flex-grow-1 align-self-center">
-                                                        <h4 class="card-title">My Attendance Adjustment List</h4>
+                                                        <h4 class="card-title">My Attendance Creation List</h4>
                                                     </div>
                                                     <div class="d-flex gap-2">
                                                     <?php
-                                                        if($request_attendance_adjustment > 0){
-                                                            echo '<button type="button" class="btn btn-primary waves-effect btn-label waves-light" id="request-attendance-adjustment"><i class="bx bx-plus label-icon"></i> Add</button>';
+                                                        if($request_attendance_creation > 0){
+                                                            echo '<button type="button" class="btn btn-primary waves-effect btn-label waves-light" id="request-attendance-creation"><i class="bx bx-plus label-icon"></i> Add</button>';
                                                         }
 
-                                                        if($tag_attendance_adjustment_for_recommendation > 0){
-                                                            echo '<button type="button" class="btn btn-success waves-effect btn-label waves-light d-none multiple-for-recommendation" id="for-recommend-attendance-adjustment"><i class="bx bx-check label-icon"></i> For Recommendation</button>';
+                                                        if($tag_attendance_creation_for_recommendation > 0){
+                                                            echo '<button type="button" class="btn btn-success waves-effect btn-label waves-light d-none multiple-for-recommendation" id="for-recommend-attendance-creation"><i class="bx bx-check label-icon"></i> For Recommendation</button>';
                                                         }
 
-                                                        if($cancel_attendance_adjustment > 0){
-                                                            echo '<button type="button" class="btn btn-warning waves-effect btn-label waves-light d-none multiple-cancel" id="cancel-attendance-adjustment"><i class="bx bx-calendar-x label-icon"></i> Cancel</button>';
+                                                        if($cancel_attendance_creation > 0){
+                                                            echo '<button type="button" class="btn btn-warning waves-effect btn-label waves-light d-none multiple-cancel" id="cancel-attendance-creation"><i class="bx bx-calendar-x label-icon"></i> Cancel</button>';
                                                         }
 
-                                                        if($delete_attendance_adjustment > 0){
-                                                            echo '<button type="button" class="btn btn-danger waves-effect btn-label waves-light d-none multiple" id="delete-attendance-adjustment"><i class="bx bx-trash label-icon"></i> Delete</button>';
+                                                        if($delete_attendance_creation > 0){
+                                                            echo '<button type="button" class="btn btn-danger waves-effect btn-label waves-light d-none multiple" id="delete-attendance-creation"><i class="bx bx-trash label-icon"></i> Delete</button>';
                                                         }
                                                     ?>
                                                     <button type="button" class="btn btn-info waves-effect btn-label waves-light" data-bs-toggle="offcanvas" data-bs-target="#filter-off-canvas" aria-controls="filter-off-canvas"><i class="bx bx-filter-alt label-icon"></i> Filter</button>
@@ -173,7 +173,7 @@
                                         </div>
                                         <div class="row mt-4">
                                             <div class="col-md-12">
-                                                <table id="my-attendance-adjustment-datatable" class="table table-bordered align-middle mb-0 table-hover table-striped dt-responsive nowrap w-100">
+                                                <table id="my-attendance-creation-datatable" class="table table-bordered align-middle mb-0 table-hover table-striped dt-responsive nowrap w-100">
                                                     <thead>
                                                         <tr>
                                                             <th class="all">
@@ -215,6 +215,6 @@
         <script src="assets/libs/select2/js/select2.min.js"></script>
         <script src="assets/libs/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
         <script src="assets/js/system.js?v=<?php echo rand(); ?>"></script>
-        <script src="assets/js/pages/my-attendance-adjustment.js?v=<?php echo rand(); ?>"></script>
+        <script src="assets/js/pages/my-attendance-creation.js?v=<?php echo rand(); ?>"></script>
     </body>
 </html>

@@ -76,15 +76,12 @@
                                                     </div>
                                                     <div class="d-flex gap-2">
                                                         <?php
-                                                            if($add_state > 0 || $delete_state > 0){
+                                                            if($add_state > 0){
+                                                                echo '<button type="button" class="btn btn-primary waves-effect btn-label waves-light" id="add-state"><i class="bx bx-plus label-icon"></i> Add</button>';
+                                                            }
 
-                                                                if($add_state > 0){
-                                                                    echo '<button type="button" class="btn btn-primary waves-effect btn-label waves-light" id="add-state"><i class="bx bx-plus label-icon"></i> Add</button>';
-                                                                }
-
-                                                                if($delete_state > 0){
-                                                                    echo '<button type="button" class="btn btn-danger waves-effect btn-label waves-light d-none multiple" id="delete-state"><i class="bx bx-trash label-icon"></i> Delete</button>';
-                                                                }
+                                                            if($delete_state > 0){
+                                                                echo '<button type="button" class="btn btn-danger waves-effect btn-label waves-light d-none multiple" id="delete-state"><i class="bx bx-trash label-icon"></i> Delete</button>';
                                                             }
                                                         ?>
 

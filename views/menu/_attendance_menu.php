@@ -7,8 +7,9 @@
     $attendance_page = $api->check_role_permissions($username, 113);
     $my_attendance = $api->check_role_permissions($username, 118);
     $my_attendance_adjustment = $api->check_role_permissions($username, 122);
+    $my_attendance_creation = $api->check_role_permissions($username, 129);
 
-    if($attendance_setting_page > 0 || $time_in_time_out_page > 0 || $attendance_page > 0 || $my_attendance > 0 || $my_attendance_adjustment > 0){
+    if($attendance_setting_page > 0 || $time_in_time_out_page > 0 || $attendance_page > 0 || $my_attendance > 0 || $my_attendance_adjustment > 0 || $my_attendance_creation > 0){
         if($time_in_time_out_page > 0){
             $menu .= '<li class="nav-item dropdown"><a href="time-in-time-out.php" class="nav-link">Time In / Time Out</a></li>';
         }
@@ -26,6 +27,10 @@
 
                             if($my_attendance_adjustment > 0){
                                 $menu .= '<a href="my-attendance-adjustment.php" class="dropdown-item" key="t-my-attendance-adjustment">My Attendance Adjustment</a>';
+                            }
+
+                            if($my_attendance_creation > 0){
+                                $menu .= '<a href="my-attendance-creation.php" class="dropdown-item" key="t-my-attendance-creation">My Attendance Creation</a>';
                             }
 
                 $menu .= '</div>

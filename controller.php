@@ -3776,6 +3776,62 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     }
     # -------------------------------------------------------------
 
+    # Delete attendance adjustment
+    else if($transaction == 'delete attendance adjustment'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['adjustment_id']) && !empty($_POST['adjustment_id'])){
+            $username = $_POST['username'];
+            $adjustment_id = $_POST['adjustment_id'];
+
+            $check_attendance_adjustment_exist = $api->check_attendance_adjustment_exist($adjustment_id);
+
+            if($check_attendance_adjustment_exist > 0){
+                $delete_attendance_adjustment = $api->delete_attendance_adjustment($adjustment_id, $username);
+                                    
+                if($delete_attendance_adjustment){
+                    echo 'Deleted';
+                }
+                else{
+                    echo $delete_attendance_adjustment;
+                }
+            }
+            else{
+                echo 'Not Found';
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Delete multiple attendance adjustment
+    else if($transaction == 'delete multiple attendance adjustment'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['adjustment_id'])){
+            $username = $_POST['username'];
+            $adjustment_ids = $_POST['adjustment_id'];
+
+            foreach($adjustment_ids as $adjustment_id){
+                $check_attendance_adjustment_exist = $api->check_attendance_adjustment_exist($adjustment_id);
+
+                if($check_attendance_adjustment_exist > 0){
+                    $delete_attendance_adjustment = $api->delete_attendance_adjustment($adjustment_id, $username);
+                                    
+                    if(!$delete_attendance_adjustment){
+                        $error = $delete_attendance_adjustment;
+                    }
+                }
+                else{
+                    $error = 'Not Found';
+                }
+            }
+
+            if(empty($error)){
+                echo 'Deleted';
+            }
+            else{
+                echo $error;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
     # -------------------------------------------------------------
     #   Unlock transactions
     # -------------------------------------------------------------
@@ -4210,6 +4266,122 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
             if(empty($error)){
                 echo 'Cancelled';
+            }
+            else{
+                echo $error;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #   For recommendation transactions
+    # -------------------------------------------------------------
+
+    # For recommendation attendance creation
+    else if($transaction == 'for recommendation attendance creation'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['creation_id']) && !empty($_POST['creation_id'])){
+            $username = $_POST['username'];
+            $creation_id = $_POST['creation_id'];
+
+            $check_attendance_creation_exist = $api->check_attendance_creation_exist($creation_id);
+
+            if($check_attendance_creation_exist > 0){
+                $update_attendance_creation_status = $api->update_attendance_creation_status($creation_id, 'FORREC', null, null, $username);
+    
+                if($update_attendance_creation_status){
+                    echo 'For Recommendation';
+                }
+                else{
+                    echo $update_attendance_creation_status;
+                }
+            }
+            else{
+                echo 'Not Found';
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # For recommendation multiple attendance creation
+    else if($transaction == 'for recommendation multiple attendance creation'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['creation_id']) && !empty($_POST['creation_id'])){
+            $username = $_POST['username'];
+            $creation_ids = $_POST['creation_id'];
+
+            foreach($creation_ids as $creation_id){
+                $check_attendance_creation_exist = $api->check_attendance_creation_exist($creation_id);
+
+                if($check_attendance_creation_exist > 0){
+                    $update_attendance_creation_status = $api->update_attendance_creation_status($creation_id, 'FORREC', null, null, $username);
+        
+                    if(!$update_attendance_creation_status){
+                        $error = $update_attendance_creation_status;
+                    }
+                }
+                else{
+                    $error = 'Not Found';
+                }
+            }
+
+            if(empty($error)){
+                echo 'For Recommendation';
+            }
+            else{
+                echo $error;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # For recommendation attendance adjustment
+    else if($transaction == 'for recommendation attendance adjustment'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['adjustment_id']) && !empty($_POST['adjustment_id'])){
+            $username = $_POST['username'];
+            $adjustment_id = $_POST['adjustment_id'];
+
+            $check_attendance_adjustment_exist = $api->check_attendance_adjustment_exist($adjustment_id);
+
+            if($check_attendance_adjustment_exist > 0){
+                $update_attendance_adjustment_status = $api->update_attendance_adjustment_status($adjustment_id, 'FORREC', null, null, $username);
+    
+                if($update_attendance_adjustment_status){
+                    echo 'For Recommendation';
+                }
+                else{
+                    echo $update_attendance_adjustment_status;
+                }
+            }
+            else{
+                echo 'Not Found';
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # For recommendation multiple attendance adjustment
+    else if($transaction == 'for recommendation multiple attendance adjustment'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['adjustment_id']) && !empty($_POST['adjustment_id'])){
+            $username = $_POST['username'];
+            $adjustment_ids = $_POST['adjustment_id'];
+
+            foreach($adjustment_ids as $adjustment_id){
+                $check_attendance_adjustment_exist = $api->check_attendance_adjustment_exist($adjustment_id);
+
+                if($check_attendance_adjustment_exist > 0){
+                    $update_attendance_adjustment_status = $api->update_attendance_adjustment_status($adjustment_id, 'FORREC', null, null, $username);
+            
+                    if(!$update_attendance_adjustment_status){
+                        $error = $update_attendance_adjustment_status;
+                    }
+                }
+                else{
+                    $error = 'Not Found';
+                }
+            }
+
+            if(empty($error)){
+                echo 'For Recommendation';
             }
             else{
                 echo $error;
