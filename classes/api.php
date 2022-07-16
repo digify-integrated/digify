@@ -9564,6 +9564,82 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : get_attendance_creation_status
+    # Purpose    : Returns the status, badge
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_attendance_creation_status($stat){
+        $response = array();
+
+        switch ($stat) {
+            case 'PEN': 
+                $status = 'Pending';
+                $button_class = 'bg-primary';
+                break;
+            case 'FORREC':
+                $status = 'For Recommendation';
+                $button_class = 'bg-info';
+                break;
+            case 'REC':
+                $status = 'Recommended';
+                $button_class = 'bg-info';
+                break;
+            case 'APV':
+                $status = 'Approved';
+                $button_class = 'bg-success';
+                break;
+            case 'REJ':
+                $status = 'Rejected';
+                $button_class = 'bg-danger';
+                break;
+            default:
+                $status = 'Cancelled';
+                $button_class = 'bg-warning';
+        }
+
+        $response[] = array(
+            'STATUS' => $status,
+            'BADGE' => '<span class="badge '. $button_class .'">'. $status .'</span>'
+        );
+
+        return $response;
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : get_attendance_creation_sanction_status
+    # Purpose    : Returns the status, badge
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_attendance_creation_sanction_status($stat){
+        $response = array();
+
+        switch ($stat) {
+            case 1:
+                $status = 'True';
+                $button_class = 'bg-danger';
+                break;
+            default:
+                $status = 'False';
+                $button_class = 'bg-warning';
+        }
+
+        $response[] = array(
+            'STATUS' => $status,
+            'BADGE' => '<span class="badge '. $button_class .'">'. $status .'</span>'
+        );
+
+        return $response;
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Check methods
     # -------------------------------------------------------------
 
