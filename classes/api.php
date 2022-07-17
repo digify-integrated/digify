@@ -3585,7 +3585,7 @@ class Api{
     # Returns    : Number/String
     #
     # -------------------------------------------------------------
-    public function update_attendance_setting($attendance_setting_id, $maximum_attendance, $late_grace_period, $time_out_interval, $late_policy, $early_leaving_policy, $overtime_policy, $attendance_adjustment_recommendation, $attendance_adjustment_approval, $attendance_creation_recommendation, $attendance_creation_approval, $username){
+    public function update_attendance_setting($attendance_setting_id, $maximum_attendance, $late_grace_period, $time_out_interval, $late_policy, $early_leaving_policy, $overtime_policy, $username){
         if ($this->databaseConnection()) {
             $record_log = 'UPD->' . $username . '->' . date('Y-m-d h:i:s');
             $attendance_setting_details = $this->get_attendance_setting_details($attendance_setting_id);
@@ -3600,7 +3600,7 @@ class Api{
                 $transaction_log_id = $transaction_log_system_parameter[0]['ID'];
             }
 
-            $sql = $this->db_connection->prepare('CALL update_attendance_setting(:attendance_setting_id, :maximum_attendance, :late_grace_period, :time_out_interval, :late_policy, :early_leaving_policy, :overtime_policy, :attendance_adjustment_recommendation, :attendance_adjustment_approval, :attendance_creation_recommendation, :attendance_creation_approval, :transaction_log_id, :record_log)');
+            $sql = $this->db_connection->prepare('CALL update_attendance_setting(:attendance_setting_id, :maximum_attendance, :late_grace_period, :time_out_interval, :late_policy, :early_leaving_policy, :overtime_policy, :transaction_log_id, :record_log)');
             $sql->bindValue(':attendance_setting_id', $attendance_setting_id);
             $sql->bindValue(':maximum_attendance', $maximum_attendance);
             $sql->bindValue(':late_grace_period', $late_grace_period);
@@ -3608,10 +3608,6 @@ class Api{
             $sql->bindValue(':late_policy', $late_policy);
             $sql->bindValue(':early_leaving_policy', $early_leaving_policy);
             $sql->bindValue(':overtime_policy', $overtime_policy);
-            $sql->bindValue(':attendance_adjustment_recommendation', $attendance_adjustment_recommendation);
-            $sql->bindValue(':attendance_adjustment_approval', $attendance_adjustment_approval);
-            $sql->bindValue(':attendance_creation_recommendation', $attendance_creation_recommendation);
-            $sql->bindValue(':attendance_creation_approval', $attendance_creation_approval);
             $sql->bindValue(':transaction_log_id', $transaction_log_id);
             $sql->bindValue(':record_log', $record_log);
         
@@ -4061,7 +4057,7 @@ class Api{
     public function update_attendance_creation($creation_id, $time_in, $time_out, $reason, $username){
         if ($this->databaseConnection()) {
             $record_log = 'UPD->' . $username . '->' . date('Y-m-d h:i:s');
-            $attendance_creation_details = $this->get_attendance_creation_details($job_position_id);
+            $attendance_creation_details = $this->get_attendance_creation_details($creation_id);
             
             if(!empty($attendance_creation_details[0]['TRANSACTION_LOG_ID'])){
                 $transaction_log_id = $attendance_creation_details[0]['TRANSACTION_LOG_ID'];
@@ -5961,7 +5957,7 @@ class Api{
     # Returns    : Number/String
     #
     # -------------------------------------------------------------
-    public function insert_attendance_setting($attendance_setting_id, $maximum_attendance, $late_grace_period, $time_out_interval, $late_policy, $early_leaving_policy, $overtime_policy, $attendance_adjustment_recommendation, $attendance_adjustment_approval, $attendance_creation_recommendation, $attendance_creation_approval, $username){
+    public function insert_attendance_setting($attendance_setting_id, $maximum_attendance, $late_grace_period, $time_out_interval, $late_policy, $early_leaving_policy, $overtime_policy, $username){
         if ($this->databaseConnection()) {
             $record_log = 'INS->' . $username . '->' . date('Y-m-d h:i:s');
 
@@ -5970,7 +5966,7 @@ class Api{
             $transaction_log_parameter_number = $transaction_log_system_parameter[0]['PARAMETER_NUMBER'];
             $transaction_log_id = $transaction_log_system_parameter[0]['ID'];
 
-            $sql = $this->db_connection->prepare('CALL insert_attendance_setting(:attendance_setting_id, :maximum_attendance, :late_grace_period, :time_out_interval, :late_policy, :early_leaving_policy, :overtime_policy, :attendance_adjustment_recommendation, :attendance_adjustment_approval, :attendance_creation_recommendation, :attendance_creation_approval, :transaction_log_id, :record_log)');
+            $sql = $this->db_connection->prepare('CALL insert_attendance_setting(:attendance_setting_id, :maximum_attendance, :late_grace_period, :time_out_interval, :late_policy, :early_leaving_policy, :overtime_policy, :transaction_log_id, :record_log)');
             $sql->bindValue(':attendance_setting_id', $attendance_setting_id);
             $sql->bindValue(':maximum_attendance', $maximum_attendance);
             $sql->bindValue(':late_grace_period', $late_grace_period);
@@ -5978,10 +5974,6 @@ class Api{
             $sql->bindValue(':late_policy', $late_policy);
             $sql->bindValue(':early_leaving_policy', $early_leaving_policy);
             $sql->bindValue(':overtime_policy', $overtime_policy);
-            $sql->bindValue(':attendance_adjustment_recommendation', $attendance_adjustment_recommendation);
-            $sql->bindValue(':attendance_adjustment_approval', $attendance_adjustment_approval);
-            $sql->bindValue(':attendance_creation_recommendation', $attendance_creation_recommendation);
-            $sql->bindValue(':attendance_creation_approval', $attendance_creation_approval);
             $sql->bindValue(':transaction_log_id', $transaction_log_id);
             $sql->bindValue(':record_log', $record_log); 
         
@@ -8442,10 +8434,6 @@ class Api{
                         'LATE_POLICY' => $row['LATE_POLICY'],
                         'EARLY_LEAVING_POLICY' => $row['EARLY_LEAVING_POLICY'],
                         'OVERTIME_POLICY' => $row['OVERTIME_POLICY'],
-                        'ATTENDANCE_ADJUSTMENT_RECOMMENDATION' => $row['ATTENDANCE_ADJUSTMENT_RECOMMENDATION'],
-                        'ATTENDANCE_ADJUSTMENT_APPROVAL' => $row['ATTENDANCE_ADJUSTMENT_APPROVAL'],
-                        'ATTENDANCE_CREATION_RECOMMENDATION' => $row['ATTENDANCE_CREATION_RECOMMENDATION'],
-                        'ATTENDANCE_CREATION_APPROVAL' => $row['ATTENDANCE_CREATION_APPROVAL'],
                         'TRANSACTION_LOG_ID' => $row['TRANSACTION_LOG_ID'],
                         'RECORD_LOG' => $row['RECORD_LOG']
                     );

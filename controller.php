@@ -1735,162 +1735,27 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
             $late_policy = $_POST['late_policy'];
             $early_leaving_policy = $_POST['early_leaving_policy'];
             $overtime_policy = $_POST['overtime_policy'];
-            $attendance_creation_recommendation = $_POST['attendance_creation_recommendation'] ?? 0;
-            $attendance_creation_approval = $_POST['attendance_creation_approval'] ?? 0;
-            $attendance_adjustment_recommendation = $_POST['attendance_adjustment_recommendation'] ?? 0;
-            $attendance_adjustment_approval = $_POST['attendance_adjustment_approval'] ?? 0;
-
-            $attendance_creation_recommendation_exceptions = explode(',', $_POST['attendance_creation_recommendation_exception']);
-            $attendance_creation_approval_exceptions = explode(',', $_POST['attendance_creation_approval_exception']);
-            $attendance_adjustment_recommendation_exceptions = explode(',', $_POST['attendance_adjustment_recommendation_exception']);
-            $attendance_adjustment_approval_exceptions = explode(',', $_POST['attendance_adjustment_approval_exception']);
 
             $check_attendance_setting_exist = $api->check_attendance_setting_exist($attendance_setting_id);
 
             if($check_attendance_setting_exist > 0){
-                $update_attendance_setting = $api->update_attendance_setting($attendance_setting_id, $maximum_attendance, $late_grace_period, $time_out_interval, $late_policy, $early_leaving_policy, $overtime_policy, $attendance_adjustment_recommendation, $attendance_adjustment_approval, $attendance_creation_recommendation, $attendance_creation_approval, $username);
+                $update_attendance_setting = $api->update_attendance_setting($attendance_setting_id, $maximum_attendance, $late_grace_period, $time_out_interval, $late_policy, $early_leaving_policy, $overtime_policy, $username);
 
                 if($update_attendance_setting){
-                    $delete_all_attendance_creation_exception = $api->delete_all_attendance_creation_exception($username);
-                                    
-                    if($delete_all_attendance_creation_exception){
-                        $delete_all_attendance_adjustment_exception = $api->delete_all_attendance_adjustment_exception($username);
-                                    
-                        if($delete_all_attendance_adjustment_exception){
-                            foreach($attendance_creation_recommendation_exceptions as $employee_id){
-                                if(!empty($employee_id)){
-                                    $insert_attendance_creation_exception = $api->insert_attendance_creation_exception($employee_id, 'R', $username);
-        
-                                    if(!$insert_attendance_creation_exception){
-                                        $error = $insert_attendance_creation_exception;
-                                        break;
-                                    }
-                                }
-                            }
-
-                            foreach($attendance_creation_approval_exceptions as $employee_id){
-                                if(!empty($employee_id)){
-                                    $insert_attendance_creation_exception = $api->insert_attendance_creation_exception($employee_id, 'A', $username);
-        
-                                    if(!$insert_attendance_creation_exception){
-                                        $error = $insert_attendance_creation_exception;
-                                        break;
-                                    }
-                                }
-                            }
-
-                            foreach($attendance_adjustment_recommendation_exceptions as $employee_id){
-                                if(!empty($employee_id)){
-                                    $insert_attendance_adjustment_exception = $api->insert_attendance_adjustment_exception($employee_id, 'R', $username);
-        
-                                    if(!$insert_attendance_adjustment_exception){
-                                        $error = $insert_attendance_adjustment_exception;
-                                        break;
-                                    }
-                                }
-                            }
-
-                            foreach($attendance_adjustment_approval_exceptions as $employee_id){
-                                if(!empty($employee_id)){
-                                    $insert_attendance_adjustment_exception = $api->insert_attendance_adjustment_exception($employee_id, 'A', $username);
-        
-                                    if(!$insert_attendance_adjustment_exception){
-                                        $error = $insert_attendance_adjustment_exception;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                        else{
-                            $error = $delete_all_attendance_adjustment_exception;
-                        }
-                    }
-                    else{
-                        $error = $delete_all_attendance_creation_exception;
-                    }
-                }
-                else{
-                    $error = $update_attendance_setting;
-                }
-
-                if(empty($error)){
                     echo 'Updated';
                 }
                 else{
-                    echo $error;
+                    echo $update_attendance_setting;
                 }
             }
             else{
-                $insert_attendance_setting = $api->insert_attendance_setting($attendance_setting_id, $maximum_attendance, $late_grace_period, $time_out_interval, $late_policy, $early_leaving_policy, $overtime_policy, $attendance_adjustment_recommendation, $attendance_adjustment_approval, $attendance_creation_recommendation, $attendance_creation_approval, $username);
+                $insert_attendance_setting = $api->insert_attendance_setting($attendance_setting_id, $maximum_attendance, $late_grace_period, $time_out_interval, $late_policy, $early_leaving_policy, $overtime_policy, $username);
 
                 if($insert_attendance_setting){
-                    $delete_all_attendance_creation_exception = $api->delete_all_attendance_creation_exception($username);
-                                    
-                    if($delete_all_attendance_creation_exception){
-                        $delete_all_attendance_adjustment_exception = $api->delete_all_attendance_adjustment_exception($username);
-                                    
-                        if($delete_all_attendance_adjustment_exception){
-                            foreach($attendance_creation_recommendation_exceptions as $employee_id){
-                                if(!empty($employee_id)){
-                                    $insert_attendance_creation_exception = $api->insert_attendance_creation_exception($employee_id, 'R', $username);
-        
-                                    if(!$insert_attendance_creation_exception){
-                                        $error = $insert_attendance_creation_exception;
-                                        break;
-                                    }
-                                }
-                            }
-
-                            foreach($attendance_creation_approval_exceptions as $employee_id){
-                                if(!empty($employee_id)){
-                                    $insert_attendance_creation_exception = $api->insert_attendance_creation_exception($employee_id, 'A', $username);
-        
-                                    if(!$insert_attendance_creation_exception){
-                                        $error = $insert_attendance_creation_exception;
-                                        break;
-                                    }
-                                }
-                            }
-
-                            foreach($attendance_adjustment_recommendation_exceptions as $employee_id){
-                                if(!empty($employee_id)){
-                                    $insert_attendance_adjustment_exception = $api->insert_attendance_adjustment_exception($employee_id, 'R', $username);
-        
-                                    if(!$insert_attendance_adjustment_exception){
-                                        $error = $insert_attendance_adjustment_exception;
-                                        break;
-                                    }
-                                }
-                            }
-
-                            foreach($attendance_adjustment_approval_exceptions as $employee_id){
-                                if(!empty($employee_id)){
-                                    $insert_attendance_adjustment_exception = $api->insert_attendance_adjustment_exception($employee_id, 'A', $username);
-        
-                                    if(!$insert_attendance_adjustment_exception){
-                                        $error = $insert_attendance_adjustment_exception;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                        else{
-                            $error = $delete_all_attendance_adjustment_exception;
-                        }
-                    }
-                    else{
-                        $error = $delete_all_attendance_creation_exception;
-                    }
-                }
-                else{
-                    $error = $insert_attendance_setting;
-                }
-
-                if(empty($error)){
                     echo 'Updated';
                 }
                 else{
-                    echo $error;
+                    echo $insert_attendance_setting;
                 }
             }
         }
@@ -2253,8 +2118,8 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     }
     # -------------------------------------------------------------
 
-    # Submit attendance request
-    else if($transaction == 'submit attendance request'){
+    # Submit attendance creation
+    else if($transaction == 'submit attendance creation'){
         if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['time_in_date']) && !empty($_POST['time_in_date']) && isset($_POST['time_in_time']) && !empty($_POST['time_in_time']) && isset($_POST['time_out_date']) && isset($_POST['time_out_time'])){
             $file_type = '';
             $username = $_POST['username'];
@@ -2512,6 +2377,112 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                             }
                             else{
                                 echo $update_attendance_adjustment;
+                            }
+                        }
+                        else{
+                            echo $check_attendance_validation;
+                        }
+                    }
+                }
+                else{
+                    echo 'Status';
+                }
+            }
+            else{
+                echo 'Not Found';
+            }           
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Submit attendance creation update
+    else if($transaction == 'submit attendance creation update'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['creation_id']) && !empty($_POST['creation_id']) && isset($_POST['time_in_date']) && !empty($_POST['time_in_date']) && isset($_POST['time_in_time']) && !empty($_POST['time_in_time']) && isset($_POST['time_out_date']) && isset($_POST['time_out_time'])){
+            $file_type = '';
+            $username = $_POST['username'];
+            $creation_id = $_POST['creation_id'];
+            $reason = $_POST['reason'];
+            $time_in = $api->check_date('attendance empty', $_POST['time_in_date'] . ' ' . $_POST['time_in_time'], '', 'Y-m-d H:i:00', '', '', '');
+            $time_out = $api->check_date('attendance empty', $_POST['time_out_date'] . ' ' . $_POST['time_out_time'], '', 'Y-m-d H:i:00', '', '', '');
+
+            $attachment_name = $_FILES['attachment']['name'];
+            $attachment_size = $_FILES['attachment']['size'];
+            $attachment_error = $_FILES['attachment']['error'];
+            $attachment_tmp_name = $_FILES['attachment']['tmp_name'];
+            $attachment_ext = explode('.', $attachment_name);
+            $attachment_actual_ext = strtolower(end($attachment_ext));
+
+            $upload_setting_details = $api->get_upload_setting_details(11);
+            $upload_file_type_details = $api->get_upload_file_type_details(11);
+            $file_max_size = $upload_setting_details[0]['MAX_FILE_SIZE'] * 1048576;
+
+            for($i = 0; $i < count($upload_file_type_details); $i++) {
+                $file_type .= $upload_file_type_details[$i]['FILE_TYPE'];
+
+                if($i != (count($upload_file_type_details) - 1)){
+                    $file_type .= ',';
+                }
+            }
+
+            $allowed_ext = explode(',', $file_type);
+
+            $check_attendance_creation_exist = $api->check_attendance_creation_exist($creation_id);
+ 
+            if($check_attendance_creation_exist > 0){
+                $attendance_creation_details = $api->get_attendance_creation_details($creation_id);
+                $attendance_creation_status = $attendance_creation_details[0]['STATUS'];
+
+                if($attendance_creation_status == 'PEN'){
+                    if(!empty($attachment_tmp_name)){
+                        if(in_array($attachment_actual_ext, $allowed_ext)){
+                            if(!$attachment_error){
+                                if($attachment_size < $file_max_size){
+                                    $check_attendance_validation = $api->check_attendance_validation($time_in, $time_out);
+            
+                                    if(empty($check_attendance_validation)){
+                                        $update_attendance_creation = $api->update_attendance_creation($creation_id, $time_in, $time_out, $reason, $username);
+            
+                                        if($update_attendance_creation){
+                                            $update_attendance_creation_attachment = $api->update_attendance_creation_attachment($attachment_tmp_name, $attachment_actual_ext, $creation_id, $username);
+            
+                                            if($update_attendance_creation_attachment){
+                                                echo 'Updated';
+                                            }
+                                            else{
+                                                echo $update_attendance_creation_attachment;
+                                            }
+                                        }
+                                        else{
+                                            echo $update_attendance_creation;
+                                        }
+                                    }
+                                    else{
+                                        echo $check_attendance_validation;
+                                    }
+                                }
+                                else{
+                                    echo 'File Size';
+                                }
+                            }
+                            else{
+                                echo 'There was an error uploading the file.';
+                            }
+                        }
+                        else{
+                            echo 'File Type';
+                        }
+                    }
+                    else{
+                        $check_attendance_validation = $api->check_attendance_validation($time_in, $time_out);
+            
+                        if(empty($check_attendance_validation)){
+                            $update_attendance_creation = $api->update_attendance_creation($creation_id, $time_in, $time_out, $reason, $username);
+            
+                            if($update_attendance_creation){
+                                echo 'Updated';
+                            }
+                            else{
+                                echo $update_attendance_creation;
                             }
                         }
                         else{
@@ -3701,7 +3672,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                 if($check_attendance_adjustment_exist > 0){
                     $delete_attendance_adjustment = $api->delete_attendance_adjustment($adjustment_id, $username);
                                     
-                    if(!$delete_job_position){
+                    if(!$delete_attendance_adjustment){
                         $error = $delete_attendance_adjustment;
                     }
                 }
@@ -3757,64 +3728,8 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                 if($check_attendance_creation_exist > 0){
                     $delete_attendance_creation = $api->delete_attendance_creation($creation_id, $username);
                                     
-                    if(!$delete_job_position){
+                    if(!$delete_attendance_creation){
                         $error = $delete_attendance_creation;
-                    }
-                }
-                else{
-                    $error = 'Not Found';
-                }
-            }
-
-            if(empty($error)){
-                echo 'Deleted';
-            }
-            else{
-                echo $error;
-            }
-        }
-    }
-    # -------------------------------------------------------------
-
-    # Delete attendance adjustment
-    else if($transaction == 'delete attendance adjustment'){
-        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['adjustment_id']) && !empty($_POST['adjustment_id'])){
-            $username = $_POST['username'];
-            $adjustment_id = $_POST['adjustment_id'];
-
-            $check_attendance_adjustment_exist = $api->check_attendance_adjustment_exist($adjustment_id);
-
-            if($check_attendance_adjustment_exist > 0){
-                $delete_attendance_adjustment = $api->delete_attendance_adjustment($adjustment_id, $username);
-                                    
-                if($delete_attendance_adjustment){
-                    echo 'Deleted';
-                }
-                else{
-                    echo $delete_attendance_adjustment;
-                }
-            }
-            else{
-                echo 'Not Found';
-            }
-        }
-    }
-    # -------------------------------------------------------------
-
-    # Delete multiple attendance adjustment
-    else if($transaction == 'delete multiple attendance adjustment'){
-        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['adjustment_id'])){
-            $username = $_POST['username'];
-            $adjustment_ids = $_POST['adjustment_id'];
-
-            foreach($adjustment_ids as $adjustment_id){
-                $check_attendance_adjustment_exist = $api->check_attendance_adjustment_exist($adjustment_id);
-
-                if($check_attendance_adjustment_exist > 0){
-                    $delete_attendance_adjustment = $api->delete_attendance_adjustment($adjustment_id, $username);
-                                    
-                    if(!$delete_attendance_adjustment){
-                        $error = $delete_attendance_adjustment;
                     }
                 }
                 else{
@@ -4261,6 +4176,75 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                 }
                 else{
                     $error = 'There was an error cancelling '. number_format($error_count) .' attendance adjustment.<br/>';
+                }
+            }
+
+            if(empty($error)){
+                echo 'Cancelled';
+            }
+            else{
+                echo $error;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Cancel attendance creation
+    else if($transaction == 'cancel attendance creation'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['creation_id']) && !empty($_POST['creation_id']) && isset($_POST['decision_remarks']) && !empty($_POST['decision_remarks'])){
+            $username = $_POST['username'];
+            $creation_id = $_POST['creation_id'];
+            $decision_remarks = $_POST['decision_remarks'];
+
+            $check_attendance_creation_exist = $api->check_attendance_creation_exist($creation_id);
+
+            if($check_attendance_creation_exist > 0){
+                $update_attendance_creation_status = $api->update_attendance_creation_status($creation_id, 'CAN', $decision_remarks, null, $username);
+    
+                if($update_attendance_creation_status){
+                    echo 'Cancelled';
+                }
+                else{
+                    echo $update_attendance_creation_status;
+                }
+            }
+            else{
+                echo 'Not Found';
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Cancel multiple attendance creation
+    else if($transaction == 'cancel multiple attendance creation'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['creation_id']) && !empty($_POST['creation_id']) && isset($_POST['decision_remarks']) && !empty($_POST['decision_remarks'])){
+            $username = $_POST['username'];
+            $creation_ids = explode(',', $_POST['creation_id']);
+            $decision_remarks = $_POST['decision_remarks'];
+            $error_count = 0;
+            $error = '';
+
+            foreach($creation_ids as $creation_id){
+                $check_attendance_creation_exist = $api->check_attendance_creation_exist($creation_id);
+
+                if($check_attendance_creation_exist > 0){
+                    $update_attendance_creation_status = $api->update_attendance_creation_status($creation_id, 'CAN', $decision_remarks, null, $username);
+        
+                    if(!$update_attendance_creation_status){
+                        $error_count = $error_count + 1;
+                    }
+                }
+                else{
+                    $error_count = $error_count + 1;
+                }
+            }
+
+            if($error_count > 0){
+                if($error_count){
+                    $error = 'There was an error cancelling '. number_format($error_count) .' attendance creation.<br/>';
+                }
+                else{
+                    $error = 'There was an error cancelling '. number_format($error_count) .' attendance creation.<br/>';
                 }
             }
 
@@ -5263,50 +5247,8 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
     # Attendance setting details
     else if($transaction == 'attendance setting details'){
-        $attendance_creation_recommendation_exception = '';
-        $attendance_creation_approval_exception = '';
-        $attendance_adjustment_recommendation_exception = '';
-        $attendance_adjustment_approval_exception = '';
-
         $attendance_setting_id = 1;
         $attendance_setting_details = $api->get_attendance_setting_details($attendance_setting_id);
-
-        $attendance_creation_recommendation_exception_details = $api->get_attendance_creation_exception_details('R');
-        $attendance_creation_approval_exception_details = $api->get_attendance_creation_exception_details('A');
-        $attendance_adjustment_recommendation_exception_details = $api->get_attendance_adjustment_exception_details('R');
-        $attendance_adjustment_approval_exception_details = $api->get_attendance_adjustment_exception_details('A');
-
-        for($i = 0; $i < count($attendance_creation_recommendation_exception_details); $i++) {
-            $attendance_creation_recommendation_exception .= $attendance_creation_recommendation_exception_details[$i]['EMPLOYEE_ID'];
-
-            if($i != (count($attendance_creation_recommendation_exception_details) - 1)){
-                $attendance_creation_recommendation_exception .= ',';
-            }
-        }
-
-        for($i = 0; $i < count($attendance_creation_approval_exception_details); $i++) {
-            $attendance_creation_approval_exception .= $attendance_creation_approval_exception_details[$i]['EMPLOYEE_ID'];
-
-            if($i != (count($attendance_creation_approval_exception_details) - 1)){
-                $attendance_creation_approval_exception .= ',';
-            }
-        }
-
-        for($i = 0; $i < count($attendance_adjustment_recommendation_exception_details); $i++) {
-            $attendance_adjustment_recommendation_exception .= $attendance_adjustment_recommendation_exception_details[$i]['EMPLOYEE_ID'];
-
-            if($i != (count($attendance_adjustment_recommendation_exception_details) - 1)){
-                $attendance_adjustment_recommendation_exception .= ',';
-            }
-        }
-
-        for($i = 0; $i < count($attendance_adjustment_approval_exception_details); $i++) {
-            $attendance_adjustment_approval_exception .= $attendance_adjustment_approval_exception_details[$i]['EMPLOYEE_ID'];
-
-            if($i != (count($attendance_adjustment_approval_exception_details) - 1)){
-                $attendance_adjustment_approval_exception .= ',';
-            }
-        }
 
         $response[] = array(
             'MAX_ATTENDANCE' => $attendance_setting_details[0]['MAX_ATTENDANCE'] ?? 1,
@@ -5314,15 +5256,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
             'TIME_OUT_INTERVAL' => $attendance_setting_details[0]['TIME_OUT_INTERVAL'] ?? 1,
             'LATE_POLICY' => $attendance_setting_details[0]['LATE_POLICY'] ?? 0,
             'EARLY_LEAVING_POLICY' => $attendance_setting_details[0]['EARLY_LEAVING_POLICY'] ?? 0,
-            'OVERTIME_POLICY' => $attendance_setting_details[0]['OVERTIME_POLICY'] ?? 0,
-            'ATTENDANCE_ADJUSTMENT_RECOMMENDATION' => $attendance_setting_details[0]['ATTENDANCE_ADJUSTMENT_RECOMMENDATION'] ?? 0,
-            'ATTENDANCE_ADJUSTMENT_APPROVAL' => $attendance_setting_details[0]['ATTENDANCE_ADJUSTMENT_APPROVAL'] ?? 0,
-            'ATTENDANCE_CREATION_RECOMMENDATION' => $attendance_setting_details[0]['ATTENDANCE_CREATION_RECOMMENDATION'] ?? 0,
-            'ATTENDANCE_CREATION_APPROVAL' => $attendance_setting_details[0]['ATTENDANCE_CREATION_APPROVAL'] ?? 0,
-            'ATTENDANCE_CREATION_RECOMMENDATION_EXCEPTION' => $attendance_creation_recommendation_exception,
-            'ATTENDANCE_CREATION_APPROVAL_EXCEPTION' => $attendance_creation_approval_exception,
-            'ATTENDANCE_ADJUSTMENT_RECOMMENDATION_EXCEPTION' => $attendance_adjustment_recommendation_exception,
-            'ATTENDANCE_ADJUSTMENT_APPROVAL_EXCEPTION' => $attendance_adjustment_approval_exception,
+            'OVERTIME_POLICY' => $attendance_setting_details[0]['OVERTIME_POLICY'] ?? 0
         );
 
         echo json_encode($response);

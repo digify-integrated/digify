@@ -3210,7 +3210,7 @@ function initialize_form_validation(form_type){
     else if(form_type == 'request attendance form'){
         $('#request-attendance-form').validate({
             submitHandler: function (form) {
-                var transaction = 'submit attendance request';
+                var transaction = 'submit attendance creation';
                 var username = $('#username').text();
                 
                 var formData = new FormData(form);
@@ -3797,7 +3797,7 @@ function initialize_form_validation(form_type){
     else if(form_type == 'request attendance creation form'){
         $('#request-attendance-creation-form').validate({
             submitHandler: function (form) {
-                var transaction = 'submit attendance request';
+                var transaction = 'submit attendance creation';
                 var username = $('#username').text();
                 
                 var formData = new FormData(form);
@@ -3868,6 +3868,244 @@ function initialize_form_validation(form_type){
                 reason: {
                     required: 'Please enter the reason',
                 }
+            },
+            errorPlacement: function(label, element) {
+                if((element.hasClass('select2') || element.hasClass('form-select2')) && element.next('.select2-container').length) {
+                    label.insertAfter(element.next('.select2-container'));
+                }
+                else if(element.parent('.input-group').length){
+                    label.insertAfter(element.parent());
+                }
+                else{
+                    label.insertAfter(element);
+                }
+            },
+            highlight: function(element) {
+                $(element).parent().addClass('has-danger');
+                $(element).addClass('form-control-danger');
+            },
+            success: function(label,element) {
+                $(element).parent().removeClass('has-danger')
+                $(element).removeClass('form-control-danger')
+                label.remove();
+            }
+        });
+    }
+    else if(form_type == 'update attendance creation form'){
+        $('#update-attendance-creation-form').validate({
+            submitHandler: function (form) {
+                var transaction = 'submit attendance creation update';
+                var username = $('#username').text();
+                
+                var formData = new FormData(form);
+                formData.append('username', username);
+                formData.append('transaction', transaction);
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'controller.php',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    beforeSend: function(){
+                        document.getElementById('submit-form').disabled = true;
+                        $('#submit-form').html('<div class="spinner-border spinner-border-sm text-light" role="status"><span rclass="sr-only"></span></div>');
+                    },
+                    success: function (response) {
+                        if(response === 'Updated' || response === 'Not Found'){
+                            if(response === 'Updated'){
+                                show_alert('Update Attendance Creation Success', 'The attendance creation has been updated.', 'success');
+                            }
+                            else{
+                                show_alert('Update Attendance Creation Error', 'The attendance creation does not exist.', 'info');
+                            }                            
+
+                            $('#System-Modal').modal('hide');
+                            reload_datatable('#my-attendance-creation-datatable');
+                        }
+                        else if(response === 'Invalid'){
+                            show_alert('Update Attendance Creation Error', 'The time in cannot be greater than the time out.', 'error');
+                        }
+                        else if(response === 'File Size'){
+                            show_alert('Update Attendance Creation Error', 'The file uploaded exceeds the maximum file size.', 'error');
+                        }
+                        else if(response === 'File Type'){
+                            show_alert('Update Attendance Creation Error', 'The file uploaded is not supported.', 'error');
+                        }
+                        else{
+                            show_alert('Update Attendance Creation Error', response, 'error');
+                        }
+                    },
+                    complete: function(){
+                        document.getElementById('submit-form').disabled = false;
+                        $('#submit-form').html('Submit');
+                    }
+                });
+                return false;
+            },
+            rules: {
+                time_in_date: {
+                    required: true
+                },
+                time_in_time: {
+                    required: true
+                },
+                reason: {
+                    required: true
+                }
+            },
+            messages: {
+                time_in_date: {
+                    required: 'Please choose the time in date',
+                },
+                time_in_time: {
+                    required: 'Please choose the time in',
+                },
+                reason: {
+                    required: 'Please enter the reason',
+                }
+            },
+            errorPlacement: function(label, element) {
+                if((element.hasClass('select2') || element.hasClass('form-select2')) && element.next('.select2-container').length) {
+                    label.insertAfter(element.next('.select2-container'));
+                }
+                else if(element.parent('.input-group').length){
+                    label.insertAfter(element.parent());
+                }
+                else{
+                    label.insertAfter(element);
+                }
+            },
+            highlight: function(element) {
+                $(element).parent().addClass('has-danger');
+                $(element).addClass('form-control-danger');
+            },
+            success: function(label,element) {
+                $(element).parent().removeClass('has-danger')
+                $(element).removeClass('form-control-danger')
+                label.remove();
+            }
+        });
+    }
+    else if(form_type == 'cancel attendance creation form'){
+        $('#cancel-attendance-creation-form').validate({
+            submitHandler: function (form) {
+                transaction = 'cancel attendance creation';
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'controller.php',
+                    data: $(form).serialize() + '&username=' + username + '&transaction=' + transaction,
+                    beforeSend: function(){
+                        document.getElementById('submit-form').disabled = true;
+                        $('#submit-form').html('<div class="spinner-border spinner-border-sm text-light" role="status"><span rclass="sr-only"></span></div>');
+                    },
+                    success: function (response) {
+                        if(response === 'Cancelled' || response === 'Not Found'){
+                            if(response === 'Cancelled'){
+                                show_alert('Attendance Creation Cancellation Success', 'The attendance creation has been cancelled.', 'success');
+                            }
+                            else{
+                                show_alert('Attendance Creation Cancellation Error', 'The attendance creation does not exist.', 'info');
+                            }
+
+                            $('#System-Modal').modal('hide');
+
+                            if($('#my-attendance-creation-datatable').length){
+                                reload_datatable('#my-attendance-creation-datatable');
+                            }
+                        }
+                        else{
+                            show_alert('Attendance Creation Cancellation Error', response, 'error');
+                        }
+                    },
+                    complete: function(){
+                        document.getElementById('submit-form').disabled = false;
+                        $('#submit-form').html('Submit');
+                    }
+                });
+                return false;
+            },
+            rules: {
+                decision_remarks: {
+                    required: true
+                },
+            },
+            messages: {
+                decision_remarks: {
+                    required: 'Please enter the cancellation remarks',
+                },
+            },
+            errorPlacement: function(label, element) {
+                if((element.hasClass('select2') || element.hasClass('form-select2')) && element.next('.select2-container').length) {
+                    label.insertAfter(element.next('.select2-container'));
+                }
+                else if(element.parent('.input-group').length){
+                    label.insertAfter(element.parent());
+                }
+                else{
+                    label.insertAfter(element);
+                }
+            },
+            highlight: function(element) {
+                $(element).parent().addClass('has-danger');
+                $(element).addClass('form-control-danger');
+            },
+            success: function(label,element) {
+                $(element).parent().removeClass('has-danger')
+                $(element).removeClass('form-control-danger')
+                label.remove();
+            }
+        });
+    }
+    else if(form_type == 'cancel multiple attendance creation form'){
+        $('#cancel-multiple-attendance-creation-form').validate({
+            submitHandler: function (form) {
+                transaction = 'cancel multiple attendance creation';
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'controller.php',
+                    data: $(form).serialize() + '&username=' + username + '&transaction=' + transaction,
+                    beforeSend: function(){
+                        document.getElementById('submit-form').disabled = true;
+                        $('#submit-form').html('<div class="spinner-border spinner-border-sm text-light" role="status"><span rclass="sr-only"></span></div>');
+                    },
+                    success: function (response) {
+                        if(response === 'Cancelled' || response === 'Not Found'){
+                            if(response === 'Cancelled'){
+                                show_alert('Attendance Creation Cancellation Success', 'The attendance creations have been cancelled.', 'success');
+                            }
+                            else{
+                                show_alert('Attendance Creation Cancellation Error', 'The attendance creation does not exist.', 'info');
+                            }
+
+                            $('#System-Modal').modal('hide');
+
+                            if($('#my-attendance-creation-datatable').length){
+                                reload_datatable('#my-attendance-creation-datatable');
+                            }
+                        }
+                        else{
+                            show_alert('Multiple Attendance Creation Cancellation Error', response, 'error');
+                        }
+                    },
+                    complete: function(){
+                        document.getElementById('submit-form').disabled = false;
+                        $('#submit-form').html('Submit');
+                    }
+                });
+                return false;
+            },
+            rules: {
+                decision_remarks: {
+                    required: true
+                },
+            },
+            messages: {
+                decision_remarks: {
+                    required: 'Please enter the cancellation remarks',
+                },
             },
             errorPlacement: function(label, element) {
                 if((element.hasClass('select2') || element.hasClass('form-select2')) && element.next('.select2-container').length) {
@@ -4930,6 +5168,26 @@ function display_form_details(form_type){
             }
         });
     }
+    else if(form_type == 'update attendance creation form'){
+        transaction = 'attendance creation details';
+
+        var creation_id = sessionStorage.getItem('creation_id');
+
+        $.ajax({
+            url: 'controller.php',
+            method: 'POST',
+            dataType: 'JSON',
+            data: {creation_id : creation_id, transaction : transaction},
+            success: function(response) {
+                $('#time_in_date').val(response[0].TIME_IN_DATE);
+                $('#time_in_time').val(response[0].TIME_IN);
+                $('#time_out_date').val(response[0].TIME_OUT_DATE);
+                $('#time_out_time').val(response[0].TIME_OUT);
+                $('#reason').val(response[0].REASON);
+                $('#creation_id').val(creation_id);
+            }
+        });
+    }
 }
 
 function initialize_transaction_log_table(datatable_name, buttons = false, show_all = false){
@@ -5162,6 +5420,10 @@ function generate_form(form_type, form_id, add, username){
                     var adjustment_id = sessionStorage.getItem('adjustment_id');
                     $('#adjustment_id').val(adjustment_id);
                 }
+                else if(form_type == 'cancel attendance creation form' || form_type == 'cancel multiple attendance creation form'){
+                    var creation_id = sessionStorage.getItem('creation_id');
+                    $('#creation_id').val(creation_id);
+                }
             }
 
             initialize_elements();
@@ -5199,7 +5461,7 @@ function generate_element(element_type, value, container, modal, username){
             if(modal == '1'){
                 $('#System-Modal').modal('show');
 
-                if(element_type == 'user account details' || element_type == 'system parameter details' || element_type == 'company details' || element_type == 'job position details' || element_type == 'work location details' || element_type == 'working hours details' || element_type == 'attendance details' || element_type == 'attendance adjustment details'){
+                if(element_type == 'user account details' || element_type == 'system parameter details' || element_type == 'company details' || element_type == 'job position details' || element_type == 'work location details' || element_type == 'working hours details' || element_type == 'attendance details' || element_type == 'attendance adjustment details' || element_type == 'attendance cration details'){
                     display_form_details(element_type);
                 }
                 else if(element_type == 'transaction log'){

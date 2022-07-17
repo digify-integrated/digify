@@ -1724,6 +1724,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                 $form .= '<div class="row">
                                 <div class="col-md-6">
                                     <div class="mb-3">
+                                        <input type="hidden" id="creation_id" name="creation_id">
                                         <label for="time_in_date" class="form-label">Time In Date <span class="text-danger">*</span></label>
                                         <div class="input-group" id="time-in-date-container">
                                             <input type="text" class="form-control" id="time_in_date" name="time_in_date" autocomplete="off" data-date-format="m/dd/yyyy" data-date-container="#time-in-date-container" data-provide="datepicker" data-date-autoclose="true">

@@ -127,7 +127,7 @@ function initialize_click_events(){
     });
 
     $(document).on('click','#request-attendance-creation',function() {        
-        generate_modal('request attendance creation form', 'Request Attendance Creation', 'R' , '0', '1', 'form', 'request-attendance-creation-form', '1', username);
+        generate_modal('request attendance creation form', 'Request Attendance', 'R' , '0', '1', 'form', 'request-attendance-creation-form', '1', username);
     });
 
     $(document).on('click','.update-attendance-creation',function() {
@@ -135,7 +135,7 @@ function initialize_click_events(){
 
         sessionStorage.setItem('creation_id', creation_id);
         
-        generate_modal('update attendance creation form', 'Request Attendance Creation', 'R' , '0', '1', 'form', 'update-attendance-creation-form', '0', username);
+        generate_modal('update attendance creation form', 'Request Attendance', 'R' , '0', '1', 'form', 'update-attendance-creation-form', '0', username);
     });
 
     $(document).on('click','.cancel-attendance-creation',function() {

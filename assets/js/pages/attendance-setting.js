@@ -9,21 +9,10 @@
             submitHandler: function (form) {
                 var transaction = 'submit attendance setting';
                 var username = $('#username').text();
-
-                var attendance_creation_recommendation_exception = $('#attendance_creation_recommendation_exception').val();
-                var attendance_creation_approval_exception = $('#attendance_creation_approval_exception').val();
-                var attendance_adjustment_recommendation_exception = $('#attendance_adjustment_recommendation_exception').val();
-                var attendance_adjustment_approval_exception = $('#attendance_adjustment_approval_exception').val();
-                
-                document.getElementById('attendance_creation_recommendation_exception').disabled = false;
-                document.getElementById('attendance_creation_approval_exception').disabled = false;
-                document.getElementById('attendance_adjustment_recommendation_exception').disabled = false;
-                document.getElementById('attendance_adjustment_approval_exception').disabled = false;
-
                 $.ajax({
                     type: 'POST',
                     url: 'controller.php',
-                    data: $(form).serialize() + '&username=' + username + '&transaction=' + transaction + '&attendance_creation_recommendation_exception=' + attendance_creation_recommendation_exception + '&attendance_creation_approval_exception=' + attendance_creation_approval_exception + '&attendance_adjustment_recommendation_exception=' + attendance_adjustment_recommendation_exception + '&attendance_adjustment_approval_exception=' + attendance_adjustment_approval_exception,
+                    data: $(form).serialize() + '&username=' + username + '&transaction=' + transaction,
                     beforeSend: function(){
                         document.getElementById('submit-attendance-setting-form').disabled = true;
                         $('#submit-attendance-setting-form').html('<div class="spinner-border spinner-border-sm text-light" role="status"><span rclass="sr-only"></span></div>');
