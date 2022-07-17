@@ -1641,7 +1641,7 @@ class Api{
         if ($this->databaseConnection()) {
             $record_log = 'LNK->' . $username . '->' . date('Y-m-d h:i:s');
             $employee_details = $this->get_employee_details($employee_id);
-            $transaction_log_id = $employee_details[0]['TRANSACTION_LOG_ID'];
+            $transaction_log_id = $employee_details[0]['TRANSACTION_LOG_ID'] ?? null;
 
             $sql = $this->db_connection->prepare('CALL update_employee_related_user(:employee_id, :user_code, :record_log)');
             $sql->bindValue(':employee_id', $employee_id);

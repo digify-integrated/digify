@@ -243,10 +243,12 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                     $delete_all_employee_related_user = $api->delete_all_employee_related_user($user_code, $username);
 
                     if($delete_all_employee_related_user){
-                        $update_employee_related_user = $api->update_employee_related_user($related_employee, $user_code, $username);
+                        if(!empty($related_employee)){
+                            $update_employee_related_user = $api->update_employee_related_user($related_employee, $user_code, $username);
 
-                        if(!$update_employee_related_user){
-                            $error = $update_employee_related_user;
+                            if(!$update_employee_related_user){
+                                $error = $update_employee_related_user;
+                            }
                         }
                     }
                     else{
