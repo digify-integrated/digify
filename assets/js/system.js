@@ -4129,6 +4129,80 @@ function initialize_form_validation(form_type){
             }
         });
     }
+    else if(form_type == 'approval type form'){
+        $('#approval-type-form').validate({
+            submitHandler: function (form) {
+                transaction = 'submit approval type';
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'controller.php',
+                    data: $(form).serialize() + '&username=' + username + '&transaction=' + transaction,
+                    beforeSend: function(){
+                        document.getElementById('submit-form').disabled = true;
+                        $('#submit-form').html('<div class="spinner-border spinner-border-sm text-light" role="status"><span rclass="sr-only"></span></div>');
+                    },
+                    success: function (response) {
+                        if(response === 'Updated' || response === 'Inserted'){
+                            if(response === 'Inserted'){
+                                show_alert('Insert Approval Type Success', 'The approval type has been inserted.', 'success');
+                            }
+                            else{
+                                show_alert('Update Approval Type Success', 'The approval type has been updated.', 'success');
+                            }
+
+                            $('#System-Modal').modal('hide');
+                            reload_datatable('#approval-type-datatable');
+                        }
+                        else{
+                            show_alert('Approval Type Error', response, 'error');
+                        }
+                    },
+                    complete: function(){
+                        document.getElementById('submit-form').disabled = false;
+                        $('#submit-form').html('Submit');
+                    }
+                });
+                return false;
+            },
+            rules: {
+                approval_type: {
+                    required: true         
+                },
+                approval_type_description: {
+                    required: true         
+                }
+            },
+            messages: {
+                approval_type: {
+                    required: 'Please enter the approval type',
+                },
+                approval_type_description: {
+                    required: 'Please enter the approval type description',
+                }
+            },
+            errorPlacement: function(label, element) {
+                if((element.hasClass('select2') || element.hasClass('form-select2')) && element.next('.select2-container').length) {
+                    label.insertAfter(element.next('.select2-container'));
+                }
+                else if(element.parent('.input-group').length){
+                    label.insertAfter(element.parent());
+                }
+                else{
+                    label.insertAfter(element);
+                }
+            },
+            highlight: function(element) {
+                $(element).parent().addClass('has-danger');
+                $(element).addClass('form-control-danger');
+            },
+            success: function(label,element) {
+                $(element).parent().removeClass('has-danger')
+                $(element).removeClass('form-control-danger')
+                label.remove();
+            }
+        });
+    }
 }
 
 // Display functions
@@ -5185,6 +5259,23 @@ function display_form_details(form_type){
                 $('#time_out_time').val(response[0].TIME_OUT);
                 $('#reason').val(response[0].REASON);
                 $('#creation_id').val(creation_id);
+            }
+        });
+    }
+    else if(form_type == 'approval type form'){
+        transaction = 'approval type details';
+
+        var approval_type_id = sessionStorage.getItem('approval_type_id');
+
+        $.ajax({
+            url: 'controller.php',
+            method: 'POST',
+            dataType: 'JSON',
+            data: {approval_type_id : approval_type_id, transaction : transaction},
+            success: function(response) {
+                $('#approval_type').val(response[0].APPROVAL_TYPE);
+                $('#approval_type_description').val(response[0].APPROVAL_TYPE_DESCRIPTION);
+                $('#approval_type_id').val(approval_type_id);
             }
         });
     }

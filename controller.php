@@ -2503,6 +2503,40 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     }
     # -------------------------------------------------------------
 
+    # Submit approval type
+    else if($transaction == 'submit approval type'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['approval_type_id']) && isset($_POST['approval_type']) && !empty($_POST['approval_type']) && isset($_POST['approval_type_description']) && !empty($_POST['approval_type_description'])){
+            $username = $_POST['username'];
+            $approval_type_id = $_POST['approval_type_id'];
+            $approval_type = $_POST['approval_type'];
+            $approval_type_description = $_POST['approval_type_description'];
+
+            $check_approval_type_exist = $api->check_approval_type_exist($approval_type_id);
+
+            if($check_approval_type_exist > 0){
+                $update_approval_type = $api->update_approval_type($approval_type_id, $approval_type, $approval_type_description, $username);
+
+                if($update_approval_type){
+                    echo 'Updated';
+                }
+                else{
+                    echo $update_approval_type;
+                }
+            }
+            else{
+                $insert_approval_type = $api->insert_approval_type($approval_type, $approval_type_description, $username);
+
+                if($insert_approval_type){
+                    echo 'Inserted';
+                }
+                else{
+                    echo $insert_approval_type;
+                }
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
     # -------------------------------------------------------------
     #   Delete transactions
     # -------------------------------------------------------------
@@ -3749,6 +3783,90 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     }
     # -------------------------------------------------------------
 
+    # Delete approval type
+    else if($transaction == 'delete approval type'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['approval_type_id']) && !empty($_POST['approval_type_id'])){
+            $username = $_POST['username'];
+            $approval_type_id = $_POST['approval_type_id'];
+
+            $check_approval_type_exist = $api->check_approval_type_exist($approval_type_id);
+
+            if($check_approval_type_exist > 0){
+                $delete_all_approval_approver = $api->delete_all_approval_approver($approval_type_id, $username);
+                                    
+                if($delete_all_approval_approver){
+                    $delete_all_approval_exception = $api->delete_all_approval_exception($approval_type_id, $username);
+                                    
+                    if($delete_all_approval_exception){
+                        $delete_approval_type = $api->delete_approval_type($approval_type_id, $username);
+                                        
+                        if($delete_approval_type){
+                            echo 'Deleted';
+                        }
+                        else{
+                            echo $delete_approval_type;
+                        }
+                    }
+                    else{
+                        echo $delete_all_approval_exception;
+                    }
+                }
+                else{
+                    echo $delete_all_approval_approver;
+                }
+            }
+            else{
+                echo 'Not Found';
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Delete multiple approval type
+    else if($transaction == 'delete multiple approval type'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['approval_type_id'])){
+            $username = $_POST['username'];
+            $approval_type_ids = $_POST['approval_type_id'];
+
+            foreach($approval_type_ids as $approval_type_id){
+                $check_approval_type_exist = $api->check_approval_type_exist($approval_type_id);
+
+                if($check_approval_type_exist > 0){
+                    $delete_approval_type = $api->delete_approval_type($approval_type_id, $username);
+                                    
+                    if($delete_approval_type){
+                        $delete_all_approval_approver = $api->delete_all_approval_approver($approval_type_id, $username);
+                                    
+                        if($delete_all_approval_approver){
+                            $delete_all_approval_exception = $api->delete_all_approval_exception($approval_type_id, $username);
+                                            
+                            if(!$delete_all_approval_exception){
+                                $error = $delete_all_approval_exception;
+                            }
+                        }
+                        else{
+                            $error = $delete_all_approval_approver;
+                        }
+                    }
+                    else{
+                        $error = $delete_approval_type;
+                    }
+                }
+                else{
+                    $error = 'Not Found';
+                }
+            }
+
+            if(empty($error)){
+                echo 'Deleted';
+            }
+            else{
+                echo $error;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
     # -------------------------------------------------------------
     #   Unlock transactions
     # -------------------------------------------------------------
@@ -3908,10 +4026,66 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                 $check_user_account_exist = $api->check_user_account_exist($user_code);
 
                 if($check_user_account_exist > 0){
-                    $update_user_account_status = $api->update_user_account_status($user_code, "ACTIVE", $username);
+                    $update_user_account_status = $api->update_user_account_status($user_code, 'ACTIVE', $username);
                                     
                     if(!$update_user_account_status){
                         $error = $update_user_account_status;
+                    }
+                }
+                else{
+                    $error = 'Not Found';
+                }
+            }
+
+            if(empty($error)){
+                echo 'Activated';
+            }
+            else{
+                echo $error;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Activate approval type
+    else if($transaction == 'activate approval type'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['approval_type_id']) && !empty($_POST['approval_type_id'])){
+            $username = $_POST['username'];
+            $approval_type_id = $_POST['approval_type_id'];
+
+            $check_approval_type_exist = $api->check_approval_type_exist($approval_type_id);
+
+            if($check_approval_type_exist > 0){
+                $update_approval_type_status = $api->update_approval_type_status($approval_type_id, 'ACTIVE', $username);
+    
+                if($update_approval_type_status){
+                    echo 'Activated';
+                }
+                else{
+                    echo $update_approval_type_status;
+                }
+            }
+            else{
+                echo 'Not Found';
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Activate multiple user account
+    else if($transaction == 'activate multiple user account'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['approval_type_id'])){
+            $username = $_POST['username'];
+            $approval_type_ids = $_POST['approval_type_id'];
+
+            foreach($approval_type_ids as $approval_type_id){
+                $check_approval_type_exist = $api->check_approval_type_exist($approval_type_id);
+
+                if($check_approval_type_exist > 0){
+                    $update_approval_type_status = $api->update_approval_type_status($approval_type_id, 'ACTIVE', $username);
+                                    
+                    if(!$update_approval_type_status){
+                        $error = $update_approval_type_status;
                     }
                 }
                 else{
@@ -3972,6 +4146,62 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                                     
                     if(!$update_user_account_status){
                         $error = $update_user_account_status;
+                    }
+                }
+                else{
+                    $error = 'Not Found';
+                }
+            }
+
+            if(empty($error)){
+                echo 'Deactivated';
+            }
+            else{
+                echo $error;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Deactivate approval type
+    else if($transaction == 'deactivate approval type'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['approval_type_id']) && !empty($_POST['approval_type_id'])){
+            $username = $_POST['username'];
+            $approval_type_id = $_POST['approval_type_id'];
+
+            $check_approval_type_exist = $api->check_approval_type_exist($approval_type_id);
+
+            if($check_approval_type_exist > 0){
+                $update_approval_type_status = $api->update_approval_type_status($approval_type_id, 'INACTIVE', $username);
+    
+                if($update_approval_type_status){
+                    echo 'Deactivated';
+                }
+                else{
+                    echo $update_approval_type_status;
+                }
+            }
+            else{
+                echo 'Not Found';
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Deactivate multiple user account
+    else if($transaction == 'deactivate multiple user account'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['approval_type_id'])){
+            $username = $_POST['username'];
+            $approval_type_ids = $_POST['approval_type_id'];
+
+            foreach($approval_type_ids as $approval_type_id){
+                $check_approval_type_exist = $api->check_approval_type_exist($approval_type_id);
+
+                if($check_approval_type_exist > 0){
+                    $update_approval_type_status = $api->update_approval_type_status($approval_type_id, 'INACTIVE', $username);
+                                    
+                    if(!$update_approval_type_status){
+                        $error = $update_approval_type_status;
                     }
                 }
                 else{
@@ -5486,6 +5716,22 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                 'DECISION_BY' => $decision_by_file_as,
                 'DECISION_REMARKS' => $attendance_adjustment_details[0]['DECISION_REMARKS'],
                 'REASON' => $attendance_adjustment_details[0]['REASON']
+            );
+
+            echo json_encode($response);
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Approval type details
+    else if($transaction == 'approval type details'){
+        if(isset($_POST['approval_type_id']) && !empty($_POST['approval_type_id'])){
+            $approval_type_id = $_POST['approval_type_id'];
+            $approval_type_details = $api->get_approval_type_details($approval_type_id);
+
+            $response[] = array(
+                'APPROVAL_TYPE' => $approval_type_details[0]['APPROVAL_TYPE'],
+                'APPROVAL_TYPE_DESCRIPTION' => $approval_type_details[0]['APPROVAL_TYPE_DESCRIPTION']
             );
 
             echo json_encode($response);

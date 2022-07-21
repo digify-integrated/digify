@@ -142,7 +142,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="mb-3">
-                                    <label for="role" class="form-label">Related Employee</label>
+                                    <label for="related_employee" class="form-label">Related Employee</label>
                                     <select class="form-control form-select2" id="related_employee" name="related_employee">
                                     <option value="">--</option>';
                                     $form .= $api->generate_employee_options();
@@ -478,7 +478,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                     <label class="form-label">Parent Department</label>
                                     <select class="form-control form-select2" id="parent_department" name="parent_department">
                                     <option value="">--</option>';
-                                    $form .= $api->generate_system_code_options('SYSTYPE');
+                                    $form .= $api->generate_department_options();
                                     $form .='</select>
                                 </div>
                             </div>
@@ -487,7 +487,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                     <label class="form-label">Manager</label>
                                     <select class="form-control form-select2" id="manager" name="manager">
                                     <option value="">--</option>';
-                                    $form .= $api->generate_system_code_options('SYSTYPE');
+                                    $form .= $api->generate_employee_options();
                                     $form .='</select>
                                 </div>
                             </div>
@@ -1783,6 +1783,25 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                     </div>
                                 </div>
                             </div>';
+            }
+            else if($form_type == 'approval type form'){
+                $form .= '<div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <input type="hidden" id="approval_type_id" name="approval_type_id">
+                                    <label for="approval_type" class="form-label">Approval Type <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control form-maxlength" autocomplete="off" id="approval_type" name="approval_type" maxlength="100">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label for="approval_type_description" class="form-label">Approval Type Description <span class="text-danger">*</span></label>
+                                    <textarea class="form-control form-maxlength" id="approval_type_description" name="approval_type_description" maxlength="100" rows="5"></textarea>
+                                </div>
+                            </div>
+                        </div>';
             }
 
             $form .= '</form>';
@@ -4498,6 +4517,121 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
     }
     # -------------------------------------------------------------
 
+    # Approval type table
+    else if($type == 'approval type table'){
+        if(isset($_POST['filter_approval_type_status'])){
+            if ($api->databaseConnection()) {
+                # Get permission
+                $update_approval_type = $api->check_role_permissions($username, 138);
+                $activate_approval_type = $api->check_role_permissions($username, 139);
+                $deactivate_approval_type = $api->check_role_permissions($username, 140);
+                $delete_approval_type = $api->check_role_permissions($username, 141);
+                $view_transaction_log = $api->check_role_permissions($username, 142);
+
+                $filter_approval_type_status = $_POST['filter_approval_type_status'];
+
+                $query = 'SELECT APPROVAL_TYPE_ID, APPROVAL_TYPE, APPROVAL_TYPE_DESCRIPTION, STATUS, TRANSACTION_LOG_ID FROM approval_type';
+
+                if(!empty($filter_approval_type_status)){
+                    $filter[] = ' WHERE STATUS = :filter_approval_type_status';
+
+                    if(!empty($filter)){
+                        $query .= implode(' AND ', $filter);
+                    }
+                }
+    
+                $sql = $api->db_connection->prepare($query);
+
+                if(!empty($filter_approval_type_status)){
+                    $sql->bindValue(':filter_approval_type_status', $filter_approval_type_status);
+                } 
+    
+                if($sql->execute()){
+                    while($row = $sql->fetch()){
+                        $approval_type_id = $row['APPROVAL_TYPE_ID'];
+                        $approval_type = $row['APPROVAL_TYPE'];
+                        $approval_type_description = $row['APPROVAL_TYPE_DESCRIPTION'];
+                        $status = $row['STATUS'];
+                        $approval_type_status = $api->get_approval_type_status($status)[0]['BADGE'];
+                        $transaction_log_id = $row['TRANSACTION_LOG_ID'];
+    
+                        if($update_approval_type > 0){
+                            $update = '<button type="button" class="btn btn-info waves-effect waves-light update-approval-type" data-approval-type-id="'. $approval_type_id .'" title="Edit Approval Type">
+                                            <i class="bx bx-pencil font-size-16 align-middle"></i>
+                                        </button>';
+                        }
+                        else{
+                            $update = '';
+                        }
+    
+                        if($status == 'ACTIVE'){
+                            if($deactivate_approval_type > 0){
+                                $active_inactive = '<button class="btn btn-danger waves-effect waves-light deactivate-approval-type" title="Deactivate Approval Type" data-approval-type-id="'. $approval_type_id .'">
+                                <i class="bx bx-x font-size-16 align-middle"></i>
+                                </button>';
+                            }
+                            else{
+                                $active_inactive = '';
+                            }
+    
+                            $data_active = '1';
+                        }
+                        else{
+                            if($activate_approval_type > 0){
+                                $active_inactive = '<button class="btn btn-success waves-effect waves-light activate-approval-type" title="Activate Approval Type" data-approval-type-id="'. $approval_type_id .'">
+                                <i class="bx bx-check font-size-16 align-middle"></i>
+                                </button>';
+                            }
+                            else{
+                                $active_inactive = '';
+                            }
+    
+                            $data_active = '0';
+                        }
+
+                        if($delete_approval_type > 0){
+                            $delete = '<button type="button" class="btn btn-danger waves-effect waves-light delete-approval-type" data-approval-type-id="'. $approval_type_id .'" title="Delete Approval Type">
+                                <i class="bx bx-trash font-size-16 align-middle"></i>
+                            </button>';
+                        }
+                        else{
+                            $delete = '';
+                        }
+    
+                        if($view_transaction_log > 0 && !empty($transaction_log_id)){
+                            $transaction_log = '<button type="button" class="btn btn-dark waves-effect waves-light view-transaction-log" data-transaction-log-id="'. $transaction_log_id .'" title="View Transaction Log">
+                                                    <i class="bx bx-detail font-size-16 align-middle"></i>
+                                                </button>';
+                        }
+                        else{
+                            $transaction_log = '';
+                        }
+    
+                        $response[] = array(
+                            'CHECK_BOX' => '<input class="form-check-input datatable-checkbox-children" type="checkbox" data-active="'. $data_active .'" value="'. $username .'">',
+                            'APPROVAL_TYPE' => $approval_type . '<p class="text-muted mb-0">'. $approval_type_description .'</p>',
+                            'STATUS' => $approval_type_status,
+                            'ACTION' => '<div class="d-flex gap-2">
+                                <button type="button" class="btn btn-primary waves-effect waves-light view-approval-type" data-approval-type-id="'. $approval_type_id .'" title="View Approval Type">
+                                    <i class="bx bx-show font-size-16 align-middle"></i>
+                                </button>
+                                '. $update .'
+                                '. $active_inactive .'
+                                '. $transaction_log .'
+                                '. $delete .'
+                            </div>'
+                        );
+                    }
+    
+                    echo json_encode($response);
+                }
+                else{
+                    echo $sql->errorInfo()[2];
+                }
+            }
+        }
+    }
+    # -------------------------------------------------------------
 }
 
 ?>

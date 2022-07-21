@@ -965,13 +965,13 @@ BEGIN
 	DROP PREPARE stmt;
 END //
 
-CREATE PROCEDURE update_user_account_status(IN username VARCHAR(50), IN USER_STATUS VARCHAR(10), IN record_log VARCHAR(100))
+CREATE PROCEDURE update_user_account_status(IN username VARCHAR(50), IN user_status VARCHAR(10), IN record_log VARCHAR(100))
 BEGIN
 	SET @username = username;
-	SET @USER_STATUS = USER_STATUS;
+	SET @user_status = user_status;
 	SET @record_log = record_log;
 
-	SET @query = 'UPDATE global_user_account SET USER_STATUS = @USER_STATUS, RECORD_LOG = @record_log WHERE USERNAME = @username';
+	SET @query = 'UPDATE global_user_account SET USER_STATUS = @user_status, RECORD_LOG = @record_log WHERE USERNAME = @username';
 
 	PREPARE stmt FROM @query;
 	EXECUTE stmt;
@@ -3320,6 +3320,103 @@ BEGIN
 	ELSE
 		SET @query = 'UPDATE attendance_creation SET STATUS = @status, SANCTION = @sanction, DECISION_REMARKS = null, DECISION_DATE = null, DECISION_BY = null, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE CREATION_ID = @creation_id';
     END IF;
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+CREATE PROCEDURE check_approval_type_exist(IN approval_type_id VARCHAR(100))
+BEGIN
+	SET @approval_type_id = approval_type_id;
+
+	SET @query = 'SELECT COUNT(1) AS TOTAL FROM approval_type WHERE APPROVAL_TYPE_ID = @approval_type_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE update_approval_type(IN approval_type_id VARCHAR(100), IN approval_type VARCHAR(100), IN approval_type_description VARCHAR(100), IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
+BEGIN
+	SET @approval_type_id = approval_type_id;
+	SET @approval_type = approval_type;
+	SET @approval_type_description = approval_type_description;
+	SET @transaction_log_id = transaction_log_id;
+	SET @record_log = record_log;
+
+	SET @query = 'UPDATE approval_type SET APPROVAL_TYPE = @approval_type, APPROVAL_TYPE_DESCRIPTION = @approval_type_description, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE APPROVAL_TYPE_ID = @approval_type_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE insert_approval_type(IN approval_type_id VARCHAR(100), IN approval_type VARCHAR(100), IN approval_type_description VARCHAR(100), IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
+BEGIN
+	SET @approval_type_id = approval_type_id;
+	SET @approval_type = approval_type;
+	SET @approval_type_description = approval_type_description;
+	SET @transaction_log_id = transaction_log_id;
+	SET @record_log = record_log;
+
+	SET @query = 'INSERT INTO approval_type (APPROVAL_TYPE_ID, APPROVAL_TYPE, APPROVAL_TYPE_DESCRIPTION, STATUS, TRANSACTION_LOG_ID, RECORD_LOG) VALUES(@approval_type_id, @approval_type, @approval_type_description, "INACTIVE", @transaction_log_id, @record_log)';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE get_approval_type_details(IN approval_type_id VARCHAR(100))
+BEGIN
+	SET @approval_type_id = approval_type_id;
+
+	SET @query = 'SELECT APPROVAL_TYPE, APPROVAL_TYPE_DESCRIPTION, STATUS, TRANSACTION_LOG_ID, RECORD_LOG FROM approval_type WHERE APPROVAL_TYPE_ID = @approval_type_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE delete_approval_type(IN approval_type_id VARCHAR(100))
+BEGIN
+	SET @approval_type_id = approval_type_id;
+
+	SET @query = 'DELETE FROM approval_type WHERE APPROVAL_TYPE_ID = @approval_type_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE delete_all_approval_approver(IN approval_type_id VARCHAR(100))
+BEGIN
+	SET @approval_type_id = approval_type_id;
+
+	SET @query = 'DELETE FROM approval_approver WHERE APPROVAL_TYPE_ID = @approval_type_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE delete_all_approval_exception(IN approval_type_id VARCHAR(100))
+BEGIN
+	SET @approval_type_id = approval_type_id;
+
+	SET @query = 'DELETE FROM approval_exception WHERE APPROVAL_TYPE_ID = @approval_type_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE update_approval_type_status(IN approval_type_id VARCHAR(100), IN status VARCHAR(10), IN record_log VARCHAR(100))
+BEGIN
+	SET @approval_type_id = approval_type_id;
+	SET @status = status;
+	SET @record_log = record_log;
+
+	SET @query = 'UPDATE approval_type SET STATUS = @status, RECORD_LOG = @record_log WHERE APPROVAL_TYPE_ID = @approval_type_id';
 
 	PREPARE stmt FROM @query;
 	EXECUTE stmt;

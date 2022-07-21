@@ -1177,6 +1177,31 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : check_approval_type_exist
+    # Purpose    : Checks if the approval type exists.
+    #
+    # Returns    : Number
+    #
+    # -------------------------------------------------------------
+    public function check_approval_type_exist($approval_type_id){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL check_approval_type_exist(:approval_type_id)');
+            $sql->bindValue(':approval_type_id', $approval_type_id);
+
+            if($sql->execute()){
+                $row = $sql->fetch();
+
+                return $row['TOTAL'];
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Update methods
     # -------------------------------------------------------------
     
@@ -4263,6 +4288,119 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : update_approval_type
+    # Purpose    : Updates approval type.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function update_approval_type($approval_type_id, $approval_type, $approval_type_description, $username){
+        if ($this->databaseConnection()) {
+            $record_log = 'UPD->' . $username . '->' . date('Y-m-d h:i:s');
+            $approval_type_details = $this->get_approval_type_details($approval_type_id);
+            
+            if(!empty($approval_type_details[0]['TRANSACTION_LOG_ID'])){
+                $transaction_log_id = $approval_type_details[0]['TRANSACTION_LOG_ID'];
+            }
+            else{
+                # Get transaction log id
+                $transaction_log_system_parameter = $this->get_system_parameter(2, 1);
+                $transaction_log_parameter_number = $transaction_log_system_parameter[0]['PARAMETER_NUMBER'];
+                $transaction_log_id = $transaction_log_system_parameter[0]['ID'];
+            }
+
+            $sql = $this->db_connection->prepare('CALL update_approval_type(:approval_type_id, :approval_type, :approval_type_description, :transaction_log_id, :record_log)');
+            $sql->bindValue(':approval_type_id', $approval_type_id);
+            $sql->bindValue(':approval_type', $approval_type);
+            $sql->bindValue(':approval_type_description', $approval_type_description);
+            $sql->bindValue(':transaction_log_id', $transaction_log_id);
+            $sql->bindValue(':record_log', $record_log);
+        
+            if($sql->execute()){
+                if(!empty($approval_type_details[0]['TRANSACTION_LOG_ID'])){
+                    $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated approval type.');
+                                    
+                    if($insert_transaction_log){
+                        return true;
+                    }
+                    else{
+                        return $insert_transaction_log;
+                    }
+                }
+                else{
+                    # Update transaction log value
+                    $update_system_parameter_value = $this->update_system_parameter_value($transaction_log_parameter_number, 2, $username);
+
+                    if($update_system_parameter_value){
+                        $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated approval type.');
+                                    
+                        if($insert_transaction_log){
+                            return true;
+                        }
+                        else{
+                            return $insert_transaction_log;
+                        }
+                    }
+                    else{
+                        return $update_system_parameter_value;
+                    }
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : update_approval_type_status
+    # Purpose    : Updates approval type status.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function update_approval_type_status($approval_type_id, $status, $username){
+        if ($this->databaseConnection()) {
+            $approval_type_details = $this->get_approval_type_details($approval_type_id);
+            $transaction_log_id = $approval_type_details[0]['TRANSACTION_LOG_ID'];
+
+            if($status == 'ACTIVE'){
+                $record_log = 'ACT->' . $username . '->' . date('Y-m-d h:i:s');
+                $log_type = 'Activate';
+                $log = 'User ' . $username . ' activated approval type.';
+            }
+            else{
+                $record_log = 'DACT->' . $username . '->' . date('Y-m-d h:i:s');
+                $log_type = 'Deactivated';
+                $log = 'User ' . $username . ' deactivated approval type.';
+            }
+
+            $sql = $this->db_connection->prepare('CALL update_approval_type_status(:approval_type_id, :status, :record_log)');
+            $sql->bindValue(':approval_type_id', $approval_type_id);
+            $sql->bindValue(':status', $status);
+            $sql->bindValue(':record_log', $record_log);
+        
+            if($sql->execute()){
+                $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, $log_type, $log);
+                                    
+                if($insert_transaction_log){
+                    return true;
+                }
+                else{
+                    return $insert_transaction_log;
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Insert methods
     # -------------------------------------------------------------
     
@@ -6392,6 +6530,68 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : insert_approval_type
+    # Purpose    : Insert approval type.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function insert_approval_type($approval_type, $approval_type_description, $username){
+        if ($this->databaseConnection()) {
+            $record_log = 'INS->' . $username . '->' . date('Y-m-d h:i:s');
+
+            # Get system parameter id
+            $system_parameter = $this->get_system_parameter(22, 1);
+            $parameter_number = $system_parameter[0]['PARAMETER_NUMBER'];
+            $id = $system_parameter[0]['ID'];
+
+            # Get transaction log id
+            $transaction_log_system_parameter = $this->get_system_parameter(2, 1);
+            $transaction_log_parameter_number = $transaction_log_system_parameter[0]['PARAMETER_NUMBER'];
+            $transaction_log_id = $transaction_log_system_parameter[0]['ID'];
+
+            $sql = $this->db_connection->prepare('CALL insert_approval_type(:id, :approval_type, :approval_type_description, :transaction_log_id, :record_log)');
+            $sql->bindValue(':id', $id);
+            $sql->bindValue(':approval_type', $approval_type);
+            $sql->bindValue(':approval_type_description', $approval_type_description);
+            $sql->bindValue(':transaction_log_id', $transaction_log_id);
+            $sql->bindValue(':record_log', $record_log); 
+        
+            if($sql->execute()){
+                # Update system parameter value
+                $update_system_parameter_value = $this->update_system_parameter_value($parameter_number, 22, $username);
+
+                if($update_system_parameter_value){
+                    # Update transaction log value
+                    $update_system_parameter_value = $this->update_system_parameter_value($transaction_log_parameter_number, 2, $username);
+
+                    if($update_system_parameter_value){
+                        $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Insert', 'User ' . $username . ' inserted approval type.');
+                                    
+                        if($insert_transaction_log){
+                            return true;
+                        }
+                        else{
+                            return $insert_transaction_log;
+                        }
+                    }
+                    else{
+                        return $update_system_parameter_value;
+                    }
+                }
+                else{
+                    return $update_system_parameter_value;
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Delete methods
     # -------------------------------------------------------------
 
@@ -7266,6 +7466,75 @@ class Api{
                 else{
                     return true;
                 }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : delete_approval_type
+    # Purpose    : Delete approval type.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function delete_approval_type($approval_type_id, $username){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL delete_approval_type(:approval_type_id)');
+            $sql->bindValue(':approval_type_id', $approval_type_id);
+        
+            if($sql->execute()){
+                return true;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : delete_all_approval_approver
+    # Purpose    : Delete all approver linked to approval type.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function delete_all_approval_approver($approval_type_id, $username){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL delete_all_approval_approver(:approval_type_id)');
+            $sql->bindValue(':approval_type_id', $approval_type_id);
+        
+            if($sql->execute()){
+                return true;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : delete_all_approval_exception
+    # Purpose    : Delete all exception linked to approval type.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function delete_all_approval_exception($approval_type_id, $username){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL delete_all_approval_exception(:approval_type_id)');
+            $sql->bindValue(':approval_type_id', $approval_type_id);
+        
+            if($sql->execute()){
+                return true;
             }
             else{
                 return $sql->errorInfo()[2];
@@ -8708,6 +8977,41 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : get_approval_type_details
+    # Purpose    : Gets the approval type details.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_approval_type_details($approval_type_id){
+        if ($this->databaseConnection()) {
+            $response = array();
+
+            $sql = $this->db_connection->prepare('CALL get_approval_type_details(:approval_type_id)');
+            $sql->bindValue(':approval_type_id', $approval_type_id);
+
+            if($sql->execute()){
+                while($row = $sql->fetch()){
+                    $response[] = array(
+                        'APPROVAL_TYPE' => $row['APPROVAL_TYPE'],
+                        'APPROVAL_TYPE_DESCRIPTION' => $row['APPROVAL_TYPE_DESCRIPTION'],
+                        'STATUS' => $row['STATUS'],
+                        'TRANSACTION_LOG_ID' => $row['TRANSACTION_LOG_ID'],
+                        'RECORD_LOG' => $row['RECORD_LOG']
+                    );
+                }
+
+                return $response;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Get methods
     # -------------------------------------------------------------
 
@@ -9616,6 +9920,36 @@ class Api{
             default:
                 $status = 'False';
                 $button_class = 'bg-warning';
+        }
+
+        $response[] = array(
+            'STATUS' => $status,
+            'BADGE' => '<span class="badge '. $button_class .'">'. $status .'</span>'
+        );
+
+        return $response;
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : get_approval_type_status
+    # Purpose    : Returns the status, badge.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_approval_type_status($stat){
+        $response = array();
+
+        switch ($stat) {
+            case 'ACTIVE':
+                $status = 'Active';
+                $button_class = 'bg-success';
+                break;
+            default:
+                $status = 'Inactive';
+                $button_class = 'bg-danger';
         }
 
         $response[] = array(
