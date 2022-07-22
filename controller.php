@@ -5424,8 +5424,6 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                                     <td>'. $file_as . '<p class="text-muted mb-0">'. $job_position_name .'</p></td>
                                 </tr>';
                 }
-
-                
             }
             else{
                 $table .= '<tr>
@@ -5725,6 +5723,22 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
     # Approval type details
     else if($transaction == 'approval type details'){
+        if(isset($_POST['approval_type_id']) && !empty($_POST['approval_type_id'])){
+            $approval_type_id = $_POST['approval_type_id'];
+            $approval_type_details = $api->get_approval_type_details($approval_type_id);
+
+            $response[] = array(
+                'APPROVAL_TYPE' => $approval_type_details[0]['APPROVAL_TYPE'],
+                'APPROVAL_TYPE_DESCRIPTION' => $approval_type_details[0]['APPROVAL_TYPE_DESCRIPTION']
+            );
+
+            echo json_encode($response);
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Approval type summary details
+    else if($transaction == 'approval type summary details'){
         if(isset($_POST['approval_type_id']) && !empty($_POST['approval_type_id'])){
             $approval_type_id = $_POST['approval_type_id'];
             $approval_type_details = $api->get_approval_type_details($approval_type_id);

@@ -5279,6 +5279,22 @@ function display_form_details(form_type){
             }
         });
     }
+    else if(form_type == 'approval type details'){
+        transaction = 'approval type summary details';
+
+        var approval_type_id = sessionStorage.getItem('approval_type_id');
+
+        $.ajax({
+            url: 'controller.php',
+            method: 'POST',
+            dataType: 'JSON',
+            data: {approval_type_id : approval_type_id, transaction : transaction},
+            success: function(response) {
+                $('#approval_type').text(response[0].APPROVAL_TYPE);
+                $('#approval_type_description').text(response[0].APPROVAL_TYPE_DESCRIPTION);
+            }
+        });
+    }
 }
 
 function initialize_transaction_log_table(datatable_name, buttons = false, show_all = false){
@@ -5552,7 +5568,7 @@ function generate_element(element_type, value, container, modal, username){
             if(modal == '1'){
                 $('#System-Modal').modal('show');
 
-                if(element_type == 'user account details' || element_type == 'system parameter details' || element_type == 'company details' || element_type == 'job position details' || element_type == 'work location details' || element_type == 'working hours details' || element_type == 'attendance details' || element_type == 'attendance adjustment details' || element_type == 'attendance cration details'){
+                if(element_type == 'user account details' || element_type == 'system parameter details' || element_type == 'company details' || element_type == 'job position details' || element_type == 'work location details' || element_type == 'working hours details' || element_type == 'attendance details' || element_type == 'attendance adjustment details' || element_type == 'attendance cration details' || element_type == 'approval type details'){
                     display_form_details(element_type);
                 }
                 else if(element_type == 'transaction log'){

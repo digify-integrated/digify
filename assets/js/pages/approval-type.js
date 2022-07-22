@@ -28,8 +28,8 @@ function initialize_approval_type_table(datatable_name, buttons = false, show_al
     var column_definition = [
         { 'width': '1%','bSortable': false, 'aTargets': 0 },
         { 'width': '59%', 'aTargets': 1 },
-        { 'width': '20%', 'aTargets': 2 },
-        { 'width': '20%','bSortable': false, 'aTargets': 3 },
+        { 'width': '10%', 'aTargets': 2 },
+        { 'width': '30%','bSortable': false, 'aTargets': 3 },
     ];
 
     if(show_all){
@@ -111,7 +111,7 @@ function initialize_click_events(){
 
         sessionStorage.setItem('approval_type_id', approval_type_id);
 
-        generate_modal('approval type details', 'Approval Type Details', 'R' , '1', '0', 'element', '', '0', username);
+        generate_modal('approval type details', 'Approval Type Details', 'LG' , '1', '0', 'element', '', '0', username);
     });
 
     $(document).on('click','#add-approval-type',function() {
@@ -208,7 +208,7 @@ function initialize_click_events(){
         });
     });
 
-    $(document).on('click','#activate-approval-type',function() {N
+    $(document).on('click','#activate-approval-type',function() {
         var approval_type_id = [];
         var transaction = 'activate multiple approval type';
 
