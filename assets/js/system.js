@@ -4203,6 +4203,140 @@ function initialize_form_validation(form_type){
             }
         });
     }
+    else if(form_type == 'approver form'){
+        $('#approver-form').validate({
+            submitHandler: function (form) {
+                transaction = 'submit approver';
+                var department = $('#department').val();
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'controller.php',
+                    data: $(form).serialize() + '&username=' + username + '&department=' + department + '&transaction=' + transaction,
+                    beforeSend: function(){
+                        document.getElementById('submit-form').disabled = true;
+                        $('#submit-form').html('<div class="spinner-border spinner-border-sm text-light" role="status"><span rclass="sr-only"></span></div>');
+                    },
+                    success: function (response) {
+                        if(response === 'Inserted'){
+                            show_alert('Insert Approver Success', 'The approver has been inserted.', 'success');
+
+                            $('#System-Modal').modal('hide');
+                            reload_datatable('#approver-datatable');
+                        }
+                        else{
+                            show_alert('Insert Approver Error', response, 'error');
+                        }
+                    },
+                    complete: function(){
+                        document.getElementById('submit-form').disabled = false;
+                        $('#submit-form').html('Submit');
+                    }
+                });
+                return false;
+            },
+            rules: {
+                employee: {
+                    required: true
+                },
+                department: {
+                    required: true
+                },
+            },
+            messages: {
+                employee: {
+                    required: 'Please choose the employee'
+                },
+                department: {
+                    required: 'Please choose at least one (1) department'
+                },
+            },
+            errorPlacement: function(label, element) {
+                if((element.hasClass('select2') || element.hasClass('form-select2')) && element.next('.select2-container').length) {
+                    label.insertAfter(element.next('.select2-container'));
+                }
+                else if(element.parent('.input-group').length){
+                    label.insertAfter(element.parent());
+                }
+                else{
+                    label.insertAfter(element);
+                }
+            },
+            highlight: function(element) {
+                $(element).parent().addClass('has-danger');
+                $(element).addClass('form-control-danger');
+            },
+            success: function(label,element) {
+                $(element).parent().removeClass('has-danger')
+                $(element).removeClass('form-control-danger')
+                label.remove();
+            }
+        });
+    }
+    else if(form_type == 'approval exception form'){
+        $('#approval-exception-form').validate({
+            submitHandler: function (form) {
+                transaction = 'submit approval exception';
+                var employee = $('#employee').val();
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'controller.php',
+                    data: $(form).serialize() + '&username=' + username + '&employee=' + employee + '&transaction=' + transaction,
+                    beforeSend: function(){
+                        document.getElementById('submit-form').disabled = true;
+                        $('#submit-form').html('<div class="spinner-border spinner-border-sm text-light" role="status"><span rclass="sr-only"></span></div>');
+                    },
+                    success: function (response) {
+                        if(response === 'Inserted'){
+                            show_alert('Insert Approval Exception Success', 'The approval exception has been inserted.', 'success');
+
+                            $('#System-Modal').modal('hide');
+                            reload_datatable('#approval-exception-datatable');
+                        }
+                        else{
+                            show_alert('Insert Approval Exception Error', response, 'error');
+                        }
+                    },
+                    complete: function(){
+                        document.getElementById('submit-form').disabled = false;
+                        $('#submit-form').html('Submit');
+                    }
+                });
+                return false;
+            },
+            rules: {
+                employee: {
+                    required: true
+                },
+            },
+            messages: {
+                employee: {
+                    required: 'Please choose at least one (1) employee'
+                },
+            },
+            errorPlacement: function(label, element) {
+                if((element.hasClass('select2') || element.hasClass('form-select2')) && element.next('.select2-container').length) {
+                    label.insertAfter(element.next('.select2-container'));
+                }
+                else if(element.parent('.input-group').length){
+                    label.insertAfter(element.parent());
+                }
+                else{
+                    label.insertAfter(element);
+                }
+            },
+            highlight: function(element) {
+                $(element).parent().addClass('has-danger');
+                $(element).addClass('form-control-danger');
+            },
+            success: function(label,element) {
+                $(element).parent().removeClass('has-danger')
+                $(element).removeClass('form-control-danger')
+                label.remove();
+            }
+        });
+    }
 }
 
 // Display functions
@@ -5530,6 +5664,11 @@ function generate_form(form_type, form_id, add, username){
                 else if(form_type == 'cancel attendance creation form' || form_type == 'cancel multiple attendance creation form'){
                     var creation_id = sessionStorage.getItem('creation_id');
                     $('#creation_id').val(creation_id);
+                }
+                else if(form_type == 'approver form' || form_type == 'approval exception form'){
+                    var approval_type_id = $('#approval-type-id').text();
+
+                    $('#approval_type_id').val(approval_type_id);
                 }
             }
 

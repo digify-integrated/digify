@@ -1804,22 +1804,41 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                         </div>';
             }
             else if($form_type == 'approver form'){
-                $form .= '<div class="row mb-3">
-                                <label for="employee" class="col-sm-3 col-form-label">Employee <span class="text-danger">*</span></label>
-                                <div class="col-sm-9">
-                                    <select class="form-control form-select2" id="employee" name="employee">';
+                $form .= '<div class="row">
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <input type="hidden" id="approval_type_id" name="approval_type_id">
+                                        <label class="form-label">Employee <span class="text-danger">*</span></label>
+                                        <select class="form-control form-select2" id="employee" name="employee">
+                                        <option value="">--</option>';
+                                        $form .= $api->generate_employee_options();
+                                        $form .='</select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <label class="form-label">Department <span class="text-danger">*</span></label>
+                                        <select class="form-control form-select2" multiple="multiple" id="department" name="department">';
+                                        $form .= $api->generate_department_options();
+                                        $form .='</select>
+                                    </div>
+                                </div>
+                            </div>';
+            }
+            else if($form_type == 'approval exception form'){
+                $form .= '<div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <input type="hidden" id="approval_type_id" name="approval_type_id">
+                                    <label class="form-label">Employee <span class="text-danger">*</span></label>
+                                    <select class="form-control form-select2" multiple="multiple" id="employee" name="employee">';
                                     $form .= $api->generate_employee_options();
                                     $form .='</select>
                                 </div>
                             </div>
-                            <div class="row mb-3">
-                                <label for="department" class="col-sm-3 col-form-label">Department <span class="text-danger">*</span></label>
-                                <div class="col-sm-9">
-                                    <select class="form-control form-select2" multiple="multiple" id="department" name="department">';
-                                    $form .= $api->generate_department_options();
-                                    $form .='</select>
-                                </div>
-                            </div>';
+                        </div>';
             }
 
             $form .= '</form>';
@@ -4631,7 +4650,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                         }
 
                         if($approval_exception_page > 0){
-                            $exception = '<a href="approver.php?id='. $approval_type_id_encrypted .'" class="btn btn-warning waves-effect waves-light" title="View Approval Exception">
+                            $exception = '<a href="approval-exception.php?id='. $approval_type_id_encrypted .'" class="btn btn-warning waves-effect waves-light" title="View Approval Exception">
                                         <i class="bx bx-user-x font-size-16 align-middle"></i>
                                     </a>';
                         }
@@ -4721,15 +4740,15 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
 
     # Approver table
     else if($type == 'approver table'){
-        if(isset($_POST['approver_type_id']) && !empty($_POST['approver_type_id'])){
+        if(isset($_POST['approval_type_id']) && !empty($_POST['approval_type_id'])){
             if ($api->databaseConnection()) {
-                $approver_type_id = $_POST['approver_type_id'];
+                $approval_type_id = $_POST['approval_type_id'];
 
                 # Get approver
                 $delete_approver = $api->check_role_permissions($username, 145);
     
-                $sql = $api->db_connection->prepare('SELECT EMPLOYEE_ID, DEPARTMENT FROM approval_approver WHERE APPROVAL_TYPE_ID = :approver_type_id ORDER BY EMPLOYEE_ID');
-                $sql->bindValue(':approver_type_id', $approver_type_id);
+                $sql = $api->db_connection->prepare('SELECT EMPLOYEE_ID, DEPARTMENT FROM approval_approver WHERE APPROVAL_TYPE_ID = :approval_type_id ORDER BY EMPLOYEE_ID');
+                $sql->bindValue(':approval_type_id', $approval_type_id);
     
                 if($sql->execute()){
                     while($row = $sql->fetch()){
@@ -4755,6 +4774,53 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                             'CHECK_BOX' => '<input class="form-check-input datatable-checkbox-children" type="checkbox" data-employee-id="'. $employee_id .'" data-department="'. $department .'">',
                             'FILE_AS' => $file_as,
                             'DEPARTMENT' => $department_name,
+                            'ACTION' => '<div class="d-flex gap-2">
+                                '. $delete .'
+                            </div>'
+                        );
+                    }
+    
+                    echo json_encode($response);
+                }
+                else{
+                    echo $sql->errorInfo()[2];
+                }
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Approval exception table
+    else if($type == 'approval exception table'){
+        if(isset($_POST['approval_type_id']) && !empty($_POST['approval_type_id'])){
+            if ($api->databaseConnection()) {
+                $approval_type_id = $_POST['approval_type_id'];
+
+                # Get approver
+                $delete_approval_exception = $api->check_role_permissions($username, 148);
+    
+                $sql = $api->db_connection->prepare('SELECT EMPLOYEE_ID FROM approval_exception WHERE APPROVAL_TYPE_ID = :approval_type_id ORDER BY EMPLOYEE_ID');
+                $sql->bindValue(':approval_type_id', $approval_type_id);
+    
+                if($sql->execute()){
+                    while($row = $sql->fetch()){
+                        $employee_id = $row['EMPLOYEE_ID'];
+
+                        $employee_details = $api->get_employee_details($employee_id);
+                        $file_as = $employee_details[0]['FILE_AS'];
+
+                        if($delete_approval_exception > 0){
+                            $delete = '<button type="button" class="btn btn-danger waves-effect waves-light delete-approval-exception" data-employee-id="'. $employee_id .'" title="Delete Approver">
+                                            <i class="bx bx-trash font-size-16 align-middle"></i>
+                                        </button>';
+                        }
+                        else{
+                            $delete = '';
+                        }
+    
+                        $response[] = array(
+                            'CHECK_BOX' => '<input class="form-check-input datatable-checkbox-children" type="checkbox" value="'. $employee_id .'">',
+                            'FILE_AS' => $file_as,
                             'ACTION' => '<div class="d-flex gap-2">
                                 '. $delete .'
                             </div>'

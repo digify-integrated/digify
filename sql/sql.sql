@@ -3325,6 +3325,7 @@ BEGIN
 	EXECUTE stmt;
 	DROP PREPARE stmt;
 END //
+
 CREATE PROCEDURE check_approval_type_exist(IN approval_type_id VARCHAR(100))
 BEGIN
 	SET @approval_type_id = approval_type_id;
@@ -3422,6 +3423,106 @@ BEGIN
 	EXECUTE stmt;
 	DROP PREPARE stmt;
 END //
+
+CREATE PROCEDURE check_approver_exist(IN approval_type_id VARCHAR(100), IN employee_id VARCHAR(100), IN department VARCHAR(50))
+BEGIN
+	SET @approval_type_id = approval_type_id;
+	SET @employee_id = employee_id;
+	SET @department = department;
+
+	SET @query = 'SELECT COUNT(1) AS TOTAL FROM approval_approver WHERE APPROVAL_TYPE_ID = @approval_type_id AND EMPLOYEE_ID = @employee_id AND DEPARTMENT = @department';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE insert_approver(IN approval_type_id VARCHAR(100), IN employee_id VARCHAR(100), IN department VARCHAR(50), IN record_log VARCHAR(100))
+BEGIN
+	SET @approval_type_id = approval_type_id;
+	SET @employee_id = employee_id;
+	SET @department = department;
+	SET @record_log = record_log;
+
+	SET @query = 'INSERT INTO approval_approver (APPROVAL_TYPE_ID, EMPLOYEE_ID, DEPARTMENT, RECORD_LOG) VALUES(@approval_type_id, @employee_id, @department, @record_log)';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE get_approver_details(IN approval_type_id VARCHAR(100))
+BEGIN
+	SET @approval_type_id = approval_type_id;
+
+	SET @query = 'SELECT EMPLOYEE_ID, DEPARTMENT, RECORD_LOG FROM approval_approver WHERE APPROVAL_TYPE_ID = @approval_type_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE delete_approver(IN approval_type_id VARCHAR(100), IN employee_id VARCHAR(100), IN department VARCHAR(50))
+BEGIN
+	SET @approval_type_id = approval_type_id;
+	SET @employee_id = employee_id;
+	SET @department = department;
+
+	SET @query = 'DELETE FROM approval_approver WHERE APPROVAL_TYPE_ID = @approval_type_id AND EMPLOYEE_ID = @employee_id AND DEPARTMENT = @department';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE check_approval_exception_exist(IN approval_type_id VARCHAR(100), IN employee_id VARCHAR(100))
+BEGIN
+	SET @approval_type_id = approval_type_id;
+	SET @employee_id = employee_id;
+
+	SET @query = 'SELECT COUNT(1) AS TOTAL FROM approval_exception WHERE APPROVAL_TYPE_ID = @approval_type_id AND EMPLOYEE_ID = @employee_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE insert_approval_exception(IN approval_type_id VARCHAR(100), IN employee_id VARCHAR(100), IN record_log VARCHAR(100))
+BEGIN
+	SET @approval_type_id = approval_type_id;
+	SET @employee_id = employee_id;
+	SET @record_log = record_log;
+
+	SET @query = 'INSERT INTO approval_exception (APPROVAL_TYPE_ID, EMPLOYEE_ID, RECORD_LOG) VALUES(@approval_type_id, @employee_id, @record_log)';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE get_approval_exception_details(IN approval_type_id VARCHAR(100))
+BEGIN
+	SET @approval_type_id = approval_type_id;
+
+	SET @query = 'SELECT EMPLOYEE_D, RECORD_LOG FROM approval_exception WHERE APPROVAL_TYPE_ID = @approval_type_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE delete_approval_exception(IN approval_type_id VARCHAR(100), IN employee_id VARCHAR(100))
+BEGIN
+	SET @approval_type_id = approval_type_id;
+	SET @employee_id = employee_id;
+
+	SET @query = 'DELETE FROM approval_exception WHERE APPROVAL_TYPE_ID = @approval_type_id AND EMPLOYEE_ID = @employee_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
 
 /* Insert Transactions */
 INSERT INTO global_user_account (USERNAME, PASSWORD, USER_STATUS, PASSWORD_EXPIRY_DATE, FAILED_LOGIN, LAST_FAILED_LOGIN, TRANSACTION_LOG_ID) VALUES ('ADMIN', '68aff5412f35ed76', 'Active', '2021-12-30', 0, null, 'TL-1');

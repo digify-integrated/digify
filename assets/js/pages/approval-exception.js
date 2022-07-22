@@ -2,34 +2,32 @@
     'use strict';
 
     $(function() {
-        if($('#approver-datatable').length){
-            initialize_approver_table('#approver-datatable');
+        if($('#approval-exception-datatable').length){
+            initialize_approval_exception_table('#approval-exception-datatable');
         }
 
         initialize_click_events();
     });
 })(jQuery);
 
-function initialize_approver_table(datatable_name, buttons = false, show_all = false){
+function initialize_approval_exception_table(datatable_name, buttons = false, show_all = false){
     hide_multiple_buttons();
     
     var username = $('#username').text();
     var approval_type_id = $('#approval-type-id').text();
-    var type = 'approver table';
+    var type = 'approval exception table';
     var settings;
 
     var column = [ 
         { 'data' : 'CHECK_BOX' },
         { 'data' : 'FILE_AS' },
-        { 'data' : 'DEPARTMENT' },
         { 'data' : 'ACTION' }
     ];
 
     var column_definition = [
         { 'width': '1%','bSortable': false, 'aTargets': 0 },
-        { 'width': '59%', 'aTargets': 1 },
-        { 'width': '20%', 'aTargets': 2 },
-        { 'width': '20%','bSortable': false, 'aTargets': 3 },
+        { 'width': '79%', 'aTargets': 1 },
+        { 'width': '20%','bSortable': false, 'aTargets': 2 },
     ];
 
     if(show_all){
@@ -106,19 +104,18 @@ function initialize_approver_table(datatable_name, buttons = false, show_all = f
 function initialize_click_events(){
     var username = $('#username').text();
 
-    $(document).on('click','#add-approver',function() {
-        generate_modal('approver form', 'Approver', 'R' , '1', '1', 'form', 'approver-form', '1', username);
+    $(document).on('click','#add-approval-exception',function() {
+        generate_modal('approval exception form', 'Approval Exception', 'R' , '1', '1', 'form', 'approval-exception-form', '1', username);
     });
-
-    $(document).on('click','.delete-approver',function() {
+    
+    $(document).on('click','.delete-approval-exception',function() {
         var approval_type_id = $('#approval-type-id').text();
-        var employee_id = $(this).data('employee-id');
-        var department = $(this).data('department');
-        var transaction = 'delete approver';
+        var employee_id = $(this).data('employee-id'); 
+        var transaction = 'delete approval exception';
 
         Swal.fire({
-            title: 'Delete Approver',
-            text: 'Are you sure you want to delete this approver?',
+            title: 'Delete Approval Exception',
+            text: 'Are you sure you want to delete this approval exception?',
             icon: 'warning',
             showCancelButton: !0,
             confirmButtonText: 'Delete',
@@ -131,20 +128,20 @@ function initialize_click_events(){
                 $.ajax({
                     type: 'POST',
                     url: 'controller.php',
-                    data: {username : username, employee_id : employee_id, department : department, approval_type_id : approval_type_id, transaction : transaction},
+                    data: {username : username, employee_id : employee_id, approval_type_id : approval_type_id, transaction : transaction},
                     success: function (response) {
                         if(response === 'Deleted' || response === 'Not Found'){
                             if(response === 'Deleted'){
-                                show_alert('Delete Approver', 'The approver has been deleted.', 'success');
+                                show_alert('Delete Approval Exception', 'The approval exception has been deleted.', 'success');
                             }
                             else{
-                                show_alert('Delete Approver', 'The approver does not exist.', 'info');
+                                show_alert('Delete Approval Exception', 'The approval exception does not exist.', 'info');
                             }
 
-                            reload_datatable('#approver-datatable');
+                            reload_datatable('#approval-exception-datatable');
                         }
                         else{
-                          show_alert('Delete Approver', response, 'error');
+                          show_alert('Delete Approval Exception', response, 'error');
                         }
                     }
                 });
@@ -153,23 +150,21 @@ function initialize_click_events(){
         });
     });
 
-    $(document).on('click','#delete-approver',function() {
+    $(document).on('click','#delete-approval-exception',function() {
         var approval_type_id = $('#approval-type-id').text();
         var employee_id = [];
-        var department = [];
-        var transaction = 'delete multiple approver';
+        var transaction = 'delete multiple approval exception';
 
         $('.datatable-checkbox-children').each(function(){
             if($(this).is(':checked')){  
-                employee_id.push($(this).data('employee-id'));  
-                department.push($(this).data('department'));  
+                employee_id.push(this.value);  
             }
         });
 
         if(employee_id.length > 0){
             Swal.fire({
-                title: 'Delete Multiple Approvers',
-                text: 'Are you sure you want to delete these approvers?',
+                title: 'Delete Multiple Approval Exceptions',
+                text: 'Are you sure you want to delete these approval exceptions?',
                 icon: 'warning',
                 showCancelButton: !0,
                 confirmButtonText: 'Delete',
@@ -183,20 +178,20 @@ function initialize_click_events(){
                     $.ajax({
                         type: 'POST',
                         url: 'controller.php',
-                        data: {username : username, employee_id : employee_id, department : department, approval_type_id : approval_type_id, transaction : transaction},
+                        data: {username : username, employee_id : employee_id, approval_type_id : approval_type_id, transaction : transaction},
                         success: function (response) {
                             if(response === 'Deleted' || response === 'Not Found'){
                                 if(response === 'Deleted'){
-                                    show_alert('Delete Multiple Approvers', 'The approvers have been deleted.', 'success');
+                                    show_alert('Delete Multiple Approval Exceptions', 'The approval exceptions have been deleted.', 'success');
                                 }
                                 else{
-                                    show_alert('Delete Multiple Approvers', 'The approver does not exist.', 'info');
+                                    show_alert('Delete Multiple Approval Exceptions', 'The approval exception does not exist.', 'info');
                                 }
     
-                                reload_datatable('#approver-datatable');
+                                reload_datatable('#approval-exception-datatable');
                             }
                             else{
-                                show_alert('Delete Multiple Approvers', response, 'error');
+                                show_alert('Delete Multiple Approval Exceptions', response, 'error');
                             }
                         }
                     });
@@ -206,7 +201,7 @@ function initialize_click_events(){
             });
         }
         else{
-            show_alert('Delete Multiple Approvers', 'Please select the policies you want to delete.', 'error');
+            show_alert('Delete Multiple Approval Exceptions', 'Please select the policies you want to delete.', 'error');
         }
     });
 }

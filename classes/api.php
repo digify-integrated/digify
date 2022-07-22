@@ -1202,6 +1202,59 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : check_approver_exist
+    # Purpose    : Checks if the approver exists.
+    #
+    # Returns    : Number
+    #
+    # -------------------------------------------------------------
+    public function check_approver_exist($approval_type_id, $employee_id, $department){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL check_approver_exist(:approval_type_id, :employee_id, :department)');
+            $sql->bindValue(':approval_type_id', $approval_type_id);
+            $sql->bindValue(':employee_id', $employee_id);
+            $sql->bindValue(':department', $department);
+
+            if($sql->execute()){
+                $row = $sql->fetch();
+
+                return $row['TOTAL'];
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : check_approval_exception_exist
+    # Purpose    : Checks if the approval exception exists.
+    #
+    # Returns    : Number
+    #
+    # -------------------------------------------------------------
+    public function check_approval_exception_exist($approval_type_id, $employee_id){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL check_approval_exception_exist(:approval_type_id, :employee_id)');
+            $sql->bindValue(':approval_type_id', $approval_type_id);
+            $sql->bindValue(':employee_id', $employee_id);
+
+            if($sql->execute()){
+                $row = $sql->fetch();
+
+                return $row['TOTAL'];
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Update methods
     # -------------------------------------------------------------
     
@@ -6592,6 +6645,81 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : insert_approver
+    # Purpose    : Insert approver.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function insert_approver($approval_type_id, $employee_id, $department, $username){
+        if ($this->databaseConnection()) {
+            $approval_type_details = $this->get_approval_type_details($approval_type_id);
+            $transaction_log_id = $approval_type_details[0]['TRANSACTION_LOG_ID'];
+
+            $record_log = 'INS->' . $username . '->' . date('Y-m-d h:i:s');
+
+            $sql = $this->db_connection->prepare('CALL insert_approver(:approval_type_id, :employee_id, :department, :record_log)');
+            $sql->bindValue(':approval_type_id', $approval_type_id);
+            $sql->bindValue(':employee_id', $employee_id);
+            $sql->bindValue(':department', $department);
+            $sql->bindValue(':record_log', $record_log); 
+        
+            if($sql->execute()){
+                $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Insert', 'User ' . $username . ' inserted approver.');
+                                    
+                if($insert_transaction_log){
+                    return true;
+                }
+                else{
+                    return $insert_transaction_log;
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : insert_approval_exception
+    # Purpose    : Insert approval exception.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function insert_approval_exception($approval_type_id, $employee_id, $username){
+        if ($this->databaseConnection()) {
+            $approval_type_details = $this->get_approval_type_details($approval_type_id);
+            $transaction_log_id = $approval_type_details[0]['TRANSACTION_LOG_ID'];
+
+            $record_log = 'INS->' . $username . '->' . date('Y-m-d h:i:s');
+
+            $sql = $this->db_connection->prepare('CALL insert_approval_exception(:approval_type_id, :employee_id, :record_log)');
+            $sql->bindValue(':approval_type_id', $approval_type_id);
+            $sql->bindValue(':employee_id', $employee_id);
+            $sql->bindValue(':record_log', $record_log); 
+        
+            if($sql->execute()){
+                $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Insert', 'User ' . $username . ' inserted approval exception.');
+                                    
+                if($insert_transaction_log){
+                    return true;
+                }
+                else{
+                    return $insert_transaction_log;
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Delete methods
     # -------------------------------------------------------------
 
@@ -7532,6 +7660,55 @@ class Api{
         if ($this->databaseConnection()) {
             $sql = $this->db_connection->prepare('CALL delete_all_approval_exception(:approval_type_id)');
             $sql->bindValue(':approval_type_id', $approval_type_id);
+        
+            if($sql->execute()){
+                return true;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : delete_approver
+    # Purpose    : Delete approver.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function delete_approver($approval_type_id, $employee_id, $department, $username){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL delete_approver(:approval_type_id, :employee_id, :department)');
+            $sql->bindValue(':approval_type_id', $approval_type_id);
+            $sql->bindValue(':employee_id', $employee_id);
+            $sql->bindValue(':department', $department);
+        
+            if($sql->execute()){
+                return true;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : delete_approval_exception
+    # Purpose    : Delete approval exception.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function delete_approval_exception($approval_type_id, $employee_id, $username){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL delete_approval_exception(:approval_type_id, :employee_id)');
+            $sql->bindValue(':approval_type_id', $approval_type_id);
+            $sql->bindValue(':employee_id', $employee_id);
         
             if($sql->execute()){
                 return true;
@@ -8998,6 +9175,71 @@ class Api{
                         'APPROVAL_TYPE_DESCRIPTION' => $row['APPROVAL_TYPE_DESCRIPTION'],
                         'STATUS' => $row['STATUS'],
                         'TRANSACTION_LOG_ID' => $row['TRANSACTION_LOG_ID'],
+                        'RECORD_LOG' => $row['RECORD_LOG']
+                    );
+                }
+
+                return $response;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : get_approver_details
+    # Purpose    : Gets the approver details.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_approver_details($approval_type_id){
+        if ($this->databaseConnection()) {
+            $response = array();
+
+            $sql = $this->db_connection->prepare('CALL get_approver_details(:approval_type_id)');
+            $sql->bindValue(':approval_type_id', $approval_type_id);
+
+            if($sql->execute()){
+                while($row = $sql->fetch()){
+                    $response[] = array(
+                        'EMPLOYEE_ID' => $row['EMPLOYEE_ID'],
+                        'DEPARTMENT' => $row['DEPARTMENT'],
+                        'RECORD_LOG' => $row['RECORD_LOG']
+                    );
+                }
+
+                return $response;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : get_approval_exception_details
+    # Purpose    : Gets the approval exception details.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_approval_exception_details($approval_type_id){
+        if ($this->databaseConnection()) {
+            $response = array();
+
+            $sql = $this->db_connection->prepare('CALL get_approval_exception_details(:approval_type_id)');
+            $sql->bindValue(':approval_type_id', $approval_type_id);
+
+            if($sql->execute()){
+                while($row = $sql->fetch()){
+                    $response[] = array(
+                        'EMPLOYEE_ID' => $row['EMPLOYEE_ID'],
                         'RECORD_LOG' => $row['RECORD_LOG']
                     );
                 }

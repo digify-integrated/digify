@@ -2537,6 +2537,69 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     }
     # -------------------------------------------------------------
 
+    # Submit approver
+    else if($transaction == 'submit approver'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['approval_type_id']) && !empty($_POST['approval_type_id']) && isset($_POST['employee']) && !empty($_POST['employee']) && isset($_POST['department']) && !empty($_POST['department'])){
+            $error = '';
+            $username = $_POST['username'];
+            $approval_type_id = $_POST['approval_type_id'];
+            $employee = $_POST['employee'];
+
+            $departments = explode(',', $_POST['department']);
+
+            foreach($departments as $department){
+                $check_approval_type_exist = $api->check_approver_exist($approval_type_id, $employee, $department);
+
+                if($check_approval_type_exist == 0){
+                    $insert_approver = $api->insert_approver($approval_type_id, $employee, $department, $username);
+
+                    if(!$insert_approver){
+                        $error = $insert_approver;
+                    }
+                }
+            }
+
+            if(empty($error)){
+                echo 'Inserted';
+            }
+            else{
+                echo $error;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Submit approval exception
+    else if($transaction == 'submit approval exception'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['approval_type_id']) && !empty($_POST['approval_type_id']) && isset($_POST['employee']) && !empty($_POST['employee'])){
+            $error = '';
+            $username = $_POST['username'];
+            $approval_type_id = $_POST['approval_type_id'];
+
+            $employees = explode(',', $_POST['employee']);
+
+            foreach($employees as $employee){
+                $check_approval_exception_exist = $api->check_approval_exception_exist($approval_type_id, $employee);
+
+                if($check_approval_exception_exist == 0){
+                    $insert_approval_exception = $api->insert_approval_exception($approval_type_id, $employee, $username);
+
+                    if(!$insert_approval_exception){
+                        $error = $insert_approval_exception;
+                    }
+                }
+            }
+
+            if(empty($error)){
+                echo 'Inserted';
+            }
+            else{
+                echo $error;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
     # -------------------------------------------------------------
     #   Delete transactions
     # -------------------------------------------------------------
@@ -3850,6 +3913,125 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                     }
                     else{
                         $error = $delete_approval_type;
+                    }
+                }
+                else{
+                    $error = 'Not Found';
+                }
+            }
+
+            if(empty($error)){
+                echo 'Deleted';
+            }
+            else{
+                echo $error;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Delete approver
+    else if($transaction == 'delete approver'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['approval_type_id']) && !empty($_POST['approval_type_id']) && isset($_POST['employee_id']) && !empty($_POST['employee_id']) && isset($_POST['department']) && !empty($_POST['department'])){
+            $username = $_POST['username'];
+            $approval_type_id = $_POST['approval_type_id'];
+            $employee_id = $_POST['employee_id'];
+            $department = $_POST['department'];
+
+            $check_approver_exist = $api->check_approver_exist($approval_type_id, $employee_id, $department);
+
+            if($check_approver_exist > 0){
+                $delete_approver = $api->delete_approver($approval_type_id, $employee_id, $department, $username);
+                                        
+                if($delete_approver){
+                    echo 'Deleted';
+                }
+                else{
+                    echo $delete_approver;
+                }
+            }
+            else{
+                echo 'Not Found';
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Delete multiple approver
+    else if($transaction == 'delete multiple approver'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['approval_type_id']) && !empty($_POST['approval_type_id']) && isset($_POST['employee_id']) && !empty($_POST['employee_id']) && isset($_POST['department']) && !empty($_POST['department'])){
+            $username = $_POST['username'];
+            $approval_type_id = $_POST['approval_type_id'];
+            $employee_id = $_POST['employee_id'];
+            $department = $_POST['department'];
+            $employee_length = count($employee_id);
+
+            for($i = 0; $i < $employee_length; $i++){
+                $check_approver_exist = $api->check_approver_exist($approval_type_id, $employee_id[$i], $department[$i]);
+
+                if($check_approver_exist > 0){
+                    $delete_approver = $api->delete_approver($approval_type_id, $employee_id[$i], $department[$i], $username);
+                                        
+                    if(!$delete_approver){
+                        $error = $delete_approver;
+                    }
+                }
+                else{
+                    $error = 'Not Found';
+                }
+            }
+
+            if(empty($error)){
+                echo 'Deleted';
+            }
+            else{
+                echo $error;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Delete approval exception
+    else if($transaction == 'delete approval exception'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['approval_type_id']) && !empty($_POST['approval_type_id']) && isset($_POST['employee_id']) && !empty($_POST['employee_id'])){
+            $username = $_POST['username'];
+            $approval_type_id = $_POST['approval_type_id'];
+            $employee_id = $_POST['employee_id'];
+
+            $check_approval_exception_exist = $api->check_approval_exception_exist($approval_type_id, $employee_id);
+
+            if($check_approval_exception_exist > 0){
+                $delete_approval_exception = $api->delete_approval_exception($approval_type_id, $employee_id, $username);
+                                        
+                if($delete_approval_exception){
+                    echo 'Deleted';
+                }
+                else{
+                    echo $delete_approval_exception;
+                }
+            }
+            else{
+                echo 'Not Found';
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Delete multiple approval exception
+    else if($transaction == 'delete multiple approval exception'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['approval_type_id']) && isset($_POST['employee_id']) && !empty($_POST['employee_id'])){
+            $username = $_POST['username'];
+            $approval_type_id = $_POST['approval_type_id'];
+            $employee_ids = $_POST['employee_id'];
+
+            foreach($employee_ids as $employee_id){
+                $check_approval_exception_exist = $api->check_approval_exception_exist($approval_type_id, $employee_id);
+
+                if($check_approval_exception_exist > 0){
+                    $delete_approval_exception = $api->delete_approval_exception($approval_type_id, $employee_id, $username);
+                                    
+                    if(!$delete_approval_exception){
+                        $error = $delete_approval_exception;
                     }
                 }
                 else{
