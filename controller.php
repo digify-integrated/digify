@@ -1997,8 +1997,74 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     # -------------------------------------------------------------
 
     # Submit full attendance adjustment
-    else if($transaction == 'submit full attendance adjustment' || $transaction == 'submit attendance adjustment'){
+    else if($transaction == 'submit full attendance adjustment'){
         if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['attendance_id']) && !empty($_POST['attendance_id']) && isset($_POST['employee_id']) && !empty($_POST['employee_id']) && isset($_POST['time_in_date']) && !empty($_POST['time_in_date']) && isset($_POST['time_in_time']) && !empty($_POST['time_in_time']) && isset($_POST['time_out_date']) && !empty($_POST['time_out_date']) && isset($_POST['time_out_time']) && !empty($_POST['time_out_time'])){
+            $file_type = '';
+            $username = $_POST['username'];
+            $attendance_id = $_POST['attendance_id'];
+            $employee_id = $_POST['employee_id'];
+            $reason = $_POST['reason'];
+            $time_in = $api->check_date('attendance empty', $_POST['time_in_date'] . ' ' . $_POST['time_in_time'], '', 'Y-m-d H:i:00', '', '', '');
+            $time_out = $api->check_date('attendance empty', $_POST['time_out_date'] . ' ' . $_POST['time_out_time'], '', 'Y-m-d H:i:00', '', '', '');
+
+            $attachment_name = $_FILES['attachment']['name'];
+            $attachment_size = $_FILES['attachment']['size'];
+            $attachment_error = $_FILES['attachment']['error'];
+            $attachment_tmp_name = $_FILES['attachment']['tmp_name'];
+            $attachment_ext = explode('.', $attachment_name);
+            $attachment_actual_ext = strtolower(end($attachment_ext));
+
+            $upload_setting_details = $api->get_upload_setting_details(10);
+            $upload_file_type_details = $api->get_upload_file_type_details(10);
+            $file_max_size = $upload_setting_details[0]['MAX_FILE_SIZE'] * 1048576;
+
+            for($i = 0; $i < count($upload_file_type_details); $i++) {
+                $file_type .= $upload_file_type_details[$i]['FILE_TYPE'];
+
+                if($i != (count($upload_file_type_details) - 1)){
+                    $file_type .= ',';
+                }
+            }
+
+            $allowed_ext = explode(',', $file_type);
+
+            if(in_array($attachment_actual_ext, $allowed_ext)){
+                if(!$attachment_error){
+                    if($attachment_size < $file_max_size){
+                        $check_attendance_validation = $api->check_attendance_validation($time_in, $time_out);
+
+                        if(empty($check_attendance_validation)){
+                            $insert_attendance_adjustment = $api->insert_attendance_adjustment($attachment_tmp_name, $attachment_actual_ext, $attendance_id, $employee_id, $time_in, $time_out, $reason, $username);
+
+                            if($insert_attendance_adjustment){
+                                echo 'Inserted';
+                            }
+                            else{
+                                echo $insert_attendance_adjustment;
+                            }
+                        }
+                        else{
+                            echo $check_attendance_validation;
+                        }
+                    }
+                    else{
+                        echo 'File Size';
+                    }
+                }
+                else{
+                    echo 'There was an error uploading the file.';
+                }
+            }
+            else{
+                echo 'File Type';
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Submit attendance adjustment
+    else if($transaction == 'submit attendance adjustment'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['attendance_id']) && !empty($_POST['attendance_id']) && isset($_POST['employee_id']) && !empty($_POST['employee_id']) && isset($_POST['time_in_date']) && !empty($_POST['time_in_date']) && isset($_POST['time_in_time']) && !empty($_POST['time_in_time']) && isset($_POST['time_out_date']) && isset($_POST['time_out_time'])){
             $file_type = '';
             $username = $_POST['username'];
             $attendance_id = $_POST['attendance_id'];
@@ -4254,8 +4320,8 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     }
     # -------------------------------------------------------------
 
-    # Activate multiple user account
-    else if($transaction == 'activate multiple user account'){
+    # Activate multiple approval type
+    else if($transaction == 'activate multiple approval type'){
         if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['approval_type_id'])){
             $username = $_POST['username'];
             $approval_type_ids = $_POST['approval_type_id'];
@@ -4370,8 +4436,8 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     }
     # -------------------------------------------------------------
 
-    # Deactivate multiple user account
-    else if($transaction == 'deactivate multiple user account'){
+    # Deactivate multiple approval type
+    else if($transaction == 'deactivate multiple approval type'){
         if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['approval_type_id'])){
             $username = $_POST['username'];
             $approval_type_ids = $_POST['approval_type_id'];
@@ -4676,62 +4742,6 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     #   For recommendation transactions
     # -------------------------------------------------------------
 
-    # For recommendation attendance creation
-    else if($transaction == 'for recommendation attendance creation'){
-        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['creation_id']) && !empty($_POST['creation_id'])){
-            $username = $_POST['username'];
-            $creation_id = $_POST['creation_id'];
-
-            $check_attendance_creation_exist = $api->check_attendance_creation_exist($creation_id);
-
-            if($check_attendance_creation_exist > 0){
-                $update_attendance_creation_status = $api->update_attendance_creation_status($creation_id, 'FORREC', null, null, $username);
-    
-                if($update_attendance_creation_status){
-                    echo 'For Recommendation';
-                }
-                else{
-                    echo $update_attendance_creation_status;
-                }
-            }
-            else{
-                echo 'Not Found';
-            }
-        }
-    }
-    # -------------------------------------------------------------
-
-    # For recommendation multiple attendance creation
-    else if($transaction == 'for recommendation multiple attendance creation'){
-        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['creation_id']) && !empty($_POST['creation_id'])){
-            $username = $_POST['username'];
-            $creation_ids = $_POST['creation_id'];
-
-            foreach($creation_ids as $creation_id){
-                $check_attendance_creation_exist = $api->check_attendance_creation_exist($creation_id);
-
-                if($check_attendance_creation_exist > 0){
-                    $update_attendance_creation_status = $api->update_attendance_creation_status($creation_id, 'FORREC', null, null, $username);
-        
-                    if(!$update_attendance_creation_status){
-                        $error = $update_attendance_creation_status;
-                    }
-                }
-                else{
-                    $error = 'Not Found';
-                }
-            }
-
-            if(empty($error)){
-                echo 'For Recommendation';
-            }
-            else{
-                echo $error;
-            }
-        }
-    }
-    # -------------------------------------------------------------
-
     # For recommendation attendance adjustment
     else if($transaction == 'for recommendation attendance adjustment'){
         if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['adjustment_id']) && !empty($_POST['adjustment_id'])){
@@ -4771,6 +4781,62 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
             
                     if(!$update_attendance_adjustment_status){
                         $error = $update_attendance_adjustment_status;
+                    }
+                }
+                else{
+                    $error = 'Not Found';
+                }
+            }
+
+            if(empty($error)){
+                echo 'For Recommendation';
+            }
+            else{
+                echo $error;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # For recommendation attendance creation
+    else if($transaction == 'for recommendation attendance creation'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['creation_id']) && !empty($_POST['creation_id'])){
+            $username = $_POST['username'];
+            $creation_id = $_POST['creation_id'];
+
+            $check_attendance_creation_exist = $api->check_attendance_creation_exist($creation_id);
+
+            if($check_attendance_creation_exist > 0){
+                $update_attendance_creation_status = $api->update_attendance_creation_status($creation_id, 'FORREC', null, null, $username);
+    
+                if($update_attendance_creation_status){
+                    echo 'For Recommendation';
+                }
+                else{
+                    echo $update_attendance_creation_status;
+                }
+            }
+            else{
+                echo 'Not Found';
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # For recommendation multiple attendance creation
+    else if($transaction == 'for recommendation multiple attendance creation'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['creation_id']) && !empty($_POST['creation_id'])){
+            $username = $_POST['username'];
+            $creation_ids = $_POST['creation_id'];
+
+            foreach($creation_ids as $creation_id){
+                $check_attendance_creation_exist = $api->check_attendance_creation_exist($creation_id);
+
+                if($check_attendance_creation_exist > 0){
+                    $update_attendance_creation_status = $api->update_attendance_creation_status($creation_id, 'FORREC', null, null, $username);
+        
+                    if(!$update_attendance_creation_status){
+                        $error = $update_attendance_creation_status;
                     }
                 }
                 else{
@@ -5896,6 +5962,73 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                 'DECISION_BY' => $decision_by_file_as,
                 'DECISION_REMARKS' => $attendance_adjustment_details[0]['DECISION_REMARKS'],
                 'REASON' => $attendance_adjustment_details[0]['REASON']
+            );
+
+            echo json_encode($response);
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Attendance creation summary details
+    else if($transaction == 'attendance creation summary details'){
+        if(isset($_POST['creation_id']) && !empty($_POST['creation_id'])){
+            $creation_id = $_POST['creation_id'];
+
+            $attendance_creation_details = $api->get_attendance_creation_details($creation_id);
+            $employee_id = $attendance_creation_details[0]['EMPLOYEE_ID'];
+            $status = $attendance_creation_details[0]['STATUS'];
+            $sanction = $attendance_creation_details[0]['SANCTION'];
+            $attachment = $attendance_creation_details[0]['ATTACHMENT'];
+            $recommendation_by = $attendance_creation_details[0]['RECOMMENDATION_BY'];
+            $decision_by = $attendance_creation_details[0]['DECISION_BY'];
+            $time_in = $api->check_date('summary', $attendance_creation_details[0]['TIME_IN'], '', 'F d, Y h:i:s a', '', '', '');
+            $time_out = $api->check_date('summary', $attendance_creation_details[0]['TIME_OUT'], '', 'F d, Y h:i:s a', '', '', '');
+
+            $status_name = $api->get_attendance_creation_status($status)[0]['BADGE'];
+            $sanction_name = $api->get_attendance_creation_sanction_status($sanction)[0]['BADGE'];
+
+            $employee_details = $api->get_employee_details($employee_id);
+            $file_as = $employee_details[0]['FILE_AS'];
+
+            if(!empty($recommendation_by)){
+                $recommendation_by_details = $api->get_employee_details($recommendation_by);
+                $recommendation_by_file_as = $recommendation_by_details[0]['FILE_AS'];
+            }
+            else{
+                $recommendation_by_file_as = '--';
+            }
+
+            if(!empty($decision_by)){
+                $decision_by_details = $api->get_employee_details($decision_by);
+                $decision_by_file_as = $decision_by_details[0]['FILE_AS'];
+            }
+            else{
+                $decision_by_file_as = '--';
+            }
+
+            if(!empty($attachment)){
+                $attachment = '<a href="'. $attachment .'" target="_blank">View Attachment</a>';
+            }
+            else{
+                $attachment = '';
+            }
+
+            $response[] = array(
+                'EMPLOYEE' => $file_as,
+                'TIME_IN' => $time_in,
+                'TIME_OUT' => $time_out,
+                'CREATED_DATE' => $api->check_date('summary', $attendance_creation_details[0]['CREATED_DATE'], '', 'F d, Y h:i:s a', '', '', ''),
+                'FOR_RECOMMENDATION_DATE' => $api->check_date('summary', $attendance_creation_details[0]['FOR_RECOMMENDATION_DATE'], '', 'F d, Y h:i:s a', '', '', ''),
+                'RECOMMENDATION_DATE' => $api->check_date('summary', $attendance_creation_details[0]['RECOMMENDATION_DATE'], '', 'F d, Y h:i:s a', '', '', ''),
+                'DECISION_DATE' => $api->check_date('summary', $attendance_creation_details[0]['DECISION_DATE'], '', 'F d, Y h:i:s a', '', '', ''),
+                'STATUS' => $status_name,
+                'SANCTION' => $sanction_name,
+                'ATTACHMENT' => $attachment,
+                'RECOMMENDATION_REMARKS' => $attendance_creation_details[0]['RECOMMENDATION_REMARKS'],
+                'RECOMMENDATION_BY' => $recommendation_by_file_as,
+                'DECISION_BY' => $decision_by_file_as,
+                'DECISION_REMARKS' => $attendance_creation_details[0]['DECISION_REMARKS'],
+                'REASON' => $attendance_creation_details[0]['REASON']
             );
 
             echo json_encode($response);

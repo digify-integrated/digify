@@ -27,8 +27,8 @@ function initialize_approval_type_table(datatable_name, buttons = false, show_al
 
     var column_definition = [
         { 'width': '1%','bSortable': false, 'aTargets': 0 },
-        { 'width': '59%', 'aTargets': 1 },
-        { 'width': '10%', 'aTargets': 2 },
+        { 'width': '44%', 'aTargets': 1 },
+        { 'width': '15%', 'aTargets': 2 },
         { 'width': '30%','bSortable': false, 'aTargets': 3 },
     ];
 

@@ -2333,6 +2333,72 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                 </tbody>
                             </table>';
             }
+            else if($element_type == 'attendance creation details'){
+                $element = '<table class="table table-nowrap mb-0">
+                                <tbody>
+                                    <tr>
+                                        <th scope="row">Employee :</th>
+                                        <td id="employee"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Time In :</th>
+                                        <td id="time_in"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Time Out :</th>
+                                        <td id="time_out"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Reason :</th>
+                                        <td id="reason"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Status :</th>
+                                        <td id="creation_status"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Sanction :</th>
+                                        <td id="sanction"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Attachment :</th>
+                                        <td id="attachment"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Created Date :</th>
+                                        <td id="created_date"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">For Recommendation Date :</th>
+                                        <td id="for_recommendation_date"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Recommendation Date :</th>
+                                        <td id="recommendation_date"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Recommendation By :</th>
+                                        <td id="recommendation_by"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Recommendation Remarks :</th>
+                                        <td id="recommendation_remarks"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Decision Date :</th>
+                                        <td id="decision_date"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Decision By :</th>
+                                        <td id="decision_by"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Decision Remarks :</th>
+                                        <td id="decision_remarks"></td>
+                                    </tr>
+                                </tbody>
+                            </table>';
+            }
             else if($element_type == 'approval type details'){
                 $element = '<div class="row">
                                 <div class="col-md-12">
@@ -4225,6 +4291,10 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                 $employee_details = $api->get_employee_details($username);
                 $employee_id = $employee_details[0]['EMPLOYEE_ID'] ?? null;
 
+                $approval_type_details = $api->get_approval_type_details(1);
+                $approval_type_status = $approval_type_details[0]['STATUS'];
+                $check_approval_exception_exist = $api->check_approval_exception_exist(1, $employee_id);
+
                 $filter_for_recommendation_start_date = $api->check_date('empty', $_POST['filter_for_recommendation_start_date'], '', 'Y-m-d', '', '', '');
                 $filter_for_recommendation_end_date = $api->check_date('empty', $_POST['filter_for_recommendation_end_date'], '', 'Y-m-d', '', '', '');
                 $filter_recommendation_start_date = $api->check_date('empty', $_POST['filter_recommendation_start_date'], '', 'Y-m-d', '', '', '');
@@ -4350,18 +4420,24 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                             $delete = '';
                         }
 
-                        if(($update_attendance_adjustment > 0 || $tag_attendance_adjustment_for_recommendation > 0) && $status == 'PEN'){
+                        if($status == 'PEN' && $check_approval_exception_exist == 0 && $approval_type_status == 'ACTIVE' && $tag_attendance_adjustment_for_recommendation > 0){
+                            $data_for_recommendation = 1;
+                            $for_recommendation = '<button type="button" class="btn btn-success waves-effect waves-light for-recommend-attendance-adjustment" data-adjustment-id="'. $adjustment_id .'" title="Tag Attendance Adjustment For Recommendation">
+                                <i class="bx bx-check font-size-16 align-middle"></i>
+                            </button>';
+                        }
+                        else{
+                            $data_for_recommendation = 0;
+                            $for_recommendation = '';
+                        }
+
+                        if($update_attendance_adjustment > 0 && $status == 'PEN'){
                             $update = '<button type="button" class="btn btn-info waves-effect waves-light update-attendance-adjustment" data-adjustment-type="'. $adjustment_type .'" data-adjustment-id="'. $adjustment_id .'" title="Update Attendance Adjustment">
                                     <i class="bx bx-pencil font-size-16 align-middle"></i>
                                 </button>';
-
-                            $for_recommendation = '<button type="button" class="btn btn-success waves-effect waves-light for-recommend-attendance-adjustment" data-adjustment-id="'. $adjustment_id .'" title="Tag Attendance Adjustment For Recommendation">
-                                            <i class="bx bx-check font-size-16 align-middle"></i>
-                                        </button>';
                         }
                         else{
                             $update = '';
-                            $for_recommendation = '';
                         }
 
                         if($view_transaction_log > 0 && !empty($transaction_log_id)){
@@ -4375,17 +4451,9 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
 
                         if($status == 'PEN' || $status == 'REC' || $status == 'FORREC'){
                             $data_cancel = 1;
-
-                            if($status == 'PEN'){
-                                $data_for_recommendation = 1;
-                            }
-                            else{
-                                $data_for_recommendation = 0;
-                            }
                         }
                         else{
                             $data_cancel = 0;
-                            $data_for_recommendation = 0;
                         }
     
                         $response[] = array(
@@ -4430,6 +4498,10 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
 
                 $employee_details = $api->get_employee_details($username);
                 $employee_id = $employee_details[0]['EMPLOYEE_ID'] ?? null;
+
+                $approval_type_details = $api->get_approval_type_details(3);
+                $approval_type_status = $approval_type_details[0]['STATUS'];
+                $check_approval_exception_exist = $api->check_approval_exception_exist(3, $employee_id);
 
                 $filter_for_recommendation_start_date = $api->check_date('empty', $_POST['filter_for_recommendation_start_date'], '', 'Y-m-d', '', '', '');
                 $filter_for_recommendation_end_date = $api->check_date('empty', $_POST['filter_for_recommendation_end_date'], '', 'Y-m-d', '', '', '');
@@ -4529,18 +4601,24 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                             $delete = '';
                         }
 
-                        if(($update_attendance_creation > 0 || $tag_attendance_creation_for_recommendation > 0) && $status == 'PEN'){
+                        if($status == 'PEN' && $check_approval_exception_exist == 0 && $approval_type_status == 'ACTIVE' && $tag_attendance_creation_for_recommendation > 0){
+                            $data_for_recommendation = 1;
+                            $for_recommendation = '<button type="button" class="btn btn-success waves-effect waves-light for-recommend-attendance-creation" data-creation-id="'. $creation_id .'" title="Tag Attendance Adjustment For Recommendation">
+                                <i class="bx bx-check font-size-16 align-middle"></i>
+                            </button>';
+                        }
+                        else{
+                            $data_for_recommendation = 0;
+                            $for_recommendation = '';
+                        }
+
+                        if(($update_attendance_creation  > 0) && $status == 'PEN'){
                             $update = '<button type="button" class="btn btn-info waves-effect waves-light update-attendance-creation" data-creation-id="'. $creation_id .'" title="Update Attendance Adjustment">
                                     <i class="bx bx-pencil font-size-16 align-middle"></i>
                                 </button>';
-
-                            $for_recommendation = '<button type="button" class="btn btn-success waves-effect waves-light for-recommend-attendance-creation" data-creation-id="'. $creation_id .'" title="Tag Attendance Adjustment For Recommendation">
-                                            <i class="bx bx-check font-size-16 align-middle"></i>
-                                        </button>';
                         }
                         else{
                             $update = '';
-                            $for_recommendation = '';
                         }
 
                         if($view_transaction_log > 0 && !empty($transaction_log_id)){
@@ -4554,17 +4632,9 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
 
                         if($status == 'PEN' || $status == 'REC' || $status == 'FORREC'){
                             $data_cancel = 1;
-
-                            if($status == 'PEN'){
-                                $data_for_recommendation = 1;
-                            }
-                            else{
-                                $data_for_recommendation = 0;
-                            }
                         }
                         else{
                             $data_cancel = 0;
-                            $data_for_recommendation = 0;
                         }
     
                         $response[] = array(
@@ -4708,7 +4778,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                         }
     
                         $response[] = array(
-                            'CHECK_BOX' => '<input class="form-check-input datatable-checkbox-children" type="checkbox" data-active="'. $data_active .'" value="'. $username .'">',
+                            'CHECK_BOX' => '<input class="form-check-input datatable-checkbox-children" type="checkbox" data-active="'. $data_active .'" value="'. $approval_type_id .'">',
                             'APPROVAL_TYPE' => $approval_type . '<p class="text-muted mb-0">'. $approval_type_description .'</p>',
                             'STATUS' => $approval_type_status,
                             'ACTION' => '<div class="d-flex gap-2">

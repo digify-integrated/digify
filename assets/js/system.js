@@ -5376,6 +5376,36 @@ function display_form_details(form_type){
             }
         });
     }
+    else if(form_type == 'attendance creation details'){
+        transaction = 'attendance creation summary details';
+
+        var creation_id = sessionStorage.getItem('creation_id');
+
+        $.ajax({
+            url: 'controller.php',
+            method: 'POST',
+            dataType: 'JSON',
+            data: {creation_id : creation_id, transaction : transaction},
+            success: function(response) {
+                $('#employee').text(response[0].EMPLOYEE);
+                $('#time_in').text(response[0].TIME_IN);
+                $('#time_out').text(response[0].TIME_OUT);
+                $('#reason').text(response[0].REASON);
+                $('#created_date').text(response[0].CREATED_DATE);
+                $('#for_recommendation_date').text(response[0].FOR_RECOMMENDATION_DATE);
+                $('#recommendation_date').text(response[0].RECOMMENDATION_DATE);
+                $('#recommendation_by').text(response[0].RECOMMENDATION_BY);
+                $('#recommendation_remarks').text(response[0].RECOMMENDATION_REMARKS);
+                $('#decision_date').text(response[0].DECISION_DATE);
+                $('#decision_by').text(response[0].DECISION_BY);
+                $('#decision_remarks').text(response[0].DECISION_REMARKS);
+                
+                document.getElementById('attachment').innerHTML = response[0].ATTACHMENT;
+                document.getElementById('creation_status').innerHTML = response[0].STATUS;
+                document.getElementById('sanction').innerHTML = response[0].SANCTION;
+            }
+        });
+    }
     else if(form_type == 'update attendance creation form'){
         transaction = 'attendance creation details';
 
@@ -5710,7 +5740,7 @@ function generate_element(element_type, value, container, modal, username){
             if(modal == '1'){
                 $('#System-Modal').modal('show');
 
-                if(element_type == 'user account details' || element_type == 'system parameter details' || element_type == 'company details' || element_type == 'job position details' || element_type == 'work location details' || element_type == 'working hours details' || element_type == 'attendance details' || element_type == 'attendance adjustment details' || element_type == 'attendance cration details' || element_type == 'approval type details'){
+                if(element_type == 'user account details' || element_type == 'system parameter details' || element_type == 'company details' || element_type == 'job position details' || element_type == 'work location details' || element_type == 'working hours details' || element_type == 'attendance details' || element_type == 'attendance adjustment details' || element_type == 'attendance creation details' || element_type == 'attendance cration details' || element_type == 'approval type details'){
                     display_form_details(element_type);
                 }
                 else if(element_type == 'transaction log'){

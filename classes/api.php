@@ -9131,6 +9131,7 @@ class Api{
                         'REASON' => $row['REASON'],
                         'ATTACHMENT' => $row['ATTACHMENT'],
                         'STATUS' => $row['STATUS'],
+                        'SANCTION' => $row['SANCTION'],
                         'CREATED_DATE' => $row['CREATED_DATE'],
                         'FOR_RECOMMENDATION_DATE' => $row['FOR_RECOMMENDATION_DATE'],
                         'RECOMMENDATION_DATE' => $row['RECOMMENDATION_DATE'],
