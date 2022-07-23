@@ -3504,7 +3504,7 @@ CREATE PROCEDURE get_approval_exception_details(IN approval_type_id VARCHAR(100)
 BEGIN
 	SET @approval_type_id = approval_type_id;
 
-	SET @query = 'SELECT EMPLOYEE_D, RECORD_LOG FROM approval_exception WHERE APPROVAL_TYPE_ID = @approval_type_id';
+	SET @query = 'SELECT EMPLOYEE_ID, RECORD_LOG FROM approval_exception WHERE APPROVAL_TYPE_ID = @approval_type_id';
 
 	PREPARE stmt FROM @query;
 	EXECUTE stmt;

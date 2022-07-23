@@ -5924,10 +5924,100 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
         if(isset($_POST['approval_type_id']) && !empty($_POST['approval_type_id'])){
             $approval_type_id = $_POST['approval_type_id'];
             $approval_type_details = $api->get_approval_type_details($approval_type_id);
+            $approver_details = $api->get_approver_details($approval_type_id);
+            $approval_exception_details = $api->get_approval_exception_details($approval_type_id);
+
+            $approver_table = '<table class="table table-bordered mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Employee</th>
+                    <th>Department</th>
+                </tr>
+            </thead>
+            <tbody>';
+
+            $approval_exception_table = '<table class="table table-bordered mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Employee</th>
+                </tr>
+            </thead>
+            <tbody>';
+
+            if(count($approver_details) > 0){
+                for($i = 0; $i < count($approver_details); $i++) {
+                $employee_id = $approver_details[$i]['EMPLOYEE_ID'];
+                $department = $approver_details[$i]['DEPARTMENT'];
+                
+                $employee_details = $api->get_employee_details($employee_id);
+                $file_as = $employee_details[0]['FILE_AS'];
+                $job_position = $employee_details[0]['JOB_POSITION'];
+                $employee_image = $employee_details[0]['EMPLOYEE_IMAGE'];
+
+                $department_details = $api->get_department_details($department);
+                $department_name = $department_details[0]['DEPARTMENT'];
+
+                $job_position_details = $api->get_job_position_details($job_position);
+                $job_position_name = $job_position_details[0]['JOB_POSITION'] ?? null;
+
+                if(empty($employee_image)){
+                    $employee_image = $api->check_image($employee_image ?? null, 'profile');
+                }
+
+                $approver_table .= '<tr>
+                                <td><img class="rounded-circle avatar-xs" src="'. $employee_image .'" alt="profile"></td>
+                                <td>'. $file_as . '<p class="text-muted mb-0">'. $job_position_name .'</p></td>
+                                <td>'. $department_name .'</td>
+                            </tr>';
+                }
+            }
+            else{
+                $approver_table .= '<tr>
+                            <td colspan="3"><p class="text-center">No Assigned Employee</p></td>
+                        </tr>';
+            }
+
+            if(count($approval_exception_details) > 0){
+                for($i = 0; $i < count($approval_exception_details); $i++) {
+                $employee_id = $approval_exception_details[$i]['EMPLOYEE_ID'];
+                
+                $employee_details = $api->get_employee_details($employee_id);
+                $file_as = $employee_details[0]['FILE_AS'];
+                $job_position = $employee_details[0]['JOB_POSITION'];
+                $employee_image = $employee_details[0]['EMPLOYEE_IMAGE'];
+
+                $job_position_details = $api->get_job_position_details($job_position);
+                $job_position_name = $job_position_details[0]['JOB_POSITION'] ?? null;
+
+                if(empty($employee_image)){
+                    $employee_image = $api->check_image($employee_image ?? null, 'profile');
+                }
+
+                $approval_exception_table .= '<tr>
+                                <td><img class="rounded-circle avatar-xs" src="'. $employee_image .'" alt="profile"></td>
+                                <td>'. $file_as . '<p class="text-muted mb-0">'. $job_position_name .'</p></td>
+                            </tr>';
+                }
+            }
+            else{
+                $approval_exception_table .= '<tr>
+                            <td colspan="3"><p class="text-center">No Assigned Employee</p></td>
+                        </tr>';
+            }
+
+            $approver_table .= '</tbody>
+            </table>';
+
+            $approval_exception_table .= '</tbody>
+            </table>';
 
             $response[] = array(
                 'APPROVAL_TYPE' => $approval_type_details[0]['APPROVAL_TYPE'],
-                'APPROVAL_TYPE_DESCRIPTION' => $approval_type_details[0]['APPROVAL_TYPE_DESCRIPTION']
+                'APPROVAL_TYPE_DESCRIPTION' => $approval_type_details[0]['APPROVAL_TYPE_DESCRIPTION'],
+                'APPROVER_TABLE' => $approver_table,
+                'APPROVAL_EXCEPTION_TABLE' => $approval_exception_table,
             );
 
             echo json_encode($response);

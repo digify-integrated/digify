@@ -2364,16 +2364,13 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                         <li class="nav-item">
                                             <a class="nav-link" data-bs-toggle="tab" href="#exceptions" role="tab">
                                                 <span class="d-block d-sm-none"><i class="bx bx-user-x"></i></span>
-                                                <span class="d-none d-sm-block">Exception</span>    
+                                                <span class="d-none d-sm-block">Approval Exception</span>    
                                             </a>
                                         </li>
                                     </ul>
                                     <div class="tab-content p-3 text-muted">
-                                        <div class="tab-pane active" id="approvers" role="tabpanel">
-
-                                        </div>
-                                        <div class="tab-pane" id="exceptions" role="tabpanel">
-                                        </div>
+                                        <div class="tab-pane active" id="approvers" role="tabpanel"></div>
+                                        <div class="tab-pane" id="exceptions" role="tabpanel"></div>
                                     </div>
                                 </div>
                             </div>';

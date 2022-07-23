@@ -5426,6 +5426,9 @@ function display_form_details(form_type){
             success: function(response) {
                 $('#approval_type').text(response[0].APPROVAL_TYPE);
                 $('#approval_type_description').text(response[0].APPROVAL_TYPE_DESCRIPTION);
+
+                document.getElementById('approvers').innerHTML = response[0].APPROVER_TABLE;
+                document.getElementById('exceptions').innerHTML = response[0].APPROVAL_EXCEPTION_TABLE;
             }
         });
     }
