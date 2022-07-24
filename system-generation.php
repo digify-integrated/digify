@@ -5399,7 +5399,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                 $filter_work_location = $_POST['filter_work_location'];
                 $filter_department = $_POST['filter_department'];
 
-                $query = 'SELECT ADJUSTMENT_ID, EMPLOYEE_ID, ATTENDANCE_ID, TIME_IN, TIME_OUT, STATUS, SANCTION, TRANSACTION_LOG_ID FROM attendance_adjustment WHERE STATUS = :status AND EMPLOYEE_ID IN (SELECT EMPLOYEE_ID FROM employee_details WHERE DEPARTMENT IN (SELECT DEPARTMENT FROM approval_approver WHERE EMPLOYEE_ID = :employee_id))';
+                $query = 'SELECT ADJUSTMENT_ID, EMPLOYEE_ID, ATTENDANCE_ID, TIME_IN, TIME_OUT, STATUS, SANCTION, TRANSACTION_LOG_ID FROM attendance_adjustment WHERE STATUS = :status AND EMPLOYEE_ID IN (SELECT EMPLOYEE_ID FROM employee_details WHERE DEPARTMENT IN (SELECT DEPARTMENT FROM approval_approver WHERE APPROVAL_TYPE_ID = :approval_type_id AND EMPLOYEE_ID = :employee_id))';
 
                 if((!empty($filter_creation_start_date) && !empty($filter_creation_end_date)) || !empty($filter_work_location) || !empty($filter_department)){
                     $query .= ' AND ';
@@ -5422,8 +5422,9 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                 }
     
                 $sql = $api->db_connection->prepare($query);
-                $sql->bindValue(':employee_id', $employee_id);
                 $sql->bindValue(':status', 'FORREC');
+                $sql->bindValue(':approval_type_id', '1');
+                $sql->bindValue(':employee_id', $employee_id);
 
                 if((!empty($filter_creation_start_date) && !empty($filter_creation_end_date)) || !empty($filter_work_location) || !empty($filter_department)){
                     if(!empty($filter_for_recommendation_start_date) && !empty($filter_for_recommendation_end_date)){
@@ -5563,7 +5564,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                 $filter_work_location = $_POST['filter_work_location'];
                 $filter_department = $_POST['filter_department'];
 
-                $query = 'SELECT CREATION_ID, EMPLOYEE_ID, TIME_IN, TIME_OUT, STATUS, SANCTION, TRANSACTION_LOG_ID FROM attendance_creation WHERE STATUS = :status AND EMPLOYEE_ID IN (SELECT EMPLOYEE_ID FROM employee_details WHERE DEPARTMENT IN (SELECT DEPARTMENT FROM approval_approver WHERE EMPLOYEE_ID = :employee_id))';
+                $query = 'SELECT CREATION_ID, EMPLOYEE_ID, TIME_IN, TIME_OUT, STATUS, SANCTION, TRANSACTION_LOG_ID FROM attendance_creation WHERE STATUS = :status AND EMPLOYEE_ID IN (SELECT EMPLOYEE_ID FROM employee_details WHERE DEPARTMENT IN (SELECT DEPARTMENT FROM approval_approver WHERE APPROVAL_TYPE_ID = :approval_type_id AND EMPLOYEE_ID = :employee_id))';
 
                 if((!empty($filter_creation_start_date) && !empty($filter_creation_end_date)) || !empty($filter_work_location) || !empty($filter_department)){
                     $query .= ' AND ';
@@ -5586,8 +5587,9 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                 }
     
                 $sql = $api->db_connection->prepare($query);
-                $sql->bindValue(':employee_id', $employee_id);
                 $sql->bindValue(':status', 'FORREC');
+                $sql->bindValue(':employee_id', $employee_id);
+                $sql->bindValue(':approval_type_id', '3');
 
                 if((!empty($filter_creation_start_date) && !empty($filter_creation_end_date)) || !empty($filter_work_location) || !empty($filter_department)){
                     if(!empty($filter_for_recommendation_start_date) && !empty($filter_for_recommendation_end_date)){
