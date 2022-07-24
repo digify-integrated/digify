@@ -10070,13 +10070,13 @@ class Api{
 
     # -------------------------------------------------------------
     #
-    # Name       : get_attendance_adjustment_sanction_status
+    # Name       : get_attendance_adjustment_sanction
     # Purpose    : Returns the status, badge
     #
     # Returns    : Array
     #
     # -------------------------------------------------------------
-    public function get_attendance_adjustment_sanction_status($stat){
+    public function get_attendance_adjustment_sanction($stat){
         $response = array();
 
         switch ($stat) {
@@ -10146,13 +10146,13 @@ class Api{
 
     # -------------------------------------------------------------
     #
-    # Name       : get_attendance_creation_sanction_status
+    # Name       : get_attendance_creation_sanction
     # Purpose    : Returns the status, badge
     #
     # Returns    : Array
     #
     # -------------------------------------------------------------
-    public function get_attendance_creation_sanction_status($stat){
+    public function get_attendance_creation_sanction($stat){
         $response = array();
 
         switch ($stat) {

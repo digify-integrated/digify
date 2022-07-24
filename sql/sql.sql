@@ -3282,6 +3282,49 @@ BEGIN
 	DROP PREPARE stmt;
 END //
 
+CREATE TABLE attendance_creation(
+	CREATION_ID VARCHAR(100) PRIMARY KEY,
+	EMPLOYEE_ID VARCHAR(100) NOT NULL,
+	TIME_IN DATETIME,
+	TIME_OUT DATETIME,
+	REASON VARCHAR(500) NOT NULL,
+	ATTACHMENT VARCHAR(500),
+	STATUS VARCHAR(10) NOT NULL,
+	SANCTION INT(1) NOT NULL,
+	CREATED_DATE DATETIME,
+	FOR_RECOMMENDATION_DATE DATETIME,
+	RECOMMENDATION_DATE DATETIME,
+	RECOMMENDATION_BY VARCHAR(100),
+	RECOMMENDATION_REMARKS VARCHAR(500),
+	DECISION_DATE DATETIME,
+	DECISION_BY VARCHAR(100),
+	DECISION_REMARKS VARCHAR(500),
+	TRANSACTION_LOG_ID VARCHAR(500),
+	RECORD_LOG VARCHAR(100)
+)
+
+CREATE TABLE attendance_adjustment(
+	ADJUSTMENT_ID VARCHAR(100) PRIMARY KEY,
+	ATTENDANCE_ID VARCHAR(100) NOT NULL,
+	EMPLOYEE_ID VARCHAR(100) NOT NULL,
+	TIME_IN DATETIME,
+	TIME_OUT DATETIME,
+	REASON VARCHAR(500) NOT NULL,
+	ATTACHMENT VARCHAR(500),
+	STATUS VARCHAR(10) NOT NULL,
+	SANCTION INT(1) NOT NULL,
+	CREATED_DATE DATETIME,
+	FOR_RECOMMENDATION_DATE DATETIME,
+	RECOMMENDATION_DATE DATETIME,
+	RECOMMENDATION_BY VARCHAR(100),
+	RECOMMENDATION_REMARKS VARCHAR(500),
+	DECISION_DATE DATETIME,
+	DECISION_BY VARCHAR(100),
+	DECISION_REMARKS VARCHAR(500),
+	TRANSACTION_LOG_ID VARCHAR(500),
+	RECORD_LOG VARCHAR(100)
+);
+
 CREATE PROCEDURE update_attendance_adjustment_status(IN adjustment_id VARCHAR(100), IN status VARCHAR(10), IN sanction INT(1), IN decision_remarks VARCHAR(500), IN decision_date DATETIME, IN decision_by VARCHAR(50), IN transaction_log_id VARCHAR(500), IN record_log VARCHAR(100))
 BEGIN
 	SET @adjustment_id = adjustment_id;
@@ -3295,8 +3338,10 @@ BEGIN
 
 	IF @status = 'APV' OR @status = 'REJ' OR @status = 'CAN' THEN
 		SET @query = 'UPDATE attendance_adjustment SET STATUS = @status, SANCTION = @sanction, DECISION_REMARKS = @decision_remarks, DECISION_DATE = @decision_date, DECISION_BY = @decision_by, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE ADJUSTMENT_ID = @adjustment_id';
+	ELSEIF @status = 'REC' THEN
+		SET @query = 'UPDATE attendance_adjustment SET STATUS = @status, RECOMMENDATION_DATE = @decision_date, RECOMMENDATION_BY = @decision_by, RECOMMENDATION_REMARKS = @decision_remarks, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE ADJUSTMENT_ID = @adjustment_id';
 	ELSE
-		SET @query = 'UPDATE attendance_adjustment SET STATUS = @status, SANCTION = @sanction, DECISION_REMARKS = null, DECISION_DATE = null, DECISION_BY = null, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE ADJUSTMENT_ID = @adjustment_id';
+		SET @query = 'UPDATE attendance_adjustment SET STATUS = @status, FOR_RECOMMENDATION_DATE = @decision_date, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE ADJUSTMENT_ID = @adjustment_id';
     END IF;
 
 	PREPARE stmt FROM @query;
@@ -3317,8 +3362,10 @@ BEGIN
 
 	IF @status = 'APV' OR @status = 'REJ' OR @status = 'CAN' THEN
 		SET @query = 'UPDATE attendance_creation SET STATUS = @status, SANCTION = @sanction, DECISION_REMARKS = @decision_remarks, DECISION_DATE = @decision_date, DECISION_BY = @decision_by, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE CREATION_ID = @creation_id';
+	ELSEIF @status = 'REC' THEN
+		SET @query = 'UPDATE attendance_creation SET STATUS = @status, RECOMMENDATION_DATE = @decision_date, RECOMMENDATION_BY = @decision_by, RECOMMENDATION_REMARKS = @decision_remarks, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE CREATION_ID = @creation_id';
 	ELSE
-		SET @query = 'UPDATE attendance_creation SET STATUS = @status, SANCTION = @sanction, DECISION_REMARKS = null, DECISION_DATE = null, DECISION_BY = null, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE CREATION_ID = @creation_id';
+		SET @query = 'UPDATE attendance_creation SET STATUS = @status, FOR_RECOMMENDATION_DATE = @decision_date, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE CREATION_ID = @creation_id';
     END IF;
 
 	PREPARE stmt FROM @query;

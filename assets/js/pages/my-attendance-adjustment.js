@@ -15,6 +15,8 @@ function initialize_my_attendance_adjustment_table(datatable_name, buttons = fal
     hide_multiple_buttons();
     
     var username = $('#username').text();
+    var filter_creation_start_date = $('#filter_creation_start_date').val();
+    var filter_creation_end_date = $('#filter_creation_end_date').val();
     var filter_for_recommendation_start_date = $('#filter_for_recommendation_start_date').val();
     var filter_for_recommendation_end_date = $('#filter_for_recommendation_end_date').val();
     var filter_recommendation_start_date = $('#filter_recommendation_start_date').val();
@@ -57,7 +59,7 @@ function initialize_my_attendance_adjustment_table(datatable_name, buttons = fal
                 'url' : 'system-generation.php',
                 'method' : 'POST',
                 'dataType': 'JSON',
-                'data': {'type' : type, 'username' : username, 'filter_for_recommendation_start_date' : filter_for_recommendation_start_date, 'filter_for_recommendation_end_date' : filter_for_recommendation_end_date, 'filter_recommendation_start_date' : filter_recommendation_start_date, 'filter_recommendation_end_date' : filter_recommendation_end_date, 'filter_decision_start_date' : filter_decision_start_date, 'filter_decision_end_date' : filter_decision_end_date, 'filter_status' : filter_status, 'filter_sanction' : filter_sanction},
+                'data': {'type' : type, 'username' : username, 'filter_creation_start_date' : filter_creation_start_date, 'filter_creation_end_date' : filter_creation_end_date, 'filter_for_recommendation_start_date' : filter_for_recommendation_start_date, 'filter_for_recommendation_end_date' : filter_for_recommendation_end_date, 'filter_recommendation_start_date' : filter_recommendation_start_date, 'filter_recommendation_end_date' : filter_recommendation_end_date, 'filter_decision_start_date' : filter_decision_start_date, 'filter_decision_end_date' : filter_decision_end_date, 'filter_status' : filter_status, 'filter_sanction' : filter_sanction},
                 'dataSrc' : ''
             },
             dom:  "<'row'<'col-sm-3'l><'col-sm-6 text-center mb-2'B><'col-sm-3'f>>" +  "<'row'<'col-sm-12'tr>>" + "<'row'<'col-sm-5'i><'col-sm-7'p>>",
@@ -88,7 +90,7 @@ function initialize_my_attendance_adjustment_table(datatable_name, buttons = fal
                 'url' : 'system-generation.php',
                 'method' : 'POST',
                 'dataType': 'JSON',
-                'data': {'type' : type, 'username' : username, 'filter_for_recommendation_start_date' : filter_for_recommendation_start_date, 'filter_for_recommendation_end_date' : filter_for_recommendation_end_date, 'filter_recommendation_start_date' : filter_recommendation_start_date, 'filter_recommendation_end_date' : filter_recommendation_end_date, 'filter_decision_start_date' : filter_decision_start_date, 'filter_decision_end_date' : filter_decision_end_date, 'filter_status' : filter_status, 'filter_sanction' : filter_sanction},
+                'data': {'type' : type, 'username' : username, 'filter_creation_start_date' : filter_creation_start_date, 'filter_creation_end_date' : filter_creation_end_date, 'filter_for_recommendation_start_date' : filter_for_recommendation_start_date, 'filter_for_recommendation_end_date' : filter_for_recommendation_end_date, 'filter_recommendation_start_date' : filter_recommendation_start_date, 'filter_recommendation_end_date' : filter_recommendation_end_date, 'filter_decision_start_date' : filter_decision_start_date, 'filter_decision_end_date' : filter_decision_end_date, 'filter_status' : filter_status, 'filter_sanction' : filter_sanction},
                 'dataSrc' : ''
             },
             'order': [[ 1, 'desc' ]],
@@ -317,7 +319,7 @@ function initialize_click_events(){
         if(adjustment_id.length > 0){
             Swal.fire({
                 title: 'Tag Multiple Attendance Adjustments For Recommendation',
-                text: 'Are you sure you want to delete these attendance adjustments?',
+                text: 'Are you sure you want to tag these attendance adjustments for recommendation?',
                 icon: 'info',
                 showCancelButton: !0,
                 confirmButtonText: 'For Recommendation',
@@ -367,6 +369,7 @@ function initialize_click_events(){
 function initialize_on_change_events(){
     $(document).on('change','#attendance_id',function() {
         sessionStorage.setItem('attendance_id', this.value);
+        document.getElementById('time_in_date').disabled = true;
 
         display_form_details('request attendance adjustment form');
     });

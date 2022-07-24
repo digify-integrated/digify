@@ -4855,6 +4855,290 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #   Reject transactions
+    # -------------------------------------------------------------
+
+    # Reject attendance adjustment
+    else if($transaction == 'reject attendance adjustment'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['adjustment_id']) && !empty($_POST['adjustment_id']) && isset($_POST['decision_remarks']) && !empty($_POST['decision_remarks'])){
+            $username = $_POST['username'];
+            $adjustment_id = $_POST['adjustment_id'];
+            $decision_remarks = $_POST['decision_remarks'];
+
+            $check_attendance_adjustment_exist = $api->check_attendance_adjustment_exist($adjustment_id);
+
+            if($check_attendance_adjustment_exist > 0){
+                $update_attendance_adjustment_status = $api->update_attendance_adjustment_status($adjustment_id, 'REJ', $decision_remarks, null, $username);
+    
+                if($update_attendance_adjustment_status){
+                    echo 'Rejected';
+                }
+                else{
+                    echo $update_attendance_adjustment_status;
+                }
+            }
+            else{
+                echo 'Not Found';
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Reject multiple attendance adjustment
+    else if($transaction == 'reject multiple attendance adjustment'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['adjustment_id']) && !empty($_POST['adjustment_id']) && isset($_POST['decision_remarks']) && !empty($_POST['decision_remarks'])){
+            $username = $_POST['username'];
+            $adjustment_ids = explode(',', $_POST['adjustment_id']);
+            $decision_remarks = $_POST['decision_remarks'];
+            $error_count = 0;
+            $error = '';
+
+            foreach($adjustment_ids as $adjustment_id){
+                $check_attendance_adjustment_exist = $api->check_attendance_adjustment_exist($adjustment_id);
+
+                if($check_attendance_adjustment_exist > 0){
+                    $update_attendance_adjustment_status = $api->update_attendance_adjustment_status($adjustment_id, 'REJ', $decision_remarks, null, $username);
+        
+                    if(!$update_attendance_adjustment_status){
+                        $error_count = $error_count + 1;
+                    }
+                }
+                else{
+                    $error_count = $error_count + 1;
+                }
+            }
+
+            if($error_count > 0){
+                if($error_count){
+                    $error = 'There was an error rejecting '. number_format($error_count) .' attendance adjustment.<br/>';
+                }
+                else{
+                    $error = 'There was an error rejecting '. number_format($error_count) .' attendance adjustment.<br/>';
+                }
+            }
+
+            if(empty($error)){
+                echo 'Rejected';
+            }
+            else{
+                echo $error;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Reject attendance creation
+    else if($transaction == 'reject attendance creation'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['creation_id']) && !empty($_POST['creation_id']) && isset($_POST['decision_remarks']) && !empty($_POST['decision_remarks'])){
+            $username = $_POST['username'];
+            $creation_id = $_POST['creation_id'];
+            $decision_remarks = $_POST['decision_remarks'];
+
+            $check_attendance_creation_exist = $api->check_attendance_creation_exist($creation_id);
+
+            if($check_attendance_creation_exist > 0){
+                $update_attendance_creation_status = $api->update_attendance_creation_status($creation_id, 'REJ', $decision_remarks, null, $username);
+    
+                if($update_attendance_creation_status){
+                    echo 'Rejected';
+                }
+                else{
+                    echo $update_attendance_creation_status;
+                }
+            }
+            else{
+                echo 'Not Found';
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Reject multiple attendance creation
+    else if($transaction == 'reject multiple attendance creation'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['creation_id']) && !empty($_POST['creation_id']) && isset($_POST['decision_remarks']) && !empty($_POST['decision_remarks'])){
+            $username = $_POST['username'];
+            $creation_ids = explode(',', $_POST['creation_id']);
+            $decision_remarks = $_POST['decision_remarks'];
+            $error_count = 0;
+            $error = '';
+
+            foreach($creation_ids as $creation_id){
+                $check_attendance_creation_exist = $api->check_attendance_creation_exist($creation_id);
+
+                if($check_attendance_creation_exist > 0){
+                    $update_attendance_creation_status = $api->update_attendance_creation_status($creation_id, 'REJ', $decision_remarks, null, $username);
+        
+                    if(!$update_attendance_creation_status){
+                        $error_count = $error_count + 1;
+                    }
+                }
+                else{
+                    $error_count = $error_count + 1;
+                }
+            }
+
+            if($error_count > 0){
+                if($error_count){
+                    $error = 'There was an error rejecting '. number_format($error_count) .' attendance creation.<br/>';
+                }
+                else{
+                    $error = 'There was an error rejecting '. number_format($error_count) .' attendance creation.<br/>';
+                }
+            }
+
+            if(empty($error)){
+                echo 'Rejected';
+            }
+            else{
+                echo $error;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #   Recommend transactions
+    # -------------------------------------------------------------
+
+    # Recommend attendance adjustment
+    else if($transaction == 'recommend attendance adjustment'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['adjustment_id']) && !empty($_POST['adjustment_id']) && isset($_POST['decision_remarks']) && !empty($_POST['decision_remarks'])){
+            $username = $_POST['username'];
+            $adjustment_id = $_POST['adjustment_id'];
+            $decision_remarks = $_POST['decision_remarks'];
+
+            $check_attendance_adjustment_exist = $api->check_attendance_adjustment_exist($adjustment_id);
+
+            if($check_attendance_adjustment_exist > 0){
+                $update_attendance_adjustment_status = $api->update_attendance_adjustment_status($adjustment_id, 'REC', $decision_remarks, null, $username);
+    
+                if($update_attendance_adjustment_status){
+                    echo 'Recommended';
+                }
+                else{
+                    echo $update_attendance_adjustment_status;
+                }
+            }
+            else{
+                echo 'Not Found';
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Recommend multiple attendance adjustment
+    else if($transaction == 'recommend multiple attendance adjustment'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['adjustment_id']) && !empty($_POST['adjustment_id']) && isset($_POST['decision_remarks']) && !empty($_POST['decision_remarks'])){
+            $username = $_POST['username'];
+            $adjustment_ids = explode(',', $_POST['adjustment_id']);
+            $decision_remarks = $_POST['decision_remarks'];
+            $error_count = 0;
+            $error = '';
+
+            foreach($adjustment_ids as $adjustment_id){
+                $check_attendance_adjustment_exist = $api->check_attendance_adjustment_exist($adjustment_id);
+
+                if($check_attendance_adjustment_exist > 0){
+                    $update_attendance_adjustment_status = $api->update_attendance_adjustment_status($adjustment_id, 'REC', $decision_remarks, null, $username);
+        
+                    if(!$update_attendance_adjustment_status){
+                        $error_count = $error_count + 1;
+                    }
+                }
+                else{
+                    $error_count = $error_count + 1;
+                }
+            }
+
+            if($error_count > 0){
+                if($error_count){
+                    $error = 'There was an error recommending '. number_format($error_count) .' attendance adjustment.<br/>';
+                }
+                else{
+                    $error = 'There was an error recommending '. number_format($error_count) .' attendance adjustment.<br/>';
+                }
+            }
+
+            if(empty($error)){
+                echo 'Recommended';
+            }
+            else{
+                echo $error;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Recommend attendance creation
+    else if($transaction == 'recommend attendance creation'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['creation_id']) && !empty($_POST['creation_id']) && isset($_POST['decision_remarks']) && !empty($_POST['decision_remarks'])){
+            $username = $_POST['username'];
+            $creation_id = $_POST['creation_id'];
+            $decision_remarks = $_POST['decision_remarks'];
+
+            $check_attendance_creation_exist = $api->check_attendance_creation_exist($creation_id);
+
+            if($check_attendance_creation_exist > 0){
+                $update_attendance_creation_status = $api->update_attendance_creation_status($creation_id, 'REC', $decision_remarks, null, $username);
+    
+                if($update_attendance_creation_status){
+                    echo 'Recommended';
+                }
+                else{
+                    echo $update_attendance_creation_status;
+                }
+            }
+            else{
+                echo 'Not Found';
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Recommend multiple attendance creation
+    else if($transaction == 'recommend multiple attendance creation'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['creation_id']) && !empty($_POST['creation_id']) && isset($_POST['decision_remarks']) && !empty($_POST['decision_remarks'])){
+            $username = $_POST['username'];
+            $creation_ids = explode(',', $_POST['creation_id']);
+            $decision_remarks = $_POST['decision_remarks'];
+            $error_count = 0;
+            $error = '';
+
+            foreach($creation_ids as $creation_id){
+                $check_attendance_creation_exist = $api->check_attendance_creation_exist($creation_id);
+
+                if($check_attendance_creation_exist > 0){
+                    $update_attendance_creation_status = $api->update_attendance_creation_status($creation_id, 'REC', $decision_remarks, null, $username);
+        
+                    if(!$update_attendance_creation_status){
+                        $error_count = $error_count + 1;
+                    }
+                }
+                else{
+                    $error_count = $error_count + 1;
+                }
+            }
+
+            if($error_count > 0){
+                if($error_count){
+                    $error = 'There was an error recommending '. number_format($error_count) .' attendance creation.<br/>';
+                }
+                else{
+                    $error = 'There was an error recommending '. number_format($error_count) .' attendance creation.<br/>';
+                }
+            }
+
+            if(empty($error)){
+                echo 'Recommended';
+            }
+            else{
+                echo $error;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Notification transactions
     # -------------------------------------------------------------
 
@@ -5897,7 +6181,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
             $attendance_time_out = $api->check_date('summary', $attendance_details[0]['TIME_OUT'], '', 'F d, Y h:i:s a', '', '', '');
 
             $status_name = $api->get_attendance_adjustment_status($status)[0]['BADGE'];
-            $sanction_name = $api->get_attendance_adjustment_sanction_status($sanction)[0]['BADGE'];
+            $sanction_name = $api->get_attendance_adjustment_sanction($sanction)[0]['BADGE'];
 
             $employee_details = $api->get_employee_details($employee_id);
             $file_as = $employee_details[0]['FILE_AS'];
@@ -5985,7 +6269,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
             $time_out = $api->check_date('summary', $attendance_creation_details[0]['TIME_OUT'], '', 'F d, Y h:i:s a', '', '', '');
 
             $status_name = $api->get_attendance_creation_status($status)[0]['BADGE'];
-            $sanction_name = $api->get_attendance_creation_sanction_status($sanction)[0]['BADGE'];
+            $sanction_name = $api->get_attendance_creation_sanction($sanction)[0]['BADGE'];
 
             $employee_details = $api->get_employee_details($employee_id);
             $file_as = $employee_details[0]['FILE_AS'];
