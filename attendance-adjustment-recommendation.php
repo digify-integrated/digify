@@ -58,7 +58,7 @@
                                         <ol class="breadcrumb m-0">
                                             <li class="breadcrumb-item"><a href="apps.php">Apps</a></li>
                                             <li class="breadcrumb-item"><a href="javascript: void(0);">Approvals</a></li>
-                                            <li class="breadcrumb-item"><a href="javascript: void(0);">Recommendations</a></li>
+                                            <li class="breadcrumb-item"><a href="javascript: void(0);">Recommendation</a></li>
                                             <li class="breadcrumb-item active"><?php echo $page_title; ?></li>
                                         </ol>
                                     </div>

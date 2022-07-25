@@ -106,13 +106,13 @@
                                                         <div class="mb-3">
                                                             <p class="text-muted">Creation Date</p>
 
-                                                            <div class="input-group mb-3" id="filter-for-recommendation-start-date-container">
-                                                                <input type="text" class="form-control" id="filter_creation_start_date" name="filter_creation_start_date" autocomplete="off" data-date-format="m/dd/yyyy" data-date-container="#filter-for-recommendation-start-date-container" data-provide="datepicker" data-date-autoclose="true" data-date-orientation="right" placeholder="Start Date">
+                                                            <div class="input-group mb-3" id="filter-creation-start-date-container">
+                                                                <input type="text" class="form-control" id="filter_creation_start_date" name="filter_creation_start_date" autocomplete="off" data-date-format="m/dd/yyyy" data-date-container="#filter-creation-start-date-container" data-provide="datepicker" data-date-autoclose="true" data-date-orientation="right" placeholder="Start Date">
                                                                 <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
                                                             </div>
 
-                                                            <div class="input-group" id="filter-for-recommendation-end-date-container">
-                                                                <input type="text" class="form-control" id="filter_creation_end_date" name="filter_creation_end_date" autocomplete="off" data-date-format="m/dd/yyyy" data-date-container="#filter-for-recommendation-end-date-container" data-provide="datepicker" data-date-autoclose="true" data-date-orientation="right" placeholder="End Date">
+                                                            <div class="input-group" id="filter-creation-end-date-container">
+                                                                <input type="text" class="form-control" id="filter_creation_end_date" name="filter_creation_end_date" autocomplete="off" data-date-format="m/dd/yyyy" data-date-container="#filter-creation-end-date-container" data-provide="datepicker" data-date-autoclose="true" data-date-orientation="right" placeholder="End Date">
                                                                 <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
                                                             </div>
                                                         </div>

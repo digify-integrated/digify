@@ -4,13 +4,12 @@
     require('classes/api.php');
 
     $api = new Api;
-    $page_title = 'My Attendance Creation';
+    $page_title = 'Attendance Creation Approval';
 
-    $page_access = $api->check_role_permissions($username, 129);
-	$request_attendance_creation = $api->check_role_permissions($username, 130);
-	$cancel_attendance_creation = $api->check_role_permissions($username, 132);
-	$tag_attendance_creation_for_recommendation = $api->check_role_permissions($username, 133);
-	$delete_attendance_creation = $api->check_role_permissions($username, 134);
+    $page_access = $api->check_role_permissions($username, 154);
+	$approve_attendance_creation = $api->check_role_permissions($username, 155);
+	$reject_attendance_creation = $api->check_role_permissions($username, 156);
+	$cancel_attendance_creation = $api->check_role_permissions($username, 157);
     
     $check_user_account_status = $api->check_user_account_status($username);
 
@@ -45,7 +44,7 @@
 
             <?php 
                 require('views/_top_bar.php');
-                require('views/menu/_attendance_menu.php');
+                require('views/menu/_approvals_menu.php');
             ?>
 
             <div class="main-content">
@@ -58,7 +57,8 @@
                                     <div class="page-title-right">
                                         <ol class="breadcrumb m-0">
                                             <li class="breadcrumb-item"><a href="apps.php">Apps</a></li>
-                                            <li class="breadcrumb-item"><a href="javascript: void(0);">Attendance</a></li>
+                                            <li class="breadcrumb-item"><a href="javascript: void(0);">Approvals</a></li>
+                                            <li class="breadcrumb-item"><a href="javascript: void(0);">Approval</a></li>
                                             <li class="breadcrumb-item active"><?php echo $page_title; ?></li>
                                         </ol>
                                     </div>
@@ -74,29 +74,26 @@
                                             <div class="col-md-12">
                                                 <div class="d-flex align-items-start">
                                                     <div class="flex-grow-1 align-self-center">
-                                                        <h4 class="card-title">My Attendance Creation List</h4>
+                                                        <h4 class="card-title">Attendance Creation Approval List</h4>
                                                     </div>
                                                     <div class="d-flex gap-2">
                                                     <?php
-                                                        if($request_attendance_creation > 0){
-                                                            echo '<button type="button" class="btn btn-primary waves-effect btn-label waves-light" id="request-attendance-creation"><i class="bx bx-plus label-icon"></i> Add</button>';
+                                                        if($approve_attendance_creation > 0){
+                                                            echo '<button type="button" class="btn btn-success waves-effect btn-label waves-light d-none multiple-approve" id="approve-attendance-creation"><i class="bx bx-check label-icon"></i> Recommend</button>';
                                                         }
 
-                                                        if($tag_attendance_creation_for_recommendation > 0){
-                                                            echo '<button type="button" class="btn btn-success waves-effect btn-label waves-light d-none multiple-for-recommendation" id="for-recommend-attendance-creation"><i class="bx bx-check label-icon"></i> For Recommendation</button>';
+                                                        if($reject_attendance_creation > 0){
+                                                            echo '<button type="button" class="btn btn-danger waves-effect btn-label waves-light d-none multiple-reject" id="reject-attendance-creation"><i class="bx bx-x label-icon"></i> Reject</button>';
                                                         }
 
                                                         if($cancel_attendance_creation > 0){
                                                             echo '<button type="button" class="btn btn-warning waves-effect btn-label waves-light d-none multiple-cancel" id="cancel-attendance-creation"><i class="bx bx-calendar-x label-icon"></i> Cancel</button>';
                                                         }
-
-                                                        if($delete_attendance_creation > 0){
-                                                            echo '<button type="button" class="btn btn-danger waves-effect btn-label waves-light d-none multiple" id="delete-attendance-creation"><i class="bx bx-trash label-icon"></i> Delete</button>';
-                                                        }
                                                     ?>
                                                     <button type="button" class="btn btn-info waves-effect btn-label waves-light" data-bs-toggle="offcanvas" data-bs-target="#filter-off-canvas" aria-controls="filter-off-canvas"><i class="bx bx-filter-alt label-icon"></i> Filter</button>
                                                     </div>
                                                 </div>
+
                                                 <div class="offcanvas offcanvas-end" tabindex="-1" id="filter-off-canvas" data-bs-backdrop="true" aria-labelledby="filter-off-canvas-label">
                                                     <div class="offcanvas-header">
                                                         <h5 class="offcanvas-title" id="filter-off-canvas-label">Filter</h5>
@@ -117,19 +114,6 @@
                                                             </div>
                                                         </div>
                                                         <div class="mb-3">
-                                                            <p class="text-muted">For Recommendation Date</p>
-
-                                                            <div class="input-group mb-3" id="filter-for-recommendation-start-date-container">
-                                                                <input type="text" class="form-control" id="filter_for_recommendation_start_date" name="filter_for_recommendation_start_date" autocomplete="off" data-date-format="m/dd/yyyy" data-date-container="#filter-for-recommendation-start-date-container" data-provide="datepicker" data-date-autoclose="true" data-date-orientation="right" placeholder="Start Date">
-                                                                <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
-                                                            </div>
-
-                                                            <div class="input-group" id="filter-for-recommendation-end-date-container">
-                                                                <input type="text" class="form-control" id="filter_for_recommendation_end_date" name="filter_for_recommendation_end_date" autocomplete="off" data-date-format="m/dd/yyyy" data-date-container="#filter-for-recommendation-end-date-container" data-provide="datepicker" data-date-autoclose="true" data-date-orientation="right" placeholder="End Date">
-                                                                <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
-                                                            </div>
-                                                        </div>
-                                                        <div class="mb-3">
                                                             <p class="text-muted">Recommendation Date</p>
 
                                                             <div class="input-group mb-3" id="filter-recommendation-start-date-container">
@@ -143,19 +127,6 @@
                                                             </div>
                                                         </div>
                                                         <div class="mb-3">
-                                                            <p class="text-muted">Decision Date</p>
-
-                                                            <div class="input-group mb-3" id="filter-decision-start-date-container">
-                                                                <input type="text" class="form-control" id="filter_decision_start_date" name="filter_decision_start_date" autocomplete="off" data-date-format="m/dd/yyyy" data-date-container="#filter-decision-start-date-container" data-provide="datepicker" data-date-autoclose="true" data-date-orientation="right" placeholder="Start Date">
-                                                                <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
-                                                            </div>
-
-                                                            <div class="input-group" id="filter-decision-end-date-container">
-                                                                <input type="text" class="form-control" id="filter_decision_end_date" name="filter_decision_end_date" autocomplete="off" data-date-format="m/dd/yyyy" data-date-container="#filter-decision-end-date-container" data-provide="datepicker" data-date-autoclose="true" data-date-orientation="right" placeholder="End Date">
-                                                                <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
-                                                            </div>
-                                                        </div>
-                                                        <div class="mb-3">
                                                             <p class="text-muted">Status</p>
 
                                                             <select class="form-control filter-select2" id="filter_status">
@@ -163,18 +134,22 @@
                                                                 <option value="PEN" selected>Pending</option>
                                                                 <option value="FORREC">For Recommendation</option>
                                                                 <option value="REC">Recommended</option>
-                                                                <option value="APV">Approved</option>
-                                                                <option value="REJ">Rejected</option>
-                                                                <option value="CAN">Cancelled</option>
                                                             </select>
                                                         </div>
                                                         <div class="mb-3">
-                                                            <p class="text-muted">Sanction</p>
+                                                            <p class="text-muted">Work Location</p>
 
-                                                            <select class="form-control filter-select2" id="filter_sanction">
-                                                                <option value="">All Sanction</option>
-                                                                <option value="1">True</option>
-                                                                <option value="0">False</option>
+                                                            <select class="form-control filter-select2" id="filter_work_location">
+                                                                <option value="">All Work Location</option>
+                                                                <?php echo $api->generate_work_location_options(); ?>
+                                                            </select>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <p class="text-muted">Department</p>
+
+                                                            <select class="form-control filter-select2" id="filter_department">
+                                                                <option value="">All Department</option>
+                                                                <?php echo $api->generate_department_options(); ?>
                                                             </select>
                                                         </div>
                                                         <div>
@@ -186,7 +161,7 @@
                                         </div>
                                         <div class="row mt-4">
                                             <div class="col-md-12">
-                                                <table id="my-attendance-creation-datatable" class="table table-bordered align-middle mb-0 table-hover table-striped dt-responsive nowrap w-100">
+                                                <table id="attendance-creation-approval-datatable" class="table table-bordered align-middle mb-0 table-hover table-striped dt-responsive nowrap w-100">
                                                     <thead>
                                                         <tr>
                                                             <th class="all">
@@ -194,6 +169,7 @@
                                                                     <input class="form-check-input" id="datatable-checkbox" type="checkbox">
                                                                 </div>
                                                             </th>
+                                                            <th class="all">Employee</th>
                                                             <th class="all">Time In</th>
                                                             <th class="all">Time Out</th>
                                                             <th class="all">Status</th>
@@ -228,6 +204,6 @@
         <script src="assets/libs/select2/js/select2.min.js"></script>
         <script src="assets/libs/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
         <script src="assets/js/system.js?v=<?php echo rand(); ?>"></script>
-        <script src="assets/js/pages/my-attendance-creation.js?v=<?php echo rand(); ?>"></script>
+        <script src="assets/js/pages/attendance-creation-approval.js?v=<?php echo rand(); ?>"></script>
     </body>
 </html>
