@@ -6,10 +6,10 @@
     $api = new Api;
     $page_title = 'Attendance Creation Approval';
 
-    $page_access = $api->check_role_permissions($username, 154);
-	$approve_attendance_creation = $api->check_role_permissions($username, 155);
-	$reject_attendance_creation = $api->check_role_permissions($username, 156);
-	$cancel_attendance_creation = $api->check_role_permissions($username, 157);
+    $page_access = $api->check_role_permissions($username, 164);
+	$approve_attendance_creation = $api->check_role_permissions($username, 165);
+	$reject_attendance_creation = $api->check_role_permissions($username, 166);
+	$cancel_attendance_creation = $api->check_role_permissions($username, 167);
     
     $check_user_account_status = $api->check_user_account_status($username);
 
@@ -79,7 +79,7 @@
                                                     <div class="d-flex gap-2">
                                                     <?php
                                                         if($approve_attendance_creation > 0){
-                                                            echo '<button type="button" class="btn btn-success waves-effect btn-label waves-light d-none multiple-approve" id="approve-attendance-creation"><i class="bx bx-check label-icon"></i> Recommend</button>';
+                                                            echo '<button type="button" class="btn btn-success waves-effect btn-label waves-light d-none multiple-approve" id="approve-attendance-creation"><i class="bx bx-check label-icon"></i> Approve</button>';
                                                         }
 
                                                         if($reject_attendance_creation > 0){

@@ -11308,6 +11308,114 @@ class Api{
     }
     # -------------------------------------------------------------
 
+    # -------------------------------------------------------------
+    #
+    # Name       : generate_attendance_adjustment_table
+    # Purpose    : Generates attendance adjustment table.
+    #
+    # Returns    : String
+    #
+    # -------------------------------------------------------------
+    public function generate_attendance_adjustment_table($attendance_id, $status){
+        if ($this->databaseConnection()) {
+            $table = '<table class="table table-bordered mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Time In</th>
+                                <th>Time Out</th>
+                                <th>Attachment</th>
+                                <th>Status</th>
+                                <th>Sanction</th>
+                            </tr>
+                        </thead>
+                        <tbody>';
+
+            $query = 'SELECT TIME_IN, TIME_OUT, REASON, ATTACHMENT, STATUS, SANCTION FROM attendance_adjustment WHERE ATTENDANCE_ID = :attendance_id';
+
+            if(!empty($status)){
+                $query .= ' AND STATUS = :status';
+            }
+            
+            $sql = $this->db_connection->prepare($query);
+            $sql->bindValue(':attendance_id', $attendance_id);
+
+            if(!empty($status)){
+                $sql->bindValue(':status', $status);
+            }
+           
+            if($sql->execute()){
+                $count = $sql->rowCount();
+        
+                if($count > 0){
+                    while($row = $sql->fetch()){
+                        $status = $row['STATUS'];
+                        $sanction = $row['SANCTION'];
+                        $attachment = $row['ATTACHMENT'];
+                        $time_in = $this->check_date('summary', $row['TIME_IN'], '', 'F d, Y h:i a', '', '', '');
+                        $time_out = $this->check_date('summary', $row['TIME_OUT'], '', 'F d, Y h:i a', '', '', '');
+
+                        $status_name = $this->get_attendance_adjustment_status($status)[0]['BADGE'];
+                        $sanction_name = $this->get_attendance_adjustment_sanction($sanction)[0]['BADGE'];
+
+                        $attendance_details = $this->get_attendance_details($attendance_id);
+                        $attendance_time_in = $this->check_date('summary', $attendance_details[0]['TIME_IN'], '', 'F d, Y h:i a', '', '', '');
+                        $attendance_time_out = $this->check_date('summary', $attendance_details[0]['TIME_OUT'], '', 'F d, Y h:i a', '', '', '');
+
+                        if(strtotime($time_in) != strtotime($attendance_time_in)){
+                            $time_in_details = $attendance_time_in . ' -> ' . $time_in;
+                        }
+                        else{
+                            $time_in_details = $time_in;
+                        }
+            
+                        if(!empty($time_out)){
+                            $adjustment_type = 'full';
+            
+                            if(strtotime($time_out) != strtotime($attendance_time_out)){
+                                $time_out_details = $attendance_time_out . ' -> ' . $time_out;
+                            }
+                            else{
+                                $time_out_details = $time_out;
+                            }
+                        }
+                        else{
+                            $time_out_details = '--';
+                        }
+            
+                        if(!empty($attachment)){
+                            $attachment = '<a href="'. $attachment .'" target="_blank">View Attachment</a>';
+                        }
+                        else{
+                            $attachment = '';
+                        }
+
+                        $table .= '<tr>
+                                    <td>'. $time_in_details .'</td>
+                                    <td>'. $time_out_details .'</td>
+                                    <td>'. $attachment .'</td>
+                                    <td>'. $status_name .'</td>
+                                    <td>'. $sanction_name .'</td>
+                                </tr>';
+                    }
+                }
+                else{
+                    $table .= '<tr>
+                        <td colspan="5"><p class="text-center">No Attendance Adjustments</p></td>
+                    </tr>';
+                }
+
+                $table .= '</tbody>
+                </table>';
+
+                return $table;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
 }
 
 ?>

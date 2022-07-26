@@ -6,10 +6,10 @@
     $api = new Api;
     $page_title = 'Attendance Adjustment Approval';
 
-    $page_access = $api->check_role_permissions($username, 149);
-	$approve_attendance_adjustment = $api->check_role_permissions($username, 150);
-	$reject_attendance_adjustment = $api->check_role_permissions($username, 151);
-	$cancel_attendance_adjustment = $api->check_role_permissions($username, 152);
+    $page_access = $api->check_role_permissions($username, 159);
+	$approve_attendance_adjustment = $api->check_role_permissions($username, 160);
+	$reject_attendance_adjustment = $api->check_role_permissions($username, 161);
+	$cancel_attendance_adjustment = $api->check_role_permissions($username, 162);
     
     $check_user_account_status = $api->check_user_account_status($username);
 
@@ -79,7 +79,7 @@
                                                     <div class="d-flex gap-2">
                                                     <?php
                                                         if($approve_attendance_adjustment > 0){
-                                                            echo '<button type="button" class="btn btn-success waves-effect btn-label waves-light d-none multiple-approve" id="approve-attendance-adjustment"><i class="bx bx-check label-icon"></i> Recommend</button>';
+                                                            echo '<button type="button" class="btn btn-success waves-effect btn-label waves-light d-none multiple-approve" id="approve-attendance-adjustment"><i class="bx bx-check label-icon"></i> Approve</button>';
                                                         }
 
                                                         if($reject_attendance_adjustment > 0){

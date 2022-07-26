@@ -3092,7 +3092,7 @@ BEGIN
 	SET @transaction_log_id = transaction_log_id;
 	SET @record_log = record_log;
 
-	SET @query = 'UPDATE attendance_record SET TIME_IN = @time_in, TIME_IN_IP_ADDRESS = @time_in_ip_address, TIME_IN_BY = @time_in_by, TIME_IN_BEHAVIOR = @time_in_behavior, TIME_OUT = @time_out, TIME_OUT_IP_ADDRESS = @time_out_ip_address, TIME_OUT_BY = @time_out_by, TIME_OUT_BEHAVIOR = @time_out_behavior, LATE = @late, EARLY_LEAVING = @early_leaving, OVERTIME = @overtime, TOTAL_WORKING_HOURS = @total_hours, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE ATTENDANCE_ID = @attendance_id';
+	SET @query = 'UPDATE attendance_record SET TIME_IN = @time_in, TIME_IN_IP_ADDRESS = @time_in_ip_address, TIME_IN_BY = @time_in_by, TIME_IN_BEHAVIOR = @time_in_behavior, TIME_OUT = @time_out, TIME_OUT_IP_ADDRESS = @time_out_ip_address, TIME_OUT_BY = @time_out_by, TIME_OUT_BEHAVIOR = @time_out_behavior, LATE = @late, EARLY_LEAVING = @early_leaving, OVERTIME = @overtime, TOTAL_WORKING_HOURS = @total_hours, REMARKS = @remarks, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE ATTENDANCE_ID = @attendance_id';
 
 	PREPARE stmt FROM @query;
 	EXECUTE stmt;
@@ -3526,7 +3526,6 @@ BEGIN
 	EXECUTE stmt;
 	DROP PREPARE stmt;
 END //
-
 
 /* Insert Transactions */
 INSERT INTO global_user_account (USERNAME, PASSWORD, USER_STATUS, PASSWORD_EXPIRY_DATE, FAILED_LOGIN, LAST_FAILED_LOGIN, TRANSACTION_LOG_ID) VALUES ('ADMIN', '68aff5412f35ed76', 'Active', '2021-12-30', 0, null, 'TL-1');

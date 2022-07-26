@@ -3683,6 +3683,10 @@ function initialize_form_validation(form_type){
                             if($('#attendance-adjustment-recommendation-datatable').length){
                                 reload_datatable('#attendance-adjustment-recommendation-datatable');
                             }
+
+                            if($('#attendance-adjustment-approval-datatable').length){
+                                reload_datatable('#attendance-adjustment-approval-datatable');
+                            }
                         }
                         else{
                             show_alert('Attendance Adjustment Cancellation Error', response, 'error');
@@ -3758,6 +3762,10 @@ function initialize_form_validation(form_type){
                             if($('#attendance-adjustment-recommendation-datatable').length){
                                 reload_datatable('#attendance-adjustment-recommendation-datatable');
                             }
+
+                            if($('#attendance-adjustment-approval-datatable').length){
+                                reload_datatable('#attendance-adjustment-approval-datatable');
+                            }
                         }
                         else{
                             show_alert('Multiple Attendance Adjustment Cancellation Error', response, 'error');
@@ -3829,6 +3837,10 @@ function initialize_form_validation(form_type){
                             if($('#attendance-adjustment-recommendation-datatable').length){
                                 reload_datatable('#attendance-adjustment-recommendation-datatable');
                             }
+
+                            if($('#attendance-adjustment-approval-datatable').length){
+                                reload_datatable('#attendance-adjustment-approval-datatable');
+                            }
                         }
                         else{
                             show_alert('Attendance Adjustment Rejection Error', response, 'error');
@@ -3899,6 +3911,10 @@ function initialize_form_validation(form_type){
 
                             if($('#attendance-adjustment-recommendation-datatable').length){
                                 reload_datatable('#attendance-adjustment-recommendation-datatable');
+                            }
+
+                            if($('#attendance-adjustment-approval-datatable').length){
+                                reload_datatable('#attendance-adjustment-approval-datatable');
                             }
                         }
                         else{
@@ -4043,6 +4059,163 @@ function initialize_form_validation(form_type){
                     }
                 });
                 return false;
+            },
+            errorPlacement: function(label, element) {
+                if((element.hasClass('select2') || element.hasClass('form-select2')) && element.next('.select2-container').length) {
+                    label.insertAfter(element.next('.select2-container'));
+                }
+                else if(element.parent('.input-group').length){
+                    label.insertAfter(element.parent());
+                }
+                else{
+                    label.insertAfter(element);
+                }
+            },
+            highlight: function(element) {
+                $(element).parent().addClass('has-danger');
+                $(element).addClass('form-control-danger');
+            },
+            success: function(label,element) {
+                $(element).parent().removeClass('has-danger')
+                $(element).removeClass('form-control-danger')
+                label.remove();
+            }
+        });
+    }
+    else if(form_type == 'approve attendance adjustment form'){
+        $('#approve-attendance-adjustment-form').validate({
+            submitHandler: function (form) {
+                transaction = 'approve attendance adjustment';
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'controller.php',
+                    data: $(form).serialize() + '&username=' + username + '&transaction=' + transaction,
+                    beforeSend: function(){
+                        document.getElementById('submit-form').disabled = true;
+                        $('#submit-form').html('<div class="spinner-border spinner-border-sm text-light" role="status"><span rclass="sr-only"></span></div>');
+                    },
+                    success: function (response) {
+                        if(response === 'Approved' || response === 'Not Found'){
+                            if(response === 'Approved'){
+                                show_alert('Attendance Adjustment Approval Success', 'The attendance adjustment has been approved.', 'success');
+                            }
+                            else{
+                                show_alert('Attendance Adjustment Approval Error', 'The attendance adjustment does not exist.', 'info');
+                            }
+
+                            $('#System-Modal').modal('hide');
+
+                            if($('#attendance-adjustment-approval-datatable').length){
+                                reload_datatable('#attendance-adjustment-approval-datatable');
+                            }
+                        }
+                        else if(response === 'Invalid'){
+                            show_alert('Attendance Adjustment Approval Error', 'The time in cannot be greater than the time out.', 'error');
+                        }
+                        else{
+                            show_alert('Attendance Adjustment Approval Error', response, 'error');
+                        }
+                    },
+                    complete: function(){
+                        document.getElementById('submit-form').disabled = false;
+                        $('#submit-form').html('Submit');
+                    }
+                });
+                return false;
+            },
+            rules: {
+                sanction: {
+                    required: true
+                },
+                decision_remarks: {
+                    required: true
+                },
+            },
+            messages: {
+                sanction: {
+                    required: 'Please choose the sanction',
+                },
+                decision_remarks: {
+                    required: 'Please enter the approval remarks',
+                },
+            },
+            errorPlacement: function(label, element) {
+                if((element.hasClass('select2') || element.hasClass('form-select2')) && element.next('.select2-container').length) {
+                    label.insertAfter(element.next('.select2-container'));
+                }
+                else if(element.parent('.input-group').length){
+                    label.insertAfter(element.parent());
+                }
+                else{
+                    label.insertAfter(element);
+                }
+            },
+            highlight: function(element) {
+                $(element).parent().addClass('has-danger');
+                $(element).addClass('form-control-danger');
+            },
+            success: function(label,element) {
+                $(element).parent().removeClass('has-danger')
+                $(element).removeClass('form-control-danger')
+                label.remove();
+            }
+        });
+    }
+    else if(form_type == 'approve multiple attendance adjustment form'){
+        $('#approve-multiple-attendance-adjustment-form').validate({
+            submitHandler: function (form) {
+                transaction = 'approve multiple attendance adjustment';
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'controller.php',
+                    data: $(form).serialize() + '&username=' + username + '&transaction=' + transaction,
+                    beforeSend: function(){
+                        document.getElementById('submit-form').disabled = true;
+                        $('#submit-form').html('<div class="spinner-border spinner-border-sm text-light" role="status"><span rclass="sr-only"></span></div>');
+                    },
+                    success: function (response) {
+                        if(response === 'Approved' || response === 'Not Found'){
+                            if(response === 'Approved'){
+                                show_alert('Attendance Adjustment Approval Success', 'The attendance adjustments have been approved.', 'success');
+                            }
+                            else{
+                                show_alert('Attendance Adjustment Approval Error', 'The attendance adjustment does not exist.', 'info');
+                            }
+
+                            $('#System-Modal').modal('hide');
+
+                            if($('#attendance-adjustment-approval-datatable').length){
+                                reload_datatable('#attendance-adjustment-approval-datatable');
+                            }
+                        }
+                        else{
+                            show_alert('Multiple Attendance Adjustment Approval Error', response, 'error');
+                        }
+                    },
+                    complete: function(){
+                        document.getElementById('submit-form').disabled = false;
+                        $('#submit-form').html('Submit');
+                    }
+                });
+                return false;
+            },
+            rules: {
+                sanction: {
+                    required: true
+                },
+                decision_remarks: {
+                    required: true
+                },
+            },
+            messages: {
+                sanction: {
+                    required: 'Please choose the sanction',
+                },
+                decision_remarks: {
+                    required: 'Please enter the approval remarks',
+                },
             },
             errorPlacement: function(label, element) {
                 if((element.hasClass('select2') || element.hasClass('form-select2')) && element.next('.select2-container').length) {
@@ -4290,6 +4463,10 @@ function initialize_form_validation(form_type){
                             if($('#attendance-creation-recommendation-datatable').length){
                                 reload_datatable('#attendance-creation-recommendation-datatable');
                             }
+
+                            if($('#attendance-creation-approval-datatable').length){
+                                reload_datatable('#attendance-creation-approval-datatable');
+                            }
                         }
                         else{
                             show_alert('Attendance Creation Cancellation Error', response, 'error');
@@ -4365,6 +4542,10 @@ function initialize_form_validation(form_type){
                             if($('#attendance-creation-recommendation-datatable').length){
                                 reload_datatable('#attendance-creation-recommendation-datatable');
                             }
+
+                            if($('#attendance-creation-approval-datatable').length){
+                                reload_datatable('#attendance-creation-approval-datatable');
+                            }
                         }
                         else{
                             show_alert('Multiple Attendance Creation Cancellation Error', response, 'error');
@@ -4436,6 +4617,10 @@ function initialize_form_validation(form_type){
                             if($('#attendance-creation-recommendation-datatable').length){
                                 reload_datatable('#attendance-creation-recommendation-datatable');
                             }
+
+                            if($('#attendance-creation-approval-datatable').length){
+                                reload_datatable('#attendance-creation-approval-datatable');
+                            }
                         }
                         else{
                             show_alert('Attendance Creation Rejection Error', response, 'error');
@@ -4506,6 +4691,10 @@ function initialize_form_validation(form_type){
 
                             if($('#attendance-creation-recommendation-datatable').length){
                                 reload_datatable('#attendance-creation-recommendation-datatable');
+                            }
+
+                            if($('#attendance-creation-approval-datatable').length){
+                                reload_datatable('#attendance-creation-approval-datatable');
                             }
                         }
                         else{
@@ -4650,6 +4839,160 @@ function initialize_form_validation(form_type){
                     }
                 });
                 return false;
+            },
+            errorPlacement: function(label, element) {
+                if((element.hasClass('select2') || element.hasClass('form-select2')) && element.next('.select2-container').length) {
+                    label.insertAfter(element.next('.select2-container'));
+                }
+                else if(element.parent('.input-group').length){
+                    label.insertAfter(element.parent());
+                }
+                else{
+                    label.insertAfter(element);
+                }
+            },
+            highlight: function(element) {
+                $(element).parent().addClass('has-danger');
+                $(element).addClass('form-control-danger');
+            },
+            success: function(label,element) {
+                $(element).parent().removeClass('has-danger')
+                $(element).removeClass('form-control-danger')
+                label.remove();
+            }
+        });
+    }
+    else if(form_type == 'approve attendance creation form'){
+        $('#approve-attendance-creation-form').validate({
+            submitHandler: function (form) {
+                transaction = 'approve attendance creation';
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'controller.php',
+                    data: $(form).serialize() + '&username=' + username + '&transaction=' + transaction,
+                    beforeSend: function(){
+                        document.getElementById('submit-form').disabled = true;
+                        $('#submit-form').html('<div class="spinner-border spinner-border-sm text-light" role="status"><span rclass="sr-only"></span></div>');
+                    },
+                    success: function (response) {
+                        if(response === 'Approved' || response === 'Not Found'){
+                            if(response === 'Approved'){
+                                show_alert('Attendance Creation Approval Success', 'The attendance creation has been approved.', 'success');
+                            }
+                            else{
+                                show_alert('Attendance Creation Approval Error', 'The attendance creation does not exist.', 'info');
+                            }
+
+                            $('#System-Modal').modal('hide');
+
+                            if($('#attendance-creation-approval-datatable').length){
+                                reload_datatable('#attendance-creation-approval-datatable');
+                            }
+                        }
+                        else{
+                            show_alert('Attendance Creation Approval Error', response, 'error');
+                        }
+                    },
+                    complete: function(){
+                        document.getElementById('submit-form').disabled = false;
+                        $('#submit-form').html('Submit');
+                    }
+                });
+                return false;
+            },
+            rules: {
+                sanction: {
+                    required: true
+                },
+                decision_remarks: {
+                    required: true
+                },
+            },
+            messages: {
+                sanction: {
+                    required: 'Please choose the sanction',
+                },
+                decision_remarks: {
+                    required: 'Please enter the approval remarks',
+                },
+            },
+            errorPlacement: function(label, element) {
+                if((element.hasClass('select2') || element.hasClass('form-select2')) && element.next('.select2-container').length) {
+                    label.insertAfter(element.next('.select2-container'));
+                }
+                else if(element.parent('.input-group').length){
+                    label.insertAfter(element.parent());
+                }
+                else{
+                    label.insertAfter(element);
+                }
+            },
+            highlight: function(element) {
+                $(element).parent().addClass('has-danger');
+                $(element).addClass('form-control-danger');
+            },
+            success: function(label,element) {
+                $(element).parent().removeClass('has-danger')
+                $(element).removeClass('form-control-danger')
+                label.remove();
+            }
+        });
+    }
+    else if(form_type == 'approve multiple attendance creation form'){
+        $('#approve-multiple-attendance-creation-form').validate({
+            submitHandler: function (form) {
+                transaction = 'approve multiple attendance creation';
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'controller.php',
+                    data: $(form).serialize() + '&username=' + username + '&transaction=' + transaction,
+                    beforeSend: function(){
+                        document.getElementById('submit-form').disabled = true;
+                        $('#submit-form').html('<div class="spinner-border spinner-border-sm text-light" role="status"><span rclass="sr-only"></span></div>');
+                    },
+                    success: function (response) {
+                        if(response === 'Approved' || response === 'Not Found'){
+                            if(response === 'Approved'){
+                                show_alert('Attendance Creation Approval Success', 'The attendance creations have been approved.', 'success');
+                            }
+                            else{
+                                show_alert('Attendance Creation Approval Error', 'The attendance creation does not exist.', 'info');
+                            }
+
+                            $('#System-Modal').modal('hide');
+
+                            if($('#attendance-creation-approval-datatable').length){
+                                reload_datatable('#attendance-creation-approval-datatable');
+                            }
+                        }
+                        else{
+                            show_alert('Multiple Attendance Creation Approval Error', response, 'error');
+                        }
+                    },
+                    complete: function(){
+                        document.getElementById('submit-form').disabled = false;
+                        $('#submit-form').html('Submit');
+                    }
+                });
+                return false;
+            },
+            rules: {
+                sanction: {
+                    required: true
+                },
+                decision_remarks: {
+                    required: true
+                },
+            },
+            messages: {
+                sanction: {
+                    required: 'Please choose the sanction',
+                },
+                decision_remarks: {
+                    required: 'Please enter the approval remarks',
+                },
             },
             errorPlacement: function(label, element) {
                 if((element.hasClass('select2') || element.hasClass('form-select2')) && element.next('.select2-container').length) {
@@ -5782,6 +6125,8 @@ function display_form_details(form_type){
                 $('#time_out_ip_address').text(response[0].TIME_OUT_IP_ADDRESS);
                 $('#time_out_by').text(response[0].TIME_OUT_BY);
                 $('#time_out_note').text(response[0].TIMEOUT_NOTE);
+
+                document.getElementById('attendance_adjustment').innerHTML = response[0].ATTENDANCE_ADJUSTMENT;
             }
         });
     }
@@ -6234,11 +6579,11 @@ function generate_form(form_type, form_id, add, username){
 
                     $('#employee_id').val(employee_id);
                 }
-                else if(form_type == 'cancel attendance adjustment form' || form_type == 'cancel multiple attendance adjustment form' || form_type == 'reject attendance adjustment form' || form_type == 'reject multiple attendance adjustment form' || form_type == 'recommend attendance adjustment form' || form_type == 'recommend multiple attendance adjustment form'){
+                else if(form_type == 'cancel attendance adjustment form' || form_type == 'cancel multiple attendance adjustment form' || form_type == 'reject attendance adjustment form' || form_type == 'reject multiple attendance adjustment form' || form_type == 'recommend attendance adjustment form' || form_type == 'recommend multiple attendance adjustment form' || form_type == 'approve attendance adjustment form' || form_type == 'approve multiple attendance adjustment form'){
                     var adjustment_id = sessionStorage.getItem('adjustment_id');
                     $('#adjustment_id').val(adjustment_id);
                 }
-                else if(form_type == 'cancel attendance creation form' || form_type == 'cancel multiple attendance creation form' || form_type == 'reject attendance creation form' || form_type == 'reject multiple attendance creation form' || form_type == 'recommend attendance creation form' || form_type == 'recommend multiple attendance creation form'){
+                else if(form_type == 'cancel attendance creation form' || form_type == 'cancel multiple attendance creation form' || form_type == 'reject attendance creation form' || form_type == 'reject multiple attendance creation form' || form_type == 'recommend attendance creation form' || form_type == 'recommend multiple attendance creation form' || form_type == 'approve attendance creation form' || form_type == 'approve multiple attendance creation form'){
                     var creation_id = sessionStorage.getItem('creation_id');
                     $('#creation_id').val(creation_id);
                 }

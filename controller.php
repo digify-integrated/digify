@@ -1781,8 +1781,6 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
             $max_attendance = $attendance_setting_details[0]['MAX_ATTENDANCE'] ?? 1;
             $attendance_total_by_date = $api->get_attendance_total_by_date($employee_id, date('Y-m-d'));
             $ip_address = $api->get_ip_address();
-
-            $attendance_total_by_date = $api->get_attendance_total_by_date($employee_id, date('Y-m-d'));
                 
             $notification_template_details = $api->get_notification_template_details(1);
             $notification_title = $notification_template_details[0]['NOTIFICATION_TITLE'] ?? null;
@@ -1931,8 +1929,6 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
             $max_attendance = $attendance_setting_details[0]['MAX_ATTENDANCE'] ?? 1;
             $attendance_total_by_date = $api->get_attendance_total_by_date($employee_id, date('Y-m-d'));
             $time_in_ip_address = $api->get_ip_address();
-
-            $attendance_total_by_date = $api->get_attendance_total_by_date($employee_id, date('Y-m-d'));
 
             if(!empty($time_out)){
                 $time_out_behavior = $api->get_time_out_behavior($employee_id, $time_in, $time_out);
@@ -5002,7 +4998,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
     # Recommend attendance adjustment
     else if($transaction == 'recommend attendance adjustment'){
-        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['adjustment_id']) && !empty($_POST['adjustment_id']) && isset($_POST['decision_remarks']) && !empty($_POST['decision_remarks'])){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['adjustment_id']) && !empty($_POST['adjustment_id']) && isset($_POST['decision_remarks'])){
             $username = $_POST['username'];
             $adjustment_id = $_POST['adjustment_id'];
             $decision_remarks = $_POST['decision_remarks'];
@@ -5028,7 +5024,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
     # Recommend multiple attendance adjustment
     else if($transaction == 'recommend multiple attendance adjustment'){
-        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['adjustment_id']) && !empty($_POST['adjustment_id']) && isset($_POST['decision_remarks']) && !empty($_POST['decision_remarks'])){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['adjustment_id']) && !empty($_POST['adjustment_id']) && isset($_POST['decision_remarks'])){
             $username = $_POST['username'];
             $adjustment_ids = explode(',', $_POST['adjustment_id']);
             $decision_remarks = $_POST['decision_remarks'];
@@ -5071,7 +5067,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
     # Recommend attendance creation
     else if($transaction == 'recommend attendance creation'){
-        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['creation_id']) && !empty($_POST['creation_id']) && isset($_POST['decision_remarks']) && !empty($_POST['decision_remarks'])){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['creation_id']) && !empty($_POST['creation_id']) && isset($_POST['decision_remarks'])){
             $username = $_POST['username'];
             $creation_id = $_POST['creation_id'];
             $decision_remarks = $_POST['decision_remarks'];
@@ -5097,7 +5093,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
     # Recommend multiple attendance creation
     else if($transaction == 'recommend multiple attendance creation'){
-        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['creation_id']) && !empty($_POST['creation_id']) && isset($_POST['decision_remarks']) && !empty($_POST['decision_remarks'])){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['creation_id']) && !empty($_POST['creation_id']) && isset($_POST['decision_remarks'])){
             $username = $_POST['username'];
             $creation_ids = explode(',', $_POST['creation_id']);
             $decision_remarks = $_POST['decision_remarks'];
@@ -5130,6 +5126,353 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
             if(empty($error)){
                 echo 'Recommended';
+            }
+            else{
+                echo $error;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #   Approve transactions
+    # -------------------------------------------------------------
+
+    # Approve attendance adjustment
+    else if($transaction == 'approve attendance adjustment'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['adjustment_id']) && !empty($_POST['adjustment_id']) && isset($_POST['sanction']) && isset($_POST['decision_remarks']) && !empty($_POST['decision_remarks'])){
+            $username = $_POST['username'];
+            $adjustment_id = $_POST['adjustment_id'];
+            $sanction = $_POST['sanction'];
+            $decision_remarks = $_POST['decision_remarks'];
+
+            $check_attendance_adjustment_exist = $api->check_attendance_adjustment_exist($adjustment_id);
+
+            if($check_attendance_adjustment_exist > 0){
+                $attendance_adjustment_details = $api->get_attendance_adjustment_details($adjustment_id);
+                $attendance_id = $attendance_adjustment_details[0]['ATTENDANCE_ID'];
+                $employee_id = $attendance_adjustment_details[0]['EMPLOYEE_ID'];
+                $time_in = $api->check_date('attendance empty', $attendance_adjustment_details[0]['TIME_IN'], '', 'Y-m-d H:i:00', '', '', '');
+                $time_in_behavior = $api->get_time_in_behavior($employee_id, $time_in);
+                $late = $api->get_attendance_late_total($employee_id, $time_in);
+    
+                $attendance_total_by_date = $api->get_attendance_total_by_date($employee_id, date('Y-m-d'));
+                $time_in_ip_address = $api->get_ip_address();
+                
+                if(!empty($attendance_adjustment_details[0]['TIME_OUT'])){
+                    $time_out = $api->check_date('attendance empty', $attendance_adjustment_details[0]['TIME_OUT'], '', 'Y-m-d H:i:00', '', '', '');
+                }
+                else{
+                    $attendance_details = $api->get_attendance_details($attendance_id);
+                    $time_out = $api->check_date('attendance empty', $attendance_details[0]['TIME_OUT'], '', 'Y-m-d H:i:00', '', '', '');
+                }
+    
+                if(!empty($time_out)){
+                    $time_out_behavior = $api->get_time_out_behavior($employee_id, $time_in, $time_out);
+                    $early_leaving = $api->get_attendance_early_leaving_total($employee_id, $time_in, $time_out);
+                    $overtime = $api->get_attendance_overtime_total($employee_id, $time_in, $time_out);
+                    $total_hours = $api->get_attendance_total_hours($employee_id, $time_in, $time_out);
+                    $time_out_ip_address = $api->get_ip_address();
+                    $time_out_by = $username;
+                }
+                else{
+                    $time_out_behavior = '';
+                    $early_leaving = 0;
+                    $overtime = 0;
+                    $total_hours = 0;
+                    $time_out_ip_address = '';
+                    $time_out_by = '';
+                }
+
+                $check_attendance_validation = $api->check_attendance_validation($time_in, $time_out);
+
+                if(empty($check_attendance_validation)){
+                    $update_attendance = $api->update_attendance($attendance_id, $time_in, $time_in_ip_address, $username, $time_in_behavior, $time_out, $time_out_ip_address, $time_out_by, $time_out_behavior, $late, $early_leaving, $overtime, $total_hours, 'System Generated: Attendance adjusted using attendance adjustment.', $username);
+    
+                    if($update_attendance > 0){
+                        $update_attendance_adjustment_status = $api->update_attendance_adjustment_status($adjustment_id, 'APV', $decision_remarks, $sanction, $username);
+            
+                        if($update_attendance_adjustment_status){
+                            echo 'Approved';
+                        }
+                        else{
+                            echo $update_attendance_adjustment_status;
+                        }
+                    }
+                    else{
+                        echo $update_attendance;
+                    }
+                }
+                else{
+                    echo $check_attendance_validation;
+                }
+            }
+            else{
+                echo 'Not Found';
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Approve multiple attendance adjustment
+    else if($transaction == 'approve multiple attendance adjustment'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['adjustment_id']) && !empty($_POST['adjustment_id']) && isset($_POST['sanction']) && isset($_POST['decision_remarks']) && !empty($_POST['decision_remarks'])){
+            $username = $_POST['username'];
+            $adjustment_ids = explode(',', $_POST['adjustment_id']);
+            $sanction = $_POST['sanction'];
+            $decision_remarks = $_POST['decision_remarks'];
+            $error_count = 0;
+            $error = '';
+
+            foreach($adjustment_ids as $adjustment_id){
+                $check_attendance_adjustment_exist = $api->check_attendance_adjustment_exist($adjustment_id);
+
+                if($check_attendance_adjustment_exist > 0){
+                    $attendance_adjustment_details = $api->get_attendance_adjustment_details($adjustment_id);
+                    $attendance_id = $attendance_adjustment_details[0]['ATTENDANCE_ID'];
+                    $employee_id = $attendance_adjustment_details[0]['EMPLOYEE_ID'];
+                    $time_in = $api->check_date('attendance empty', $attendance_adjustment_details[0]['TIME_IN'], '', 'Y-m-d H:i:00', '', '', '');
+                    $time_in_behavior = $api->get_time_in_behavior($employee_id, $time_in);
+                    $late = $api->get_attendance_late_total($employee_id, $time_in);
+                    $attendance_total_by_date = $api->get_attendance_total_by_date($employee_id, date('Y-m-d'));
+                    $time_in_ip_address = $api->get_ip_address();
+
+                    if(!empty($attendance_adjustment_details[0]['TIME_OUT'])){
+                        $time_out = $api->check_date('attendance empty', $attendance_adjustment_details[0]['TIME_OUT'], '', 'Y-m-d H:i:00', '', '', '');
+                    }
+                    else{
+                        $attendance_details = $api->get_attendance_details($attendance_id);
+                        $time_out = $api->check_date('attendance empty', $attendance_details[0]['TIME_OUT'], '', 'Y-m-d H:i:00', '', '', '');
+                    }
+        
+                    if(!empty($time_out)){
+                        $time_out_behavior = $api->get_time_out_behavior($employee_id, $time_in, $time_out);
+                        $early_leaving = $api->get_attendance_early_leaving_total($employee_id, $time_in, $time_out);
+                        $overtime = $api->get_attendance_overtime_total($employee_id, $time_in, $time_out);
+                        $total_hours = $api->get_attendance_total_hours($employee_id, $time_in, $time_out);
+                        $time_out_ip_address = $api->get_ip_address();
+                        $time_out_by = $username;
+                    }
+                    else{
+                        $time_out_behavior = '';
+                        $early_leaving = 0;
+                        $overtime = 0;
+                        $total_hours = 0;
+                        $time_out_ip_address = '';
+                        $time_out_by = '';
+                    }
+
+                    $check_attendance_validation = $api->check_attendance_validation($time_in, $time_out);
+
+                    if(empty($check_attendance_validation)){
+                        $update_attendance = $api->update_attendance($attendance_id, $time_in, $time_in_ip_address, $username, $time_in_behavior, $time_out, $time_out_ip_address, $time_out_by, $time_out_behavior, $late, $early_leaving, $overtime, $total_hours, 'System Generated: Attendance adjusted using attendance adjustment.', $username);
+        
+                        if($update_attendance > 0){
+                            $update_attendance_adjustment_status = $api->update_attendance_adjustment_status($adjustment_id, 'APV', $decision_remarks, $sanction, $username);
+                
+                            if(!$update_attendance_adjustment_status){
+                                $error_count = $error_count + 1;
+                            }
+                        }
+                        else{
+                            $error_count = $error_count + 1;
+                        }
+                    }
+                    else{
+                        $error_count = $error_count + 1;
+                    }
+
+                    $update_attendance_adjustment_status = $api->update_attendance_adjustment_status($adjustment_id, 'APV', $decision_remarks, $sanction, $username);
+        
+                    if(!$update_attendance_adjustment_status){
+                        $error_count = $error_count + 1;
+                    }
+                }
+                else{
+                    $error_count = $error_count + 1;
+                }
+            }
+
+            if($error_count > 0){
+                if($error_count){
+                    $error = 'There was an error approving '. number_format($error_count) .' attendance adjustment.<br/>';
+                }
+                else{
+                    $error = 'There was an error approving '. number_format($error_count) .' attendance adjustment.<br/>';
+                }
+            }
+
+            if(empty($error)){
+                echo 'Approved';
+            }
+            else{
+                echo $error;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Approve attendance creation
+    else if($transaction == 'approve attendance creation'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['creation_id']) && !empty($_POST['creation_id']) && isset($_POST['sanction']) && isset($_POST['decision_remarks']) && !empty($_POST['decision_remarks'])){
+            $username = $_POST['username'];
+            $creation_id = $_POST['creation_id'];
+            $sanction = $_POST['sanction'];
+            $decision_remarks = $_POST['decision_remarks'];
+
+            $check_attendance_creation_exist = $api->check_attendance_creation_exist($creation_id);
+
+            if($check_attendance_creation_exist > 0){
+                $attendance_creation_details = $api->get_attendance_creation_details($creation_id);
+                $employee_id = $attendance_creation_details[0]['EMPLOYEE_ID'];
+                $time_in = $api->check_date('attendance empty', $attendance_creation_details[0]['TIME_IN'], '', 'Y-m-d H:i:00', '', '', '');
+                $time_out = $api->check_date('attendance empty', $attendance_creation_details[0]['TIME_OUT'], '', 'Y-m-d H:i:00', '', '', '');
+
+                $time_in_behavior = $api->get_time_in_behavior($employee_id, $time_in);
+                $late = $api->get_attendance_late_total($employee_id, $time_in);
+    
+                $attendance_setting_details = $api->get_attendance_setting_details(1);
+                $max_attendance = $attendance_setting_details[0]['MAX_ATTENDANCE'] ?? 1;
+                $attendance_total_by_date = $api->get_attendance_total_by_date($employee_id, date('Y-m-d'));
+                $time_in_ip_address = $api->get_ip_address();
+    
+                if(!empty($time_out)){
+                    $time_out_behavior = $api->get_time_out_behavior($employee_id, $time_in, $time_out);
+                    $early_leaving = $api->get_attendance_early_leaving_total($employee_id, $time_in, $time_out);
+                    $overtime = $api->get_attendance_overtime_total($employee_id, $time_in, $time_out);
+                    $total_hours = $api->get_attendance_total_hours($employee_id, $time_in, $time_out);
+                    $time_out_ip_address = $api->get_ip_address();
+                    $time_out_by = $username;
+                }
+                else{
+                    $time_out_behavior = '';
+                    $early_leaving = 0;
+                    $overtime = 0;
+                    $total_hours = 0;
+                    $time_out_ip_address = '';
+                    $time_out_by = '';
+                }
+
+                $check_attendance_validation = $api->check_attendance_validation($time_in, $time_out);
+
+                if(empty($check_attendance_validation)){
+                    if($attendance_total_by_date < $max_attendance){
+                        $insert_attendance = $api->insert_attendance($employee_id, $time_in, $time_in_ip_address, $username, $time_in_behavior, $time_out, $time_out_ip_address, $time_out_by, $time_out_behavior, $late, $early_leaving, $overtime, $total_hours, 'System Generated: Created using attendance creation.', $username);
+    
+                        if($insert_attendance > 0){
+                            $update_attendance_creation_status = $api->update_attendance_creation_status($creation_id, 'APV', $decision_remarks, $sanction, $username);
+    
+                            if($update_attendance_creation_status){
+                                echo 'Approved';
+                            }
+                            else{
+                                echo $update_attendance_creation_status;
+                            }
+                        }
+                        else{
+                            echo $insert_attendance;
+                        }
+                    }
+                    else{
+                        echo 'Max Attendance';
+                    }
+                }
+                else{
+                    echo $check_attendance_validation;
+                }
+            }
+            else{
+                echo 'Not Found';
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Approve multiple attendance creation
+    else if($transaction == 'approve multiple attendance creation'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['creation_id']) && !empty($_POST['creation_id']) && isset($_POST['sanction']) && isset($_POST['decision_remarks']) && !empty($_POST['decision_remarks'])){
+            $username = $_POST['username'];
+            $creation_ids = explode(',', $_POST['creation_id']);
+            $sanction = $_POST['sanction'];
+            $decision_remarks = $_POST['decision_remarks'];
+            $error_count = 0;
+            $error = '';
+
+            foreach($creation_ids as $creation_id){
+                $check_attendance_creation_exist = $api->check_attendance_creation_exist($creation_id);
+
+                if($check_attendance_creation_exist > 0){
+                    $attendance_creation_details = $api->get_attendance_creation_details($creation_id);
+                    $employee_id = $attendance_creation_details[0]['EMPLOYEE_ID'];
+                    $time_in = $api->check_date('attendance empty', $attendance_creation_details[0]['TIME_IN'], '', 'Y-m-d H:i:00', '', '', '');
+                    $time_out = $api->check_date('attendance empty', $attendance_creation_details[0]['TIME_OUT'], '', 'Y-m-d H:i:00', '', '', '');
+
+                    $time_in_behavior = $api->get_time_in_behavior($employee_id, $time_in);
+                    $late = $api->get_attendance_late_total($employee_id, $time_in);
+        
+                    $attendance_setting_details = $api->get_attendance_setting_details(1);
+                    $max_attendance = $attendance_setting_details[0]['MAX_ATTENDANCE'] ?? 1;
+                    $attendance_total_by_date = $api->get_attendance_total_by_date($employee_id, date('Y-m-d'));
+                    $time_in_ip_address = $api->get_ip_address();
+        
+                    if(!empty($time_out)){
+                        $time_out_behavior = $api->get_time_out_behavior($employee_id, $time_in, $time_out);
+                        $early_leaving = $api->get_attendance_early_leaving_total($employee_id, $time_in, $time_out);
+                        $overtime = $api->get_attendance_overtime_total($employee_id, $time_in, $time_out);
+                        $total_hours = $api->get_attendance_total_hours($employee_id, $time_in, $time_out);
+                        $time_out_ip_address = $api->get_ip_address();
+                        $time_out_by = $username;
+                    }
+                    else{
+                        $time_out_behavior = '';
+                        $early_leaving = 0;
+                        $overtime = 0;
+                        $total_hours = 0;
+                        $time_out_ip_address = '';
+                        $time_out_by = '';
+                    }
+
+                    $check_attendance_validation = $api->check_attendance_validation($time_in, $time_out);
+
+                    if(empty($check_attendance_validation)){
+                        if($attendance_total_by_date < $max_attendance){
+                            $insert_attendance = $api->insert_attendance($employee_id, $time_in, $time_in_ip_address, $username, $time_in_behavior, $time_out, $time_out_ip_address, $time_out_by, $time_out_behavior, $late, $early_leaving, $overtime, $total_hours, 'System Generated: Created using attendance creation.', $username);
+        
+                            if($insert_attendance > 0){
+                                $update_attendance_creation_status = $api->update_attendance_creation_status($creation_id, 'APV', $decision_remarks, $sanction, $username);
+        
+                                if(!$update_attendance_creation_status){
+                                    $error_count = $error_count + 1;
+                                }
+                            }
+                            else{
+                                $error_count = $error_count + 1;
+                            }
+                        }
+                        else{
+                            $error_count = $error_count + 1;
+                        }
+                    }
+                    else{
+                        $error_count = $error_count + 1;
+                    }
+                }
+                else{
+                    $error_count = $error_count + 1;
+                }
+            }
+
+            if($error_count > 0){
+                if($error_count){
+                    $error = 'There was an error approving '. number_format($error_count) .' attendance creation.<br/>';
+                }
+                else{
+                    $error = 'There was an error approving '. number_format($error_count) .' attendance creation.<br/>';
+                }
+            }
+
+            if(empty($error)){
+                echo 'Approved';
             }
             else{
                 echo $error;
@@ -6062,6 +6405,8 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
             $employee_details = $api->get_employee_details($employee_id);
             $file_as = $employee_details[0]['FILE_AS'];
 
+            $generate_attendance_adjustment_table = $api->generate_attendance_adjustment_table($attendance_id, 'APV');
+
             if(!empty($attendance_details[0]['TIME_IN_BY'])){
                 $time_in_by = $attendance_details[0]['TIME_IN_BY'];
                 $time_in_by_details = $api->get_employee_details($time_in_by);
@@ -6096,8 +6441,8 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
             $response[] = array(
                 'EMPLOYEE' => $file_as,
-                'TIME_IN' => $api->check_date('empty', $attendance_details[0]['TIME_IN'], '', 'F d, Y H:i:00', '', '', ''),
-                'TIME_OUT' => $api->check_date('empty', $attendance_details[0]['TIME_OUT'], '', 'F d, Y H:i:00', '', '', ''),
+                'TIME_IN' => $api->check_date('empty', $attendance_details[0]['TIME_IN'], '', 'F d, Y H:i', '', '', ''),
+                'TIME_OUT' => $api->check_date('empty', $attendance_details[0]['TIME_OUT'], '', 'F d, Y H:i', '', '', ''),
                 'TIME_IN_NOTE' => $attendance_details[0]['TIME_IN_NOTE'],
                 'TIME_IN_IP_ADDRESS' => $attendance_details[0]['TIME_IN_IP_ADDRESS'],
                 'TIME_OUT_IP_ADDRESS' => $attendance_details[0]['TIME_OUT_IP_ADDRESS'],
@@ -6112,7 +6457,8 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                 'LATE' => $attendance_details[0]['LATE'] . ' minute(s)',
                 'EARLY_LEAVING' => $attendance_details[0]['EARLY_LEAVING'] . ' minute(s)',
                 'OVERTIME' => $attendance_details[0]['OVERTIME'] . ' minute(s)',
-                'TOTAL_WORKING_HOURS' => $attendance_details[0]['TOTAL_WORKING_HOURS'] . ' hour(s)'
+                'TOTAL_WORKING_HOURS' => $attendance_details[0]['TOTAL_WORKING_HOURS'] . ' hour(s)',
+                'ATTENDANCE_ADJUSTMENT' => $generate_attendance_adjustment_table
             );
 
             echo json_encode($response);
@@ -6173,12 +6519,12 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
             $attachment = $attendance_adjustment_details[0]['ATTACHMENT'];
             $recommendation_by = $attendance_adjustment_details[0]['RECOMMENDATION_BY'];
             $decision_by = $attendance_adjustment_details[0]['DECISION_BY'];
-            $time_in = $api->check_date('summary', $attendance_adjustment_details[0]['TIME_IN'], '', 'F d, Y h:i:s a', '', '', '');
-            $time_out = $api->check_date('summary', $attendance_adjustment_details[0]['TIME_OUT'], '', 'F d, Y h:i:s a', '', '', '');
+            $time_in = $api->check_date('summary', $attendance_adjustment_details[0]['TIME_IN'], '', 'F d, Y h:i a', '', '', '');
+            $time_out = $api->check_date('summary', $attendance_adjustment_details[0]['TIME_OUT'], '', 'F d, Y h:i a', '', '', '');
 
             $attendance_details = $api->get_attendance_details($attendance_id);
             $attendance_time_in = $api->check_date('summary', $attendance_details[0]['TIME_IN'], '', 'F d, Y h:i:s a', '', '', '');
-            $attendance_time_out = $api->check_date('summary', $attendance_details[0]['TIME_OUT'], '', 'F d, Y h:i:s a', '', '', '');
+            $attendance_time_out = $api->check_date('summary', $attendance_details[0]['TIME_OUT'], '', 'F d, Y h:i a', '', '', '');
 
             $status_name = $api->get_attendance_adjustment_status($status)[0]['BADGE'];
             $sanction_name = $api->get_attendance_adjustment_sanction($sanction)[0]['BADGE'];
@@ -6265,8 +6611,8 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
             $attachment = $attendance_creation_details[0]['ATTACHMENT'];
             $recommendation_by = $attendance_creation_details[0]['RECOMMENDATION_BY'];
             $decision_by = $attendance_creation_details[0]['DECISION_BY'];
-            $time_in = $api->check_date('summary', $attendance_creation_details[0]['TIME_IN'], '', 'F d, Y h:i:s a', '', '', '');
-            $time_out = $api->check_date('summary', $attendance_creation_details[0]['TIME_OUT'], '', 'F d, Y h:i:s a', '', '', '');
+            $time_in = $api->check_date('summary', $attendance_creation_details[0]['TIME_IN'], '', 'F d, Y h:i a', '', '', '');
+            $time_out = $api->check_date('summary', $attendance_creation_details[0]['TIME_OUT'], '', 'F d, Y h:i a', '', '', '');
 
             $status_name = $api->get_attendance_creation_status($status)[0]['BADGE'];
             $sanction_name = $api->get_attendance_creation_sanction($sanction)[0]['BADGE'];

@@ -2316,6 +2316,12 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                                 <span class="d-none d-sm-block">Attendance Record</span>    
                                             </a>
                                         </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" data-bs-toggle="tab" href="#attendance_adjustment" role="tab">
+                                                <span class="d-block d-sm-none"><i class="bx bx-time-five"></i></span>
+                                                <span class="d-none d-sm-block">Attendance Adjustment</span>    
+                                            </a>
+                                        </li>
                                     </ul>
                                     <div class="tab-content p-3 text-muted">
                                         <div class="tab-pane active" id="attendance_record" role="tabpanel">
@@ -2353,6 +2359,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                                 </tbody>
                                             </table>
                                         </div>
+                                        <div class="tab-pane" id="attendance_adjustment" role="tabpanel"></div>
                                     </div>
                                 </div>
                             </div>';
@@ -5938,7 +5945,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                 $filter_work_location = $_POST['filter_work_location'];
                 $filter_department = $_POST['filter_department'];
 
-                $query = 'SELECT CREATION_ID, EMPLOYEE_ID, TIME_IN, TIME_OUT, STATUS, SANCTION, TRANSACTION_LOG_ID FROM attendance_creation WHERE STATUS = :status AND EMPLOYEE_ID IN (SELECT EMPLOYEE_ID FROM employee_details WHERE DEPARTMENT IN (SELECT DEPARTMENT FROM approval_approver WHERE APPROVAL_TYPE_ID = :approval_type_id AND EMPLOYEE_ID = :employee_id)) AND STATUS IN ("PEN", "FORREC", "REC")';
+                $query = 'SELECT CREATION_ID, EMPLOYEE_ID, TIME_IN, TIME_OUT, STATUS, SANCTION, TRANSACTION_LOG_ID FROM attendance_creation WHERE EMPLOYEE_ID IN (SELECT EMPLOYEE_ID FROM employee_details WHERE DEPARTMENT IN (SELECT DEPARTMENT FROM approval_approver WHERE APPROVAL_TYPE_ID = :approval_type_id AND EMPLOYEE_ID = :employee_id)) AND STATUS IN ("PEN", "FORREC", "REC")';
 
                 if((!empty($filter_creation_start_date) && !empty($filter_creation_end_date)) || (!empty($filter_recommendation_start_date) && !empty($filter_recommendation_end_date)) || !empty($filter_work_location) || !empty($filter_department)){
                     $query .= ' AND ';
@@ -5965,9 +5972,8 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                 }
     
                 $sql = $api->db_connection->prepare($query);
-                $sql->bindValue(':status', 'FORREC');
-                $sql->bindValue(':employee_id', $employee_id);
                 $sql->bindValue(':approval_type_id', '4');
+                $sql->bindValue(':employee_id', $employee_id);
 
                 if((!empty($filter_creation_start_date) && !empty($filter_creation_end_date)) || (!empty($filter_recommendation_start_date) && !empty($filter_recommendation_end_date)) || !empty($filter_work_location) || !empty($filter_department)){
                     if(!empty($filter_creation_start_date) && !empty($filter_creation_end_date)){
