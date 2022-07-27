@@ -334,7 +334,7 @@ class Api{
         $mail->addAddress($email, $email);
         $mail->Subject = $subject;
 
-        if($notification_type == 1 || $notification_type == 2 || $notification_type == 3 || $notification_type == 4 || $notification_type == 5 || $notification_type == 6 || $notification_type == 7 || $notification_type == 8 || $notification_type == 9 || $notification_type == 10 || $notification_type == 11 || $notification_type == 12 || $notification_type == 13 || $notification_type == 14 || $notification_type == 15 || $notification_type == 16 || $notification_type == 17 || $notification_type == 18 || $notification_type == 19){
+        if($notification_type == 1 || $notification_type == 2){
             if(!empty($link)){
                 $message = file_get_contents('email_template/basic-notification-with-button.html');
                 $message = str_replace('@link', $link, $message);
@@ -342,17 +342,11 @@ class Api{
                 if($notification_type == 1 || $notification_type == 2){
                     $message = str_replace('@button_title', 'View Attendance Record', $message);
                 }
-                else if($notification_type == 3 || $notification_type == 5 || $notification_type == 7 || $notification_type == 9 || $notification_type == 11 || $notification_type == 13){
-                    $message = str_replace('@button_title', 'View Attendance Creation', $message);
-                }
-                else if($notification_type == 4 || $notification_type == 6 || $notification_type == 8 || $notification_type == 10 || $notification_type == 12 || $notification_type == 14){
+                else if($notification_type == 3 || $notification_type == 4 || $notification_type == 5 || $notification_type == 6 || $notification_type == 7){
                     $message = str_replace('@button_title', 'View Attendance Adjustment', $message);
                 }
-                else if($notification_type == 15 || $notification_type == 16 || $notification_type == 17 || $notification_type == 18){
-                    $message = str_replace('@button_title', 'View Leave Application', $message);
-                }
-                else if($notification_type == 19){
-                    $message = str_replace('@button_title', 'View Payslip', $message);
+                else if($notification_type == 8 || $notification_type == 9 || $notification_type == 10 || $notification_type == 11 || $notification_type == 12){
+                    $message = str_replace('@button_title', 'View Attendance Creation', $message);
                 }
             }
             else{

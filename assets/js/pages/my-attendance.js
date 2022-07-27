@@ -65,7 +65,7 @@ function initialize_my_attendance_table(datatable_name, buttons = false, show_al
             buttons: [
                 'csv', 'excel', 'pdf'
             ],
-            'order': [[ 0, 'asc' ]],
+            'order': [[ 0, 'desc' ]],
             'columns' : column,
             'scrollY': false,
             'scrollX': true,
@@ -92,7 +92,7 @@ function initialize_my_attendance_table(datatable_name, buttons = false, show_al
                 'data': {'type' : type, 'username' : username, 'filter_start_date' : filter_start_date, 'filter_end_date' : filter_end_date, 'filter_time_in_behavior' : filter_time_in_behavior, 'filter_time_out_behavior' : filter_time_out_behavior},
                 'dataSrc' : ''
             },
-            'order': [[ 0, 'asc' ]],
+            'order': [[ 0, 'desc' ]],
             'columns' : column,
             'scrollY': false,
             'scrollX': true,
