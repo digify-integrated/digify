@@ -5,31 +5,36 @@
     $attendance_setting_page = $api->check_role_permissions($username, 108);
     $time_in_time_out_page = $api->check_role_permissions($username, 111);
     $attendance_page = $api->check_role_permissions($username, 113);
-    $my_attendance = $api->check_role_permissions($username, 118);
-    $my_attendance_adjustment = $api->check_role_permissions($username, 122);
-    $my_attendance_creation = $api->check_role_permissions($username, 129);
+    $my_attendance_page = $api->check_role_permissions($username, 118);
+    $my_attendance_adjustment_page = $api->check_role_permissions($username, 122);
+    $my_attendance_creation_page = $api->check_role_permissions($username, 129);
+    $kiosk_mode_page = $api->check_role_permissions($username, 169);
 
-    if($attendance_setting_page > 0 || $time_in_time_out_page > 0 || $attendance_page > 0 || $my_attendance > 0 || $my_attendance_adjustment > 0 || $my_attendance_creation > 0){
+    if($attendance_setting_page > 0 || $time_in_time_out_page > 0 || $attendance_page > 0 || $my_attendance_page > 0 || $my_attendance_adjustment_page > 0 || $my_attendance_creation_page > 0){
         if($time_in_time_out_page > 0){
             $menu .= '<li class="nav-item dropdown"><a href="time-in-time-out.php" class="nav-link">Time In / Time Out</a></li>';
         }
 
-        if($my_attendance > 0 || $my_attendance_adjustment > 0){
+        if($kiosk_mode_page > 0){
+            $menu .= '<li class="nav-item dropdown"><a href="kiosk-mode.php" class="nav-link">Kiosk Mode</a></li>';
+        }
+
+        if($my_attendance_page > 0 || $my_attendance_adjustment_page > 0 || $my_attendance_creation_page > 0){
             $menu .= '<li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle arrow-none" href="javascript: void(0);" id="topnav-user-access" role="button">
                             <span key="t-user-access">Attendance Record</span> <div class="arrow-down"></div>
                         </a>
                         <div class="dropdown-menu" aria-labelledby="topnav-user-access">';
 
-                            if($my_attendance > 0){
+                            if($my_attendance_page > 0){
                                 $menu .= '<a href="my-attendance.php" class="dropdown-item" key="t-attendance">My Attendance</a>';
                             }
 
-                            if($my_attendance_adjustment > 0){
+                            if($my_attendance_adjustment_page > 0){
                                 $menu .= '<a href="my-attendance-adjustment.php" class="dropdown-item" key="t-my-attendance-adjustment">My Attendance Adjustment</a>';
                             }
 
-                            if($my_attendance_creation > 0){
+                            if($my_attendance_creation_page > 0){
                                 $menu .= '<a href="my-attendance-creation.php" class="dropdown-item" key="t-my-attendance-creation">My Attendance Creation</a>';
                             }
 
