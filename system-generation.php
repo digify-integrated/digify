@@ -2538,6 +2538,13 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                 </div>
                             </div>';
             }
+            else if($element_type == 'scan badge form'){
+                $element = '<div class="row">
+                                <div class="col-md-12">
+                                    <div id="badge-reader"></div>
+                                </div>
+                            </div>';
+            }
 
             $response[] = array(
                 'ELEMENT' => $element
@@ -4177,8 +4184,8 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                         $time_out_behavior = $api->get_time_out_behavior_status($row['TIME_OUT_BEHAVIOR'])[0]['BADGE'];
 
                         $employee_details = $api->get_employee_details($employee_id);
-                        $file_as = $employee_details[0]['FILE_AS'];
-                        $job_position = $employee_details[0]['JOB_POSITION'];
+                        $file_as = $employee_details[0]['FILE_AS'] ?? null;
+                        $job_position = $employee_details[0]['JOB_POSITION'] ?? null;
 
                         $job_position_details = $api->get_job_position_details($job_position);
                         $job_position_name = $job_position_details[0]['JOB_POSITION'] ?? null;

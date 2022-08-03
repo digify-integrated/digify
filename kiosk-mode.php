@@ -105,6 +105,7 @@
         <script src="assets/libs/jquery-validation/js/jquery.validate.min.js"></script>
         <script src="assets/libs/sweetalert2/sweetalert2.min.js"></script>
         <script src="assets/libs/gmaps/gmaps.min.js"></script>
+        <script src="assets/libs/html5-qr-code/html5-qrcode.min.js"></script>
         <script src="assets/js/system.js?v=<?php echo rand(); ?>"></script>
         <script src="assets/js/pages/kiosk-mode.js?v=<?php echo rand(); ?>"></script>
     </body>

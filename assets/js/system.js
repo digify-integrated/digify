@@ -6491,6 +6491,7 @@ function get_location(map_div) {
 function show_position(position) {
     sessionStorage.setItem('latitude', position.coords.latitude);
     sessionStorage.setItem('longitude', position.coords.longitude);
+    sessionStorage.setItem('attendance_position', position.coords.latitude + ', ' + position.coords.longitude);
 
     if ($('#attendance_position').length) {
         $('#attendance_position').val(position.coords.latitude + ', ' + position.coords.longitude);
@@ -6631,6 +6632,84 @@ function generate_element(element_type, value, container, modal, username){
 
                 if(element_type == 'user account details' || element_type == 'system parameter details' || element_type == 'company details' || element_type == 'job position details' || element_type == 'work location details' || element_type == 'working hours details' || element_type == 'attendance details' || element_type == 'attendance adjustment details' || element_type == 'attendance creation details' || element_type == 'attendance cration details' || element_type == 'approval type details'){
                     display_form_details(element_type);
+                }
+                else if(element_type == 'scan badge form'){
+                    $('#badge-reader').html('<div class="d-flex justify-content-center"><div class="spinner-border spinner-border-sm text-primary" role="status"><span rclass="sr-only"></span></div></div>');
+
+                    Html5Qrcode.getCameras().then(devices => {
+                        if (devices && devices.length) {
+                            get_location('');
+                            var camera_id = devices[0].id;
+            
+                            const html5QrCode = new Html5Qrcode('badge-reader');
+                            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+                            const qrCodeSuccessCallback = (decodedText, decodedResult) => {
+                                var audio = new Audio('assets/audio/scan.mp3');
+                                audio.play();
+                                navigator.vibrate([500]);
+            
+                                var employee_id = decodedText.substring(
+                                    decodedText.lastIndexOf('[') + 1, 
+                                    decodedText.lastIndexOf(']')
+                                );
+            
+                                var attendance_position = sessionStorage.getItem('attendance_position');
+                                var transaction = 'submit badge scan';
+                                var username = $('#username').text();
+                                    
+                                $.ajax({
+                                    type: 'POST',
+                                    url: 'controller.php',
+                                    data: {username : username, attendance_position : attendance_position, employee_id : employee_id, transaction : transaction},
+                                    success: function (response) {
+                                        if(response === 'Time In'){
+                                            var audio = new Audio('assets/audio/attendance-clock-in-success.mp3');
+                                            audio.play();
+                                            navigator.vibrate([500]);
+                                        }
+                                        else if(response === 'Time Out'){
+                                            var audio = new Audio('assets/audio/attendance-clock-out-success.mp3');
+                                            audio.play();
+                                            navigator.vibrate([500]);
+                                        }
+                                        else if(response === 'Max Attendance'){
+                                            var audio = new Audio('assets/audio/max-attendance-error.mp3');
+                                            audio.play();
+                                            navigator.vibrate([500]);
+                                        }
+                                        else if(response === 'Location'){
+                                            var audio = new Audio('assets/audio/location-error.mp3');
+                                            audio.play();
+                                            navigator.vibrate([500]);
+                                        }
+                                        else if(response === 'Time Allowance'){
+                                            var audio = new Audio('assets/audio/clock-out-time-error.mp3');
+                                            audio.play();
+                                            navigator.vibrate([500]);
+                                        }
+                                        else{
+                                            var audio = new Audio('assets/audio/attendance-error.mp3');
+                                            audio.play();
+                                            navigator.vibrate([500]);
+                                        }
+                                    }
+                                });
+            
+                                html5QrCode.stop().then((ignore) => {
+                                    $('#badge-reader').html('');
+                                    $('#badge-reader').html('<div class="d-flex justify-content-center"><div class="spinner-border spinner-border-sm text-primary" role="status"><span rclass="sr-only"></span></div></div>');
+                                    
+                                    setTimeout(function(){  html5QrCode.start({ deviceId: { exact: camera_id} }, config, qrCodeSuccessCallback); }, 4000);
+                                }).catch((err) => {
+                                    alert(err);
+                                });
+                            };
+            
+                            html5QrCode.start({ deviceId: { exact: camera_id} }, config, qrCodeSuccessCallback);
+                        }
+                    }).catch(err => {
+                        alert(err);
+                    });
                 }
                 else if(element_type == 'transaction log'){
                     if($('#transaction-log-datatable').length){
