@@ -80,6 +80,18 @@
                                 </a>
                             </div>
                             <div class="col-sm-2">
+                                <a class="dropdown-icon-item" href="public-holiday.php">
+                                    <div class="card text-center">
+                                        <div class="card-body">
+                                            <div class="font-size-24 text-primary mb-2">
+                                                <i class="bx bx-calendar"></i>
+                                            </div>
+                                            <h6>Leave Management</h6>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="col-sm-2">
                                 <a class="dropdown-icon-item" href="approval-type.php">
                                     <div class="card text-center">
                                         <div class="card-body">

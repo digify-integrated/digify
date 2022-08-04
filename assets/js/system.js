@@ -6663,35 +6663,25 @@ function generate_element(element_type, value, container, modal, username){
                                     data: {username : username, attendance_position : attendance_position, employee_id : employee_id, transaction : transaction},
                                     success: function (response) {
                                         if(response === 'Time In'){
-                                            var audio = new Audio('assets/audio/attendance-clock-in-success.mp3');
-                                            audio.play();
-                                            navigator.vibrate([500]);
+                                            show_alert('Attendance Success', 'Your time in has been recorded.', 'success');
                                         }
                                         else if(response === 'Time Out'){
-                                            var audio = new Audio('assets/audio/attendance-clock-out-success.mp3');
-                                            audio.play();
-                                            navigator.vibrate([500]);
+                                            show_alert('Attendance Success', 'Your time out has been recorded.', 'success');
                                         }
                                         else if(response === 'Max Attendance'){
-                                            var audio = new Audio('assets/audio/max-attendance-error.mp3');
-                                            audio.play();
-                                            navigator.vibrate([500]);
+                                            show_alert('Attendance Error', 'Your have reached the maximum time in for the day.', 'error');
                                         }
                                         else if(response === 'Location'){
-                                            var audio = new Audio('assets/audio/location-error.mp3');
-                                            audio.play();
-                                            navigator.vibrate([500]);
+                                            show_alert('Attendance Error', 'Your location cannot be determined.', 'error');
                                         }
                                         else if(response === 'Time Allowance'){
-                                            var audio = new Audio('assets/audio/clock-out-time-error.mp3');
-                                            audio.play();
-                                            navigator.vibrate([500]);
+                                            show_alert('Attendance Error', 'Please wait a few minutes before you can time out.', 'error');
                                         }
                                         else{
-                                            var audio = new Audio('assets/audio/attendance-error.mp3');
-                                            audio.play();
-                                            navigator.vibrate([500]);
+                                            show_alert('Attendance Error', response, 'error');
                                         }
+
+                                        navigator.vibrate([500]);
                                     }
                                 });
             

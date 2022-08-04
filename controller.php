@@ -2003,45 +2003,35 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
             $attendance_id = $recent_employee_attendance_details[0]['ATTENDANCE_ID'] ?? null;
 
             if(!empty($attendance_id)){
-                $check_attendance_exist = $api->check_attendance_exist($attendance_id);
-    
-                if($check_attendance_exist > 0){
-                    $attendance_details = $api->get_attendance_details($attendance_id);
-                    $time_in = $attendance_details[0]['TIME_IN'];
+                $attendance_details = $api->get_attendance_details($attendance_id);
+                $time_in = $attendance_details[0]['TIME_IN'] ?? null;
 
-                    $time_out = date('Y-m-d H:i:00');
-                    $time_out_behavior = $api->get_time_out_behavior($employee_id, $time_in, $time_out);
-                    $early_leaving = $api->get_attendance_early_leaving_total($employee_id, $time_in, $time_out);
-                    $overtime = $api->get_attendance_overtime_total($employee_id, $time_in, $time_out);
-                    $total_hours = $api->get_attendance_total_hours($employee_id, $time_in, $time_out);
-                    $ip_address = $api->get_ip_address();
-                        
-                    $notification_template_details = $api->get_notification_template_details(2);
-                    $notification_title = $notification_template_details[0]['NOTIFICATION_TITLE'] ?? null;
-                    $notification_message = $notification_template_details[0]['NOTIFICATION_MESSAGE'] ?? null;
-                    $notification_message = str_replace('{date}', $api->check_date('empty', $time_out, '', 'F d, Y', '', '', ''), $notification_message);
-                    $notification_message = str_replace('{time}', $api->check_date('empty', $time_out, '', 'h:i a', '', '', ''), $notification_message);
+                $attendance_setting_details = $api->get_attendance_setting_details(1);
+                $max_attendance = $attendance_setting_details[0]['MAX_ATTENDANCE'] ?? 1;
+                $attendance_total_by_date = $api->get_attendance_total_by_date($employee_id, $api->check_date('empty', $time_in, '', 'Y-m-d', '', '', ''));
 
+                $time_out = date('Y-m-d H:i:00');
+                $time_out_behavior = $api->get_time_out_behavior($employee_id, $time_in, $time_out);
+                $early_leaving = $api->get_attendance_early_leaving_total($employee_id, $time_in, $time_out);
+                $overtime = $api->get_attendance_overtime_total($employee_id, $time_in, $time_out);
+                $total_hours = $api->get_attendance_total_hours($employee_id, $time_in, $time_out);
+                $ip_address = $api->get_ip_address();
+                    
+                $notification_template_details = $api->get_notification_template_details(2);
+                $notification_title = $notification_template_details[0]['NOTIFICATION_TITLE'] ?? null;
+                $notification_message = $notification_template_details[0]['NOTIFICATION_MESSAGE'] ?? null;
+                $notification_message = str_replace('{date}', $api->check_date('empty', $time_out, '', 'F d, Y', '', '', ''), $notification_message);
+                $notification_message = str_replace('{time}', $api->check_date('empty', $time_out, '', 'h:i a', '', '', ''), $notification_message);
+
+                $attendance_setting_details = $api->get_attendance_setting_details(1);
+                $time_out_interval = $attendance_setting_details[0]['TIME_OUT_INTERVAL'] ?? 1;
+
+                $time_difference = round(abs(strtotime($time_out) - strtotime($time_in)) / 60, 2);
+
+                if($time_difference > $time_out_interval){
                     if (!filter_var($ip_address, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)){
-                        $update_time_out = $api->update_time_out($attendance_id, $time_out, $attendance_position, $ip_address, $time_out_behavior, 'Scanned', $early_leaving, $overtime, $total_hours, $username);
-        
-                        if($update_time_out > 0){
-                            $send_notification = $api->send_notification(2, null, $employee_id, $notification_title, $notification_message, $username);
-        
-                            if($send_notification){
-                                echo 'Time Out';
-                            }
-                            else{
-                                echo $send_notification;
-                            }
-                        }
-                        else{
-                            echo $update_time_out;
-                        }
-                    }
-                    else{
-                        if(!empty($attendance_position)){
-                            $update_time_out = $api->update_time_out($attendance_id, $time_out, $attendance_position, $ip_address, $time_out_behavior, 'Scanned', $early_leaving, $overtime, $total_hours, $username);
+                        if($attendance_total_by_date < $max_attendance){
+                            $update_time_out = $api->update_time_out($attendance_id, $time_out, $attendance_position, $ip_address, $time_out_behavior, 'Recorded using badge scanning.', $early_leaving, $overtime, $total_hours, $username);
         
                             if($update_time_out > 0){
                                 $send_notification = $api->send_notification(2, null, $employee_id, $notification_title, $notification_message, $username);
@@ -2058,70 +2048,39 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                             }
                         }
                         else{
-                            echo 'Location';
-                        }
-                    }
-                }
-                else{
-                    $time_in = date('Y-m-d H:i:00');
-                    $time_in_behavior = $api->get_time_in_behavior($employee_id, $time_in);
-                    $late = $api->get_attendance_late_total($employee_id, $time_in);
-        
-                    $attendance_setting_details = $api->get_attendance_setting_details(1);
-                    $max_attendance = $attendance_setting_details[0]['MAX_ATTENDANCE'] ?? 1;
-                    $attendance_total_by_date = $api->get_attendance_total_by_date($employee_id, date('Y-m-d'));
-                    $ip_address = $api->get_ip_address();
-                        
-                    $notification_template_details = $api->get_notification_template_details(1);
-                    $notification_title = $notification_template_details[0]['NOTIFICATION_TITLE'] ?? null;
-                    $notification_message = $notification_template_details[0]['NOTIFICATION_MESSAGE'] ?? null;
-                    $notification_message = str_replace('{date}', $api->check_date('empty', $time_in, '', 'F d, Y', '', '', ''), $notification_message);
-                    $notification_message = str_replace('{time}', $api->check_date('empty', $time_in, '', 'h:i a', '', '', ''), $notification_message);
-            
-                    if (!filter_var($ip_address, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)){
-                        if($attendance_total_by_date < $max_attendance){
-                            $insert_time_in = $api->insert_time_in($employee_id, $time_in, $attendance_position, $ip_address, $time_in_behavior, 'Scanned', $late, $username);
-        
-                            if($insert_time_in > 0){
-                                $send_notification = $api->send_notification(1, null, $employee_id, $notification_title, $notification_message, $username);
-        
-                                if($send_notification){
-                                    echo 'Time In';
-                                }
-                                else{
-                                    echo $send_notification;
-                                }
-                            }
-                            else{
-                                echo $insert_time_in;
-                            }
-                        }
-                        else{
                             echo 'Max Attendance';
                         }
                     }
                     else{
                         if(!empty($attendance_position)){
-                            $insert_time_in = $api->insert_time_in($employee_id, $time_in, $attendance_position, $ip_address, $time_in_behavior, 'Scanned', $late, $username);
-        
-                            if($insert_time_in > 0){
-                                $send_notification = $api->send_notification(1, null, $employee_id, $notification_title, $notification_message, $username);
-        
-                                if($send_notification){
-                                    echo 'Time In';
+                            if($attendance_total_by_date < $max_attendance){
+                                $update_time_out = $api->update_time_out($attendance_id, $time_out, $attendance_position, $ip_address, $time_out_behavior, 'Recorded using badge scanning.', $early_leaving, $overtime, $total_hours, $username);
+            
+                                if($update_time_out > 0){
+                                    $send_notification = $api->send_notification(2, null, $employee_id, $notification_title, $notification_message, $username);
+                
+                                    if($send_notification){
+                                        echo 'Time Out';
+                                    }
+                                    else{
+                                        echo $send_notification;
+                                    }
                                 }
                                 else{
-                                    echo $send_notification;
+                                    echo $update_time_out;
                                 }
                             }
                             else{
-                                echo $insert_time_in;
+                                echo 'Max Attendance';
                             }
                         }
                         else{
                             echo 'Location';
                         }
                     }
+                }
+                else{
+                    echo 'Time Allowance';
                 }
             }
             else{
@@ -2142,7 +2101,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
         
                 if (!filter_var($ip_address, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)){
                     if($attendance_total_by_date < $max_attendance){
-                        $insert_time_in = $api->insert_time_in($employee_id, $time_in, $attendance_position, $ip_address, $time_in_behavior, 'Scanned', $late, $username);
+                        $insert_time_in = $api->insert_time_in($employee_id, $time_in, $attendance_position, $ip_address, $time_in_behavior, 'Recorded using badge scanning.', $late, $username);
     
                         if($insert_time_in > 0){
                             $send_notification = $api->send_notification(1, null, $employee_id, $notification_title, $notification_message, $username);
@@ -2164,7 +2123,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                 }
                 else{
                     if(!empty($attendance_position)){
-                        $insert_time_in = $api->insert_time_in($employee_id, $time_in, $attendance_position, $ip_address, $time_in_behavior, 'Scanned', $late, $username);
+                        $insert_time_in = $api->insert_time_in($employee_id, $time_in, $attendance_position, $ip_address, $time_in_behavior, 'Recorded using badge scanning.', $late, $username);
     
                         if($insert_time_in > 0){
                             $send_notification = $api->send_notification(1, null, $employee_id, $notification_title, $notification_message, $username);
@@ -6828,8 +6787,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
     # Attendance setting details
     else if($transaction == 'attendance setting details'){
-        $attendance_setting_id = 1;
-        $attendance_setting_details = $api->get_attendance_setting_details($attendance_setting_id);
+        $attendance_setting_details = $api->get_attendance_setting_details(1);
 
         $response[] = array(
             'MAX_ATTENDANCE' => $attendance_setting_details[0]['MAX_ATTENDANCE'] ?? 1,

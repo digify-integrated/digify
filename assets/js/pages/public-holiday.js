@@ -2,31 +2,35 @@
     'use strict';
 
     $(function() {
-        if($('#job-position-datatable').length){
-            initialize_job_position_table('#job-position-datatable');
+        if($('#public-holiday-datatable').length){
+            initialize_public_holiday_table('#public-holiday-datatable');
         }
 
         initialize_click_events();
     });
 })(jQuery);
 
-function initialize_job_position_table(datatable_name, buttons = false, show_all = false){
+function initialize_public_holiday_table(datatable_name, buttons = false, show_all = false){
     hide_multiple_buttons();
     
     var username = $('#username').text();
-    var type = 'job position table';
+    var type = 'public holiday table';
     var settings;
 
     var column = [ 
         { 'data' : 'CHECK_BOX' },
-        { 'data' : 'JOB_POSITION' },
+        { 'data' : 'PUBLIC_HOLIDAY_TYPE' },
+        { 'data' : 'HOLIDAY_DATE' },
+        { 'data' : 'HOLIDAY_TYPE' },
         { 'data' : 'ACTION' }
     ];
 
     var column_definition = [
         { 'width': '1%','bSortable': false, 'aTargets': 0 },
-        { 'width': '79%', 'aTargets': 1 },
-        { 'width': '20%','bSortable': false, 'aTargets': 2 },
+        { 'width': '39%', 'aTargets': 1 },
+        { 'width': '20%', 'aTargets': 2 },
+        { 'width': '20%', 'aTargets': 3 },
+        { 'width': '20%','bSortable': false, 'aTargets': 4 },
     ];
 
     if(show_all){
@@ -103,33 +107,33 @@ function initialize_job_position_table(datatable_name, buttons = false, show_all
 function initialize_click_events(){
     var username = $('#username').text();
 
-    $(document).on('click','.view-job-position',function() {
-        var job_position_id = $(this).data('job-position-id');
+    $(document).on('click','.view-public-holiday',function() {
+        var public_holiday_id = $(this).data('public-holiday-id');
 
-        sessionStorage.setItem('job_position_id', job_position_id);
+        sessionStorage.setItem('public_holiday_id', public_holiday_id);
 
-        generate_modal('job position details', 'Job Position Details', 'R' , '1', '0', 'element', '', '0', username);
+        generate_modal('public holiday details', 'Public Holiday Details', 'R' , '1', '0', 'element', '', '0', username);
     });
 
-    $(document).on('click','#add-job-position',function() {
-        generate_modal('job position form', 'Job Position', 'R' , '1', '1', 'form', 'job-position-form', '1', username);
+    $(document).on('click','#add-public-holiday',function() {
+        generate_modal('public holiday form', 'Public Holiday', 'R' , '1', '1', 'form', 'public-holiday-form', '1', username);
     });
 
-    $(document).on('click','.update-job-position',function() {
-        var job_position_id = $(this).data('job-position-id');
+    $(document).on('click','.update-public-holiday',function() {
+        var public_holiday_id = $(this).data('public-holiday-id');
 
-        sessionStorage.setItem('job_position_id', job_position_id);
+        sessionStorage.setItem('public_holiday_id', public_holiday_id);
         
-        generate_modal('job position form', 'Job Position', 'R' , '1', '1', 'form', 'job-position-form', '0', username);
+        generate_modal('public holiday form', 'Public Holiday', 'R' , '1', '1', 'form', 'public-holiday-form', '0', username);
     });
     
-    $(document).on('click','.delete-job-position',function() {
-        var job_position_id = $(this).data('job-position-id');
-        var transaction = 'delete job position';
+    $(document).on('click','.delete-public-holiday',function() {
+        var public_holiday_id = $(this).data('public-holiday-id');
+        var transaction = 'delete public holiday';
 
         Swal.fire({
-            title: 'Delete Job Position',
-            text: 'Are you sure you want to delete this job position?',
+            title: 'Delete Public Holiday',
+            text: 'Are you sure you want to delete this public holiday?',
             icon: 'warning',
             showCancelButton: !0,
             confirmButtonText: 'Delete',
@@ -142,20 +146,20 @@ function initialize_click_events(){
                 $.ajax({
                     type: 'POST',
                     url: 'controller.php',
-                    data: {username : username, job_position_id : job_position_id, transaction : transaction},
+                    data: {username : username, public_holiday_id : public_holiday_id, transaction : transaction},
                     success: function (response) {
                         if(response === 'Deleted' || response === 'Not Found'){
                             if(response === 'Deleted'){
-                                show_alert('Delete Job Position', 'The job position has been deleted.', 'success');
+                                show_alert('Delete Public Holiday', 'The public holiday has been deleted.', 'success');
                             }
                             else{
-                                show_alert('Delete Job Position', 'The job position does not exist.', 'info');
+                                show_alert('Delete Public Holiday', 'The public holiday does not exist.', 'info');
                             }
 
-                            reload_datatable('#job-position-datatable');
+                            reload_datatable('#public-holiday-datatable');
                         }
                         else{
-                          show_alert('Delete Job Position', response, 'error');
+                          show_alert('Delete Public Holiday', response, 'error');
                         }
                     }
                 });
@@ -164,20 +168,20 @@ function initialize_click_events(){
         });
     });
 
-    $(document).on('click','#delete-job-position',function() {
-        var job_position_id = [];
-        var transaction = 'delete multiple job position';
+    $(document).on('click','#delete-public-holiday',function() {
+        var public_holiday_id = [];
+        var transaction = 'delete multiple public holiday';
 
         $('.datatable-checkbox-children').each(function(){
             if($(this).is(':checked')){  
-                job_position_id.push(this.value);  
+                public_holiday_id.push(this.value);  
             }
         });
 
-        if(job_position_id.length > 0){
+        if(public_holiday_id.length > 0){
             Swal.fire({
-                title: 'Delete Multiple Job Positions',
-                text: 'Are you sure you want to delete these job positions?',
+                title: 'Delete Multiple Public Holidays',
+                text: 'Are you sure you want to delete these public holidays?',
                 icon: 'warning',
                 showCancelButton: !0,
                 confirmButtonText: 'Delete',
@@ -191,20 +195,20 @@ function initialize_click_events(){
                     $.ajax({
                         type: 'POST',
                         url: 'controller.php',
-                        data: {username : username, job_position_id : job_position_id, transaction : transaction},
+                        data: {username : username, public_holiday_id : public_holiday_id, transaction : transaction},
                         success: function (response) {
                             if(response === 'Deleted' || response === 'Not Found'){
                                 if(response === 'Deleted'){
-                                    show_alert('Delete Multiple Job Positions', 'The job positions have been deleted.', 'success');
+                                    show_alert('Delete Multiple Public Holidays', 'The public holidays have been deleted.', 'success');
                                 }
                                 else{
-                                    show_alert('Delete Multiple Job Positions', 'The job positions does not exist.', 'info');
+                                    show_alert('Delete Multiple Public Holidays', 'The public holidays does not exist.', 'info');
                                 }
     
-                                reload_datatable('#job-position-datatable');
+                                reload_datatable('#public-holiday-datatable');
                             }
                             else{
-                                show_alert('Delete Multiple Job Positions', response, 'error');
+                                show_alert('Delete Multiple Public Holidays', response, 'error');
                             }
                         }
                     });
@@ -214,7 +218,7 @@ function initialize_click_events(){
             });
         }
         else{
-            show_alert('Delete Multiple Job Positions', 'Please select the job positions you want to delete.', 'error');
+            show_alert('Delete Multiple Public Holidays', 'Please select the public holidays you want to delete.', 'error');
         }
     });
 
