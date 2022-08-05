@@ -514,7 +514,7 @@ CREATE TABLE public_holiday(
 	RECORD_LOG VARCHAR(100)
 );
 
-CREATE TABLE public_holiday_branch(
+CREATE TABLE public_holiday_work_location(
 	PUBLIC_HOLIDAY_ID VARCHAR(100) NOT NULL,
 	WORK_LOCATION_ID VARCHAR(50) NOT NULL,
 	RECORD_LOG VARCHAR(100)
@@ -550,6 +550,7 @@ CREATE INDEX global_notification_index ON global_notification(NOTIFICATION_ID);
 CREATE INDEX attendance_adjustment_index ON attendance_adjustment(ADJUSTMENT_ID);
 CREATE INDEX attendance_creation_index ON attendance_creation(CREATION_ID);
 CREATE INDEX approval_exception_index ON approval_exception(APPROVAL_TYPE_ID);
+CREATE INDEX public_holiday_index ON public_holiday(PUBLIC_HOLIDAY_ID);
 
 /* Stored Procedure */
 
@@ -3536,6 +3537,121 @@ BEGIN
 	SET @employee_id = employee_id;
 
 	SET @query = 'DELETE FROM approval_exception WHERE APPROVAL_TYPE_ID = @approval_type_id AND EMPLOYEE_ID = @employee_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE TABLE public_holiday(
+	PUBLIC_HOLIDAY_ID VARCHAR(100) PRIMARY KEY,
+	PUBLIC_HOLIDAY VARCHAR(100) NOT NULL,
+	HOLIDAY_DATE DATE NOT NULL,
+	HOLIDAY_TYPE VARCHAR(50) NOT NULL,
+	TRANSACTION_LOG_ID VARCHAR(100),
+	RECORD_LOG VARCHAR(100)
+);
+
+CREATE TABLE public_holiday_work_location(
+	PUBLIC_HOLIDAY_ID VARCHAR(100) NOT NULL,
+	WORK_LOCATION_ID VARCHAR(50) NOT NULL,
+	RECORD_LOG VARCHAR(100)
+);
+
+CREATE PROCEDURE check_public_holiday_exist(IN public_holiday_id VARCHAR(100))
+BEGIN
+	SET @public_holiday_id = public_holiday_id;
+
+	SET @query = 'SELECT COUNT(1) AS TOTAL FROM public_holiday WHERE PUBLIC_HOLIDAY_ID = @public_holiday_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE update_public_holiday(IN public_holiday_id VARCHAR(100), IN public_holiday VARCHAR(100), IN holiday_date DATE, IN holiday_type VARCHAR(50), IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
+BEGIN
+	SET @public_holiday_id = public_holiday_id;
+	SET @public_holiday = public_holiday;
+	SET @holiday_date = holiday_date;
+	SET @holiday_type = holiday_type;
+	SET @transaction_log_id = transaction_log_id;
+	SET @record_log = record_log;
+
+	SET @query = 'UPDATE public_holiday SET PUBLIC_HOLIDAY = @public_holiday, HOLIDAY_DATE = @holiday_date, HOLIDAY_TYPE = @holiday_type, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE PUBLIC_HOLIDAY_ID = @public_holiday_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE insert_public_holiday(IN public_holiday_id VARCHAR(100), IN public_holiday VARCHAR(100), IN holiday_date DATE, IN holiday_type VARCHAR(50), IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
+BEGIN
+	SET @public_holiday_id = public_holiday_id;
+	SET @public_holiday = public_holiday;
+	SET @holiday_date = holiday_date;
+	SET @holiday_type = holiday_type;
+	SET @transaction_log_id = transaction_log_id;
+	SET @record_log = record_log;
+
+	SET @query = 'INSERT INTO public_holiday (PUBLIC_HOLIDAY_ID, PUBLIC_HOLIDAY, HOLIDAY_DATE, HOLIDAY_TYPE, TRANSACTION_LOG_ID, RECORD_LOG) VALUES(@public_holiday_id, @public_holiday, @holiday_date, @holiday_type, @transaction_log_id, @record_log)';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE insert_public_holiday_work_location(IN public_holiday_id VARCHAR(100), IN work_location_id VARCHAR(50), IN record_log VARCHAR(100))
+BEGIN
+	SET @public_holiday_id = public_holiday_id;
+	SET @work_location_id = work_location_id;
+	SET @record_log = record_log;
+
+	SET @query = 'INSERT INTO public_holiday_work_location (PUBLIC_HOLIDAY_ID, WORK_LOCATION_ID, RECORD_LOG) VALUES(@public_holiday_id, @work_location_id, @record_log)';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE get_public_holiday_details(IN public_holiday_id VARCHAR(100))
+BEGIN
+	SET @public_holiday_id = public_holiday_id;
+
+	SET @query = 'SELECT PUBLIC_HOLIDAY, HOLIDAY_DATE, HOLIDAY_TYPE, TRANSACTION_LOG_ID, RECORD_LOG FROM public_holiday WHERE PUBLIC_HOLIDAY_ID = @public_holiday_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE get_public_holiday_work_location_details(IN public_holiday_id VARCHAR(100))
+BEGIN
+	SET @public_holiday_id = public_holiday_id;
+
+	SET @query = 'SELECT WORK_LOCATION_ID, RECORD_LOG FROM public_holiday_work_location WHERE PUBLIC_HOLIDAY_ID = @public_holiday_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE delete_public_holiday_work(IN public_holiday_id VARCHAR(100))
+BEGIN
+	SET @public_holiday_id = public_holiday_id;
+
+	SET @query = 'DELETE FROM public_holiday WHERE PUBLIC_HOLIDAY_ID = @public_holiday_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE delete_all_public_holiday_work_location(IN public_holiday_id VARCHAR(100))
+BEGIN
+	SET @public_holiday_id = public_holiday_id;
+
+	SET @query = 'DELETE FROM public_holiday_work_location WHERE PUBLIC_HOLIDAY_ID = @public_holiday_id';
 
 	PREPARE stmt FROM @query;
 	EXECUTE stmt;
