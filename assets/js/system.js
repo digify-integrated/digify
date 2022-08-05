@@ -5224,6 +5224,93 @@ function initialize_form_validation(form_type){
             }
         });
     }
+    else if(form_type == 'public holiday form'){
+        $('#public-holiday-form').validate({
+            submitHandler: function (form) {
+                transaction = 'submit public holiday';
+                var work_location = $('#work_location').val();
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'controller.php',
+                    data: $(form).serialize() + '&username=' + username + '&transaction=' + transaction + '&work_location=' + work_location,
+                    beforeSend: function(){
+                        document.getElementById('submit-form').disabled = true;
+                        $('#submit-form').html('<div class="spinner-border spinner-border-sm text-light" role="status"><span rclass="sr-only"></span></div>');
+                    },
+                    success: function (response) {
+                        if(response === 'Updated' || response === 'Inserted'){
+                            if(response === 'Inserted'){
+                                show_alert('Insert Public Holiday Success', 'The user account has been inserted.', 'success');
+                            }
+                            else{
+                                show_alert('Update Public Holiday Success', 'The user account has been updated.', 'success');
+                            }
+                          
+                            $('#System-Modal').modal('hide');
+                            reload_datatable('#public-holiday-datatable');
+                        }
+                        else{
+                            show_alert('Public Holiday Error', response, 'error');
+                        }
+                    },
+                    complete: function(){
+                        document.getElementById('submit-form').disabled = false;
+                        $('#submit-form').html('Submit');
+                    }
+                });
+                return false;
+            },
+            rules: {
+                public_holiday: {
+                    required: true
+                },
+                holiday_type: {
+                    required: true
+                },
+                holiday_date: {
+                    required: true
+                },
+                work_location: {
+                    required: true
+                }
+            },
+            messages: {
+                public_holiday: {
+                    required: 'Please enter the public holiday',
+                },
+                holiday_type: {
+                    required: 'Please choose the holiday type',
+                },
+                holiday_date: {
+                    required: 'Please choose the holiday date',
+                },
+                work_location: {
+                    required: 'Please choose at least one (1) work location',
+                }
+            },
+            errorPlacement: function(label, element) {
+                if((element.hasClass('select2') || element.hasClass('form-select2')) && element.next('.select2-container').length) {
+                    label.insertAfter(element.next('.select2-container'));
+                }
+                else if(element.parent('.input-group').length){
+                    label.insertAfter(element.parent());
+                }
+                else{
+                    label.insertAfter(element);
+                }
+            },
+            highlight: function(element) {
+                $(element).parent().addClass('has-danger');
+                $(element).addClass('form-control-danger');
+            },
+            success: function(label,element) {
+                $(element).parent().removeClass('has-danger')
+                $(element).removeClass('form-control-danger')
+                label.remove();
+            }
+        });
+    }
 }
 
 // Display functions
@@ -6348,6 +6435,26 @@ function display_form_details(form_type){
 
                 document.getElementById('approvers').innerHTML = response[0].APPROVER_TABLE;
                 document.getElementById('exceptions').innerHTML = response[0].APPROVAL_EXCEPTION_TABLE;
+            }
+        });
+    }
+    else if(form_type == 'public holiday form'){
+        transaction = 'public holiday details';
+
+        var public_holiday_id = sessionStorage.getItem('public_holiday_id');
+
+        $.ajax({
+            url: 'controller.php',
+            method: 'POST',
+            dataType: 'JSON',
+            data: {public_holiday_id : public_holiday_id, transaction : transaction},
+            success: function(response) {
+                $('#public_holiday').val(response[0].PUBLIC_HOLIDAY);
+                $('#holiday_date').val(response[0].HOLIDAY_DATE);
+                $('#public_holiday_id').val(public_holiday_id);
+
+                check_option_exist('#holiday_type', response[0].HOLIDAY_TYPE, '');
+                check_empty(response[0].WORK_LOCATION_ID.split(','), '#work_location', 'select');
             }
         });
     }

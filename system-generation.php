@@ -1930,6 +1930,49 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                             </div>
                         </div>';
             }
+            else if($form_type == 'public holiday form'){
+                $form .= '<div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <input type="hidden" id="public_holiday_id" name="public_holiday_id">
+                                    <label for="public_holiday" class="form-label">Public Holiday <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control form-maxlength" autocomplete="off" id="public_holiday" name="public_holiday" maxlength="100">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label for="holiday_type" class="form-label">Holiday Type <span class="text-danger">*</span></label>
+                                    <select class="form-control form-select2" id="holiday_type" name="holiday_type">
+                                    <option value="">--</option>';
+                                    $form .= $api->generate_system_code_options('HOLIDAYTYPE');
+                                    $form .='</select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label for="holiday_date" class="form-label">Holiday Date <span class="text-danger">*</span></label>
+                                    <div class="input-group" id="holiday-date-container">
+                                        <input type="text" class="form-control" id="holiday_date" name="holiday_date" autocomplete="off" data-date-format="m/dd/yyyy" data-date-container="#holiday-date-container" data-provide="datepicker" data-date-autoclose="true">
+                                        <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <label for="work_location" class="form-label">Work Location <span class="text-danger">*</span></label>
+                                        <select class="form-control form-select2" multiple="multiple" id="work_location" name="work_location">
+                                            '. $api->generate_work_location_options() .'
+                                        </select>
+                                    </div>
+                                </div>
+                        </div>';
+            }
 
             $form .= '</form>';
 
@@ -6073,6 +6116,124 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                 </div>'
                             );
                         }
+                    }
+    
+                    echo json_encode($response);
+                }
+                else{
+                    echo $sql->errorInfo()[2];
+                }
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Public holiday table
+    else if($type == 'public holiday table'){
+        if(isset($_POST['filter_start_date']) && isset($_POST['filter_end_date']) && isset($_POST['filter_work_location']) && isset($_POST['filter_holiday_type'])){
+            if ($api->databaseConnection()) {
+                # Get permission
+                $update_public_holiday = $api->check_role_permissions($username, 173);
+                $delete_public_holiday = $api->check_role_permissions($username, 174);
+                $view_transaction_log = $api->check_role_permissions($username, 175);
+
+                $filter_start_date = $api->check_date('empty', $_POST['filter_start_date'], '', 'Y-m-d', '', '', '');
+                $filter_end_date = $api->check_date('empty', $_POST['filter_end_date'], '', 'Y-m-d', '', '', '');
+                $filter_work_location = $_POST['filter_work_location'];
+                $filter_holiday_type = $_POST['filter_holiday_type'];
+
+                $query = 'SELECT PUBLIC_HOLIDAY_ID, PUBLIC_HOLIDAY, HOLIDAY_DATE, HOLIDAY_TYPE, TRANSACTION_LOG_ID FROM public_holiday';
+
+                if((!empty($filter_start_date) && !empty($filter_end_date)) || !empty($filter_work_location) || !empty($filter_holiday_type)){
+                    $query .= ' WHERE ';
+
+                    if(!empty($filter_start_date) && !empty($filter_end_date)){
+                        $filter[] = 'HOLIDAY_DATE BETWEEN :filter_start_date AND :filter_end_date';
+                    }
+
+                    if(!empty($filter_work_location)){
+                        $filter[] = 'PUBLIC_HOLIDAY_ID IN (SELECT PUBLIC_HOLIDAY_ID FROM public_holiday_work_location WHERE WORK_LOCATION_ID = :filter_work_location)';
+                    }
+
+                    if(!empty($filter_holiday_type)){
+                        $filter[] = 'HOLIDAY_TYPE = :filter_holiday_type';
+                    }
+
+                    if(!empty($filter)){
+                        $query .= implode(' AND ', $filter);
+                    }
+                }
+    
+                $sql = $api->db_connection->prepare($query);
+
+                if((!empty($filter_start_date) && !empty($filter_end_date)) || !empty($filter_work_location) || !empty($filter_holiday_type)){
+
+                    if(!empty($filter_start_date) && !empty($filter_end_date)){
+                        $sql->bindValue(':filter_start_date', $filter_start_date);
+                        $sql->bindValue(':filter_end_date', $filter_end_date);
+                    }
+
+                    if(!empty($filter_work_location)){
+                        $sql->bindValue(':filter_work_location', $filter_work_location);
+                    }
+
+                    if(!empty($filter_holiday_type)){
+                        $sql->bindValue(':filter_holiday_type', $filter_holiday_type);
+                    }
+                }
+    
+                if($sql->execute()){
+                    while($row = $sql->fetch()){
+                        $public_holiday_id = $row['PUBLIC_HOLIDAY_ID'];
+                        $public_holiday = $row['PUBLIC_HOLIDAY'];
+                        $holiday_type = $row['HOLIDAY_TYPE'];
+                        $holiday_date = $api->check_date('empty', $row['HOLIDAY_DATE'], '', 'm/d/Y', '', '', '');
+                        $transaction_log_id = $row['TRANSACTION_LOG_ID'];
+
+                        $system_code_details = $api->get_system_code_details('HOLIDAYTYPE', $holiday_type);
+                        $holiday_type_name = $system_code_details[0]['SYSTEM_DESCRIPTION'];
+
+                        if($update_public_holiday > 0){
+                            $update = '<button type="button" class="btn btn-info waves-effect waves-light update-public-holiday" data-public-holiday-id="'. $public_holiday_id .'" title="Edit Public Holiday">
+                                            <i class="bx bx-pencil font-size-16 align-middle"></i>
+                                        </button>';
+                        }
+                        else{
+                            $update = '';
+                        }
+
+                        if($delete_public_holiday > 0){
+                            $delete = '<button type="button" class="btn btn-danger waves-effect waves-light delete-public-holiday" data-public-holiday-id="'. $public_holiday_id .'" title="Delete Public Holiday">
+                                <i class="bx bx-trash font-size-16 align-middle"></i>
+                            </button>';
+                        }
+                        else{
+                            $delete = '';
+                        }
+
+                        if($view_transaction_log > 0 && !empty($transaction_log_id)){
+                            $transaction_log = '<button type="button" class="btn btn-dark waves-effect waves-light view-transaction-log" data-transaction-log-id="'. $transaction_log_id .'" title="View Transaction Log">
+                                                    <i class="bx bx-detail font-size-16 align-middle"></i>
+                                                </button>';
+                        }
+                        else{
+                            $transaction_log = '';
+                        }
+    
+                        $response[] = array(
+                            'CHECK_BOX' => '<input class="form-check-input datatable-checkbox-children" type="checkbox" value="'. $public_holiday_id .'">',
+                            'PUBLIC_HOLIDAY' => $public_holiday,
+                            'HOLIDAY_DATE' => $holiday_date,
+                            'HOLIDAY_TYPE' => $holiday_type_name,
+                            'ACTION' => '<div class="d-flex gap-2">
+                                <button type="button" class="btn btn-primary waves-effect waves-light view-public-holiday" data-public-holiday-id="'. $public_holiday_id .'" title="View Public Holiday">
+                                    <i class="bx bx-show font-size-16 align-middle"></i>
+                                </button>
+                                '. $update .'
+                                '. $transaction_log .'
+                                '. $delete .'
+                            </div>'
+                        );
                     }
     
                     echo json_encode($response);

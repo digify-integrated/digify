@@ -1249,6 +1249,31 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : check_public_holiday_exist
+    # Purpose    : Checks if the public holiday exists.
+    #
+    # Returns    : Number
+    #
+    # -------------------------------------------------------------
+    public function check_public_holiday_exist($public_holiday_id){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL check_public_holiday_exist(:public_holiday_id)');
+            $sql->bindValue(':public_holiday_id', $public_holiday_id);
+
+            if($sql->execute()){
+                $row = $sql->fetch();
+
+                return $row['TOTAL'];
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Update methods
     # -------------------------------------------------------------
     
@@ -4448,6 +4473,75 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : update_public_holiday
+    # Purpose    : Updates public holiday.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function update_public_holiday($public_holiday_id, $public_holiday, $holiday_date, $holiday_type, $username){
+        if ($this->databaseConnection()) {
+            $record_log = 'UPD->' . $username . '->' . date('Y-m-d h:i:s');
+            $public_holiday_details = $this->get_public_holiday_details($public_holiday_id);
+            
+            if(!empty($public_holiday_details[0]['TRANSACTION_LOG_ID'])){
+                $transaction_log_id = $public_holiday_details[0]['TRANSACTION_LOG_ID'];
+            }
+            else{
+                # Get transaction log id
+                $transaction_log_system_parameter = $this->get_system_parameter(2, 1);
+                $transaction_log_parameter_number = $transaction_log_system_parameter[0]['PARAMETER_NUMBER'];
+                $transaction_log_id = $transaction_log_system_parameter[0]['ID'];
+            }
+
+            $sql = $this->db_connection->prepare('CALL update_public_holiday(:public_holiday_id, :public_holiday, :holiday_date, :holiday_type, :transaction_log_id, :record_log)');
+            $sql->bindValue(':public_holiday_id', $public_holiday_id);
+            $sql->bindValue(':public_holiday', $public_holiday);
+            $sql->bindValue(':holiday_date', $holiday_date);
+            $sql->bindValue(':holiday_type', $holiday_type);
+            $sql->bindValue(':transaction_log_id', $transaction_log_id);
+            $sql->bindValue(':record_log', $record_log);
+        
+            if($sql->execute()){
+                if(!empty($public_holiday_details[0]['TRANSACTION_LOG_ID'])){
+                    $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated public holiday.');
+                                    
+                    if($insert_transaction_log){
+                        return true;
+                    }
+                    else{
+                        return $insert_transaction_log;
+                    }
+                }
+                else{
+                    # Update transaction log value
+                    $update_system_parameter_value = $this->update_system_parameter_value($transaction_log_parameter_number, 2, $username);
+
+                    if($update_system_parameter_value){
+                        $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated public holiday.');
+                                    
+                        if($insert_transaction_log){
+                            return true;
+                        }
+                        else{
+                            return $insert_transaction_log;
+                        }
+                    }
+                    else{
+                        return $update_system_parameter_value;
+                    }
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+
+    # -------------------------------------------------------------
     #   Insert methods
     # -------------------------------------------------------------
     
@@ -6714,6 +6808,120 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : insert_public_holiday
+    # Purpose    : Insert public holiday.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function insert_public_holiday($public_holiday, $holiday_date, $holiday_type, $work_locations, $username){
+        if ($this->databaseConnection()) {
+            $error = '';
+            $record_log = 'INS->' . $username . '->' . date('Y-m-d h:i:s');
+
+            # Get system parameter id
+            $system_parameter = $this->get_system_parameter(23, 1);
+            $parameter_number = $system_parameter[0]['PARAMETER_NUMBER'];
+            $id = $system_parameter[0]['ID'];
+
+            # Get transaction log id
+            $transaction_log_system_parameter = $this->get_system_parameter(2, 1);
+            $transaction_log_parameter_number = $transaction_log_system_parameter[0]['PARAMETER_NUMBER'];
+            $transaction_log_id = $transaction_log_system_parameter[0]['ID'];
+
+            $sql = $this->db_connection->prepare('CALL insert_public_holiday(:id, :public_holiday, :holiday_date, :holiday_type, :transaction_log_id, :record_log)');
+            $sql->bindValue(':id', $id);
+            $sql->bindValue(':public_holiday', $public_holiday);
+            $sql->bindValue(':holiday_date', $holiday_date);
+            $sql->bindValue(':holiday_type', $holiday_type);
+            $sql->bindValue(':transaction_log_id', $transaction_log_id);
+            $sql->bindValue(':record_log', $record_log); 
+        
+            if($sql->execute()){
+                # Update system parameter value
+                $update_system_parameter_value = $this->update_system_parameter_value($parameter_number, 23, $username);
+
+                if($update_system_parameter_value){
+                    # Update transaction log value
+                    $update_system_parameter_value = $this->update_system_parameter_value($transaction_log_parameter_number, 2, $username);
+
+                    if($update_system_parameter_value){
+                        $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Insert', 'User ' . $username . ' inserted public holiday.');
+                                    
+                        if($insert_transaction_log){
+                            foreach($work_locations as $work_location){
+                                $insert_public_holiday_work_location = $this->insert_public_holiday_work_location($id, $work_location, $username);
+    
+                                if(!$insert_public_holiday_work_location){
+                                    $error = $insert_public_holiday_work_location;
+                                }
+                            }
+
+                            if(empty($error)){
+                                return true;
+                            }
+                            else{
+                                return $error;
+                            }
+                        }
+                        else{
+                            return $insert_transaction_log;
+                        }
+                    }
+                    else{
+                        return $update_system_parameter_value;
+                    }
+                }
+                else{
+                    return $update_system_parameter_value;
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : insert_public_holiday_work_location
+    # Purpose    : Insert public holiday work location.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function insert_public_holiday_work_location($public_holiday_id, $work_location, $username){
+        if ($this->databaseConnection()) {
+            $public_holiday_details = $this->get_public_holiday_details($public_holiday_id);
+            $transaction_log_id = $public_holiday_details[0]['TRANSACTION_LOG_ID'];
+
+            $record_log = 'INS->' . $username . '->' . date('Y-m-d h:i:s');
+
+            $sql = $this->db_connection->prepare('CALL insert_public_holiday_work_location(:public_holiday_id, :work_location, :record_log)');
+            $sql->bindValue(':public_holiday_id', $public_holiday_id);
+            $sql->bindValue(':work_location', $work_location);
+            $sql->bindValue(':record_log', $record_log); 
+        
+            if($sql->execute()){
+                $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Insert', 'User ' . $username . ' inserted public holiday work location.');
+                                    
+                if($insert_transaction_log){
+                    return true;
+                }
+                else{
+                    return $insert_transaction_log;
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Delete methods
     # -------------------------------------------------------------
 
@@ -7703,6 +7911,52 @@ class Api{
             $sql = $this->db_connection->prepare('CALL delete_approval_exception(:approval_type_id, :employee_id)');
             $sql->bindValue(':approval_type_id', $approval_type_id);
             $sql->bindValue(':employee_id', $employee_id);
+        
+            if($sql->execute()){
+                return true;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : delete_public_holiday
+    # Purpose    : Delete public holiday.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function delete_public_holiday($public_holiday_id, $username){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL delete_public_holiday(:public_holiday_id)');
+            $sql->bindValue(':public_holiday_id', $public_holiday_id);
+        
+            if($sql->execute()){
+                return true;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : delete_all_public_holiday_work_location
+    # Purpose    : Delete public holiday work location.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function delete_all_public_holiday_work_location($public_holiday_id, $username){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL delete_all_public_holiday_work_location(:public_holiday_id)');
+            $sql->bindValue(':public_holiday_id', $public_holiday_id);
         
             if($sql->execute()){
                 return true;
@@ -9235,6 +9489,73 @@ class Api{
                 while($row = $sql->fetch()){
                     $response[] = array(
                         'EMPLOYEE_ID' => $row['EMPLOYEE_ID'],
+                        'RECORD_LOG' => $row['RECORD_LOG']
+                    );
+                }
+
+                return $response;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : get_public_holiday_details
+    # Purpose    : Gets the public holiday details.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_public_holiday_details($public_holiday_id){
+        if ($this->databaseConnection()) {
+            $response = array();
+
+            $sql = $this->db_connection->prepare('CALL get_public_holiday_details(:public_holiday_id)');
+            $sql->bindValue(':public_holiday_id', $public_holiday_id);
+
+            if($sql->execute()){
+                while($row = $sql->fetch()){
+                    $response[] = array(
+                        'PUBLIC_HOLIDAY' => $row['PUBLIC_HOLIDAY'],
+                        'HOLIDAY_DATE' => $row['HOLIDAY_DATE'],
+                        'HOLIDAY_TYPE' => $row['HOLIDAY_TYPE'],
+                        'TRANSACTION_LOG_ID' => $row['TRANSACTION_LOG_ID'],
+                        'RECORD_LOG' => $row['RECORD_LOG']
+                    );
+                }
+
+                return $response;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : get_public_holiday_work_location_details
+    # Purpose    : Gets the public holiday work location details.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_public_holiday_work_location_details($public_holiday_id){
+        if ($this->databaseConnection()) {
+            $response = array();
+
+            $sql = $this->db_connection->prepare('CALL get_public_holiday_work_location_details(:public_holiday_id)');
+            $sql->bindValue(':public_holiday_id', $public_holiday_id);
+
+            if($sql->execute()){
+                while($row = $sql->fetch()){
+                    $response[] = array(
+                        'WORK_LOCATION_ID' => $row['WORK_LOCATION_ID'],
                         'RECORD_LOG' => $row['RECORD_LOG']
                     );
                 }

@@ -2818,6 +2818,62 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     }
     # -------------------------------------------------------------
 
+    # Submit public holiday
+    else if($transaction == 'submit public holiday'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['public_holiday_id']) && isset($_POST['public_holiday']) && !empty($_POST['public_holiday']) && isset($_POST['holiday_type']) && !empty($_POST['holiday_type']) && isset($_POST['holiday_date']) && !empty($_POST['holiday_date']) && isset($_POST['work_location']) && !empty($_POST['work_location'])){
+            $username = $_POST['username'];
+            $public_holiday_id = $_POST['public_holiday_id'];
+            $public_holiday = $_POST['public_holiday'];
+            $holiday_type = $_POST['holiday_type'];
+            $holiday_date = $api->check_date('empty', $_POST['holiday_date'], '', 'Y-m-d', '', '', '');
+            $work_locations = explode(',', $_POST['work_location']);
+
+            $check_public_holiday_exist = $api->check_public_holiday_exist($public_holiday_id);
+
+            if($check_public_holiday_exist > 0){
+                $update_public_holiday = $api->update_public_holiday($public_holiday_id, $public_holiday, $holiday_date, $holiday_type, $username);
+
+                if($update_public_holiday){
+                    $delete_all_public_holiday_work_location = $api->delete_all_public_holiday_work_location($public_holiday_id, $username);
+
+                    if($delete_all_public_holiday_work_location){
+                        foreach($work_locations as $work_location){
+                            $insert_public_holiday_work_location = $api->insert_public_holiday_work_location($public_holiday_id, $work_location, $username);
+
+                            if(!$insert_public_holiday_work_location){
+                                $error = $insert_public_holiday_work_location;
+                            }
+                        }
+                    }
+                    else{
+                        $error = $delete_all_user_account_role;
+                    }                 
+                }
+                else{
+                    $error = $update_public_holiday;
+                }
+
+                if(empty($error)){
+                    echo 'Updated';
+                }
+                else{
+                    echo $error;
+                }
+            }
+            else{
+                $insert_public_holiday = $api->insert_public_holiday($public_holiday, $holiday_date, $holiday_type, $work_locations, $username);
+
+                if($insert_public_holiday){
+                    echo 'Inserted';
+                }
+                else{
+                    $error = $insert_public_holiday;
+                }
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
     # -------------------------------------------------------------
     #   Delete transactions
     # -------------------------------------------------------------
@@ -4250,6 +4306,76 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                                     
                     if(!$delete_approval_exception){
                         $error = $delete_approval_exception;
+                    }
+                }
+                else{
+                    $error = 'Not Found';
+                }
+            }
+
+            if(empty($error)){
+                echo 'Deleted';
+            }
+            else{
+                echo $error;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Delete public holiday
+    else if($transaction == 'delete public holiday'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['public_holiday_id']) && !empty($_POST['public_holiday_id'])){
+            $username = $_POST['username'];
+            $public_holiday_id = $_POST['public_holiday_id'];
+
+            $check_public_holiday_exist = $api->check_public_holiday_exist($public_holiday_id);
+
+            if($check_public_holiday_exist > 0){
+                $delete_all_public_holiday_work_location = $api->delete_all_public_holiday_work_location($public_holiday_id, $username);
+
+                if($delete_all_public_holiday_work_location){
+                    $delete_public_holiday = $api->delete_public_holiday($public_holiday_id, $username);
+                                    
+                    if($delete_public_holiday){
+                        echo 'Deleted';
+                    }
+                    else{
+                        echo $delete_public_holiday;
+                    }
+                }
+                else{
+                    echo $delete_all_public_holiday_work_location;
+                }
+            }
+            else{
+                echo 'Not Found';
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Delete multiple public holiday
+    else if($transaction == 'delete multiple public holiday'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['public_holiday_id'])){
+            $username = $_POST['username'];
+            $public_holiday_ids = $_POST['public_holiday_id'];
+
+            foreach($public_holiday_ids as $public_holiday_id){
+                $check_public_holiday_exist = $api->check_public_holiday_exist($public_holiday_id);
+
+                if($check_public_holiday_exist > 0){
+                    $delete_all_public_holiday_work_location = $api->delete_all_public_holiday_work_location($public_holiday_id, $username);
+
+                    if($delete_all_public_holiday_work_location){
+                        $delete_public_holiday = $api->delete_public_holiday($public_holiday_id, $username);
+                                        
+                        if(!$delete_public_holiday){
+                            $error = $delete_public_holiday;
+                        }
+                    }
+                    else{
+                        $error = $delete_all_public_holiday_work_location;
                     }
                 }
                 else{
@@ -7221,6 +7347,35 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
         }
     }
     # -------------------------------------------------------------
+
+    # Public holiday details
+    else if($transaction == 'public holiday details'){
+        if(isset($_POST['public_holiday_id']) && !empty($_POST['public_holiday_id'])){
+            $work_locations = '';
+            $public_holiday_id = $_POST['public_holiday_id'];
+            $public_holiday_details = $api->get_public_holiday_details($public_holiday_id);
+            $public_holiday_work_location_details = $api->get_public_holiday_work_location_details($public_holiday_id);
+
+            for($i = 0; $i < count($public_holiday_work_location_details); $i++) {
+                $work_locations .= $public_holiday_work_location_details[$i]['WORK_LOCATION_ID'];
+
+                if($i != (count($public_holiday_work_location_details) - 1)){
+                    $work_locations .= ',';
+                }
+            }
+
+            $response[] = array(
+                'PUBLIC_HOLIDAY' => $public_holiday_details[0]['PUBLIC_HOLIDAY'],
+                'HOLIDAY_DATE' => $api->check_date('empty', $public_holiday_details[0]['HOLIDAY_DATE'], '', 'n/d/Y', '', '', ''),
+                'HOLIDAY_TYPE' => $public_holiday_details[0]['HOLIDAY_TYPE'],
+                'WORK_LOCATION_ID' => $work_locations,
+            );
+
+            echo json_encode($response);
+        }
+    }
+    # -------------------------------------------------------------
+
 }
 
 ?>

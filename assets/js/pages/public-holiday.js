@@ -15,11 +15,15 @@ function initialize_public_holiday_table(datatable_name, buttons = false, show_a
     
     var username = $('#username').text();
     var type = 'public holiday table';
+    var filter_start_date = $('#filter_start_date').val();
+    var filter_end_date = $('#filter_end_date').val();
+    var filter_work_location = $('#filter_work_location').val();
+    var filter_holiday_type = $('#filter_holiday_type').val();
     var settings;
 
     var column = [ 
         { 'data' : 'CHECK_BOX' },
-        { 'data' : 'PUBLIC_HOLIDAY_TYPE' },
+        { 'data' : 'PUBLIC_HOLIDAY' },
         { 'data' : 'HOLIDAY_DATE' },
         { 'data' : 'HOLIDAY_TYPE' },
         { 'data' : 'ACTION' }
@@ -46,7 +50,7 @@ function initialize_public_holiday_table(datatable_name, buttons = false, show_a
                 'url' : 'system-generation.php',
                 'method' : 'POST',
                 'dataType': 'JSON',
-                'data': {'type' : type, 'username' : username},
+                'data': {'type' : type, 'username' : username, 'filter_start_date' : filter_start_date, 'filter_end_date' : filter_end_date, 'filter_work_location' : filter_work_location, 'filter_holiday_type' :filter_holiday_type},
                 'dataSrc' : ''
             },
             dom:  "<'row'<'col-sm-3'l><'col-sm-6 text-center mb-2'B><'col-sm-3'f>>" +  "<'row'<'col-sm-12'tr>>" + "<'row'<'col-sm-5'i><'col-sm-7'p>>",
@@ -77,7 +81,7 @@ function initialize_public_holiday_table(datatable_name, buttons = false, show_a
                 'url' : 'system-generation.php',
                 'method' : 'POST',
                 'dataType': 'JSON',
-                'data': {'type' : type, 'username' : username},
+                'data': {'type' : type, 'username' : username, 'filter_start_date' : filter_start_date, 'filter_end_date' : filter_end_date, 'filter_work_location' : filter_work_location, 'filter_holiday_type' :filter_holiday_type},
                 'dataSrc' : ''
             },
             'order': [[ 1, 'asc' ]],
@@ -116,7 +120,7 @@ function initialize_click_events(){
     });
 
     $(document).on('click','#add-public-holiday',function() {
-        generate_modal('public holiday form', 'Public Holiday', 'R' , '1', '1', 'form', 'public-holiday-form', '1', username);
+        generate_modal('public holiday form', 'Public Holiday', 'R' , '0', '1', 'form', 'public-holiday-form', '1', username);
     });
 
     $(document).on('click','.update-public-holiday',function() {
@@ -124,7 +128,7 @@ function initialize_click_events(){
 
         sessionStorage.setItem('public_holiday_id', public_holiday_id);
         
-        generate_modal('public holiday form', 'Public Holiday', 'R' , '1', '1', 'form', 'public-holiday-form', '0', username);
+        generate_modal('public holiday form', 'Public Holiday', 'R' , '0', '1', 'form', 'public-holiday-form', '0', username);
     });
     
     $(document).on('click','.delete-public-holiday',function() {
@@ -220,6 +224,10 @@ function initialize_click_events(){
         else{
             show_alert('Delete Multiple Public Holidays', 'Please select the public holidays you want to delete.', 'error');
         }
+    });
+
+    $(document).on('click','#apply-filter',function() {
+        initialize_public_holiday_table('#public-holiday-datatable');
     });
 
 }
