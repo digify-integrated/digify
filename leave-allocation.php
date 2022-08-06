@@ -4,11 +4,11 @@
     require('classes/api.php');
 
     $api = new Api;
-    $page_title = 'Leave Type';
+    $page_title = 'Leave Allocation';
 
-    $page_access = $api->check_role_permissions($username, 176);
-    $add_leave_type = $api->check_role_permissions($username, 177);
-	$delete_leave_type = $api->check_role_permissions($username, 179);
+    $page_access = $api->check_role_permissions($username, 181);
+    $add_leave_allocation = $api->check_role_permissions($username, 182);
+	$delete_leave_allocation = $api->check_role_permissions($username, 184);
     
     $check_user_account_status = $api->check_user_account_status($username);
 
@@ -28,6 +28,7 @@
 <html lang="en">
     <head>
         <?php require('views/_head.php'); ?>
+        <link href="assets/libs/bootstrap-datepicker/css/bootstrap-datepicker.min.css" rel="stylesheet" type="text/css">
         <link href="assets/libs/select2/css/select2.min.css" rel="stylesheet" type="text/css" />
         <link rel="stylesheet" href="assets/libs/sweetalert2/sweetalert2.min.css">
         <link href="assets/libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css" rel="stylesheet" type="text/css" />
@@ -72,16 +73,16 @@
                                             <div class="col-md-12">
                                                 <div class="d-flex align-items-start">
                                                     <div class="flex-grow-1 align-self-center">
-                                                        <h4 class="card-title">Leave Type List</h4>
+                                                        <h4 class="card-title">Leave Allocation List</h4>
                                                     </div>
                                                     <div class="d-flex gap-2">
                                                     <?php
-                                                        if($add_leave_type > 0){
-                                                            echo '<button type="button" class="btn btn-primary waves-effect btn-label waves-light" id="add-leave-type"><i class="bx bx-plus label-icon"></i> Add</button>';
+                                                        if($add_leave_allocation > 0){
+                                                            echo '<button type="button" class="btn btn-primary waves-effect btn-label waves-light" id="add-leave-allocation"><i class="bx bx-plus label-icon"></i> Add</button>';
                                                         }
 
-                                                        if($delete_leave_type > 0){
-                                                            echo '<button type="button" class="btn btn-danger waves-effect btn-label waves-light d-none multiple" id="delete-leave-type"><i class="bx bx-trash label-icon"></i> Delete</button>';
+                                                        if($delete_leave_allocation > 0){
+                                                            echo '<button type="button" class="btn btn-danger waves-effect btn-label waves-light d-none multiple" id="delete-leave-allocation"><i class="bx bx-trash label-icon"></i> Delete</button>';
                                                         }
                                                     ?>
                                                     <button type="button" class="btn btn-info waves-effect btn-label waves-light" data-bs-toggle="offcanvas" data-bs-target="#filter-off-canvas" aria-controls="filter-off-canvas"><i class="bx bx-filter-alt label-icon"></i> Filter</button>
@@ -93,6 +94,19 @@
                                                         <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                                                     </div>
                                                     <div class="offcanvas-body">
+                                                        <div class="mb-3">
+                                                            <p class="text-muted">Validity</p>
+
+                                                            <div class="input-group mb-3" id="filter-start-date-container">
+                                                                <input type="text" class="form-control" id="filter_start_date" name="filter_start_date" autocomplete="off" data-date-format="m/dd/yyyy" data-date-container="#filter-start-date-container" data-provide="datepicker" data-date-autoclose="true" data-date-orientation="right" placeholder="Start Date" value="<?php echo date('1/01/Y'); ?>">
+                                                                <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+                                                            </div>
+
+                                                            <div class="input-group" id="filter-end-date-container">
+                                                                <input type="text" class="form-control" id="filter_end_date" name="filter_end_date" autocomplete="off" data-date-format="m/dd/yyyy" data-date-container="#filter-end-date-container" data-provide="datepicker" data-date-autoclose="true" data-date-orientation="right" placeholder="End Date" value="<?php echo date('12/t/Y'); ?>">
+                                                                <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+                                                            </div>
+                                                        </div>
                                                         <div class="mb-3">
                                                             <p class="text-muted">Paid Type</p>
 
@@ -111,6 +125,38 @@
                                                                 <option value="NOLIMIT">No Limit</option>
                                                             </select>
                                                         </div>
+                                                        <div class="mb-3">
+                                                            <p class="text-muted">Work Location</p>
+
+                                                            <select class="form-control filter-select2" id="filter_work_location">
+                                                                <option value="">All Work Location</option>
+                                                               <?php echo $api->generate_work_location_options(); ?>
+                                                            </select>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <p class="text-muted">Department</p>
+
+                                                            <select class="form-control filter-select2" id="filter_department">
+                                                                <option value="">All Department</option>
+                                                                <?php echo $api->generate_department_options(); ?>
+                                                            </select>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <p class="text-muted">Job Position</p>
+
+                                                            <select class="form-control filter-select2" id="filter_job_position">
+                                                                <option value="">All Job Position</option>
+                                                                <?php echo $api->generate_job_position_options(); ?>
+                                                            </select>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <p class="text-muted">Employee Type</p>
+
+                                                            <select class="form-control filter-select2" id="filter_employee_type">
+                                                                <option value="">All Employee Type</option>
+                                                                <?php echo $api->generate_employee_type_options(); ?>
+                                                            </select>
+                                                        </div>
                                                         <div>
                                                             <button type="button" class="btn btn-primary waves-effect waves-light" id="apply-filter" data-bs-toggle="offcanvas" data-bs-target="#filter-off-canvas" aria-controls="filter-off-canvas">Apply Filter</button>
                                                         </div>
@@ -120,7 +166,7 @@
                                         </div>
                                         <div class="row mt-4">
                                             <div class="col-md-12">
-                                                <table id="leave-type-datatable" class="table table-bordered align-middle mb-0 table-hover table-striped dt-responsive nowrap w-100">
+                                                <table id="leave-allocation-datatable" class="table table-bordered align-middle mb-0 table-hover table-striped dt-responsive nowrap w-100">
                                                     <thead>
                                                         <tr>
                                                             <th class="all">
@@ -128,9 +174,10 @@
                                                                     <input class="form-check-input" id="datatable-checkbox" type="checkbox">
                                                                 </div>
                                                             </th>
+                                                            <th class="all">Employee</th>
                                                             <th class="all">Leave Type</th>
-                                                            <th class="all">Paid Type</th>
-                                                            <th class="all">Allocation Type</th>
+                                                            <th class="all">Validity</th>
+                                                            <th class="all">Duration</th>
                                                             <th class="all">Action</th>
                                                         </tr>
                                                     </thead>
@@ -159,7 +206,8 @@
         <script src="assets/libs/jquery-validation/js/jquery.validate.min.js"></script>
         <script src="assets/libs/sweetalert2/sweetalert2.min.js"></script>
         <script src="assets/libs/select2/js/select2.min.js"></script>
+        <script src="assets/libs/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
         <script src="assets/js/system.js?v=<?php echo rand(); ?>"></script>
-        <script src="assets/js/pages/leave-type.js?v=<?php echo rand(); ?>"></script>
+        <script src="assets/js/pages/leave-allocation.js?v=<?php echo rand(); ?>"></script>
     </body>
 </html>
