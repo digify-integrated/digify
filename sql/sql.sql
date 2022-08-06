@@ -520,6 +520,31 @@ CREATE TABLE public_holiday_work_location(
 	RECORD_LOG VARCHAR(100)
 );
 
+CREATE TABLE leave_type(
+	LEAVE_TYPE_ID VARCHAR(100) PRIMARY KEY,
+	LEAVE_TYPE VARCHAR(100) NOT NULL,
+	PAID_TYPE VARCHAR(10) NOT NULL,
+	ALLOCATION_TYPE VARCHAR(50) NOT NULL,
+	TRANSACTION_LOG_ID VARCHAR(100),
+	RECORD_LOG VARCHAR(100)
+);
+
+CREATE TABLE leave_allocation(
+	LEAVE_ALLOCATION_ID VARCHAR(100) PRIMARY KEY,
+	LEAVE_TYPE_ID VARCHAR(100) NOT NULL,
+	VALIDITY_START_DATE DATE NOT NULL,
+	VALIDITY_END_DATE DATE NOT NULL,
+	DURATION DOUBLE NOT NULL,
+	TRANSACTION_LOG_ID VARCHAR(100),
+	RECORD_LOG VARCHAR(100)
+);
+
+CREATE TABLE leave_allocation_assignment(
+	LEAVE_ALLOCATION_ID VARCHAR(100) PRIMARY KEY,
+	EMPLOYEE_ID VARCHAR(100) NOT NULL,
+	RECORD_LOG VARCHAR(100)
+);
+
 /* Index */
 CREATE INDEX global_user_account_index ON global_user_account(USERNAME);
 CREATE INDEX global_system_parameter_index ON global_system_parameters(PARAMETER_ID);
@@ -551,6 +576,7 @@ CREATE INDEX attendance_adjustment_index ON attendance_adjustment(ADJUSTMENT_ID)
 CREATE INDEX attendance_creation_index ON attendance_creation(CREATION_ID);
 CREATE INDEX approval_exception_index ON approval_exception(APPROVAL_TYPE_ID);
 CREATE INDEX public_holiday_index ON public_holiday(PUBLIC_HOLIDAY_ID);
+CREATE INDEX leave_type_index ON leave_type(LEAVE_TYPE_ID);
 
 /* Stored Procedure */
 
@@ -3543,32 +3569,6 @@ BEGIN
 	DROP PREPARE stmt;
 END //
 
-CREATE TABLE public_holiday(
-	PUBLIC_HOLIDAY_ID VARCHAR(100) PRIMARY KEY,
-	PUBLIC_HOLIDAY VARCHAR(100) NOT NULL,
-	HOLIDAY_DATE DATE NOT NULL,
-	HOLIDAY_TYPE VARCHAR(50) NOT NULL,
-	TRANSACTION_LOG_ID VARCHAR(100),
-	RECORD_LOG VARCHAR(100)
-);
-
-CREATE TABLE public_holiday_work_location(
-	PUBLIC_HOLIDAY_ID VARCHAR(100) NOT NULL,
-	WORK_LOCATION_ID VARCHAR(50) NOT NULL,
-	RECORD_LOG VARCHAR(100)
-);
-
-CREATE PROCEDURE check_public_holiday_exist(IN public_holiday_id VARCHAR(100))
-BEGIN
-	SET @public_holiday_id = public_holiday_id;
-
-	SET @query = 'SELECT COUNT(1) AS TOTAL FROM public_holiday WHERE PUBLIC_HOLIDAY_ID = @public_holiday_id';
-
-	PREPARE stmt FROM @query;
-	EXECUTE stmt;
-	DROP PREPARE stmt;
-END //
-
 CREATE PROCEDURE update_public_holiday(IN public_holiday_id VARCHAR(100), IN public_holiday VARCHAR(100), IN holiday_date DATE, IN holiday_type VARCHAR(50), IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
 BEGIN
 	SET @public_holiday_id = public_holiday_id;
@@ -3652,6 +3652,71 @@ BEGIN
 	SET @public_holiday_id = public_holiday_id;
 
 	SET @query = 'DELETE FROM public_holiday_work_location WHERE PUBLIC_HOLIDAY_ID = @public_holiday_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE check_leave_type_exist(IN leave_type_id VARCHAR(100))
+BEGIN
+	SET @leave_type_id = leave_type_id;
+
+	SET @query = 'SELECT COUNT(1) AS TOTAL FROM leave_type WHERE LEAVE_TYPE_ID = @leave_type_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE update_leave_type(IN leave_type_id VARCHAR(100), IN leave_type VARCHAR(100), IN paid_type VARCHAR(10), IN allocation_type VARCHAR(10), IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
+BEGIN
+	SET @leave_type_id = leave_type_id;
+	SET @leave_type = leave_type;
+	SET @paid_type = paid_type;
+	SET @allocation_type = allocation_type;
+	SET @transaction_log_id = transaction_log_id;
+	SET @record_log = record_log;
+
+	SET @query = 'UPDATE leave_type SET LEAVE_TYPE = @leave_type, PAID_TYPE = @paid_type, ALLOCATION_TYPE = @allocation_type, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE LEAVE_TYPE_ID = @leave_type_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE insert_leave_type(IN leave_type_id VARCHAR(100), IN leave_type VARCHAR(100), IN paid_type VARCHAR(10), IN allocation_type VARCHAR(10), IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
+BEGIN
+	SET @leave_type_id = leave_type_id;
+	SET @leave_type = leave_type;
+	SET @paid_type = paid_type;
+	SET @allocation_type = allocation_type;
+	SET @transaction_log_id = transaction_log_id;
+	SET @record_log = record_log;
+
+	SET @query = 'INSERT INTO leave_type (LEAVE_TYPE_ID, LEAVE_TYPE, PAID_TYPE, ALLOCATION_TYPE, TRANSACTION_LOG_ID, RECORD_LOG) VALUES(@leave_type_id, @leave_type, @paid_type, @allocation_type, @transaction_log_id, @record_log)';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE get_leave_type_details(IN leave_type_id VARCHAR(100))
+BEGIN
+	SET @leave_type_id = leave_type_id;
+
+	SET @query = 'SELECT LEAVE_TYPE, PAID_TYPE, ALLOCATION_TYPE, TRANSACTION_LOG_ID, RECORD_LOG FROM leave_type WHERE LEAVE_TYPE_ID = @leave_type_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE delete_leave_type(IN leave_type_id VARCHAR(100))
+BEGIN
+	SET @leave_type_id = leave_type_id;
+
+	SET @query = 'DELETE FROM leave_type WHERE LEAVE_TYPE_ID = @leave_type_id';
 
 	PREPARE stmt FROM @query;
 	EXECUTE stmt;

@@ -4,11 +4,11 @@
     require('classes/api.php');
 
     $api = new Api;
-    $page_title = 'Public Holiday';
+    $page_title = 'Leave Type';
 
-    $page_access = $api->check_role_permissions($username, 171);
-    $add_public_holiday = $api->check_role_permissions($username, 172);
-	$delete_public_holiday = $api->check_role_permissions($username, 174);
+    $page_access = $api->check_role_permissions($username, 176);
+    $add_leave_type = $api->check_role_permissions($username, 177);
+	$delete_leave_type = $api->check_role_permissions($username, 179);
     
     $check_user_account_status = $api->check_user_account_status($username);
 
@@ -73,16 +73,16 @@
                                             <div class="col-md-12">
                                                 <div class="d-flex align-items-start">
                                                     <div class="flex-grow-1 align-self-center">
-                                                        <h4 class="card-title">Public Holiday List</h4>
+                                                        <h4 class="card-title">Leave Type List</h4>
                                                     </div>
                                                     <div class="d-flex gap-2">
                                                     <?php
-                                                        if($add_public_holiday > 0){
-                                                            echo '<button type="button" class="btn btn-primary waves-effect btn-label waves-light" id="add-public-holiday"><i class="bx bx-plus label-icon"></i> Add</button>';
+                                                        if($add_leave_type > 0){
+                                                            echo '<button type="button" class="btn btn-primary waves-effect btn-label waves-light" id="add-leave-type"><i class="bx bx-plus label-icon"></i> Add</button>';
                                                         }
 
-                                                        if($delete_public_holiday > 0){
-                                                            echo '<button type="button" class="btn btn-danger waves-effect btn-label waves-light d-none multiple" id="delete-public-holiday"><i class="bx bx-trash label-icon"></i> Delete</button>';
+                                                        if($delete_leave_type > 0){
+                                                            echo '<button type="button" class="btn btn-danger waves-effect btn-label waves-light d-none multiple" id="delete-leave-type"><i class="bx bx-trash label-icon"></i> Delete</button>';
                                                         }
                                                     ?>
                                                     <button type="button" class="btn btn-info waves-effect btn-label waves-light" data-bs-toggle="offcanvas" data-bs-target="#filter-off-canvas" aria-controls="filter-off-canvas"><i class="bx bx-filter-alt label-icon"></i> Filter</button>
@@ -95,32 +95,21 @@
                                                     </div>
                                                     <div class="offcanvas-body">
                                                         <div class="mb-3">
-                                                            <p class="text-muted">Holiday Date</p>
+                                                            <p class="text-muted">Paid Type</p>
 
-                                                            <div class="input-group mb-3" id="filter-start-date-container">
-                                                                <input type="text" class="form-control" id="filter_start_date" name="filter_start_date" autocomplete="off" data-date-format="m/dd/yyyy" data-date-container="#filter-start-date-container" data-provide="datepicker" data-date-autoclose="true" data-date-orientation="right" placeholder="Start Date" value="<?php echo date('1/01/Y'); ?>">
-                                                                <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
-                                                            </div>
-
-                                                            <div class="input-group" id="filter-end-date-container">
-                                                                <input type="text" class="form-control" id="filter_end_date" name="filter_end_date" autocomplete="off" data-date-format="m/dd/yyyy" data-date-container="#filter-end-date-container" data-provide="datepicker" data-date-autoclose="true" data-date-orientation="right" placeholder="End Date" value="<?php echo date('12/t/Y'); ?>">
-                                                                <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
-                                                            </div>
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <p class="text-muted">Work Location</p>
-
-                                                            <select class="form-control filter-select2" id="filter_work_location">
-                                                                <option value="">All Work Location</option>
-                                                                <?php echo $api->generate_work_location_options(); ?>
+                                                            <select class="form-control filter-select2" id="filter_paid_type">
+                                                                <option value="">All Paid Type</option>
+                                                                <option value="PAID">Paid</option>
+                                                                <option value="UNPAID">Unpaid</option>
                                                             </select>
                                                         </div>
                                                         <div class="mb-3">
-                                                            <p class="text-muted">Holiday Type</p>
+                                                            <p class="text-muted">Allocation Type</p>
 
-                                                            <select class="form-control filter-select2" id="filter_holiday_type">
-                                                                <option value="">All Holiday Type</option>
-                                                                <?php echo $api->generate_system_code_options('HOLIDAYTYPE'); ?>
+                                                            <select class="form-control filter-select2" id="allocation_type">
+                                                                <option value="">Allocation Type</option>
+                                                                <option value="LIMITED">Limited</option>
+                                                                <option value="NOLIMIT">No Limit</option>
                                                             </select>
                                                         </div>
                                                         <div>
@@ -132,7 +121,7 @@
                                         </div>
                                         <div class="row mt-4">
                                             <div class="col-md-12">
-                                                <table id="public-holiday-datatable" class="table table-bordered align-middle mb-0 table-hover table-striped dt-responsive nowrap w-100">
+                                                <table id="leave-type-datatable" class="table table-bordered align-middle mb-0 table-hover table-striped dt-responsive nowrap w-100">
                                                     <thead>
                                                         <tr>
                                                             <th class="all">
@@ -140,9 +129,9 @@
                                                                     <input class="form-check-input" id="datatable-checkbox" type="checkbox">
                                                                 </div>
                                                             </th>
-                                                            <th class="all">Public Holiday</th>
-                                                            <th class="all">Holiday Date</th>
-                                                            <th class="all">Type</th>
+                                                            <th class="all">Leave Type</th>
+                                                            <th class="all">Paid Type</th>
+                                                            <th class="all">Allocation Type</th>
                                                             <th class="all">Action</th>
                                                         </tr>
                                                     </thead>
@@ -173,6 +162,6 @@
         <script src="assets/libs/select2/js/select2.min.js"></script>
         <script src="assets/libs/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
         <script src="assets/js/system.js?v=<?php echo rand(); ?>"></script>
-        <script src="assets/js/pages/public-holiday.js?v=<?php echo rand(); ?>"></script>
+        <script src="assets/js/pages/leave-type.js?v=<?php echo rand(); ?>"></script>
     </body>
 </html>

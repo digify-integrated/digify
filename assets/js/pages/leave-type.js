@@ -2,30 +2,28 @@
     'use strict';
 
     $(function() {
-        if($('#public-holiday-datatable').length){
-            initialize_public_holiday_table('#public-holiday-datatable');
+        if($('#leave-type-datatable').length){
+            initialize_leave_type_table('#leave-type-datatable');
         }
 
         initialize_click_events();
     });
 })(jQuery);
 
-function initialize_public_holiday_table(datatable_name, buttons = false, show_all = false){
+function initialize_leave_type_table(datatable_name, buttons = false, show_all = false){
     hide_multiple_buttons();
     
     var username = $('#username').text();
-    var type = 'public holiday table';
-    var filter_start_date = $('#filter_start_date').val();
-    var filter_end_date = $('#filter_end_date').val();
-    var filter_work_location = $('#filter_work_location').val();
-    var filter_holiday_type = $('#filter_holiday_type').val();
+    var type = 'leave type table';
+    var filter_paid_type = $('#filter_paid_type').val();
+    var allocation_type = $('#allocation_type').val();
     var settings;
 
     var column = [ 
         { 'data' : 'CHECK_BOX' },
-        { 'data' : 'PUBLIC_HOLIDAY' },
-        { 'data' : 'HOLIDAY_DATE' },
-        { 'data' : 'HOLIDAY_TYPE' },
+        { 'data' : 'LEAVE_TYPE' },
+        { 'data' : 'PAID_TYPE' },
+        { 'data' : 'ALLOCATION_TYPE' },
         { 'data' : 'ACTION' }
     ];
 
@@ -50,7 +48,7 @@ function initialize_public_holiday_table(datatable_name, buttons = false, show_a
                 'url' : 'system-generation.php',
                 'method' : 'POST',
                 'dataType': 'JSON',
-                'data': {'type' : type, 'username' : username, 'filter_start_date' : filter_start_date, 'filter_end_date' : filter_end_date, 'filter_work_location' : filter_work_location, 'filter_holiday_type' :filter_holiday_type},
+                'data': {'type' : type, 'username' : username, 'filter_paid_type' : filter_paid_type, 'allocation_type' : allocation_type},
                 'dataSrc' : ''
             },
             dom:  "<'row'<'col-sm-3'l><'col-sm-6 text-center mb-2'B><'col-sm-3'f>>" +  "<'row'<'col-sm-12'tr>>" + "<'row'<'col-sm-5'i><'col-sm-7'p>>",
@@ -81,7 +79,7 @@ function initialize_public_holiday_table(datatable_name, buttons = false, show_a
                 'url' : 'system-generation.php',
                 'method' : 'POST',
                 'dataType': 'JSON',
-                'data': {'type' : type, 'username' : username, 'filter_start_date' : filter_start_date, 'filter_end_date' : filter_end_date, 'filter_work_location' : filter_work_location, 'filter_holiday_type' :filter_holiday_type},
+                'data': {'type' : type, 'username' : username, 'filter_paid_type' : filter_paid_type, 'allocation_type' : allocation_type},
                 'dataSrc' : ''
             },
             'order': [[ 1, 'asc' ]],
@@ -111,33 +109,33 @@ function initialize_public_holiday_table(datatable_name, buttons = false, show_a
 function initialize_click_events(){
     var username = $('#username').text();
 
-    $(document).on('click','.view-public-holiday',function() {
-        var public_holiday_id = $(this).data('public-holiday-id');
+    $(document).on('click','.view-leave-type',function() {
+        var leave_type_id = $(this).data('leave-type-id');
 
-        sessionStorage.setItem('public_holiday_id', public_holiday_id);
+        sessionStorage.setItem('leave_type_id', leave_type_id);
 
-        generate_modal('public holiday details', 'Public Holiday Details', 'LG' , '1', '0', 'element', '', '0', username);
+        generate_modal('leave type details', 'Leave Type Details', 'LG' , '1', '0', 'element', '', '0', username);
     });
 
-    $(document).on('click','#add-public-holiday',function() {
-        generate_modal('public holiday form', 'Public Holiday', 'R' , '0', '1', 'form', 'public-holiday-form', '1', username);
+    $(document).on('click','#add-leave-type',function() {
+        generate_modal('leave type form', 'Leave Type', 'R' , '0', '1', 'form', 'leave-type-form', '1', username);
     });
 
-    $(document).on('click','.update-public-holiday',function() {
-        var public_holiday_id = $(this).data('public-holiday-id');
+    $(document).on('click','.update-leave-type',function() {
+        var leave_type_id = $(this).data('leave-type-id');
 
-        sessionStorage.setItem('public_holiday_id', public_holiday_id);
+        sessionStorage.setItem('leave_type_id', leave_type_id);
         
-        generate_modal('public holiday form', 'Public Holiday', 'R' , '0', '1', 'form', 'public-holiday-form', '0', username);
+        generate_modal('leave type form', 'Leave Type', 'R' , '0', '1', 'form', 'leave-type-form', '0', username);
     });
     
-    $(document).on('click','.delete-public-holiday',function() {
-        var public_holiday_id = $(this).data('public-holiday-id');
-        var transaction = 'delete public holiday';
+    $(document).on('click','.delete-leave-type',function() {
+        var leave_type_id = $(this).data('leave-type-id');
+        var transaction = 'delete leave type';
 
         Swal.fire({
-            title: 'Delete Public Holiday',
-            text: 'Are you sure you want to delete this public holiday?',
+            title: 'Delete Leave Type',
+            text: 'Are you sure you want to delete this leave type?',
             icon: 'warning',
             showCancelButton: !0,
             confirmButtonText: 'Delete',
@@ -150,20 +148,20 @@ function initialize_click_events(){
                 $.ajax({
                     type: 'POST',
                     url: 'controller.php',
-                    data: {username : username, public_holiday_id : public_holiday_id, transaction : transaction},
+                    data: {username : username, leave_type_id : leave_type_id, transaction : transaction},
                     success: function (response) {
                         if(response === 'Deleted' || response === 'Not Found'){
                             if(response === 'Deleted'){
-                                show_alert('Delete Public Holiday', 'The public holiday has been deleted.', 'success');
+                                show_alert('Delete Leave Type', 'The leave type has been deleted.', 'success');
                             }
                             else{
-                                show_alert('Delete Public Holiday', 'The public holiday does not exist.', 'info');
+                                show_alert('Delete Leave Type', 'The leave type does not exist.', 'info');
                             }
 
-                            reload_datatable('#public-holiday-datatable');
+                            reload_datatable('#leave-type-datatable');
                         }
                         else{
-                          show_alert('Delete Public Holiday', response, 'error');
+                          show_alert('Delete Leave Type', response, 'error');
                         }
                     }
                 });
@@ -172,20 +170,20 @@ function initialize_click_events(){
         });
     });
 
-    $(document).on('click','#delete-public-holiday',function() {
-        var public_holiday_id = [];
-        var transaction = 'delete multiple public holiday';
+    $(document).on('click','#delete-leave-type',function() {
+        var leave_type_id = [];
+        var transaction = 'delete multiple leave type';
 
         $('.datatable-checkbox-children').each(function(){
             if($(this).is(':checked')){  
-                public_holiday_id.push(this.value);  
+                leave_type_id.push(this.value);  
             }
         });
 
-        if(public_holiday_id.length > 0){
+        if(leave_type_id.length > 0){
             Swal.fire({
-                title: 'Delete Multiple Public Holidays',
-                text: 'Are you sure you want to delete these public holidays?',
+                title: 'Delete Multiple Leave Types',
+                text: 'Are you sure you want to delete these leave types?',
                 icon: 'warning',
                 showCancelButton: !0,
                 confirmButtonText: 'Delete',
@@ -199,20 +197,20 @@ function initialize_click_events(){
                     $.ajax({
                         type: 'POST',
                         url: 'controller.php',
-                        data: {username : username, public_holiday_id : public_holiday_id, transaction : transaction},
+                        data: {username : username, leave_type_id : leave_type_id, transaction : transaction},
                         success: function (response) {
                             if(response === 'Deleted' || response === 'Not Found'){
                                 if(response === 'Deleted'){
-                                    show_alert('Delete Multiple Public Holidays', 'The public holidays have been deleted.', 'success');
+                                    show_alert('Delete Multiple Leave Types', 'The leave types have been deleted.', 'success');
                                 }
                                 else{
-                                    show_alert('Delete Multiple Public Holidays', 'The public holidays does not exist.', 'info');
+                                    show_alert('Delete Multiple Leave Types', 'The leave types does not exist.', 'info');
                                 }
     
-                                reload_datatable('#public-holiday-datatable');
+                                reload_datatable('#leave-type-datatable');
                             }
                             else{
-                                show_alert('Delete Multiple Public Holidays', response, 'error');
+                                show_alert('Delete Multiple Leave Types', response, 'error');
                             }
                         }
                     });
@@ -222,12 +220,12 @@ function initialize_click_events(){
             });
         }
         else{
-            show_alert('Delete Multiple Public Holidays', 'Please select the public holidays you want to delete.', 'error');
+            show_alert('Delete Multiple Leave Types', 'Please select the leave types you want to delete.', 'error');
         }
     });
 
     $(document).on('click','#apply-filter',function() {
-        initialize_public_holiday_table('#public-holiday-datatable');
+        initialize_leave_type_table('#leave-type-datatable');
     });
 
 }

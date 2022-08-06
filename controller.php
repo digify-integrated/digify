@@ -2874,6 +2874,41 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     }
     # -------------------------------------------------------------
 
+    # Submit leave type
+    else if($transaction == 'submit leave type'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['leave_type_id']) && isset($_POST['leave_type']) && !empty($_POST['leave_type']) && isset($_POST['paid_type']) && !empty($_POST['paid_type']) && isset($_POST['leave_allocation_type']) && !empty($_POST['leave_allocation_type'])){
+            $username = $_POST['username'];
+            $leave_type_id = $_POST['leave_type_id'];
+            $leave_type = $_POST['leave_type'];
+            $paid_type = $_POST['paid_type'];
+            $leave_allocation_type = $_POST['leave_allocation_type'];
+
+            $check_leave_type_exist = $api->check_leave_type_exist($leave_type_id);
+
+            if($check_leave_type_exist > 0){
+                $update_leave_type = $api->update_leave_type($leave_type_id, $leave_type, $paid_type, $leave_allocation_type, $username);
+
+                if($update_leave_type){
+                    echo 'Updated';
+                }
+                else{
+                    echo $update_leave_type;
+                }
+            }
+            else{
+                $insert_leave_type = $api->insert_leave_type($leave_type, $paid_type, $leave_allocation_type, $username);
+
+                if($insert_leave_type){
+                    echo 'Inserted';
+                }
+                else{
+                    echo $insert_leave_type;
+                }
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
     # -------------------------------------------------------------
     #   Delete transactions
     # -------------------------------------------------------------
@@ -4376,6 +4411,62 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                     }
                     else{
                         $error = $delete_all_public_holiday_work_location;
+                    }
+                }
+                else{
+                    $error = 'Not Found';
+                }
+            }
+
+            if(empty($error)){
+                echo 'Deleted';
+            }
+            else{
+                echo $error;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Delete leave type
+    else if($transaction == 'delete leave type'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['leave_type_id']) && !empty($_POST['leave_type_id'])){
+            $username = $_POST['username'];
+            $leave_type_id = $_POST['leave_type_id'];
+
+            $check_leave_type_exist = $api->check_leave_type_exist($leave_type_id);
+
+            if($check_leave_type_exist > 0){
+                $delete_leave_type = $api->delete_leave_type($leave_type_id, $username);
+                                    
+                if($delete_leave_type){
+                    echo 'Deleted';
+                }
+                else{
+                    echo $delete_leave_type;
+                }
+            }
+            else{
+                echo 'Not Found';
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Delete multiple leave type
+    else if($transaction == 'delete multiple leave type'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['leave_type_id'])){
+            $username = $_POST['username'];
+            $leave_type_ids = $_POST['leave_type_id'];
+
+            foreach($leave_type_ids as $leave_type_id){
+                $check_leave_type_exist = $api->check_leave_type_exist($leave_type_id);
+
+                if($check_leave_type_exist > 0){
+                    $delete_leave_type = $api->delete_leave_type($leave_type_id, $username);
+                                    
+                    if(!$delete_leave_type){
+                        $error = $delete_leave_type;
                     }
                 }
                 else{
@@ -7369,6 +7460,74 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                 'HOLIDAY_DATE' => $api->check_date('empty', $public_holiday_details[0]['HOLIDAY_DATE'], '', 'n/d/Y', '', '', ''),
                 'HOLIDAY_TYPE' => $public_holiday_details[0]['HOLIDAY_TYPE'],
                 'WORK_LOCATION_ID' => $work_locations,
+            );
+
+            echo json_encode($response);
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Public holiday summary details
+    else if($transaction == 'public holiday summary details'){
+        if(isset($_POST['public_holiday_id']) && !empty($_POST['public_holiday_id'])){
+            $public_holiday_id = $_POST['public_holiday_id'];
+            $public_holiday_details = $api->get_public_holiday_details($public_holiday_id);
+            $public_holiday_work_location_details = $api->get_public_holiday_work_location_details($public_holiday_id);
+
+            $system_code_details = $api->get_system_code_details('HOLIDAYTYPE', $public_holiday_details[0]['HOLIDAY_TYPE']);
+            $holiday_type_name = $system_code_details[0]['SYSTEM_DESCRIPTION'];
+
+            $work_location_table = '<table class="table table-bordered mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Work Location</th>
+                </tr>
+            </thead>
+            <tbody>';
+
+            if(count($public_holiday_work_location_details) > 0){
+                for($i = 0; $i < count($public_holiday_work_location_details); $i++) {
+                    $work_location_id = $public_holiday_work_location_details[$i]['WORK_LOCATION_ID'];
+
+                    $work_location_details = $api->get_work_location_details($work_location_id);
+
+                    $work_location_table .= '<tr>
+                                    <td>'. ($i + 1) .'</td>
+                                    <td>'. $work_location_details[0]['WORK_LOCATION'] .'</td>
+                                </tr>';
+                }
+            }
+            else{
+                $work_location_table .= '<tr>
+                            <td colspan="2"><p class="text-center">No Assigned Employee</p></td>
+                        </tr>';
+            }
+
+            
+
+            $response[] = array(
+                'PUBLIC_HOLIDAY' => $public_holiday_details[0]['PUBLIC_HOLIDAY'],
+                'HOLIDAY_DATE' => $api->check_date('empty', $public_holiday_details[0]['HOLIDAY_DATE'], '', 'F d, Y', '', '', ''),
+                'HOLIDAY_TYPE' => $holiday_type_name,
+                'WORK_LOCATION_TABLE' => $work_location_table
+            );
+
+            echo json_encode($response);
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Leave type details
+    else if($transaction == 'leave type details'){
+        if(isset($_POST['leave_type_id']) && !empty($_POST['leave_type_id'])){
+            $leave_type_id = $_POST['leave_type_id'];
+            $leave_type_details = $api->get_leave_type_details($leave_type_id);
+
+            $response[] = array(
+                'LEAVE_TYPE' => $leave_type_details[0]['LEAVE_TYPE'],
+                'PAID_TYPE' => $leave_type_details[0]['PAID_TYPE'],
+                'ALLOCATION_TYPE' => $leave_type_details[0]['ALLOCATION_TYPE']
             );
 
             echo json_encode($response);

@@ -1274,6 +1274,31 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : check_leave_type_exist
+    # Purpose    : Checks if the department exists.
+    #
+    # Returns    : Number
+    #
+    # -------------------------------------------------------------
+    public function check_leave_type_exist($leave_type_id){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL check_leave_type_exist(:leave_type_id)');
+            $sql->bindValue(':leave_type_id', $leave_type_id);
+
+            if($sql->execute()){
+                $row = $sql->fetch();
+
+                return $row['TOTAL'];
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Update methods
     # -------------------------------------------------------------
     
@@ -4540,6 +4565,73 @@ class Api{
     }
     # -------------------------------------------------------------
 
+    # -------------------------------------------------------------
+    #
+    # Name       : update_leave_type
+    # Purpose    : Updates leave type.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function update_leave_type($leave_type_id, $leave_type, $paid_type, $allocation_type, $username){
+        if ($this->databaseConnection()) {
+            $record_log = 'UPD->' . $username . '->' . date('Y-m-d h:i:s');
+            $leave_type_details = $this->get_leave_type_details($leave_type_id);
+            
+            if(!empty($leave_type_details[0]['TRANSACTION_LOG_ID'])){
+                $transaction_log_id = $leave_type_details[0]['TRANSACTION_LOG_ID'];
+            }
+            else{
+                # Get transaction log id
+                $transaction_log_system_parameter = $this->get_system_parameter(2, 1);
+                $transaction_log_parameter_number = $transaction_log_system_parameter[0]['PARAMETER_NUMBER'];
+                $transaction_log_id = $transaction_log_system_parameter[0]['ID'];
+            }
+
+            $sql = $this->db_connection->prepare('CALL update_leave_type(:leave_type_id, :leave_type, :paid_type, :allocation_type, :transaction_log_id, :record_log)');
+            $sql->bindValue(':leave_type_id', $leave_type_id);
+            $sql->bindValue(':leave_type', $leave_type);
+            $sql->bindValue(':paid_type', $paid_type);
+            $sql->bindValue(':allocation_type', $allocation_type);
+            $sql->bindValue(':transaction_log_id', $transaction_log_id);
+            $sql->bindValue(':record_log', $record_log);
+        
+            if($sql->execute()){
+                if(!empty($leave_type_details[0]['TRANSACTION_LOG_ID'])){
+                    $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated leave type.');
+                                    
+                    if($insert_transaction_log){
+                        return true;
+                    }
+                    else{
+                        return $insert_transaction_log;
+                    }
+                }
+                else{
+                    # Update transaction log value
+                    $update_system_parameter_value = $this->update_system_parameter_value($transaction_log_parameter_number, 2, $username);
+
+                    if($update_system_parameter_value){
+                        $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated leave type.');
+                                    
+                        if($insert_transaction_log){
+                            return true;
+                        }
+                        else{
+                            return $insert_transaction_log;
+                        }
+                    }
+                    else{
+                        return $update_system_parameter_value;
+                    }
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
 
     # -------------------------------------------------------------
     #   Insert methods
@@ -6894,9 +6986,6 @@ class Api{
     # -------------------------------------------------------------
     public function insert_public_holiday_work_location($public_holiday_id, $work_location, $username){
         if ($this->databaseConnection()) {
-            $public_holiday_details = $this->get_public_holiday_details($public_holiday_id);
-            $transaction_log_id = $public_holiday_details[0]['TRANSACTION_LOG_ID'];
-
             $record_log = 'INS->' . $username . '->' . date('Y-m-d h:i:s');
 
             $sql = $this->db_connection->prepare('CALL insert_public_holiday_work_location(:public_holiday_id, :work_location, :record_log)');
@@ -6905,13 +6994,69 @@ class Api{
             $sql->bindValue(':record_log', $record_log); 
         
             if($sql->execute()){
-                $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Insert', 'User ' . $username . ' inserted public holiday work location.');
+                return true;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : insert_leave_type
+    # Purpose    : Insert leave type.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function insert_leave_type($leave_type, $paid_type, $allocation_type, $username){
+        if ($this->databaseConnection()) {
+            $record_log = 'INS->' . $username . '->' . date('Y-m-d h:i:s');
+
+            # Get system parameter id
+            $system_parameter = $this->get_system_parameter(24, 1);
+            $parameter_number = $system_parameter[0]['PARAMETER_NUMBER'];
+            $id = $system_parameter[0]['ID'];
+
+            # Get transaction log id
+            $transaction_log_system_parameter = $this->get_system_parameter(2, 1);
+            $transaction_log_parameter_number = $transaction_log_system_parameter[0]['PARAMETER_NUMBER'];
+            $transaction_log_id = $transaction_log_system_parameter[0]['ID'];
+
+            $sql = $this->db_connection->prepare('CALL insert_leave_type(:id, :leave_type, :paid_type, :allocation_type, :transaction_log_id, :record_log)');
+            $sql->bindValue(':id', $id);
+            $sql->bindValue(':leave_type', $leave_type);
+            $sql->bindValue(':paid_type', $paid_type);
+            $sql->bindValue(':allocation_type', $allocation_type);
+            $sql->bindValue(':transaction_log_id', $transaction_log_id);
+            $sql->bindValue(':record_log', $record_log); 
+        
+            if($sql->execute()){
+                # Update system parameter value
+                $update_system_parameter_value = $this->update_system_parameter_value($parameter_number, 24, $username);
+
+                if($update_system_parameter_value){
+                    # Update transaction log value
+                    $update_system_parameter_value = $this->update_system_parameter_value($transaction_log_parameter_number, 2, $username);
+
+                    if($update_system_parameter_value){
+                        $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Insert', 'User ' . $username . ' inserted leave type.');
                                     
-                if($insert_transaction_log){
-                    return true;
+                        if($insert_transaction_log){
+                            return true;
+                        }
+                        else{
+                            return $insert_transaction_log;
+                        }
+                    }
+                    else{
+                        return $update_system_parameter_value;
+                    }
                 }
                 else{
-                    return $insert_transaction_log;
+                    return $update_system_parameter_value;
                 }
             }
             else{
@@ -7957,6 +8102,29 @@ class Api{
         if ($this->databaseConnection()) {
             $sql = $this->db_connection->prepare('CALL delete_all_public_holiday_work_location(:public_holiday_id)');
             $sql->bindValue(':public_holiday_id', $public_holiday_id);
+        
+            if($sql->execute()){
+                return true;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : delete_leave_type
+    # Purpose    : Delete department.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function delete_leave_type($leave_type_id, $username){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL delete_leave_type(:leave_type_id)');
+            $sql->bindValue(':leave_type_id', $leave_type_id);
         
             if($sql->execute()){
                 return true;
@@ -9570,6 +9738,41 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : get_leave_type_details
+    # Purpose    : Gets the department details.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_leave_type_details($leave_type_id){
+        if ($this->databaseConnection()) {
+            $response = array();
+
+            $sql = $this->db_connection->prepare('CALL get_leave_type_details(:leave_type_id)');
+            $sql->bindValue(':leave_type_id', $leave_type_id);
+
+            if($sql->execute()){
+                while($row = $sql->fetch()){
+                    $response[] = array(
+                        'LEAVE_TYPE' => $row['LEAVE_TYPE'],
+                        'PAID_TYPE' => $row['PAID_TYPE'],
+                        'ALLOCATION_TYPE' => $row['ALLOCATION_TYPE'],
+                        'TRANSACTION_LOG_ID' => $row['TRANSACTION_LOG_ID'],
+                        'RECORD_LOG' => $row['RECORD_LOG']
+                    );
+                }
+
+                return $response;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Get methods
     # -------------------------------------------------------------
 
@@ -10516,6 +10719,42 @@ class Api{
         );
 
         return $response;
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : get_leave_type_paid_type
+    # Purpose    : Returns the leave type paid type.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_leave_type_paid_type($paid_type){
+        if ($paid_type == 'PAID') {
+            return 'Paid';
+        }
+        else{
+            return 'Unpaid';
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : get_leave_type_allocation_type
+    # Purpose    : Returns the leave type allocation type.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_leave_type_allocation_type($allocation_type){
+        if ($allocation_type == 'LIMITED') {
+            return 'Limited';
+        }
+        else{
+            return 'No Limit';
+        }
     }
     # -------------------------------------------------------------
 

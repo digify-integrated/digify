@@ -1973,6 +1973,39 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                 </div>
                         </div>';
             }
+            else if($form_type == 'leave type form'){
+                $form .= '<div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <input type="hidden" id="leave_type_id" name="leave_type_id">
+                                    <label for="leave_type" class="form-label">Leave Type <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control form-maxlength" autocomplete="off" id="leave_type" name="leave_type" maxlength="100">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="paid_type" class="form-label">Paid Type <span class="text-danger">*</span></label>
+                                    <select class="form-control form-select2" id="paid_type" name="paid_type">
+                                        <option value="">--</option>
+                                        <option value="PAID">Paid</option>
+                                        <option value="UNPAID">Unpaid</option>                                   
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="leave_allocation_type" class="form-label">Allocation Type <span class="text-danger">*</span></label>
+                                    <select class="form-control form-select2" id="leave_allocation_type" name="leave_allocation_type">
+                                        <option value="">--</option>
+                                        <option value="LIMITED">Limited</option>
+                                        <option value="NOLIMIT">No Limit</option>                                   
+                                    </select>
+                                </div>
+                            </div>
+                        </div>';
+            }
 
             $form .= '</form>';
 
@@ -2585,6 +2618,45 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                 $element = '<div class="row">
                                 <div class="col-md-12">
                                     <div id="badge-reader"></div>
+                                </div>
+                            </div>';
+            }
+            else if($element_type == 'public holiday details'){
+                $element = '<div class="row">
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <table class="table table-nowrap mb-0">
+                                            <tbody>
+                                                <tr>
+                                                    <th scope="row">Public Holiday :</th>
+                                                    <td id="public_holiday"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">Holiday Date :</th>
+                                                    <td id="holiday_date"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">Holiday Type :</th>
+                                                    <td id="holiday_type"></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <ul class="nav nav-tabs" role="tablist">
+                                        <li class="nav-item">
+                                            <a class="nav-link active" data-bs-toggle="tab" href="#work_location" role="tab">
+                                                <span class="d-block d-sm-none"><i class="bx bx-map"></i></span>
+                                                <span class="d-none d-sm-block">Work Location</span>    
+                                            </a>
+                                        </li>
+                                    </ul>
+                                    <div class="tab-content p-3 text-muted">
+                                        <div class="tab-pane active" id="work_location" role="tabpanel"></div>
+                                    </div>
                                 </div>
                             </div>';
             }
@@ -6229,6 +6301,109 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                 <button type="button" class="btn btn-primary waves-effect waves-light view-public-holiday" data-public-holiday-id="'. $public_holiday_id .'" title="View Public Holiday">
                                     <i class="bx bx-show font-size-16 align-middle"></i>
                                 </button>
+                                '. $update .'
+                                '. $transaction_log .'
+                                '. $delete .'
+                            </div>'
+                        );
+                    }
+    
+                    echo json_encode($response);
+                }
+                else{
+                    echo $sql->errorInfo()[2];
+                }
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Leave type table
+    else if($type == 'leave type table'){
+        if(isset($_POST['filter_paid_type']) && isset($_POST['allocation_type'])){
+            if ($api->databaseConnection()) {
+                # Get permission
+                $update_leave_type = $api->check_role_permissions($username, 178);
+                $delete_leave_type = $api->check_role_permissions($username, 179);
+                $view_transaction_log = $api->check_role_permissions($username, 180);
+
+                $filter_paid_type = $_POST['filter_paid_type'];
+                $allocation_type = $_POST['allocation_type'];
+
+                $query = 'SELECT LEAVE_TYPE_ID, LEAVE_TYPE, PAID_TYPE, ALLOCATION_TYPE, TRANSACTION_LOG_ID FROM leave_type';
+
+                if(!empty($filter_paid_type) || !empty($allocation_type)){
+                    $query .= ' WHERE ';
+
+                    if(!empty($filter_paid_type)){
+                        $filter[] = 'PAID_TYPE = :filter_paid_type';
+                    }
+
+                    if(!empty($allocation_type)){
+                        $filter[] = 'ALLOCATION_TYPE = :allocation_type';
+                    }
+
+                    if(!empty($filter)){
+                        $query .= implode(' AND ', $filter);
+                    }
+                }
+    
+                $sql = $api->db_connection->prepare($query);
+
+                if(!empty($filter_paid_type) || !empty($allocation_type)){
+                    if(!empty($filter_paid_type)){
+                        $sql->bindValue(':filter_paid_type', $filter_paid_type);
+                    }
+
+                    if(!empty($allocation_type)){
+                        $sql->bindValue(':allocation_type', $allocation_type);
+                    }
+                }
+    
+                if($sql->execute()){
+                    while($row = $sql->fetch()){
+                        $leave_type_id = $row['LEAVE_TYPE_ID'];
+                        $leave_type = $row['LEAVE_TYPE'];
+                        $paid_type = $row['PAID_TYPE'];
+                        $allocation_type = $row['ALLOCATION_TYPE'];
+                        $transaction_log_id = $row['TRANSACTION_LOG_ID'];
+
+                        $leave_type_paid_type = $api->get_leave_type_paid_type($paid_type);
+                        $leave_type_allocation_type = $api->get_leave_type_allocation_type($allocation_type);
+
+                        if($update_leave_type > 0){
+                            $update = '<button type="button" class="btn btn-info waves-effect waves-light update-leave-type" data-leave-type-id="'. $leave_type_id .'" title="Edit Leave Type">
+                                            <i class="bx bx-pencil font-size-16 align-middle"></i>
+                                        </button>';
+                        }
+                        else{
+                            $update = '';
+                        }
+
+                        if($delete_leave_type > 0){
+                            $delete = '<button type="button" class="btn btn-danger waves-effect waves-light delete-leave-type" data-leave-type-id="'. $leave_type_id .'" title="Delete Leave Type">
+                                <i class="bx bx-trash font-size-16 align-middle"></i>
+                            </button>';
+                        }
+                        else{
+                            $delete = '';
+                        }
+
+                        if($view_transaction_log > 0 && !empty($transaction_log_id)){
+                            $transaction_log = '<button type="button" class="btn btn-dark waves-effect waves-light view-transaction-log" data-transaction-log-id="'. $transaction_log_id .'" title="View Transaction Log">
+                                                    <i class="bx bx-detail font-size-16 align-middle"></i>
+                                                </button>';
+                        }
+                        else{
+                            $transaction_log = '';
+                        }
+    
+                        $response[] = array(
+                            'CHECK_BOX' => '<input class="form-check-input datatable-checkbox-children" type="checkbox" value="'. $leave_type_id .'">',
+                            'LEAVE_TYPE' => $leave_type,
+                            'PAID_TYPE' => $leave_type_paid_type,
+                            'ALLOCATION_TYPE' => $leave_type_allocation_type,
+                            'ACTION' => '<div class="d-flex gap-2">
                                 '. $update .'
                                 '. $transaction_log .'
                                 '. $delete .'

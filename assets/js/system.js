@@ -5241,10 +5241,10 @@ function initialize_form_validation(form_type){
                     success: function (response) {
                         if(response === 'Updated' || response === 'Inserted'){
                             if(response === 'Inserted'){
-                                show_alert('Insert Public Holiday Success', 'The user account has been inserted.', 'success');
+                                show_alert('Insert Public Holiday Success', 'The public holiday has been inserted.', 'success');
                             }
                             else{
-                                show_alert('Update Public Holiday Success', 'The user account has been updated.', 'success');
+                                show_alert('Update Public Holiday Success', 'The public holiday has been updated.', 'success');
                             }
                           
                             $('#System-Modal').modal('hide');
@@ -5288,6 +5288,86 @@ function initialize_form_validation(form_type){
                 work_location: {
                     required: 'Please choose at least one (1) work location',
                 }
+            },
+            errorPlacement: function(label, element) {
+                if((element.hasClass('select2') || element.hasClass('form-select2')) && element.next('.select2-container').length) {
+                    label.insertAfter(element.next('.select2-container'));
+                }
+                else if(element.parent('.input-group').length){
+                    label.insertAfter(element.parent());
+                }
+                else{
+                    label.insertAfter(element);
+                }
+            },
+            highlight: function(element) {
+                $(element).parent().addClass('has-danger');
+                $(element).addClass('form-control-danger');
+            },
+            success: function(label,element) {
+                $(element).parent().removeClass('has-danger')
+                $(element).removeClass('form-control-danger')
+                label.remove();
+            }
+        });
+    }
+    else if(form_type == 'leave type form'){
+        $('#leave-type-form').validate({
+            submitHandler: function (form) {
+                transaction = 'submit leave type';
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'controller.php',
+                    data: $(form).serialize() + '&username=' + username + '&transaction=' + transaction,
+                    beforeSend: function(){
+                        document.getElementById('submit-form').disabled = true;
+                        $('#submit-form').html('<div class="spinner-border spinner-border-sm text-light" role="status"><span rclass="sr-only"></span></div>');
+                    },
+                    success: function (response) {
+                        if(response === 'Updated' || response === 'Inserted'){
+                            if(response === 'Inserted'){
+                                show_alert('Insert Leave Type Success', 'The leave type has been inserted.', 'success');
+                            }
+                            else{
+                                show_alert('Update Leave Type Success', 'The leave type has been updated.', 'success');
+                            }
+                          
+                            $('#System-Modal').modal('hide');
+                            reload_datatable('#leave-type-datatable');
+                        }
+                        else{
+                            show_alert('Leave Type Error', response, 'error');
+                        }
+                    },
+                    complete: function(){
+                        document.getElementById('submit-form').disabled = false;
+                        $('#submit-form').html('Submit');
+                    }
+                });
+                return false;
+            },
+            rules: {
+                leave_type: {
+                    required: true
+                },
+                paid_type: {
+                    required: true
+                },
+                allocation_type: {
+                    required: true
+                },
+            },
+            messages: {
+                leave_type: {
+                    required: 'Please enter the leave type',
+                },
+                paid_type: {
+                    required: 'Please choose the paid type',
+                },
+                allocation_type: {
+                    required: 'Please choose the allocation type',
+                },
             },
             errorPlacement: function(label, element) {
                 if((element.hasClass('select2') || element.hasClass('form-select2')) && element.next('.select2-container').length) {
@@ -6458,6 +6538,44 @@ function display_form_details(form_type){
             }
         });
     }
+    else if(form_type == 'public holiday details'){
+        transaction = 'public holiday summary details';
+
+        var public_holiday_id = sessionStorage.getItem('public_holiday_id');
+
+        $.ajax({
+            url: 'controller.php',
+            method: 'POST',
+            dataType: 'JSON',
+            data: {public_holiday_id : public_holiday_id, transaction : transaction},
+            success: function(response) {
+                $('#public_holiday').text(response[0].PUBLIC_HOLIDAY);
+                $('#holiday_date').text(response[0].HOLIDAY_DATE);
+                $('#holiday_type').text(response[0].HOLIDAY_TYPE);
+
+                document.getElementById('work_location').innerHTML = response[0].WORK_LOCATION_TABLE;
+            }
+        });
+    }
+    else if(form_type == 'leave type form'){
+        transaction = 'leave type details';
+
+        var leave_type_id = sessionStorage.getItem('leave_type_id');
+
+        $.ajax({
+            url: 'controller.php',
+            method: 'POST',
+            dataType: 'JSON',
+            data: {leave_type_id : leave_type_id, transaction : transaction},
+            success: function(response) {
+                $('#leave_type').val(response[0].LEAVE_TYPE);
+                $('#leave_type_id').val(leave_type_id);
+
+                check_option_exist('#paid_type', response[0].PAID_TYPE, '');
+                check_option_exist('#leave_allocation_type', response[0].ALLOCATION_TYPE, '');
+            }
+        });
+    }
 }
 
 function initialize_transaction_log_table(datatable_name, buttons = false, show_all = false){
@@ -6737,7 +6855,7 @@ function generate_element(element_type, value, container, modal, username){
             if(modal == '1'){
                 $('#System-Modal').modal('show');
 
-                if(element_type == 'user account details' || element_type == 'system parameter details' || element_type == 'company details' || element_type == 'job position details' || element_type == 'work location details' || element_type == 'working hours details' || element_type == 'attendance details' || element_type == 'attendance adjustment details' || element_type == 'attendance creation details' || element_type == 'attendance cration details' || element_type == 'approval type details'){
+                if(element_type == 'user account details' || element_type == 'system parameter details' || element_type == 'company details' || element_type == 'job position details' || element_type == 'work location details' || element_type == 'working hours details' || element_type == 'attendance details' || element_type == 'attendance adjustment details' || element_type == 'attendance creation details' || element_type == 'attendance cration details' || element_type == 'approval type details' || element_type == 'public holiday details'){
                     display_form_details(element_type);
                 }
                 else if(element_type == 'scan badge form'){
