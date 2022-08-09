@@ -27,6 +27,7 @@ function initialize_leave_allocation_table(datatable_name, buttons = false, show
     var column = [ 
         { 'data' : 'CHECK_BOX' },
         { 'data' : 'FILE_AS' },
+        { 'data' : 'FILE_AS' },
         { 'data' : 'VALIDITY' },
         { 'data' : 'DURATION' },
         { 'data' : 'ACTION' }
@@ -34,10 +35,11 @@ function initialize_leave_allocation_table(datatable_name, buttons = false, show
 
     var column_definition = [
         { 'width': '1%','bSortable': false, 'aTargets': 0 },
-        { 'width': '39%', 'aTargets': 1 },
-        { 'width': '20%', 'aTargets': 2 },
-        { 'width': '20%', 'aTargets': 3 },
-        { 'width': '20%','bSortable': false, 'aTargets': 4 },
+        { 'width': '29%', 'aTargets': 1 },
+        { 'width': '15%', 'aTargets': 2 },
+        { 'width': '15%', 'aTargets': 3 },
+        { 'width': '15%', 'aTargets': 4 },
+        { 'width': '20%','bSortable': false, 'aTargets': 5 },
     ];
 
     if(show_all){
@@ -123,7 +125,7 @@ function initialize_click_events(){
     });
 
     $(document).on('click','#add-leave-allocation',function() {
-        generate_modal('leave allocation form', 'Leave Allocation', 'R' , '0', '1', 'form', 'leave-allocation-form', '1', username);
+        generate_modal('leave allocation form', 'Leave Allocation', 'LG' , '0', '1', 'form', 'leave-allocation-form', '1', username);
     });
 
     $(document).on('click','.update-leave-allocation',function() {
@@ -131,7 +133,7 @@ function initialize_click_events(){
 
         sessionStorage.setItem('leave_allocation_id', leave_allocation_id);
         
-        generate_modal('leave allocation form', 'Leave Allocation', 'R' , '0', '1', 'form', 'leave-allocation-form', '0', username);
+        generate_modal('leave allocation form', 'Leave Allocation', 'LG' , '0', '1', 'form', 'leave-allocation-form', '0', username);
     });
     
     $(document).on('click','.delete-leave-allocation',function() {
