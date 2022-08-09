@@ -250,7 +250,6 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <input type="hidden" id="settingid" name="settingid">
                                         <label for="max_file_size" class="form-label">Max File Size (Megabytes) <span class="text-danger">*</span></label>
                                         <input id="max_file_size" name="max_file_size" class="form-control" type="number" min="0">
                                     </div>
@@ -2002,6 +2001,56 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                         <option value="LIMITED">Limited</option>
                                         <option value="NOLIMIT">No Limit</option>                                   
                                     </select>
+                                </div>
+                            </div>
+                        </div>';
+            }
+            else if($form_type == 'leave allocation form'){
+                $form .= '<div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label class="form-label">Employee <span class="text-danger">*</span></label>
+                                    <input type="hidden" id="leave_allocation_id" name="leave_allocation_id">
+                                    <select class="form-control form-select2" multiple="multiple" id="employee" name="employee">';
+                                    $form .= $api->generate_employee_options();
+                                    $form .='</select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Leave Type <span class="text-danger">*</span></label>
+                                    <select class="form-control form-select2" id="leave_type" name="leave_type">
+                                    <option value="">--</option>';
+                                    $form .= $api->generate_leave_type_options();
+                                    $form .='</select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="duration" class="form-label">Duration (Hours) <span class="text-danger">*</span></label>
+                                    <input id="duration" name="duration" class="form-control" type="number" min="1">
+                                </div>
+                            </div>
+                        </div>y
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="validity_start_date" class="form-label">Time In Date <span class="text-danger">*</span></label>
+                                    <div class="input-group" id="validity-start-date-container">
+                                        <input type="text" class="form-control" id="validity_start_date" name="validity_start_date" autocomplete="off" data-date-format="m/dd/yyyy" data-date-container="#validity-start-date-container" data-provide="datepicker" data-date-autoclose="true">
+                                        <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="validity_end_date" class="form-label">Time In Date <span class="text-danger">*</span></label>
+                                    <div class="input-group" id="validity-end-date-container">
+                                        <input type="text" class="form-control" id="validity_end_date" name="validity_end_date" autocomplete="off" data-date-format="m/dd/yyyy" data-date-container="#validity-end-date-container" data-provide="datepicker" data-date-autoclose="true">
+                                        <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+                                    </div>
                                 </div>
                             </div>
                         </div>';
@@ -6504,6 +6553,9 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                         $duration = $row['DURATION'];
                         $transaction_log_id = $row['TRANSACTION_LOG_ID'];
 
+                        $employee_details = $api->get_employee_details($employee_id);
+                        $file_as = $employee_details[0]['FILE_AS'] ?? null;
+
                         $leave_type_details = $api->get_leave_type_details($leave_type_id);
                         $leave_type = $leave_type_details[0]['LEAVE_TYPE'];
 
@@ -6536,9 +6588,10 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
     
                         $response[] = array(
                             'CHECK_BOX' => '<input class="form-check-input datatable-checkbox-children" type="checkbox" value="'. $leave_allocation_id .'">',
-                            'PUBLIC_HOLIDAY' => $public_holiday,
-                            'HOLIDAY_DATE' => $holiday_date,
-                            'HOLIDAY_TYPE' => $holiday_type_name,
+                            'FILE_AS' => $file_as,
+                            'LEAVE_TYPE' => $leave_type,
+                            'VALIDITY' => $validity_start_date . ' - ' . $validity_end_date,
+                            'DURATION' => $duration . ' Hour(s)',
                             'ACTION' => '<div class="d-flex gap-2">
                                 '. $update .'
                                 '. $transaction_log .'
