@@ -108,21 +108,11 @@
                                                             </div>
                                                         </div>
                                                         <div class="mb-3">
-                                                            <p class="text-muted">Paid Type</p>
+                                                            <p class="text-muted">Leave Type</p>
 
-                                                            <select class="form-control filter-select2" id="filter_paid_type">
-                                                                <option value="">All Paid Type</option>
-                                                                <option value="PAID">Paid</option>
-                                                                <option value="UNPAID">Unpaid</option>
-                                                            </select>
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <p class="text-muted">Allocation Type</p>
-
-                                                            <select class="form-control filter-select2" id="allocation_type">
-                                                                <option value="">Allocation Type</option>
-                                                                <option value="LIMITED">Limited</option>
-                                                                <option value="NOLIMIT">No Limit</option>
+                                                            <select class="form-control filter-select2" id="filter_leave_type">
+                                                                <option value="">All Leave Type</option>
+                                                               <?php echo $api->generate_leave_type_options(); ?>
                                                             </select>
                                                         </div>
                                                         <div class="mb-3">

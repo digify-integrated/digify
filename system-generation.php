@@ -6421,6 +6421,142 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
     }
     # -------------------------------------------------------------
 
+    # Leave allocation table
+    else if($type == 'leave allocation table'){
+        if(isset($_POST['filter_start_date']) && isset($_POST['filter_end_date']) && isset($_POST['filter_leave_type']) && isset($_POST['filter_work_location']) && isset($_POST['filter_department']) && isset($_POST['filter_job_position']) && isset($_POST['filter_employee_type'])){
+            if ($api->databaseConnection()) {
+                # Get permission
+                $update_leave_allocation = $api->check_role_permissions($username, 183);
+                $delete_leave_allocation = $api->check_role_permissions($username, 184);
+                $view_transaction_log = $api->check_role_permissions($username, 185);
+
+                $filter_start_date = $api->check_date('empty', $_POST['filter_start_date'], '', 'Y-m-d', '', '', '');
+                $filter_end_date = $api->check_date('empty', $_POST['filter_end_date'], '', 'Y-m-d', '', '', '');
+                $filter_leave_type = $_POST['filter_leave_type'];
+                $filter_work_location = $_POST['filter_work_location'];
+                $filter_department = $_POST['filter_department'];
+                $filter_job_position = $_POST['filter_job_position'];
+                $filter_employee_type = $_POST['filter_employee_type'];
+
+                $query = 'SELECT LEAVE_ALLOCATION_ID, LEAVE_TYPE_ID, EMPLOYEE_ID, VALIDITY_START_DATE, VALIDITY_END_DATE, DURATION, TRANSACTION_LOG_ID FROM leave_allocation';
+
+                if((!empty($filter_start_date) && !empty($filter_end_date)) || !empty($filter_work_location) || !empty($filter_department) || !empty($filter_job_position) || !empty($filter_employee_type)){
+                    $query .= ' WHERE ';
+
+                    if(!empty($filter_start_date) && !empty($filter_end_date)){
+                        $filter[] = 'VALIDITY_START_DATE BETWEEN :filter_start_date AND :filter_end_date';
+                    }
+
+                    if(!empty($filter_work_location)){
+                        $filter[] = 'EMPLOYEE_ID IN (SELECT EMPLOYEE_ID FROM employee_details WHERE WORK_LOCATION = :filter_work_location)';
+                    }
+
+                    if(!empty($filter_department)){
+                        $filter[] = 'EMPLOYEE_ID IN (SELECT EMPLOYEE_ID FROM employee_details WHERE DEPARTMENT = :filter_department)';
+                    }
+
+                    if(!empty($filter_job_position)){
+                        $filter[] = 'EMPLOYEE_ID IN (SELECT EMPLOYEE_ID FROM employee_details WHERE JOB_POSITION = :filter_job_position)';
+                    }
+
+                    if(!empty($filter_employee_type)){
+                        $filter[] = 'EMPLOYEE_ID IN (SELECT EMPLOYEE_ID FROM employee_details WHERE EMPLOYEE_TYPE = :filter_employee_type)';
+                    }
+
+                    if(!empty($filter)){
+                        $query .= implode(' AND ', $filter);
+                    }
+                }
+    
+                $sql = $api->db_connection->prepare($query);
+
+                if((!empty($filter_start_date) && !empty($filter_end_date)) || !empty($filter_work_location) || !empty($filter_department) || !empty($filter_job_position) || !empty($filter_employee_type)){
+
+                    if(!empty($filter_start_date) && !empty($filter_end_date)){
+                        $sql->bindValue(':filter_start_date', $filter_start_date);
+                        $sql->bindValue(':filter_end_date', $filter_end_date);
+                    }
+
+                    if(!empty($filter_work_location)){
+                        $sql->bindValue(':filter_work_location', $filter_work_location);
+                    }
+
+                    if(!empty($filter_department)){
+                        $sql->bindValue(':filter_department', $filter_department);
+                    }
+
+                    if(!empty($filter_job_position)){
+                        $sql->bindValue(':filter_job_position', $filter_job_position);
+                    }
+
+                    if(!empty($filter_employee_type)){
+                        $sql->bindValue(':filter_employee_type', $filter_employee_type);
+                    }
+                }
+    
+                if($sql->execute()){
+                    while($row = $sql->fetch()){
+                        $leave_allocation_id = $row['LEAVE_ALLOCATION_ID'];
+                        $leave_type_id = $row['LEAVE_TYPE_ID'];
+                        $employee_id = $row['EMPLOYEE_ID'];
+                        $validity_start_date = $api->check_date('empty', $row['VALIDITY_START_DATE'], '', 'm/d/Y', '', '', '');
+                        $validity_end_date = $api->check_date('empty', $row['VALIDITY_END_DATE'], '', 'm/d/Y', '', '', '');
+                        $duration = $row['DURATION'];
+                        $transaction_log_id = $row['TRANSACTION_LOG_ID'];
+
+                        $leave_type_details = $api->get_leave_type_details($leave_type_id);
+                        $leave_type = $leave_type_details[0]['LEAVE_TYPE'];
+
+                        if($update_leave_allocation > 0){
+                            $update = '<button type="button" class="btn btn-info waves-effect waves-light update-leave-allocation" data-leave-allocation-id="'. $leave_allocation_id .'" title="Edit Leave Allocation">
+                                            <i class="bx bx-pencil font-size-16 align-middle"></i>
+                                        </button>';
+                        }
+                        else{
+                            $update = '';
+                        }
+
+                        if($delete_leave_allocation > 0){
+                            $delete = '<button type="button" class="btn btn-danger waves-effect waves-light delete-leave-allocation" data-leave-allocation-id="'. $leave_allocation_id .'" title="Delete Leave Allocation">
+                                <i class="bx bx-trash font-size-16 align-middle"></i>
+                            </button>';
+                        }
+                        else{
+                            $delete = '';
+                        }
+
+                        if($view_transaction_log > 0 && !empty($transaction_log_id)){
+                            $transaction_log = '<button type="button" class="btn btn-dark waves-effect waves-light view-transaction-log" data-transaction-log-id="'. $transaction_log_id .'" title="View Transaction Log">
+                                                    <i class="bx bx-detail font-size-16 align-middle"></i>
+                                                </button>';
+                        }
+                        else{
+                            $transaction_log = '';
+                        }
+    
+                        $response[] = array(
+                            'CHECK_BOX' => '<input class="form-check-input datatable-checkbox-children" type="checkbox" value="'. $leave_allocation_id .'">',
+                            'PUBLIC_HOLIDAY' => $public_holiday,
+                            'HOLIDAY_DATE' => $holiday_date,
+                            'HOLIDAY_TYPE' => $holiday_type_name,
+                            'ACTION' => '<div class="d-flex gap-2">
+                                '. $update .'
+                                '. $transaction_log .'
+                                '. $delete .'
+                            </div>'
+                        );
+                    }
+    
+                    echo json_encode($response);
+                }
+                else{
+                    echo $sql->errorInfo()[2];
+                }
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
 }
 
 ?>
