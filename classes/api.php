@@ -11864,6 +11864,41 @@ class Api{
 
     # -------------------------------------------------------------
     #
+    # Name       : generate_leave_type_options
+    # Purpose    : Generates leave type options of dropdown.
+    #
+    # Returns    : String
+    #
+    # -------------------------------------------------------------
+    public function generate_leave_type_options(){
+        if ($this->databaseConnection()) {
+            $option = '';
+            
+            $sql = $this->db_connection->prepare('CALL generate_leave_type_options()');
+
+            if($sql->execute()){
+                $count = $sql->rowCount();
+        
+                if($count > 0){
+                    while($row = $sql->fetch()){
+                        $leave_type_id = $row['LEAVE_TYPE_ID'];
+                        $leave_type = $row['LEAVE_TYPE'];
+    
+                        $option .= "<option value='". $leave_type_id ."'>". $leave_type ."</option>";
+                    }
+    
+                    return $option;
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
     # Name       : generate_attendance_adjustment_table
     # Purpose    : Generates attendance adjustment table.
     #
