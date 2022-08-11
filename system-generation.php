@@ -2011,7 +2011,8 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                 <div class="mb-3">
                                     <label class="form-label">Employee <span class="text-danger">*</span></label>
                                     <input type="hidden" id="leave_allocation_id" name="leave_allocation_id">
-                                    <select class="form-control form-select2" multiple="multiple" id="employee" name="employee">';
+                                    <select class="form-control form-select2" id="employee_id" name="employee_id">
+                                    <option value="">--</option>';
                                     $form .= $api->generate_employee_options();
                                     $form .='</select>
                                 </div>
@@ -2029,15 +2030,18 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="duration" class="form-label">Duration (Hours) <span class="text-danger">*</span></label>
-                                    <input id="duration" name="duration" class="form-control" type="number" min="1">
+                                    <label for="duration" class="form-label">Duration <span class="text-danger">*</span></label>
+                                    <div class="input-group" id="validity-start-date-container">
+                                        <input id="duration" name="duration" class="form-control" type="number" min="1">
+                                        <span class="input-group-text">Hours</span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>y
+                        </div>
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="validity_start_date" class="form-label">Time In Date <span class="text-danger">*</span></label>
+                                    <label for="validity_start_date" class="form-label">Validity Start Date <span class="text-danger">*</span></label>
                                     <div class="input-group" id="validity-start-date-container">
                                         <input type="text" class="form-control" id="validity_start_date" name="validity_start_date" autocomplete="off" data-date-format="m/dd/yyyy" data-date-container="#validity-start-date-container" data-provide="datepicker" data-date-autoclose="true">
                                         <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
@@ -2046,7 +2050,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="validity_end_date" class="form-label">Time In Date <span class="text-danger">*</span></label>
+                                    <label for="validity_end_date" class="form-label">Validity End Date</label>
                                     <div class="input-group" id="validity-end-date-container">
                                         <input type="text" class="form-control" id="validity_end_date" name="validity_end_date" autocomplete="off" data-date-format="m/dd/yyyy" data-date-container="#validity-end-date-container" data-provide="datepicker" data-date-autoclose="true">
                                         <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
@@ -6558,6 +6562,10 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
 
                         $leave_type_details = $api->get_leave_type_details($leave_type_id);
                         $leave_type = $leave_type_details[0]['LEAVE_TYPE'];
+
+                        if(empty($validity_end_date)){
+                            $validity_end_date = 'No Limit';
+                        }
 
                         if($update_leave_allocation > 0){
                             $update = '<button type="button" class="btn btn-info waves-effect waves-light update-leave-allocation" data-leave-allocation-id="'. $leave_allocation_id .'" title="Edit Leave Allocation">

@@ -2909,6 +2909,88 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     }
     # -------------------------------------------------------------
 
+    # Submit leave allocation
+    else if($transaction == 'submit leave allocation'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['leave_allocation_id']) && isset($_POST['employee_id']) && !empty($_POST['employee_id']) && isset($_POST['leave_type']) && !empty($_POST['leave_type']) && isset($_POST['duration']) && !empty($_POST['duration']) && isset($_POST['validity_start_date']) && !empty($_POST['validity_start_date']) && isset($_POST['validity_end_date'])){
+            $username = $_POST['username'];
+            $leave_allocation_id = $_POST['leave_allocation_id'];
+            $employee_id = $_POST['employee_id'];
+            $leave_type = $_POST['leave_type'];
+            $duration = $_POST['duration'];
+            $validity_start_date = $api->check_date('empty', $_POST['validity_start_date'], '', 'Y-m-d', '', '', '');
+            $validity_end_date = $api->check_date('empty', $_POST['validity_end_date'], '', 'Y-m-d', '', '', '');
+
+            $check_leave_allocation_exist = $api->check_leave_allocation_exist($leave_allocation_id);
+
+            if($check_leave_allocation_exist > 0){
+                $check_date_range_validation = $api->check_date_range_validation($validity_start_date, $validity_end_date);
+
+                if(empty($check_date_range_validation)){
+                    $leave_allocation_details = $api->get_leave_allocation_details($leave_allocation_id);
+                    $leave_allocation_validity_start_date = $leave_allocation_details[0]['VALIDITY_START_DATE'];
+                    $leave_allocation_validity_end_date = $leave_allocation_details[0]['VALIDITY_END_DATE'];
+
+                    if(strtotime($leave_allocation_validity_start_date) != strtotime($validity_start_date) || strtotime($leave_allocation_validity_end_date) != strtotime($validity_end_date)){    
+                        $check_leave_allocation_overlap = $api->check_leave_allocation_overlap($leave_allocation_id, $validity_start_date, $validity_end_date, $employee_id, $leave_type);
+
+                        if($check_leave_allocation_overlap == 0){
+                            $update_leave_allocation = $api->update_leave_allocation($leave_allocation_id, $leave_type, $employee_id, $validity_start_date, $validity_end_date, $duration, $username);
+
+                            if($update_leave_allocation){
+                                echo 'Updated';
+                            }
+                            else{
+                                echo $update_leave_allocation;
+                            }
+                        }
+                        else{
+                            echo 'Overlap';
+                        }
+                    }
+                    else{
+                        $update_leave_allocation = $api->update_leave_allocation($leave_allocation_id, $leave_type, $employee_id, $validity_start_date, $validity_end_date, $duration, $username);
+
+                        if($update_leave_allocation){
+                            echo 'Updated';
+                        }
+                        else{
+                            echo $update_leave_allocation;
+                        }
+                    }
+                }
+                else{
+                    echo $check_date_range_validation;
+                }
+            }
+            else{
+                $check_date_range_validation = $api->check_date_range_validation($validity_start_date, $validity_end_date);
+
+                if(empty($check_date_range_validation)){
+                    $check_leave_allocation_overlap = $api->check_leave_allocation_overlap(null, $validity_start_date, $validity_end_date, $employee_id, $leave_type);
+
+                    if($check_leave_allocation_overlap == 0){
+                        $insert_leave_allocation = $api->insert_leave_allocation($leave_type, $employee_id, $validity_start_date, $validity_end_date, $duration, $username);
+
+                        if($insert_leave_allocation){
+                            echo 'Inserted';
+                        }
+                        else{
+                            echo $insert_leave_allocation;
+                        }
+                    }
+                    else{
+                        echo 'Overlap';
+                    }
+                    
+                }
+                else{
+                    echo $check_date_range_validation;
+                }
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
     # -------------------------------------------------------------
     #   Delete transactions
     # -------------------------------------------------------------
@@ -4467,6 +4549,62 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                                     
                     if(!$delete_leave_type){
                         $error = $delete_leave_type;
+                    }
+                }
+                else{
+                    $error = 'Not Found';
+                }
+            }
+
+            if(empty($error)){
+                echo 'Deleted';
+            }
+            else{
+                echo $error;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Delete leave allocation
+    else if($transaction == 'delete leave allocation'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['leave_allocation_id']) && !empty($_POST['leave_allocation_id'])){
+            $username = $_POST['username'];
+            $leave_allocation_id = $_POST['leave_allocation_id'];
+
+            $check_leave_allocation_exist = $api->check_leave_allocation_exist($leave_allocation_id);
+
+            if($check_leave_allocation_exist > 0){
+                $delete_leave_allocation = $api->delete_leave_allocation($leave_allocation_id, $username);
+                                    
+                if($delete_leave_allocation){
+                    echo 'Deleted';
+                }
+                else{
+                    echo $delete_leave_allocation;
+                }
+            }
+            else{
+                echo 'Not Found';
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Delete multiple leave allocation
+    else if($transaction == 'delete multiple leave allocation'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['leave_allocation_id'])){
+            $username = $_POST['username'];
+            $leave_allocation_ids = $_POST['leave_allocation_id'];
+
+            foreach($leave_allocation_ids as $leave_allocation_id){
+                $check_leave_allocation_exist = $api->check_leave_allocation_exist($leave_allocation_id);
+
+                if($check_leave_allocation_exist > 0){
+                    $delete_leave_allocation = $api->delete_leave_allocation($leave_allocation_id, $username);
+                                    
+                    if(!$delete_leave_allocation){
+                        $error = $delete_leave_allocation;
                     }
                 }
                 else{
@@ -7528,6 +7666,25 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                 'LEAVE_TYPE' => $leave_type_details[0]['LEAVE_TYPE'],
                 'PAID_TYPE' => $leave_type_details[0]['PAID_TYPE'],
                 'ALLOCATION_TYPE' => $leave_type_details[0]['ALLOCATION_TYPE']
+            );
+
+            echo json_encode($response);
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Leave allocation details
+    else if($transaction == 'leave allocation details'){
+        if(isset($_POST['leave_allocation_id']) && !empty($_POST['leave_allocation_id'])){
+            $leave_allocation_id = $_POST['leave_allocation_id'];
+            $leave_allocation_details = $api->get_leave_allocation_details($leave_allocation_id);
+
+            $response[] = array(
+                'LEAVE_TYPE_ID' => $leave_allocation_details[0]['LEAVE_TYPE_ID'],
+                'EMPLOYEE_ID' => $leave_allocation_details[0]['EMPLOYEE_ID'],
+                'VALIDITY_START_DATE' => $api->check_date('empty', $leave_allocation_details[0]['VALIDITY_START_DATE'], '', 'n/d/Y', '', '', ''),
+                'VALIDITY_END_DATE' => $api->check_date('empty', $leave_allocation_details[0]['VALIDITY_END_DATE'], '', 'n/d/Y', '', '', ''),
+                'DURATION' => $leave_allocation_details[0]['DURATION']
             );
 
             echo json_encode($response);

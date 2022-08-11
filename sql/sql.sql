@@ -534,7 +534,7 @@ CREATE TABLE leave_allocation(
 	LEAVE_TYPE_ID VARCHAR(100) NOT NULL,
 	EMPLOYEE_ID VARCHAR(100) NOT NULL,
 	VALIDITY_START_DATE DATE NOT NULL,
-	VALIDITY_END_DATE DATE NOT NULL,
+	VALIDITY_END_DATE DATE,
 	DURATION DOUBLE NOT NULL,
 	TRANSACTION_LOG_ID VARCHAR(100),
 	RECORD_LOG VARCHAR(100)
@@ -3738,6 +3738,92 @@ CREATE TABLE leave_allocation(
 	TRANSACTION_LOG_ID VARCHAR(100),
 	RECORD_LOG VARCHAR(100)
 );
+
+CREATE PROCEDURE check_leave_allocation_overlap(IN leave_allocation_id VARCHAR(100), IN employee_id VARCHAR(100), IN leave_type VARCHAR(100))
+BEGIN
+	SET @leave_allocation_id = leave_allocation_id;
+	SET @employee_id = employee_id;
+	SET @leave_type = leave_type;
+
+	IF @leave_allocation_id IS NULL OR @leave_allocation_id = '' THEN
+		SET @query = 'SELECT VALIDITY_START_DATE, VALIDITY_END_DATE FROM leave_allocation WHERE EMPLOYEE_ID = @employee_id AND LEAVE_TYPE_ID = @leave_type';
+	ELSE
+		SET @query = 'SELECT VALIDITY_START_DATE, VALIDITY_END_DATE FROM leave_allocation WHERE LEAVE_ALLOCATION_ID != @leave_allocation_id AND EMPLOYEE_ID = @employee_id AND LEAVE_TYPE_ID = @leave_type';
+    END IF;
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE check_leave_allocation_exist(IN leave_allocation_id VARCHAR(100))
+BEGIN
+	SET @leave_allocation_id = leave_allocation_id;
+
+	SET @query = 'SELECT COUNT(1) AS TOTAL FROM leave_allocation WHERE LEAVE_ALLOCATION_ID = @leave_allocation_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE update_leave_allocation(IN leave_allocation_id VARCHAR(100), IN leave_type_id VARCHAR(100), IN employee_id VARCHAR(100), IN validity_start_date DATE, IN validity_end_date DATE, IN duration DOUBLE, IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
+BEGIN
+	SET @leave_allocation_id = leave_allocation_id;
+	SET @leave_type_id = leave_type_id;
+	SET @employee_id = employee_id;
+	SET @validity_start_date = validity_start_date;
+	SET @validity_end_date = validity_end_date;
+	SET @duration = duration;
+	SET @transaction_log_id = transaction_log_id;
+	SET @record_log = record_log;
+
+	SET @query = 'UPDATE leave_allocation SET LEAVE_TYPE_ID = @leave_type_id, EMPLOYEE_ID = @employee_id, VALIDITY_START_DATE = @validity_start_date, VALIDITY_END_DATE = @validity_end_date, DURATION = @duration, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE LEAVE_ALLOCATION_ID = @leave_allocation_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE insert_leave_allocation(IN leave_allocation_id VARCHAR(100), IN leave_type_id VARCHAR(100), IN employee_id VARCHAR(100), IN validity_start_date DATE, IN validity_end_date DATE, IN duration DOUBLE, IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
+BEGIN
+	SET @leave_allocation_id = leave_allocation_id;
+	SET @leave_type_id = leave_type_id;
+	SET @employee_id = employee_id;
+	SET @validity_start_date = validity_start_date;
+	SET @validity_end_date = validity_end_date;
+	SET @duration = duration;
+	SET @transaction_log_id = transaction_log_id;
+	SET @record_log = record_log;
+
+	SET @query = 'INSERT INTO leave_allocation (LEAVE_ALLOCATION_ID, LEAVE_TYPE_ID, EMPLOYEE_ID, VALIDITY_START_DATE, VALIDITY_END_DATE, DURATION, TRANSACTION_LOG_ID, RECORD_LOG) VALUES(@leave_allocation_id, @leave_type_id, @employee_id, @validity_start_date, @validity_end_date, @duration, @transaction_log_id, @record_log)';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE get_leave_allocation_details(IN leave_allocation_id VARCHAR(100))
+BEGIN
+	SET @leave_allocation_id = leave_allocation_id;
+
+	SET @query = 'SELECT LEAVE_TYPE_ID, EMPLOYEE_ID, VALIDITY_START_DATE, VALIDITY_END_DATE, DURATION, TRANSACTION_LOG_ID, RECORD_LOG FROM leave_allocation WHERE LEAVE_ALLOCATION_ID = @leave_allocation_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE delete_leave_allocation(IN leave_allocation_id VARCHAR(100))
+BEGIN
+	SET @leave_allocation_id = leave_allocation_id;
+
+	SET @query = 'DELETE FROM leave_allocation WHERE LEAVE_ALLOCATION_ID = @leave_allocation_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
 
 /* Insert Transactions */
 INSERT INTO global_user_account (USERNAME, PASSWORD, USER_STATUS, PASSWORD_EXPIRY_DATE, FAILED_LOGIN, LAST_FAILED_LOGIN, TRANSACTION_LOG_ID) VALUES ('ADMIN', '68aff5412f35ed76', 'Active', '2021-12-30', 0, null, 'TL-1');

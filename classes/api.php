@@ -1276,7 +1276,7 @@ class Api{
     # -------------------------------------------------------------
     #
     # Name       : check_leave_type_exist
-    # Purpose    : Checks if the department exists.
+    # Purpose    : Checks if the leave type exists.
     #
     # Returns    : Number
     #
@@ -1285,6 +1285,31 @@ class Api{
         if ($this->databaseConnection()) {
             $sql = $this->db_connection->prepare('CALL check_leave_type_exist(:leave_type_id)');
             $sql->bindValue(':leave_type_id', $leave_type_id);
+
+            if($sql->execute()){
+                $row = $sql->fetch();
+
+                return $row['TOTAL'];
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : check_leave_allocation_exist
+    # Purpose    : Checks if the leave allocation exists.
+    #
+    # Returns    : Number
+    #
+    # -------------------------------------------------------------
+    public function check_leave_allocation_exist($leave_allocation_id){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL check_leave_allocation_exist(:leave_allocation_id)');
+            $sql->bindValue(':leave_allocation_id', $leave_allocation_id);
 
             if($sql->execute()){
                 $row = $sql->fetch();
@@ -4634,6 +4659,76 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : update_leave_allocation
+    # Purpose    : Updates leave allocation.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function update_leave_allocation($leave_allocation_id, $leave_type, $employee_id, $validity_start_date, $validity_end_date, $duration, $username){
+        if ($this->databaseConnection()) {
+            $record_log = 'UPD->' . $username . '->' . date('Y-m-d h:i:s');
+            $leave_allocation_details = $this->get_leave_allocation_details($leave_allocation_id);
+            
+            if(!empty($leave_allocation_details[0]['TRANSACTION_LOG_ID'])){
+                $transaction_log_id = $leave_allocation_details[0]['TRANSACTION_LOG_ID'];
+            }
+            else{
+                # Get transaction log id
+                $transaction_log_system_parameter = $this->get_system_parameter(2, 1);
+                $transaction_log_parameter_number = $transaction_log_system_parameter[0]['PARAMETER_NUMBER'];
+                $transaction_log_id = $transaction_log_system_parameter[0]['ID'];
+            }
+
+            $sql = $this->db_connection->prepare('CALL update_leave_allocation(:leave_allocation_id, :leave_type, :employee_id, :validity_start_date, :validity_end_date, :duration, :transaction_log_id, :record_log)');
+            $sql->bindValue(':leave_allocation_id', $leave_allocation_id);
+            $sql->bindValue(':leave_type', $leave_type);
+            $sql->bindValue(':employee_id', $employee_id);
+            $sql->bindValue(':validity_start_date', $validity_start_date);
+            $sql->bindValue(':validity_end_date', $validity_end_date);
+            $sql->bindValue(':duration', $duration);
+            $sql->bindValue(':transaction_log_id', $transaction_log_id);
+            $sql->bindValue(':record_log', $record_log);
+        
+            if($sql->execute()){
+                if(!empty($leave_allocation_details[0]['TRANSACTION_LOG_ID'])){
+                    $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated leave allocation.');
+                                    
+                    if($insert_transaction_log){
+                        return true;
+                    }
+                    else{
+                        return $insert_transaction_log;
+                    }
+                }
+                else{
+                    # Update transaction log value
+                    $update_system_parameter_value = $this->update_system_parameter_value($transaction_log_parameter_number, 2, $username);
+
+                    if($update_system_parameter_value){
+                        $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated leave allocation.');
+                                    
+                        if($insert_transaction_log){
+                            return true;
+                        }
+                        else{
+                            return $insert_transaction_log;
+                        }
+                    }
+                    else{
+                        return $update_system_parameter_value;
+                    }
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Insert methods
     # -------------------------------------------------------------
     
@@ -7067,6 +7162,71 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : insert_leave_allocation
+    # Purpose    : Insert leave allocation.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function insert_leave_allocation($leave_type, $employee_id, $validity_start_date, $validity_end_date, $duration, $username){
+        if ($this->databaseConnection()) {
+            $record_log = 'INS->' . $username . '->' . date('Y-m-d h:i:s');
+
+            # Get system parameter id
+            $system_parameter = $this->get_system_parameter(25, 1);
+            $parameter_number = $system_parameter[0]['PARAMETER_NUMBER'];
+            $id = $system_parameter[0]['ID'];
+
+            # Get transaction log id
+            $transaction_log_system_parameter = $this->get_system_parameter(2, 1);
+            $transaction_log_parameter_number = $transaction_log_system_parameter[0]['PARAMETER_NUMBER'];
+            $transaction_log_id = $transaction_log_system_parameter[0]['ID'];
+
+            $sql = $this->db_connection->prepare('CALL insert_leave_allocation(:id, :leave_type, :employee_id, :validity_start_date, :validity_end_date, :duration, :transaction_log_id, :record_log)');
+            $sql->bindValue(':id', $id);
+            $sql->bindValue(':leave_type', $leave_type);
+            $sql->bindValue(':employee_id', $employee_id);
+            $sql->bindValue(':validity_start_date', $validity_start_date);
+            $sql->bindValue(':validity_end_date', $validity_end_date);
+            $sql->bindValue(':duration', $duration);
+            $sql->bindValue(':transaction_log_id', $transaction_log_id);
+            $sql->bindValue(':record_log', $record_log); 
+        
+            if($sql->execute()){
+                # Update system parameter value
+                $update_system_parameter_value = $this->update_system_parameter_value($parameter_number, 25, $username);
+
+                if($update_system_parameter_value){
+                    # Update transaction log value
+                    $update_system_parameter_value = $this->update_system_parameter_value($transaction_log_parameter_number, 2, $username);
+
+                    if($update_system_parameter_value){
+                        $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Insert', 'User ' . $username . ' inserted leave allocation.');
+                                    
+                        if($insert_transaction_log){
+                            return true;
+                        }
+                        else{
+                            return $insert_transaction_log;
+                        }
+                    }
+                    else{
+                        return $update_system_parameter_value;
+                    }
+                }
+                else{
+                    return $update_system_parameter_value;
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Delete methods
     # -------------------------------------------------------------
 
@@ -8116,7 +8276,7 @@ class Api{
     # -------------------------------------------------------------
     #
     # Name       : delete_leave_type
-    # Purpose    : Delete department.
+    # Purpose    : Delete leave type.
     #
     # Returns    : Number/String
     #
@@ -8125,6 +8285,29 @@ class Api{
         if ($this->databaseConnection()) {
             $sql = $this->db_connection->prepare('CALL delete_leave_type(:leave_type_id)');
             $sql->bindValue(':leave_type_id', $leave_type_id);
+        
+            if($sql->execute()){
+                return true;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : delete_leave_allocation
+    # Purpose    : Delete leave allocation.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function delete_leave_allocation($leave_allocation_id, $username){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL delete_leave_allocation(:leave_allocation_id)');
+            $sql->bindValue(':leave_allocation_id', $leave_allocation_id);
         
             if($sql->execute()){
                 return true;
@@ -9740,7 +9923,7 @@ class Api{
     # -------------------------------------------------------------
     #
     # Name       : get_leave_type_details
-    # Purpose    : Gets the department details.
+    # Purpose    : Gets the leave type details.
     #
     # Returns    : Array
     #
@@ -9758,6 +9941,43 @@ class Api{
                         'LEAVE_TYPE' => $row['LEAVE_TYPE'],
                         'PAID_TYPE' => $row['PAID_TYPE'],
                         'ALLOCATION_TYPE' => $row['ALLOCATION_TYPE'],
+                        'TRANSACTION_LOG_ID' => $row['TRANSACTION_LOG_ID'],
+                        'RECORD_LOG' => $row['RECORD_LOG']
+                    );
+                }
+
+                return $response;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : get_leave_allocation_details
+    # Purpose    : Gets the leave allocation details.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_leave_allocation_details($leave_allocation_id){
+        if ($this->databaseConnection()) {
+            $response = array();
+
+            $sql = $this->db_connection->prepare('CALL get_leave_allocation_details(:leave_allocation_id)');
+            $sql->bindValue(':leave_allocation_id', $leave_allocation_id);
+
+            if($sql->execute()){
+                while($row = $sql->fetch()){
+                    $response[] = array(
+                        'LEAVE_TYPE_ID' => $row['LEAVE_TYPE_ID'],
+                        'EMPLOYEE_ID' => $row['EMPLOYEE_ID'],
+                        'VALIDITY_START_DATE' => $row['VALIDITY_START_DATE'],
+                        'VALIDITY_END_DATE' => $row['VALIDITY_END_DATE'],
+                        'DURATION' => $row['DURATION'],
                         'TRANSACTION_LOG_ID' => $row['TRANSACTION_LOG_ID'],
                         'RECORD_LOG' => $row['RECORD_LOG']
                     );
@@ -11162,6 +11382,69 @@ class Api{
         }
         else{
             return null;
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : check_date_range_validation
+    # Purpose    : Checks date range validation.
+    #
+    # Returns    : String/null
+    #
+    # -------------------------------------------------------------
+    public function check_date_range_validation($start_date, $end_date){
+        if(!empty($start_date) && !empty($end_date)){
+            if(strtotime($start_date) > strtotime($end_date) || strtotime($end_date) < strtotime($start_date)){
+                return 'Invalid';
+            }
+            else{
+                return null;
+            }
+        }
+        else{
+            return null;
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : check_leave_allocation_overlap
+    # Purpose    : Checks the leave allocation overlap.
+    #
+    # Returns    : Date
+    #
+    # -------------------------------------------------------------
+    public function check_leave_allocation_overlap($leave_allocation_id, $validity_start_date, $validity_end_date, $employee_id, $leave_type){
+        if ($this->databaseConnection()) {
+            $overlap_count = 0;
+
+            $sql = $this->db_connection->prepare('CALL check_leave_allocation_overlap(:leave_allocation_id, :employee_id, :leave_type)');
+            $sql->bindValue(':leave_allocation_id', $leave_allocation_id);
+            $sql->bindValue(':employee_id', $employee_id);
+            $sql->bindValue(':leave_type', $leave_type);
+                                                        
+            if($sql->execute()){
+                $count = $sql->rowCount();
+        
+                if($count > 0){
+                    while($row = $sql->fetch()){
+                        $start_date = $row['VALIDITY_START_DATE'];
+                        $end_date = $row['VALIDITY_END_DATE'];
+
+                        if((strtotime($validity_start_date) >= strtotime($start_date) && strtotime($validity_start_date) <= strtotime($end_date)) || (strtotime($validity_end_date) >= strtotime($start_date) && strtotime($validity_end_date) <= strtotime($end_date)) || (strtotime($validity_start_date) <= strtotime($start_date) && strtotime($validity_end_date) >= strtotime($end_date))){
+                            $overlap_count++;
+                        }
+                    }
+    
+                    return $overlap_count;
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
         }
     }
     # -------------------------------------------------------------

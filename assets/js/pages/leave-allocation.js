@@ -125,7 +125,7 @@ function initialize_click_events(){
     });
 
     $(document).on('click','#add-leave-allocation',function() {
-        generate_modal('leave allocation form', 'Leave Allocation', 'LG' , '0', '1', 'form', 'leave-allocation-form', '1', username);
+        generate_modal('leave allocation form', 'Leave Allocation', 'R' , '0', '1', 'form', 'leave-allocation-form', '1', username);
     });
 
     $(document).on('click','.update-leave-allocation',function() {
@@ -133,7 +133,7 @@ function initialize_click_events(){
 
         sessionStorage.setItem('leave_allocation_id', leave_allocation_id);
         
-        generate_modal('leave allocation form', 'Leave Allocation', 'LG' , '0', '1', 'form', 'leave-allocation-form', '0', username);
+        generate_modal('leave allocation form', 'Leave Allocation', 'R' , '0', '1', 'form', 'leave-allocation-form', '0', username);
     });
     
     $(document).on('click','.delete-leave-allocation',function() {

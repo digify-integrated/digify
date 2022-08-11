@@ -5391,6 +5391,102 @@ function initialize_form_validation(form_type){
             }
         });
     }
+    else if(form_type == 'leave allocation form'){
+        $('#leave-allocation-form').validate({
+            submitHandler: function (form) {
+                transaction = 'submit leave allocation';
+                document.getElementById('employee_id').disabled = false;
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'controller.php',
+                    data: $(form).serialize() + '&username=' + username + '&transaction=' + transaction,
+                    beforeSend: function(){
+                        document.getElementById('submit-form').disabled = true;
+                        $('#submit-form').html('<div class="spinner-border spinner-border-sm text-light" role="status"><span rclass="sr-only"></span></div>');
+                    },
+                    success: function (response) {
+                        if(response === 'Updated' || response === 'Inserted'){
+                            if(response === 'Inserted'){
+                                show_alert('Insert Leave Allocation Success', 'The leave allocation has been inserted.', 'success');
+                            }
+                            else{
+                                show_alert('Update Leave Allocation Success', 'The leave allocation has been updated.', 'success');
+                            }
+                          
+                            $('#System-Modal').modal('hide');
+                            reload_datatable('#leave-allocation-datatable');
+                        }
+                        else if(response == 'Overlap'){
+                            show_alert('Leave Allocation Error', 'The leave allocation overlaps with an existing allocation.', 'error');
+                            document.getElementById('employee_id').disabled = true;
+                        }
+                        else if(response === 'Invalid'){
+                            show_alert('Leave Allocation Error', 'The validity start date cannot be greater than the validity end date.', 'error');
+                            document.getElementById('employee_id').disabled = true;
+                        }
+                        else{
+                            show_alert('Leave Allocation Error', response, 'error');
+                            document.getElementById('employee_id').disabled = true;
+                        }
+                    },
+                    complete: function(){
+                        document.getElementById('submit-form').disabled = false;
+                        $('#submit-form').html('Submit');
+                    }
+                });
+                return false;
+            },
+            rules: {
+                employee_id: {
+                    required: true
+                },
+                leave_type: {
+                    required: true
+                },
+                duration: {
+                    required: true
+                },
+                validity_start_date: {
+                    required: true
+                },
+            },
+            messages: {
+                employee_id: {
+                    required: 'Please choose the employee',
+                },
+                leave_type: {
+                    required: 'Please choose the leave type',
+                },
+                duration: {
+                    required: 'Please enter the duration',
+                },
+                validity_start_date: {
+                    required: 'Please choose the validity',
+                },
+            },
+            errorPlacement: function(label, element) {
+                if((element.hasClass('select2') || element.hasClass('form-select2')) && element.next('.select2-container').length) {
+                    label.insertAfter(element.next('.select2-container'));
+                }
+                else if(element.parent('.input-group').length){
+                    label.insertAfter(element.parent());
+                }
+                else{
+                    label.insertAfter(element);
+                }
+            },
+            highlight: function(element) {
+                $(element).parent().addClass('has-danger');
+                $(element).addClass('form-control-danger');
+            },
+            success: function(label,element) {
+                $(element).parent().removeClass('has-danger')
+                $(element).removeClass('form-control-danger')
+                label.remove();
+            }
+        });
+    }
 }
 
 // Display functions
@@ -6573,6 +6669,30 @@ function display_form_details(form_type){
 
                 check_option_exist('#paid_type', response[0].PAID_TYPE, '');
                 check_option_exist('#leave_allocation_type', response[0].ALLOCATION_TYPE, '');
+            }
+        });
+    }
+    else if(form_type == 'leave allocation form'){
+        transaction = 'leave allocation details';
+
+        var leave_allocation_id = sessionStorage.getItem('leave_allocation_id');
+
+        $.ajax({
+            url: 'controller.php',
+            method: 'POST',
+            dataType: 'JSON',
+            data: {leave_allocation_id : leave_allocation_id, transaction : transaction},
+            success: function(response) {
+                $('#duration').val(response[0].DURATION);
+                $('#validity_start_date').val(response[0].VALIDITY_START_DATE);
+                $('#validity_end_date').val(response[0].VALIDITY_END_DATE);
+                $('#leave_allocation_id').val(leave_allocation_id);
+
+                check_option_exist('#employee_id', response[0].EMPLOYEE_ID, '');
+                check_option_exist('#leave_type', response[0].LEAVE_TYPE_ID, '');
+            },
+            complete: function(){
+                document.getElementById('employee_id').disabled = true;
             }
         });
     }
