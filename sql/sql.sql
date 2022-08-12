@@ -536,7 +536,31 @@ CREATE TABLE leave_allocation(
 	VALIDITY_START_DATE DATE NOT NULL,
 	VALIDITY_END_DATE DATE,
 	DURATION DOUBLE NOT NULL,
+	AVAILED DOUBLE NOT NULL,
 	TRANSACTION_LOG_ID VARCHAR(100),
+	RECORD_LOG VARCHAR(100)
+);
+
+CREATE TABLE leave_management(
+	LEAVE_ID VARCHAR(100) PRIMARY KEY,
+	EMPLOYEE_ID VARCHAR(100) NOT NULL,
+	LEAVE_TYPE_ID VARCHAR(100) NOT NULL,
+	REASON VARCHAR(500) NOT NULL,
+	LEAVE_DATE VARCHAR(500) NOT NULL,
+	STATUS VARCHAR(10) NOT NULL,
+	CREATED_DATE DATETIME,
+	FOR_APPROVAL_DATE DATETIME,
+	DECISION_DATE DATETIME,
+	DECISION_BY VARCHAR(100),
+	DECISION_REMARKS VARCHAR(500),
+	TRANSACTION_LOG_ID VARCHAR(500),
+	RECORD_LOG VARCHAR(100)
+);
+
+CREATE TABLE leave_supporting_document(
+	LEAVE_SUPPORTING_DOCUMENT_ID VARCHAR(100) PRIMARY KEY,
+	LEAVE_ID VARCHAR(100) NOT NULL,
+	SUPPORTING_DOCUMENT VARCHAR(500) NOT NULL,
 	RECORD_LOG VARCHAR(100)
 );
 
@@ -573,6 +597,8 @@ CREATE INDEX approval_exception_index ON approval_exception(APPROVAL_TYPE_ID);
 CREATE INDEX public_holiday_index ON public_holiday(PUBLIC_HOLIDAY_ID);
 CREATE INDEX leave_type_index ON leave_type(LEAVE_TYPE_ID);
 CREATE INDEX leave_allocation_index ON leave_allocation(LEAVE_ALLOCATION_ID);
+CREATE INDEX leave_management_index ON leave_management(LEAVE_ID);
+CREATE INDEX leave_supporting_document_index ON leave_supporting_document(LEAVE_SUPPORTING_DOCUMENT_ID);
 
 /* Stored Procedure */
 
@@ -3728,17 +3754,6 @@ BEGIN
 	DROP PREPARE stmt;
 END //
 
-CREATE TABLE leave_allocation(
-	LEAVE_ALLOCATION_ID VARCHAR(100) PRIMARY KEY,
-	LEAVE_TYPE_ID VARCHAR(100) NOT NULL,
-	EMPLOYEE_ID VARCHAR(100) NOT NULL,
-	VALIDITY_START_DATE DATE NOT NULL,
-	VALIDITY_END_DATE DATE NOT NULL,
-	DURATION DOUBLE NOT NULL,
-	TRANSACTION_LOG_ID VARCHAR(100),
-	RECORD_LOG VARCHAR(100)
-);
-
 CREATE PROCEDURE check_leave_allocation_overlap(IN leave_allocation_id VARCHAR(100), IN employee_id VARCHAR(100), IN leave_type VARCHAR(100))
 BEGIN
 	SET @leave_allocation_id = leave_allocation_id;
@@ -3796,7 +3811,7 @@ BEGIN
 	SET @transaction_log_id = transaction_log_id;
 	SET @record_log = record_log;
 
-	SET @query = 'INSERT INTO leave_allocation (LEAVE_ALLOCATION_ID, LEAVE_TYPE_ID, EMPLOYEE_ID, VALIDITY_START_DATE, VALIDITY_END_DATE, DURATION, TRANSACTION_LOG_ID, RECORD_LOG) VALUES(@leave_allocation_id, @leave_type_id, @employee_id, @validity_start_date, @validity_end_date, @duration, @transaction_log_id, @record_log)';
+	SET @query = 'INSERT INTO leave_allocation (LEAVE_ALLOCATION_ID, LEAVE_TYPE_ID, EMPLOYEE_ID, VALIDITY_START_DATE, VALIDITY_END_DATE, DURATION, AVAILED, TRANSACTION_LOG_ID, RECORD_LOG) VALUES(@leave_allocation_id, @leave_type_id, @employee_id, @validity_start_date, @validity_end_date, @duration, @duration, @transaction_log_id, @record_log)';
 
 	PREPARE stmt FROM @query;
 	EXECUTE stmt;
@@ -3807,7 +3822,7 @@ CREATE PROCEDURE get_leave_allocation_details(IN leave_allocation_id VARCHAR(100
 BEGIN
 	SET @leave_allocation_id = leave_allocation_id;
 
-	SET @query = 'SELECT LEAVE_TYPE_ID, EMPLOYEE_ID, VALIDITY_START_DATE, VALIDITY_END_DATE, DURATION, TRANSACTION_LOG_ID, RECORD_LOG FROM leave_allocation WHERE LEAVE_ALLOCATION_ID = @leave_allocation_id';
+	SET @query = 'SELECT LEAVE_TYPE_ID, EMPLOYEE_ID, VALIDITY_START_DATE, VALIDITY_END_DATE, DURATION, AVAILED, TRANSACTION_LOG_ID, RECORD_LOG FROM leave_allocation WHERE LEAVE_ALLOCATION_ID = @leave_allocation_id';
 
 	PREPARE stmt FROM @query;
 	EXECUTE stmt;

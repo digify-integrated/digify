@@ -27,7 +27,7 @@ function initialize_leave_allocation_table(datatable_name, buttons = false, show
     var column = [ 
         { 'data' : 'CHECK_BOX' },
         { 'data' : 'FILE_AS' },
-        { 'data' : 'FILE_AS' },
+        { 'data' : 'LEAVE_TYPE' },
         { 'data' : 'VALIDITY' },
         { 'data' : 'DURATION' },
         { 'data' : 'ACTION' }
@@ -35,10 +35,10 @@ function initialize_leave_allocation_table(datatable_name, buttons = false, show
 
     var column_definition = [
         { 'width': '1%','bSortable': false, 'aTargets': 0 },
-        { 'width': '29%', 'aTargets': 1 },
+        { 'width': '25%', 'aTargets': 1 },
         { 'width': '15%', 'aTargets': 2 },
-        { 'width': '15%', 'aTargets': 3 },
-        { 'width': '15%', 'aTargets': 4 },
+        { 'width': '17%', 'aTargets': 3 },
+        { 'width': '18%', 'aTargets': 4 },
         { 'width': '20%','bSortable': false, 'aTargets': 5 },
     ];
 

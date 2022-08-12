@@ -6491,7 +6491,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                 $filter_job_position = $_POST['filter_job_position'];
                 $filter_employee_type = $_POST['filter_employee_type'];
 
-                $query = 'SELECT LEAVE_ALLOCATION_ID, LEAVE_TYPE_ID, EMPLOYEE_ID, VALIDITY_START_DATE, VALIDITY_END_DATE, DURATION, TRANSACTION_LOG_ID FROM leave_allocation';
+                $query = 'SELECT LEAVE_ALLOCATION_ID, LEAVE_TYPE_ID, EMPLOYEE_ID, VALIDITY_START_DATE, VALIDITY_END_DATE, DURATION, AVAILED, TRANSACTION_LOG_ID FROM leave_allocation';
 
                 if((!empty($filter_start_date) && !empty($filter_end_date)) || !empty($filter_work_location) || !empty($filter_department) || !empty($filter_job_position) || !empty($filter_employee_type)){
                     $query .= ' WHERE ';
@@ -6555,6 +6555,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                         $validity_start_date = $api->check_date('empty', $row['VALIDITY_START_DATE'], '', 'm/d/Y', '', '', '');
                         $validity_end_date = $api->check_date('empty', $row['VALIDITY_END_DATE'], '', 'm/d/Y', '', '', '');
                         $duration = $row['DURATION'];
+                        $availed = $row['AVAILED'];
                         $transaction_log_id = $row['TRANSACTION_LOG_ID'];
 
                         $employee_details = $api->get_employee_details($employee_id);
@@ -6599,9 +6600,197 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                             'FILE_AS' => $file_as,
                             'LEAVE_TYPE' => $leave_type,
                             'VALIDITY' => $validity_start_date . ' - ' . $validity_end_date,
-                            'DURATION' => $duration . ' Hour(s)',
+                            'DURATION' => $availed . ' remaining out of ' . $duration . ' hour(s)',
                             'ACTION' => '<div class="d-flex gap-2">
                                 '. $update .'
+                                '. $transaction_log .'
+                                '. $delete .'
+                            </div>'
+                        );
+                    }
+    
+                    echo json_encode($response);
+                }
+                else{
+                    echo $sql->errorInfo()[2];
+                }
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # My leave table
+    else if($type == 'my leave table'){
+        if(isset($_POST['filter_creation_start_date']) && isset($_POST['filter_creation_end_date']) && isset($_POST['filter_leave_start_date']) && isset($_POST['filter_leave_end_date']) && isset($_POST['filter_for_approval_start_date']) && isset($_POST['filter_for_approval_end_date']) && isset($_POST['filter_decision_start_date']) && isset($_POST['filter_decision_end_date']) && isset($_POST['filter_status']) && isset($_POST['filter_leave_type'])){
+            if ($api->databaseConnection()) {
+                # Get permission
+                $update_attendance_creation = $api->check_role_permissions($username, 131);
+                $cancel_attendance_creation = $api->check_role_permissions($username, 132);
+	            $tag_attendance_creation_for_recommendation = $api->check_role_permissions($username, 133);
+                $delete_attendance_creation = $api->check_role_permissions($username, 134);
+                $view_transaction_log = $api->check_role_permissions($username, 135);
+
+                $employee_details = $api->get_employee_details($username);
+                $employee_id = $employee_details[0]['EMPLOYEE_ID'] ?? null;
+
+                $approval_type_details = $api->get_approval_type_details(3);
+                $approval_type_status = $approval_type_details[0]['STATUS'];
+                $check_approval_exception_exist = $api->check_approval_exception_exist(3, $employee_id);
+
+                $filter_creation_start_date = $api->check_date('empty', $_POST['filter_creation_start_date'], '', 'Y-m-d', '', '', '');
+                $filter_creation_end_date = $api->check_date('empty', $_POST['filter_leave_end_date'], '', 'Y-m-d', '', '', '');
+                $filter_leave_start_date = $api->check_date('empty', $_POST['filter_leave_start_date'], '', 'Y-m-d', '', '', '');
+                $filter_leave_end_date = $api->check_date('empty', $_POST['filter_leave_end_date'], '', 'Y-m-d', '', '', '');
+                $filter_for_approval_start_date = $api->check_date('empty', $_POST['filter_for_approval_start_date'], '', 'Y-m-d', '', '', '');
+                $filter_for_approval_end_date = $api->check_date('empty', $_POST['filter_for_approval_end_date'], '', 'Y-m-d', '', '', '');
+                $filter_decision_start_date = $api->check_date('empty', $_POST['filter_decision_start_date'], '', 'Y-m-d', '', '', '');
+                $filter_decision_end_date = $api->check_date('empty', $_POST['filter_decision_end_date'], '', 'Y-m-d', '', '', '');
+                $filter_status = $_POST['filter_status'];
+                $filter_leave_type = $_POST['filter_leave_type'];
+
+                $query = 'SELECT LEAVE_ID, LEAVE_TYPE_ID, LEAVE_DATE, STATUS, TRANSACTION_LOG_ID FROM leave_management WHERE EMPLOYEE_ID = :employee_id';
+
+                if((!empty($filter_creation_start_date) && !empty($filter_creation_end_date)) || (!empty($filter_leave_start_date) && !empty($filter_leave_end_date)) || (!empty($filter_for_approval_start_date) && !empty($filter_for_approval_end_date)) || (!empty($filter_decision_start_date) && !empty($filter_decision_end_date)) || !empty($filter_status) || !empty($filter_leave_type) ){
+                    $query .= ' AND ';
+
+                    if(!empty($filter_creation_start_date) && !empty($filter_creation_end_date)){
+                        $filter[] = 'DATE(CREATED_DATE) BETWEEN :filter_creation_start_date AND :filter_creation_end_date';
+                    }
+
+                    if(!empty($filter_leave_start_date) && !empty($filter_leave_end_date)){
+                        $filter[] = 'DATE(FOR_RECOMMENDATION_DATE) BETWEEN :filter_leave_start_date AND :filter_leave_end_date';
+                    }
+
+                    if(!empty($filter_for_approval_start_date) && !empty($filter_for_approval_end_date)){
+                        $filter[] = 'DATE(RECOMMENDATION_DATE) BETWEEN :filter_for_approval_start_date AND :filter_for_approval_end_date';
+                    }
+
+                    if(!empty($filter_decision_start_date) && !empty($filter_decision_end_date)){
+                        $filter[] = 'DATE(DECISION_DATE) BETWEEN :filter_decision_start_date AND :filter_decision_end_date';
+                    }
+
+                    if(!empty($filter_status)){
+                        $filter[] = 'STATUS = :filter_status';
+                    }
+
+                    if(!empty($filter_leave_type)){
+                        $filter[] = 'SANCTION = :filter_leave_type';
+                    }
+
+                    if(!empty($filter)){
+                        $query .= implode(' AND ', $filter);
+                    }
+                }
+    
+                $sql = $api->db_connection->prepare($query);
+                $sql->bindValue(':employee_id', $employee_id);
+
+                if((!empty($filter_creation_start_date) && !empty($filter_creation_end_date)) || (!empty($filter_leave_start_date) && !empty($filter_leave_end_date)) || (!empty($filter_for_approval_start_date) && !empty($filter_for_approval_end_date)) || (!empty($filter_decision_start_date) && !empty($filter_decision_end_date)) || !empty($filter_status) || !empty($filter_leave_type)){
+
+                    if(!empty($filter_creation_start_date) && !empty($filter_creation_end_date)){
+                        $sql->bindValue(':filter_creation_start_date', $filter_creation_start_date);
+                        $sql->bindValue(':filter_creation_end_date', $filter_creation_end_date);
+                    }
+
+                    if(!empty($filter_leave_start_date) && !empty($filter_leave_end_date)){
+                        $sql->bindValue(':filter_leave_start_date', $filter_leave_start_date);
+                        $sql->bindValue(':filter_leave_end_date', $filter_leave_end_date);
+                    }
+
+                    if(!empty($filter_for_approval_start_date) && !empty($filter_for_approval_end_date)){
+                        $sql->bindValue(':filter_for_approval_start_date', $filter_for_approval_start_date);
+                        $sql->bindValue(':filter_for_approval_end_date', $filter_for_approval_end_date);
+                    }
+
+                    if(!empty($filter_decision_start_date) && !empty($filter_decision_end_date)){
+                        $sql->bindValue(':filter_decision_start_date', $filter_decision_start_date);
+                        $sql->bindValue(':filter_decision_end_date', $filter_decision_end_date);
+                    }
+
+                    if(!empty($filter_status)){
+                        $sql->bindValue(':filter_status', $filter_status);
+                    }
+
+                    if(!empty($filter_leave_type)){
+                        $sql->bindValue(':filter_leave_type', $filter_leave_type);
+                    }
+                }
+    
+                if($sql->execute()){
+                    while($row = $sql->fetch()){
+                        $leave_id = $row['LEAVE_ID'];
+                        $leave_date = $api->check_date('empty', $row['LEAVE_DATE'], '', 'm/d/Y', '', '', '');
+                        $leave_type_id = $row['LEAVE_TYPE_ID'];
+                        $status = $row['STATUS'];
+                        $transaction_log_id = $row['TRANSACTION_LOG_ID'];
+
+                        if($cancel_attendance_creation > 0 && ($status == 'PEN' || $status == 'REC' || $status == 'FORREC')){
+                            $cancel = '<button type="button" class="btn btn-warning waves-effect waves-light cancel-attendance-creation" data-creation-id="'. $creation_id .'" title="Cancel Attendance Adjustment">
+                                        <i class="bx bx-calendar-x font-size-16 align-middle"></i>
+                                    </button>';
+                        }
+                        else{
+                            $cancel = '';
+                        }
+
+                        if($delete_attendance_creation > 0){
+                            $delete = '<button type="button" class="btn btn-danger waves-effect waves-light delete-attendance-creation" data-creation-id="'. $creation_id .'" title="Delete Attendance Adjustment">
+                                <i class="bx bx-trash font-size-16 align-middle"></i>
+                            </button>';
+                        }
+                        else{
+                            $delete = '';
+                        }
+
+                        if($status == 'PEN' && $check_approval_exception_exist == 0 && $approval_type_status == 'ACTIVE' && $tag_attendance_creation_for_recommendation > 0){
+                            $data_for_recommendation = 1;
+                            $for_recommendation = '<button type="button" class="btn btn-success waves-effect waves-light for-recommend-attendance-creation" data-creation-id="'. $creation_id .'" title="Tag Attendance Adjustment For Recommendation">
+                                <i class="bx bx-check font-size-16 align-middle"></i>
+                            </button>';
+                        }
+                        else{
+                            $data_for_recommendation = 0;
+                            $for_recommendation = '';
+                        }
+
+                        if(($update_attendance_creation  > 0) && $status == 'PEN'){
+                            $update = '<button type="button" class="btn btn-info waves-effect waves-light update-attendance-creation" data-creation-id="'. $creation_id .'" title="Update Attendance Adjustment">
+                                    <i class="bx bx-pencil font-size-16 align-middle"></i>
+                                </button>';
+                        }
+                        else{
+                            $update = '';
+                        }
+
+                        if($view_transaction_log > 0 && !empty($transaction_log_id)){
+                            $transaction_log = '<button type="button" class="btn btn-dark waves-effect waves-light view-transaction-log" data-transaction-log-id="'. $transaction_log_id .'" title="View Transaction Log">
+                                                    <i class="bx bx-detail font-size-16 align-middle"></i>
+                                                </button>';
+                        }
+                        else{
+                            $transaction_log = '';
+                        }
+
+                        if($status == 'PEN' || $status == 'REC' || $status == 'FORREC'){
+                            $data_cancel = 1;
+                        }
+                        else{
+                            $data_cancel = 0;
+                        }
+    
+                        $response[] = array(
+                            'CHECK_BOX' => '<input class="form-check-input datatable-checkbox-children" data-cancel="'. $data_cancel .'" data-for-recommendation="'. $data_for_recommendation .'" type="checkbox" value="'. $creation_id .'">',
+                            'TIME_IN' => $time_in,
+                            'TIME_OUT' => $time_out,
+                            'STATUS' => $status_name,
+                            'SANCTION' => $sanction_name,
+                            'ACTION' => '<div class="d-flex gap-2">
+                                <button type="button" class="btn btn-primary waves-effect waves-light view-attendance-creation" data-creation-id="'. $creation_id .'" title="View Attendance Creation">
+                                    <i class="bx bx-show font-size-16 align-middle"></i>
+                                </button>
+                                '. $update .'
+                                '. $for_recommendation .'
+                                '. $cancel .'
                                 '. $transaction_log .'
                                 '. $delete .'
                             </div>'

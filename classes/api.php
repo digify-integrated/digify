@@ -9978,6 +9978,7 @@ class Api{
                         'VALIDITY_START_DATE' => $row['VALIDITY_START_DATE'],
                         'VALIDITY_END_DATE' => $row['VALIDITY_END_DATE'],
                         'DURATION' => $row['DURATION'],
+                        'AVAILED' => $row['AVAILED'],
                         'TRANSACTION_LOG_ID' => $row['TRANSACTION_LOG_ID'],
                         'RECORD_LOG' => $row['RECORD_LOG']
                     );
