@@ -1324,6 +1324,31 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : check_leave_exist
+    # Purpose    : Checks if the leave exists.
+    #
+    # Returns    : Number
+    #
+    # -------------------------------------------------------------
+    public function check_leave_exist($leave_id){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL check_leave_exist(:leave_id)');
+            $sql->bindValue(':leave_id', $leave_id);
+
+            if($sql->execute()){
+                $row = $sql->fetch();
+
+                return $row['TOTAL'];
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Update methods
     # -------------------------------------------------------------
     
@@ -4729,6 +4754,76 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : update_leave
+    # Purpose    : Updates leave.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function update_leave($leave_id, $leave_type, $reason, $leave_date, $start_time, $end_time, $username){
+        if ($this->databaseConnection()) {
+            $record_log = 'UPD->' . $username . '->' . date('Y-m-d h:i:s');
+            $leave_details = $this->get_leave_details($leave_id);
+            
+            if(!empty($leave_details[0]['TRANSACTION_LOG_ID'])){
+                $transaction_log_id = $leave_details[0]['TRANSACTION_LOG_ID'];
+            }
+            else{
+                # Get transaction log id
+                $transaction_log_system_parameter = $this->get_system_parameter(2, 1);
+                $transaction_log_parameter_number = $transaction_log_system_parameter[0]['PARAMETER_NUMBER'];
+                $transaction_log_id = $transaction_log_system_parameter[0]['ID'];
+            }
+
+            $sql = $this->db_connection->prepare('CALL update_leave(:leave_id, :leave_type, :reason, :leave_date, :start_time, :end_time, :transaction_log_id, :record_log)');
+            $sql->bindValue(':leave_id', $leave_id);
+            $sql->bindValue(':leave_type', $leave_type);
+            $sql->bindValue(':reason', $reason);
+            $sql->bindValue(':leave_date', $leave_date);
+            $sql->bindValue(':start_time', $start_time);
+            $sql->bindValue(':end_time', $end_time);
+            $sql->bindValue(':transaction_log_id', $transaction_log_id);
+            $sql->bindValue(':record_log', $record_log);
+        
+            if($sql->execute()){
+                if(!empty($leave_details[0]['TRANSACTION_LOG_ID'])){
+                    $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated leave.');
+                                    
+                    if($insert_transaction_log){
+                        return true;
+                    }
+                    else{
+                        return $insert_transaction_log;
+                    }
+                }
+                else{
+                    # Update transaction log value
+                    $update_system_parameter_value = $this->update_system_parameter_value($transaction_log_parameter_number, 2, $username);
+
+                    if($update_system_parameter_value){
+                        $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated leave.');
+                                    
+                        if($insert_transaction_log){
+                            return true;
+                        }
+                        else{
+                            return $insert_transaction_log;
+                        }
+                    }
+                    else{
+                        return $update_system_parameter_value;
+                    }
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Insert methods
     # -------------------------------------------------------------
     
@@ -7203,6 +7298,74 @@ class Api{
 
                     if($update_system_parameter_value){
                         $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Insert', 'User ' . $username . ' inserted leave allocation.');
+                                    
+                        if($insert_transaction_log){
+                            return true;
+                        }
+                        else{
+                            return $insert_transaction_log;
+                        }
+                    }
+                    else{
+                        return $update_system_parameter_value;
+                    }
+                }
+                else{
+                    return $update_system_parameter_value;
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : insert_leave
+    # Purpose    : Insert leave.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function insert_leave($employee_id, $leave_type, $reason, $leave_date, $start_time, $end_time, $username){
+        if ($this->databaseConnection()) {
+            $record_log = 'INS->' . $username . '->' . date('Y-m-d h:i:s');
+            $system_date_time = date('Y-m-d H:i:s');
+
+            # Get system parameter id
+            $system_parameter = $this->get_system_parameter(26, 1);
+            $parameter_number = $system_parameter[0]['PARAMETER_NUMBER'];
+            $id = $system_parameter[0]['ID'];
+
+            # Get transaction log id
+            $transaction_log_system_parameter = $this->get_system_parameter(2, 1);
+            $transaction_log_parameter_number = $transaction_log_system_parameter[0]['PARAMETER_NUMBER'];
+            $transaction_log_id = $transaction_log_system_parameter[0]['ID'];
+
+            $sql = $this->db_connection->prepare('CALL insert_leave(:id, :employee_id, :leave_type, :reason, :leave_date, :start_time, :end_time, :system_date_time, :transaction_log_id, :record_log)');
+            $sql->bindValue(':id', $id);
+            $sql->bindValue(':employee_id', $employee_id);
+            $sql->bindValue(':leave_type', $leave_type);
+            $sql->bindValue(':reason', $reason);
+            $sql->bindValue(':leave_date', $leave_date);
+            $sql->bindValue(':start_time', $start_time);
+            $sql->bindValue(':end_time', $end_time);
+            $sql->bindValue(':system_date_time', $system_date_time);
+            $sql->bindValue(':transaction_log_id', $transaction_log_id);
+            $sql->bindValue(':record_log', $record_log); 
+        
+            if($sql->execute()){
+                # Update system parameter value
+                $update_system_parameter_value = $this->update_system_parameter_value($parameter_number, 26, $username);
+
+                if($update_system_parameter_value){
+                    # Update transaction log value
+                    $update_system_parameter_value = $this->update_system_parameter_value($transaction_log_parameter_number, 2, $username);
+
+                    if($update_system_parameter_value){
+                        $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Insert', 'User ' . $username . ' inserted leave.');
                                     
                         if($insert_transaction_log){
                             return true;
@@ -11375,6 +11538,29 @@ class Api{
     public function check_attendance_validation($time_in, $time_out){
         if(!empty($time_in) && !empty($time_out)){
             if(strtotime($time_in) > strtotime($time_out) || strtotime($time_out) < strtotime($time_in)){
+                return 'Invalid';
+            }
+            else{
+                return null;
+            }
+        }
+        else{
+            return null;
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : check_time_validation
+    # Purpose    : Checks time validation.
+    #
+    # Returns    : String/null
+    #
+    # -------------------------------------------------------------
+    public function check_time_validation($start_time, $time_out){
+        if(!empty($start_time) && !empty($time_out)){
+            if(strtotime($start_time) > strtotime($time_out) || strtotime($time_out) < strtotime($start_time)){
                 return 'Invalid';
             }
             else{

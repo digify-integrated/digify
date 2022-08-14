@@ -424,12 +424,15 @@ function initialize_form_validation(form_type){
                         $('#submit-form').html('<div class="spinner-border spinner-border-sm text-light" role="status"><span rclass="sr-only"></span></div>');
                     },
                     success: function (response) {
-                        if(response === 'Updated'){
-                            show_alert_event('Role Permission Update Success', 'The permission has been updated.', 'success', 'reload');
+                        if(response === 'Updated' || response === 'Not Found'){
+                            if(response === 'Updated'){
+                                show_alert_event('Role Permission Update Success', 'The permission has been updated.', 'success', 'reload');
+                            }
+                            else{
+                                show_alert_event('Role Permission Update Error', 'The role does not exist.', 'error', 'reload');
+                            }
+
                             $('#System-Modal').modal('hide');
-                        }
-                        else if(response === 'Not Found'){
-                            show_alert_event('Role Permission Update Error', 'The role does not exist.', 'error', 'reload');
                         }
                         else{
                             show_alert('Role Permission Update Error', response, 'error');
@@ -2874,7 +2877,7 @@ function initialize_form_validation(form_type){
                         }
                         else if(response === 'Not Found'){
                             show_alert_event('Time Out Error', 'The attendance does not exist.', 'info', 'reload');
-                          }
+                        }
                         else if(response === 'Location'){
                             show_alert_event('Time Out Error', 'Your location cannot be determined.', 'error', 'reload');
                         }
@@ -5463,6 +5466,191 @@ function initialize_form_validation(form_type){
                 },
                 validity_start_date: {
                     required: 'Please choose the validity',
+                },
+            },
+            errorPlacement: function(label, element) {
+                if((element.hasClass('select2') || element.hasClass('form-select2')) && element.next('.select2-container').length) {
+                    label.insertAfter(element.next('.select2-container'));
+                }
+                else if(element.parent('.input-group').length){
+                    label.insertAfter(element.parent());
+                }
+                else{
+                    label.insertAfter(element);
+                }
+            },
+            highlight: function(element) {
+                $(element).parent().addClass('has-danger');
+                $(element).addClass('form-control-danger');
+            },
+            success: function(label,element) {
+                $(element).parent().removeClass('has-danger')
+                $(element).removeClass('form-control-danger')
+                label.remove();
+            }
+        });
+    }
+    else if(form_type == 'add leave form'){
+        $('#add-leave-form').validate({
+            submitHandler: function (form) {
+                transaction = 'submit leave';
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'controller.php',
+                    data: $(form).serialize() + '&username=' + username + '&transaction=' + transaction,
+                    beforeSend: function(){
+                        document.getElementById('submit-form').disabled = true;
+                        $('#submit-form').html('<div class="spinner-border spinner-border-sm text-light" role="status"><span rclass="sr-only"></span></div>');
+                    },
+                    success: function (response) {
+                        if(response === 'Inserted'){
+                            show_alert('Insert Leave Success', 'The leave has been inserted.', 'success');
+                          
+                            $('#System-Modal').modal('hide');
+                            reload_datatable('#my-leave-datatable');
+                        }
+                        else if(response === 'Invalid'){
+                            show_alert('Leave Error', 'The start time cannot be greater than the end time.', 'error');
+                        }
+                        else{
+                            show_alert('Leave Error', response, 'error');
+                        }
+                    },
+                    complete: function(){
+                        document.getElementById('submit-form').disabled = false;
+                        $('#submit-form').html('Submit');
+                    }
+                });
+                return false;
+            },
+            rules: {
+                leave_type: {
+                    required: true
+                },
+                leave_date: {
+                    required: true
+                },
+                start_time: {
+                    required: true
+                },
+                end_time: {
+                    required: true
+                },
+                reason: {
+                    required: true
+                },
+            },
+            messages: {
+                leave_type: {
+                    required: 'Please choose the leave type',
+                },
+                leave_date: {
+                    required: 'Please choose the leave date',
+                },
+                start_time: {
+                    required: 'Please choose the start time',
+                },
+                end_time: {
+                    required: 'Please choose the end time',
+                },
+                reason: {
+                    required: 'Please enter the reason',
+                },
+            },
+            errorPlacement: function(label, element) {
+                if((element.hasClass('select2') || element.hasClass('form-select2')) && element.next('.select2-container').length) {
+                    label.insertAfter(element.next('.select2-container'));
+                }
+                else if(element.parent('.input-group').length){
+                    label.insertAfter(element.parent());
+                }
+                else{
+                    label.insertAfter(element);
+                }
+            },
+            highlight: function(element) {
+                $(element).parent().addClass('has-danger');
+                $(element).addClass('form-control-danger');
+            },
+            success: function(label,element) {
+                $(element).parent().removeClass('has-danger')
+                $(element).removeClass('form-control-danger')
+                label.remove();
+            }
+        });
+    }
+    else if(form_type == 'update leave form'){
+        $('#update-leave-form').validate({
+            submitHandler: function (form) {
+                transaction = 'submit leave update';
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'controller.php',
+                    data: $(form).serialize() + '&username=' + username + '&transaction=' + transaction,
+                    beforeSend: function(){
+                        document.getElementById('submit-form').disabled = true;
+                        $('#submit-form').html('<div class="spinner-border spinner-border-sm text-light" role="status"><span rclass="sr-only"></span></div>');
+                    },
+                    success: function (response) {
+                        if(response === 'Updated' || response == 'Not Found'){
+                            if(response === 'Updated'){
+                                show_alert('Update Leave Success', 'The leave has been updated.', 'success');
+                            }
+                            else{
+                                show_alert('Update Leave Error', 'The leave does not exist.', 'error');
+                            }
+                          
+                            $('#System-Modal').modal('hide');
+                            reload_datatable('#my-leave-datatable');
+                        }
+                        else if(response === 'Invalid'){
+                            show_alert('Update Leave Error', 'The start time cannot be greater than the end time.', 'error');
+                        }
+                        else{
+                            show_alert('Update Leave Error', response, 'error');
+                        }
+                    },
+                    complete: function(){
+                        document.getElementById('submit-form').disabled = false;
+                        $('#submit-form').html('Submit');
+                    }
+                });
+                return false;
+            },
+            rules: {
+                leave_type: {
+                    required: true
+                },
+                leave_date: {
+                    required: true
+                },
+                start_time: {
+                    required: true
+                },
+                end_time: {
+                    required: true
+                },
+                reason: {
+                    required: true
+                },
+            },
+            messages: {
+                leave_type: {
+                    required: 'Please choose the leave type',
+                },
+                leave_date: {
+                    required: 'Please choose the leave date',
+                },
+                start_time: {
+                    required: 'Please choose the start time',
+                },
+                end_time: {
+                    required: 'Please choose the end time',
+                },
+                reason: {
+                    required: 'Please enter the reason',
                 },
             },
             errorPlacement: function(label, element) {

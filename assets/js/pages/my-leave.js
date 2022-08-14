@@ -129,7 +129,7 @@ function initialize_click_events(){
         generate_modal('add leave form', 'Add Leave', 'R' , '0', '1', 'form', 'add-leave-form', '1', username);
     });
 
-    $(document).on('click','.update_leave',function() {
+    $(document).on('click','.update-leave',function() {
         var leave_id = $(this).data('leave-id');
 
         sessionStorage.setItem('leave_id', leave_id);

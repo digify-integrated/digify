@@ -547,6 +547,8 @@ CREATE TABLE leave_management(
 	LEAVE_TYPE_ID VARCHAR(100) NOT NULL,
 	REASON VARCHAR(500) NOT NULL,
 	LEAVE_DATE VARCHAR(500) NOT NULL,
+	START_TIME TIME NOT NULL,
+	END_TIME TIME NOT NULL,
 	STATUS VARCHAR(10) NOT NULL,
 	CREATED_DATE DATETIME,
 	FOR_APPROVAL_DATE DATETIME,
@@ -3834,6 +3836,90 @@ BEGIN
 	SET @leave_allocation_id = leave_allocation_id;
 
 	SET @query = 'DELETE FROM leave_allocation WHERE LEAVE_ALLOCATION_ID = @leave_allocation_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE get_available_leave_allocation(IN leave_type_id VARCHAR(100), IN employee_id VARCHAR(100), IN leave_date DATE)
+BEGIN
+	SET @leave_type_id = leave_type_id;
+	SET @employee_id = employee_id;
+	SET @leave_date = leave_date;
+
+	SET @query = 'SELECT AVAILED FROM leave_allocation WHERE LEAVE_TYPE_ID = @leave_type_id AND EMPLOYEE_ID = @employee_id AND (VALIDITY_START_DATE <= @leave_date AND VALIDITY_END_DATE >= @leave_date)';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE check_leave_exist(IN leave_id VARCHAR(100))
+BEGIN
+	SET @leave_id = leave_id;
+
+	SET @query = 'SELECT COUNT(1) AS TOTAL FROM leave_management WHERE LEAVE_ID = @leave_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE update_leave(IN leave_id VARCHAR(100), IN leave_type_id VARCHAR(100), IN reason VARCHAR(500), IN leave_date DATE, IN start_time TIME, IN end_time TIME, IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
+BEGIN
+	SET @leave_id = leave_id;
+	SET @leave_type_id = leave_type_id;
+	SET @reason = reason;
+	SET @leave_date = leave_date;
+	SET @start_time = start_time;
+	SET @end_time = end_time;
+	SET @transaction_log_id = transaction_log_id;
+	SET @record_log = record_log;
+
+	SET @query = 'UPDATE leave_management SET LEAVE_TYPE_ID = @leave_type_id, REASON = @reason, LEAVE_DATE = @leave_date, START_TIME = @start_time, END_TIME = @end_time, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE LEAVE_ID = @leave_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE insert_leave(IN leave_id VARCHAR(100), IN employee_id VARCHAR(100), IN leave_type_id VARCHAR(100), IN reason VARCHAR(500), IN leave_date DATE, IN start_time TIME, IN end_time TIME, IN created_date DATETIME, IN transaction_log_id VARCHAR(100), IN record_log VARCHAR(100))
+BEGIN
+	SET @leave_id = leave_id;
+	SET @employee_id = employee_id;
+	SET @leave_type_id = leave_type_id;
+	SET @reason = reason;
+	SET @leave_date = leave_date;
+	SET @start_time = start_time;
+	SET @end_time = end_time;
+	SET @created_date = created_date;
+	SET @transaction_log_id = transaction_log_id;
+	SET @record_log = record_log;
+
+	SET @query = 'INSERT INTO leave_management (LEAVE_ID, EMPLOYEE_ID, LEAVE_TYPE_ID, REASON, LEAVE_DATE, START_TIME, END_TIME, STATUS, CREATED_DATE, TRANSACTION_LOG_ID, RECORD_LOG) VALUES(@leave_id, @employee_id, @leave_type_id, @reason, @leave_date, @start_time, @end_time, "PEN", @created_date, @transaction_log_id, @record_log)';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE get_leave_details(IN leave_id VARCHAR(100))
+BEGIN
+	SET @leave_id = leave_id;
+
+	SET @query = 'SELECT EMPLOYEE_ID, LEAVE_TYPE_ID, REASON, LEAVE_DATE, START_TIME, END_TIME, STATUS, CREATED_DATE, FOR_APPROVAL_DATE, DECISION_DATE, DECISION_BY, DECISION_REMARKS, TRANSACTION_LOG_ID, RECORD_LOG FROM leave WHERE LEAVE_ID = @leave_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE delete_leave(IN leave_id VARCHAR(100))
+BEGIN
+	SET @leave_id = leave_id;
+
+	SET @query = 'DELETE FROM leave WHERE LEAVE_ID = @leave_id';
 
 	PREPARE stmt FROM @query;
 	EXECUTE stmt;

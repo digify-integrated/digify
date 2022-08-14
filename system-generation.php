@@ -2031,7 +2031,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="duration" class="form-label">Duration <span class="text-danger">*</span></label>
-                                    <div class="input-group" id="validity-start-date-container">
+                                    <div class="input-group" id="duration-container">
                                         <input id="duration" name="duration" class="form-control" type="number" min="1">
                                         <span class="input-group-text">Hours</span>
                                     </div>
@@ -2055,6 +2055,98 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                         <input type="text" class="form-control" id="validity_end_date" name="validity_end_date" autocomplete="off" data-date-format="m/dd/yyyy" data-date-container="#validity-end-date-container" data-provide="datepicker" data-date-autoclose="true">
                                         <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
                                     </div>
+                                </div>
+                            </div>
+                        </div>';
+            }
+            else if($form_type == 'add leave form'){
+                $form .= '<div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Leave Type <span class="text-danger">*</span></label>
+                                    <input type="hidden" id="leave_id" name="leave_id">
+                                    <select class="form-control form-select2" id="leave_type" name="leave_type">
+                                    <option value="">--</option>';
+                                    $form .= $api->generate_leave_type_options();
+                                    $form .='</select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="leave_date" class="form-label">Leave Date <span class="text-danger">*</span></label>
+                                    <div class="input-group" id="leave-date-container">
+                                        <input type="text" class="form-control" id="leave_date" name="leave_date" autocomplete="off" data-date-format="m/dd/yyyy" data-date-container="#leave-date-container" data-provide="datepicker" data-date-autoclose="false" data-date-multidate="true">
+                                        <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="start_time" class="form-label">Start Time <span class="text-danger">*</span></label>
+                                    <input type="time" id="start_time" name="start_time" class="form-control" autocomplete="off">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="end_time" class="form-label">End Time <span class="text-danger">*</span></label>
+                                    <input type="time" id="end_time" name="end_time" class="form-control" autocomplete="off">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label for="reason" class="form-label">Reason <span class="text-danger">*</span></label>
+                                    <textarea class="form-control form-maxlength" id="reason" name="reason" maxlength="500" rows="5"></textarea>
+                                </div>
+                            </div>
+                        </div>';
+            }
+            else if($form_type == 'update leave form'){
+                $form .= '<div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label class="form-label">Leave Type <span class="text-danger">*</span></label>
+                                    <input type="hidden" id="leave_id" name="leave_id">
+                                    <select class="form-control form-select2" id="leave_type" name="leave_type">
+                                    <option value="">--</option>';
+                                    $form .= $api->generate_leave_type_options();
+                                    $form .='</select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label for="leave_date" class="form-label">Leave Date <span class="text-danger">*</span></label>
+                                    <div class="input-group" id="leave-date-container">
+                                        <input type="text" class="form-control" id="leave_date" name="leave_date" autocomplete="off" data-date-format="m/dd/yyyy" data-date-container="#leave-date-container" data-provide="datepicker" data-date-autoclose="false">
+                                        <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="start_time" class="form-label">Start Time <span class="text-danger">*</span></label>
+                                    <input type="time" id="start_time" name="start_time" class="form-control" autocomplete="off">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="end_time" class="form-label">End Time <span class="text-danger">*</span></label>
+                                    <input type="time" id="end_time" name="end_time" class="form-control" autocomplete="off">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label for="reason" class="form-label">Reason</label>
+                                    <textarea class="form-control form-maxlength" id="reason" name="reason" maxlength="500" rows="5"></textarea>
                                 </div>
                             </div>
                         </div>';
@@ -6724,8 +6816,11 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                         $status = $row['STATUS'];
                         $transaction_log_id = $row['TRANSACTION_LOG_ID'];
 
+                        $leave_type_details = $api->get_leave_type_details($leave_type_id);
+                        $leave_type = $leave_type_details[0]['LEAVE_TYPE'];
+
                         if($cancel_attendance_creation > 0 && ($status == 'PEN' || $status == 'REC' || $status == 'FORREC')){
-                            $cancel = '<button type="button" class="btn btn-warning waves-effect waves-light cancel-attendance-creation" data-creation-id="'. $creation_id .'" title="Cancel Attendance Adjustment">
+                            $cancel = '<button type="button" class="btn btn-warning waves-effect waves-light cancel-leave" data-leave-id="'. $leave_id .'" title="Cancel Leave">
                                         <i class="bx bx-calendar-x font-size-16 align-middle"></i>
                                     </button>';
                         }
@@ -6734,7 +6829,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                         }
 
                         if($delete_attendance_creation > 0){
-                            $delete = '<button type="button" class="btn btn-danger waves-effect waves-light delete-attendance-creation" data-creation-id="'. $creation_id .'" title="Delete Attendance Adjustment">
+                            $delete = '<button type="button" class="btn btn-danger waves-effect waves-light delete-leave" data-leave-id="'. $leave_id .'" title="Delete Leave">
                                 <i class="bx bx-trash font-size-16 align-middle"></i>
                             </button>';
                         }
@@ -6744,7 +6839,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
 
                         if($status == 'PEN' && $check_approval_exception_exist == 0 && $approval_type_status == 'ACTIVE' && $tag_attendance_creation_for_recommendation > 0){
                             $data_for_recommendation = 1;
-                            $for_recommendation = '<button type="button" class="btn btn-success waves-effect waves-light for-recommend-attendance-creation" data-creation-id="'. $creation_id .'" title="Tag Attendance Adjustment For Recommendation">
+                            $for_recommendation = '<button type="button" class="btn btn-success waves-effect waves-light for-approval-leave" data-leave-id="'. $leave_id .'" title="Tag Leave For Approval">
                                 <i class="bx bx-check font-size-16 align-middle"></i>
                             </button>';
                         }
@@ -6754,7 +6849,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                         }
 
                         if(($update_attendance_creation  > 0) && $status == 'PEN'){
-                            $update = '<button type="button" class="btn btn-info waves-effect waves-light update-attendance-creation" data-creation-id="'. $creation_id .'" title="Update Attendance Adjustment">
+                            $update = '<button type="button" class="btn btn-info waves-effect waves-light update-leave" data-leave-id="'. $leave_id .'" title="Update Leave">
                                     <i class="bx bx-pencil font-size-16 align-middle"></i>
                                 </button>';
                         }
@@ -6779,13 +6874,12 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                         }
     
                         $response[] = array(
-                            'CHECK_BOX' => '<input class="form-check-input datatable-checkbox-children" data-cancel="'. $data_cancel .'" data-for-recommendation="'. $data_for_recommendation .'" type="checkbox" value="'. $creation_id .'">',
-                            'TIME_IN' => $time_in,
-                            'TIME_OUT' => $time_out,
-                            'STATUS' => $status_name,
-                            'SANCTION' => $sanction_name,
+                            'CHECK_BOX' => '<input class="form-check-input datatable-checkbox-children" data-cancel="'. $data_cancel .'" data-for-approval="'. $data_for_recommendation .'" type="checkbox" value="'. $leave_id .'">',
+                            'LEAVE_DATE' => $leave_date,
+                            'LEAVE_TYPE' => $leave_type,
+                            'STATUS' => $status,
                             'ACTION' => '<div class="d-flex gap-2">
-                                <button type="button" class="btn btn-primary waves-effect waves-light view-attendance-creation" data-creation-id="'. $creation_id .'" title="View Attendance Creation">
+                                <button type="button" class="btn btn-primary waves-effect waves-light view-leave" data-leave-id="'. $leave_id .'" title="View Leave">
                                     <i class="bx bx-show font-size-16 align-middle"></i>
                                 </button>
                                 '. $update .'

@@ -2991,6 +2991,87 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     }
     # -------------------------------------------------------------
 
+    # Submit leave
+    else if($transaction == 'submit leave'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['leave_type']) && !empty($_POST['leave_type']) && isset($_POST['leave_date']) && !empty($_POST['leave_date']) && isset($_POST['start_time']) && !empty($_POST['start_time']) && isset($_POST['end_time']) && !empty($_POST['end_time'])){
+            $file_type = '';
+            $username = $_POST['username'];
+            $leave_type = $_POST['leave_type'];
+            $leave_dates = explode(',', $_POST['leave_date']);
+            $start_time = $api->check_date('empty', $_POST['start_time'], '', 'H:i:00', '', '', '');
+            $end_time = $api->check_date('empty', $_POST['end_time'], '', 'H:i:00', '', '', '');
+            $reason = $_POST['reason'];
+
+            $employee_details = $api->get_employee_details($username);
+            $employee_id = $employee_details[0]['EMPLOYEE_ID'] ?? null;
+
+            foreach($leave_dates as $leave_date){
+                $leave_date = $api->check_date('empty', $leave_date, '', 'Y-m-d', '', '', '');
+                
+                $check_time_validation = $api->check_time_validation($start_time, $end_time);
+
+                if(empty($check_time_validation)){
+                    $insert_leave = $api->insert_leave($employee_id, $leave_type, $reason, $leave_date, $start_time, $end_time, $username);
+
+                    if(!$insert_leave){
+                        $error = $insert_leave;
+                        break;
+                    }
+                }
+                else{
+                    $error = $check_time_validation;
+                    break;
+                }
+            }
+
+            if(empty($error)){
+                echo 'Inserted';
+            }
+            else{
+                echo $error;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Submit leave update
+    else if($transaction == 'submit leave update'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['leave_id']) && isset($_POST['leave_type']) && !empty($_POST['leave_type']) && isset($_POST['leave_date']) && !empty($_POST['leave_date']) && isset($_POST['start_time']) && !empty($_POST['start_time']) && isset($_POST['end_time']) && !empty($_POST['end_time'])){
+            $file_type = '';
+            $username = $_POST['username'];
+            $leave_id = $_POST['leave_id'];
+            $leave_type = $_POST['leave_type'];
+            $leave_date = $api->check_date('empty', $_POST['leave_date'], '', 'Y-m-d', '', '', '');
+            $start_time = $api->check_date('empty', $_POST['start_time'], '', 'H:i:00', '', '', '');
+            $end_time = $api->check_date('empty', $_POST['end_time'], '', 'H:i:00', '', '', '');
+            $reason = $_POST['reason'];
+
+            $check_leave_exist = $api->check_leave_exist($leave_id);
+
+            if($check_leave_exist > 0){
+                $check_time_validation = $api->check_time_validation($start_time, $end_time);
+
+                if(empty($check_time_validation)){
+                    $update_leave = $api->update_leave($leave_id, $leave_type, $reason, $leave_date, $start_time, $end_time, $username);
+
+                    if($update_leave){
+                        echo 'Updated';
+                    }
+                    else{
+                        echo $update_leave;
+                    }
+                }
+                else{
+                    echo $check_time_validation;
+                }
+            }
+            else{
+                echo 'Not Found';
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
     # -------------------------------------------------------------
     #   Delete transactions
     # -------------------------------------------------------------
