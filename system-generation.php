@@ -2151,6 +2151,50 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                             </div>
                         </div>';
             }
+            else if($form_type == 'cancel leave form' || $form_type == 'cancel multiple leave form'){
+                $form .= '<div class="row">
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <label for="decision_remarks" class="form-label">Cancellation Remarks <span class="text-danger">*</span></label>
+                                        <input type="hidden" id="leave_id" name="leave_id">
+                                        <textarea class="form-control form-maxlength" id="decision_remarks" name="decision_remarks" maxlength="500" rows="3"></textarea>
+                                    </div>
+                                </div>
+                            </div>';
+            }
+            else if($form_type == 'reject leave form' || $form_type == 'reject multiple leave form'){
+                $form .= '<div class="row">
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <label for="decision_remarks" class="form-label">Rejection Remarks <span class="text-danger">*</span></label>
+                                        <input type="hidden" id="leave_id" name="leave_id">
+                                        <textarea class="form-control form-maxlength" id="decision_remarks" name="decision_remarks" maxlength="500" rows="3"></textarea>
+                                    </div>
+                                </div>
+                            </div>';
+            }
+            else if($form_type == 'tag leave for approval form' || $form_type == 'tag multiple leave for approval form'){
+                $form .= '<div class="row">
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <label for="decision_remarks" class="form-label">Recommendation Remarks</label>
+                                        <input type="hidden" id="leave_id" name="leave_id">
+                                        <textarea class="form-control form-maxlength" id="decision_remarks" name="decision_remarks" maxlength="500" rows="3"></textarea>
+                                    </div>
+                                </div>
+                            </div>';
+            }
+            else if($form_type == 'approve leave form' || $form_type == 'approve multiple leave form'){
+                $form .= '<div class="row">
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <input type="hidden" id="leave_id" name="leave_id">
+                                        <label for="decision_remarks" class="form-label">Approval Remarks <span class="text-danger">*</span></label>
+                                        <textarea class="form-control form-maxlength" id="decision_remarks" name="decision_remarks" maxlength="500" rows="3"></textarea>
+                                    </div>
+                                </div>
+                            </div>';
+            }
 
             $form .= '</form>';
 
@@ -6716,18 +6760,18 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
         if(isset($_POST['filter_creation_start_date']) && isset($_POST['filter_creation_end_date']) && isset($_POST['filter_leave_start_date']) && isset($_POST['filter_leave_end_date']) && isset($_POST['filter_for_approval_start_date']) && isset($_POST['filter_for_approval_end_date']) && isset($_POST['filter_decision_start_date']) && isset($_POST['filter_decision_end_date']) && isset($_POST['filter_status']) && isset($_POST['filter_leave_type'])){
             if ($api->databaseConnection()) {
                 # Get permission
-                $update_attendance_creation = $api->check_role_permissions($username, 131);
-                $cancel_attendance_creation = $api->check_role_permissions($username, 132);
-	            $tag_attendance_creation_for_recommendation = $api->check_role_permissions($username, 133);
-                $delete_attendance_creation = $api->check_role_permissions($username, 134);
-                $view_transaction_log = $api->check_role_permissions($username, 135);
+                $update_leave = $api->check_role_permissions($username, 188);
+                $cancel_leave = $api->check_role_permissions($username, 189);
+	            $tag_leave_for_approval = $api->check_role_permissions($username, 190);
+                $delete_leave = $api->check_role_permissions($username, 191);
+                $view_transaction_log = $api->check_role_permissions($username, 192);
 
                 $employee_details = $api->get_employee_details($username);
                 $employee_id = $employee_details[0]['EMPLOYEE_ID'] ?? null;
 
-                $approval_type_details = $api->get_approval_type_details(3);
+                $approval_type_details = $api->get_approval_type_details(5);
                 $approval_type_status = $approval_type_details[0]['STATUS'];
-                $check_approval_exception_exist = $api->check_approval_exception_exist(3, $employee_id);
+                $check_approval_exception_exist = $api->check_approval_exception_exist(5, $employee_id);
 
                 $filter_creation_start_date = $api->check_date('empty', $_POST['filter_creation_start_date'], '', 'Y-m-d', '', '', '');
                 $filter_creation_end_date = $api->check_date('empty', $_POST['filter_leave_end_date'], '', 'Y-m-d', '', '', '');
@@ -6740,7 +6784,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                 $filter_status = $_POST['filter_status'];
                 $filter_leave_type = $_POST['filter_leave_type'];
 
-                $query = 'SELECT LEAVE_ID, LEAVE_TYPE_ID, LEAVE_DATE, STATUS, TRANSACTION_LOG_ID FROM leave_management WHERE EMPLOYEE_ID = :employee_id';
+                $query = 'SELECT LEAVE_ID, LEAVE_TYPE_ID, LEAVE_DATE, START_TIME, END_TIME, STATUS, TRANSACTION_LOG_ID FROM leave_management WHERE EMPLOYEE_ID = :employee_id';
 
                 if((!empty($filter_creation_start_date) && !empty($filter_creation_end_date)) || (!empty($filter_leave_start_date) && !empty($filter_leave_end_date)) || (!empty($filter_for_approval_start_date) && !empty($filter_for_approval_end_date)) || (!empty($filter_decision_start_date) && !empty($filter_decision_end_date)) || !empty($filter_status) || !empty($filter_leave_type) ){
                     $query .= ' AND ';
@@ -6812,6 +6856,8 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                     while($row = $sql->fetch()){
                         $leave_id = $row['LEAVE_ID'];
                         $leave_date = $api->check_date('empty', $row['LEAVE_DATE'], '', 'm/d/Y', '', '', '');
+                        $start_time = $api->check_date('empty', $row['START_TIME'], '', 'h:i:s a', '', '', '');
+                        $end_time = $api->check_date('empty', $row['END_TIME'], '', 'h:i:s a', '', '', '');
                         $leave_type_id = $row['LEAVE_TYPE_ID'];
                         $status = $row['STATUS'];
                         $transaction_log_id = $row['TRANSACTION_LOG_ID'];
@@ -6819,7 +6865,9 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                         $leave_type_details = $api->get_leave_type_details($leave_type_id);
                         $leave_type = $leave_type_details[0]['LEAVE_TYPE'];
 
-                        if($cancel_attendance_creation > 0 && ($status == 'PEN' || $status == 'REC' || $status == 'FORREC')){
+                        $status_name = $api->get_leave_status($status)[0]['BADGE'];
+
+                        if($cancel_leave > 0 && ($status == 'PEN' || $status == 'FA')){
                             $cancel = '<button type="button" class="btn btn-warning waves-effect waves-light cancel-leave" data-leave-id="'. $leave_id .'" title="Cancel Leave">
                                         <i class="bx bx-calendar-x font-size-16 align-middle"></i>
                                     </button>';
@@ -6828,7 +6876,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                             $cancel = '';
                         }
 
-                        if($delete_attendance_creation > 0){
+                        if($delete_leave > 0){
                             $delete = '<button type="button" class="btn btn-danger waves-effect waves-light delete-leave" data-leave-id="'. $leave_id .'" title="Delete Leave">
                                 <i class="bx bx-trash font-size-16 align-middle"></i>
                             </button>';
@@ -6837,18 +6885,18 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                             $delete = '';
                         }
 
-                        if($status == 'PEN' && $check_approval_exception_exist == 0 && $approval_type_status == 'ACTIVE' && $tag_attendance_creation_for_recommendation > 0){
-                            $data_for_recommendation = 1;
-                            $for_recommendation = '<button type="button" class="btn btn-success waves-effect waves-light for-approval-leave" data-leave-id="'. $leave_id .'" title="Tag Leave For Approval">
+                        if($status == 'PEN' && $check_approval_exception_exist == 0 && $approval_type_status == 'ACTIVE' && $tag_leave_for_approval > 0){
+                            $data_for_approval = 1;
+                            $for_approval = '<button type="button" class="btn btn-success waves-effect waves-light for-approval-leave" data-leave-id="'. $leave_id .'" title="Tag Leave For Approval">
                                 <i class="bx bx-check font-size-16 align-middle"></i>
                             </button>';
                         }
                         else{
-                            $data_for_recommendation = 0;
-                            $for_recommendation = '';
+                            $data_for_approval = 0;
+                            $for_approval = '';
                         }
 
-                        if(($update_attendance_creation  > 0) && $status == 'PEN'){
+                        if(($update_leave > 0) && $status == 'PEN'){
                             $update = '<button type="button" class="btn btn-info waves-effect waves-light update-leave" data-leave-id="'. $leave_id .'" title="Update Leave">
                                     <i class="bx bx-pencil font-size-16 align-middle"></i>
                                 </button>';
@@ -6866,7 +6914,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                             $transaction_log = '';
                         }
 
-                        if($status == 'PEN' || $status == 'REC' || $status == 'FORREC'){
+                        if($status == 'PEN' || $status == 'FA'){
                             $data_cancel = 1;
                         }
                         else{
@@ -6874,16 +6922,16 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                         }
     
                         $response[] = array(
-                            'CHECK_BOX' => '<input class="form-check-input datatable-checkbox-children" data-cancel="'. $data_cancel .'" data-for-approval="'. $data_for_recommendation .'" type="checkbox" value="'. $leave_id .'">',
-                            'LEAVE_DATE' => $leave_date,
+                            'CHECK_BOX' => '<input class="form-check-input datatable-checkbox-children" data-cancel="'. $data_cancel .'" data-for-approval="'. $data_for_approval .'" type="checkbox" value="'. $leave_id .'">',
                             'LEAVE_TYPE' => $leave_type,
-                            'STATUS' => $status,
+                            'LEAVE_DATE' => $leave_date . '<p class="text-muted mb-0">'. $start_time .' - '. $end_time .'</p>',
+                            'STATUS' => $status_name,
                             'ACTION' => '<div class="d-flex gap-2">
                                 <button type="button" class="btn btn-primary waves-effect waves-light view-leave" data-leave-id="'. $leave_id .'" title="View Leave">
                                     <i class="bx bx-show font-size-16 align-middle"></i>
                                 </button>
                                 '. $update .'
-                                '. $for_recommendation .'
+                                '. $for_approval .'
                                 '. $cancel .'
                                 '. $transaction_log .'
                                 '. $delete .'

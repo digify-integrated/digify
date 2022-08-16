@@ -29,17 +29,17 @@ function initialize_my_leave_table(datatable_name, buttons = false, show_all = f
 
     var column = [ 
         { 'data' : 'CHECK_BOX' },
-        { 'data' : 'LEAVE_DATE' },
         { 'data' : 'LEAVE_TYPE' },
+        { 'data' : 'LEAVE_DATE' },
         { 'data' : 'STATUS' },
         { 'data' : 'ACTION' }
     ];
 
     var column_definition = [
         { 'width': '1%','bSortable': false, 'aTargets': 0 },
-        { 'width': '20%', 'aTargets': 1 },
-        { 'width': '20%', 'aTargets': 2 },
-        { 'width': '15%', 'aTargets': 3 },
+        { 'width': '30%', 'aTargets': 1 },
+        { 'width': '15%', 'aTargets': 2 },
+        { 'width': '10%', 'aTargets': 3 },
         { 'width': '20%','bSortable': false, 'aTargets': 4 }
     ];
 
@@ -134,7 +134,7 @@ function initialize_click_events(){
 
         sessionStorage.setItem('leave_id', leave_id);
         
-        generate_modal('update leave form', 'Update Leave', 'R' , '0', '1', 'form', 'update_leave-form', '0', username);
+        generate_modal('update leave form', 'Update Leave', 'R' , '0', '1', 'form', 'update-leave-form', '0', username);
     });
 
     $(document).on('click','.cancel-leave',function() {

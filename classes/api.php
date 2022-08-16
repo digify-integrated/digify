@@ -10157,6 +10157,50 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : get_leave_details
+    # Purpose    : Gets the leave details.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_leave_details($leave_id){
+        if ($this->databaseConnection()) {
+            $response = array();
+
+            $sql = $this->db_connection->prepare('CALL get_leave_details(:leave_id)');
+            $sql->bindValue(':leave_id', $leave_id);
+
+            if($sql->execute()){
+                while($row = $sql->fetch()){
+                    $response[] = array(
+                        'EMPLOYEE_ID' => $row['EMPLOYEE_ID'],
+                        'LEAVE_TYPE_ID' => $row['LEAVE_TYPE_ID'],
+                        'REASON' => $row['REASON'],
+                        'LEAVE_DATE' => $row['LEAVE_DATE'],
+                        'START_TIME' => $row['START_TIME'],
+                        'END_TIME' => $row['END_TIME'],
+                        'STATUS' => $row['STATUS'],
+                        'CREATED_DATE' => $row['CREATED_DATE'],
+                        'FOR_APPROVAL_DATE' => $row['FOR_APPROVAL_DATE'],
+                        'DECISION_DATE' => $row['DECISION_DATE'],
+                        'DECISION_BY' => $row['DECISION_BY'],
+                        'DECISION_REMARKS' => $row['DECISION_REMARKS'],
+                        'TRANSACTION_LOG_ID' => $row['TRANSACTION_LOG_ID'],
+                        'RECORD_LOG' => $row['RECORD_LOG']
+                    );
+                }
+
+                return $response;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Get methods
     # -------------------------------------------------------------
 
@@ -11139,6 +11183,48 @@ class Api{
         else{
             return 'No Limit';
         }
+    }
+    # -------------------------------------------------------------
+
+     # -------------------------------------------------------------
+    #
+    # Name       : get_leave_status
+    # Purpose    : Returns the status, badge
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_leave_status($stat){
+        $response = array();
+
+        switch ($stat) {
+            case 'PEN':
+                $status = 'Pending';
+                $button_class = 'bg-primary';
+                break;
+            case 'FA':
+                $status = 'For Approval';
+                $button_class = 'bg-info';
+                break;
+            case 'APV':
+                $status = 'Approved';
+                $button_class = 'bg-success';
+                break;
+            case 'REJ':
+                $status = 'Rejected';
+                $button_class = 'bg-danger';
+                break;
+            default:
+                $status = 'Cancelled';
+                $button_class = 'bg-warning';
+        }
+
+        $response[] = array(
+            'STATUS' => $status,
+            'BADGE' => '<span class="badge '. $button_class .'">'. $status .'</span>'
+        );
+
+        return $response;
     }
     # -------------------------------------------------------------
 

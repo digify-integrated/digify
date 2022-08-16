@@ -5971,6 +5971,107 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #   Tag for approval transactions
+    # -------------------------------------------------------------
+
+    # Tag leave for approval
+    else if($transaction == 'tag leave for approval'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['adjustment_id']) && !empty($_POST['adjustment_id']) && isset($_POST['decision_remarks'])){
+            $username = $_POST['username'];
+            $adjustment_id = $_POST['adjustment_id'];
+            $decision_remarks = $_POST['decision_remarks'];
+
+            $employee_details = $api->get_employee_details($username);
+            $approver_id = $employee_details[0]['EMPLOYEE_ID'];
+            $file_as = $employee_details[0]['FILE_AS'];
+
+            $notification_template_details = $api->get_notification_template_details(4);
+            $notification_title = $notification_template_details[0]['NOTIFICATION_TITLE'] ?? null;
+            $notification_message = $notification_template_details[0]['NOTIFICATION_MESSAGE'] ?? null;
+            $notification_message = str_replace('{employee}', $file_as, $notification_message);
+
+            $check_attendance_adjustment_exist = $api->check_attendance_adjustment_exist($adjustment_id);
+
+            if($check_attendance_adjustment_exist > 0){
+                $attendance_adjustment_details = $api->get_attendance_adjustment_details($adjustment_id);
+				$employee_id = $attendance_adjustment_details[0]['EMPLOYEE_ID'];
+
+                $update_attendance_adjustment_status = $api->update_attendance_adjustment_status($adjustment_id, 'REC', $decision_remarks, null, $username);
+    
+                if($update_attendance_adjustment_status){
+                    $send_notification = $api->send_notification(4, $approver_id, $employee_id, $notification_title, $notification_message, $username);
+
+                    if($send_notification){
+                        echo 'Recommended';
+                    }
+                    else{
+                        echo $send_notification;
+                    }
+                }
+                else{
+                    echo $update_attendance_adjustment_status;
+                }
+            }
+            else{
+                echo 'Not Found';
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Tag multiple leave for approval
+    else if($transaction == 'tag multiple leave for approval'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['adjustment_id']) && !empty($_POST['adjustment_id']) && isset($_POST['decision_remarks'])){
+            $username = $_POST['username'];
+            $adjustment_ids = explode(',', $_POST['adjustment_id']);
+            $decision_remarks = $_POST['decision_remarks'];
+            $error = '';
+
+            $employee_details = $api->get_employee_details($username);
+            $approver_id = $employee_details[0]['EMPLOYEE_ID'];
+            $file_as = $employee_details[0]['FILE_AS'];
+
+            $notification_template_details = $api->get_notification_template_details(4);
+            $notification_title = $notification_template_details[0]['NOTIFICATION_TITLE'] ?? null;
+            $notification_message = $notification_template_details[0]['NOTIFICATION_MESSAGE'] ?? null;
+            $notification_message = str_replace('{employee}', $file_as, $notification_message);
+
+            foreach($adjustment_ids as $adjustment_id){
+                $check_attendance_adjustment_exist = $api->check_attendance_adjustment_exist($adjustment_id);
+
+                if($check_attendance_adjustment_exist > 0){
+                    $attendance_adjustment_details = $api->get_attendance_adjustment_details($adjustment_id);
+					$employee_id = $attendance_adjustment_details[0]['EMPLOYEE_ID'];
+
+                    $update_attendance_adjustment_status = $api->update_attendance_adjustment_status($adjustment_id, 'REC', $decision_remarks, null, $username);
+        
+                    if($update_attendance_adjustment_status){
+                        $send_notification = $api->send_notification(4, $approver_id, $employee_id, $notification_title, $notification_message, $username);
+
+                        if(!$send_notification){
+                           $error = $send_notification;
+                        }
+                    }
+                    else{
+                        $error = $update_attendance_adjustment_status;
+                    }
+                }
+                else{
+                    $error = 'Not Found';
+                }
+            }
+
+            if(empty($error)){
+                echo 'Recommended';
+            }
+            else{
+                echo $error;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Approve transactions
     # -------------------------------------------------------------
 
@@ -7766,6 +7867,26 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                 'VALIDITY_START_DATE' => $api->check_date('empty', $leave_allocation_details[0]['VALIDITY_START_DATE'], '', 'n/d/Y', '', '', ''),
                 'VALIDITY_END_DATE' => $api->check_date('empty', $leave_allocation_details[0]['VALIDITY_END_DATE'], '', 'n/d/Y', '', '', ''),
                 'DURATION' => $leave_allocation_details[0]['DURATION']
+            );
+
+            echo json_encode($response);
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Leave details
+    else if($transaction == 'leave details'){
+        if(isset($_POST['leave_id']) && !empty($_POST['leave_id'])){
+            $leave_id = $_POST['leave_id'];
+            $leave_details = $api->get_leave_details($leave_id);
+
+            $response[] = array(
+                'LEAVE_TYPE_ID' => $leave_details[0]['LEAVE_TYPE_ID'],
+                'EMPLOYEE_ID' => $leave_details[0]['EMPLOYEE_ID'],
+                'REASON' => $leave_details[0]['REASON'],
+                'LEAVE_DATE' => $api->check_date('empty', $leave_details[0]['LEAVE_DATE'], '', 'n/d/Y', '', '', ''),
+                'START_TIME' => $api->check_date('empty', $leave_details[0]['START_TIME'], '', 'H:i:00', '', '', ''),
+                'END_TIME' => $api->check_date('empty', $leave_details[0]['END_TIME'], '', 'H:i:00', '', '', '')
             );
 
             echo json_encode($response);

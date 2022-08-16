@@ -6884,6 +6884,27 @@ function display_form_details(form_type){
             }
         });
     }
+    else if(form_type == 'update leave form'){
+        transaction = 'leave details';
+
+        var leave_id = sessionStorage.getItem('leave_id');
+
+        $.ajax({
+            url: 'controller.php',
+            method: 'POST',
+            dataType: 'JSON',
+            data: {leave_id : leave_id, transaction : transaction},
+            success: function(response) {
+                $('#leave_date').val(response[0].LEAVE_DATE);
+                $('#start_time').val(response[0].START_TIME);
+                $('#end_time').val(response[0].END_TIME);
+                $('#reason').val(response[0].REASON);
+                $('#leave_id').val(leave_id);
+
+                check_option_exist('#leave_type', response[0].LEAVE_TYPE_ID, '');
+            }
+        });
+    }
 }
 
 function initialize_transaction_log_table(datatable_name, buttons = false, show_all = false){
