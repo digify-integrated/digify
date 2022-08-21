@@ -7464,6 +7464,7 @@ function check_table_multiple_button(){
         var delete_array = [];
         var reject_array = [];
         var approve_array = [];
+        var pending_array = [];
         var for_recommendation_array = [];
         var for_approval_array = [];
         var recommend_array = [];
@@ -7477,6 +7478,7 @@ function check_table_multiple_button(){
         $(".datatable-checkbox-children").each(function () {
             var cancel_data = $(this).data('cancel');
             var delete_data = $(this).data('delete');
+            var pending_data = $(this).data('pending');
             var for_recommendation_data = $(this).data('for-recommendation');
             var for_approval_data = $(this).data('for-approval');
             var recommend_data = $(this).data('recommend');
@@ -7494,6 +7496,7 @@ function check_table_multiple_button(){
                 lock_array.push(lock);
                 cancel_array.push(cancel_data);
                 approve_array.push(approve_data);
+                pending_array.push(pending_data);
                 for_approval_array.push(for_approval_data);
                 reject_array.push(reject_data);
                 delete_array.push(delete_data);
@@ -7510,6 +7513,7 @@ function check_table_multiple_button(){
 
         var cancel_checker = arr => arr.every(v => v === 1);
         var delete_checker = arr => arr.every(v => v === 1);
+        var pending_checker = arr => arr.every(v => v === 1);
         var for_recommendation_checker = arr => arr.every(v => v === 1);
         var for_approval_checker = arr => arr.every(v => v === 1);
         var recommend_checker = arr => arr.every(v => v === 1);
@@ -7608,6 +7612,13 @@ function check_table_multiple_button(){
         else{
             $('.multiple-delete').addClass('d-none');
         }
+
+        if(pending_checker(pending_array)){
+            $('.multiple-pending').removeClass('d-none');
+        }
+        else{
+            $('.multiple-pending').addClass('d-none');
+        }
         
         if(for_recommendation_checker(for_recommendation_array)){
             $('.multiple-for-recommendation').removeClass('d-none');
@@ -7654,6 +7665,7 @@ function check_table_multiple_button(){
     else{
         $('.multiple-delete').addClass('d-none');
         $('.multiple-cancel').addClass('d-none');
+        $('.multiple-pending').addClass('d-none');
         $('.multiple-for-recommendation').addClass('d-none');
         $('.multiple-for-approval').addClass('d-none');
         $('.multiple-recommendation').addClass('d-none');

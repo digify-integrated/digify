@@ -6,11 +6,12 @@
     $api = new Api;
     $page_title = 'My Leave';
 
-    $page_access = $api->check_role_permissions($username, 129);
-	$add_leave = $api->check_role_permissions($username, 130);
-	$cancel_leave = $api->check_role_permissions($username, 132);
-	$tag_leave_for_approval = $api->check_role_permissions($username, 133);
-	$delete_leave = $api->check_role_permissions($username, 134);
+    $page_access = $api->check_role_permissions($username, 188);
+	$add_leave = $api->check_role_permissions($username, 189);
+	$cancel_leave = $api->check_role_permissions($username, 191);
+	$tag_leave_for_approval = $api->check_role_permissions($username, 192);
+	$tag_leave_as_pending = $api->check_role_permissions($username, 193);
+	$delete_leave = $api->check_role_permissions($username, 194);
     
     $check_user_account_status = $api->check_user_account_status($username);
 
@@ -85,6 +86,10 @@
 
                                                         if($tag_leave_for_approval > 0){
                                                             echo '<button type="button" class="btn btn-success waves-effect btn-label waves-light d-none multiple-for-approval" id="for-approval-leave"><i class="bx bx-check label-icon"></i> For Approval</button>';
+                                                        }
+                                                        
+                                                        if($tag_leave_as_pending > 0){
+                                                            echo '<button type="button" class="btn btn-info waves-effect btn-label waves-light d-none multiple-pending" id="pending-leave"><i class="bx bx-check label-icon"></i> Tag As Pending</button>';
                                                         }
 
                                                         if($cancel_leave > 0){

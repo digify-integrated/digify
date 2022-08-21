@@ -10,7 +10,8 @@
 	$request_attendance_adjustment = $api->check_role_permissions($username, 123);
 	$cancel_attendance_adjustment = $api->check_role_permissions($username, 125);
 	$tag_attendance_adjustment_for_recommendation = $api->check_role_permissions($username, 126);
-	$delete_attendance_adjustment = $api->check_role_permissions($username, 127);
+	$tag_attendance_adjustment_as_pending = $api->check_role_permissions($username, 127);
+	$delete_attendance_adjustment = $api->check_role_permissions($username, 128);
     
     $check_user_account_status = $api->check_user_account_status($username);
 
@@ -84,6 +85,10 @@
 
                                                         if($tag_attendance_adjustment_for_recommendation > 0){
                                                             echo '<button type="button" class="btn btn-success waves-effect btn-label waves-light d-none multiple-for-recommendation" id="for-recommend-attendance-adjustment"><i class="bx bx-check label-icon"></i> For Recommendation</button>';
+                                                        }
+
+                                                        if($tag_attendance_adjustment_as_pending > 0){
+                                                            echo '<button type="button" class="btn btn-info waves-effect btn-label waves-light d-none multiple-pending" id="pending-attendance-adjustment"><i class="bx bx-check label-icon"></i> Tag As Pending</button>';
                                                         }
 
                                                         if($cancel_attendance_adjustment > 0){

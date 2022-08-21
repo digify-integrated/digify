@@ -6,9 +6,9 @@
     $api = new Api;
     $page_title = 'Approver';
 
-    $page_access = $api->check_role_permissions($username, 143);
-    $add_approver = $api->check_role_permissions($username, 144);
-	$delete_approver = $api->check_role_permissions($username, 145);
+    $page_access = $api->check_role_permissions($username, 145);
+    $add_approver = $api->check_role_permissions($username, 146);
+	$delete_approver = $api->check_role_permissions($username, 147);
     
     $check_user_account_status = $api->check_user_account_status($username);
 

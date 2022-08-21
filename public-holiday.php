@@ -6,9 +6,9 @@
     $api = new Api;
     $page_title = 'Public Holiday';
 
-    $page_access = $api->check_role_permissions($username, 171);
-    $add_public_holiday = $api->check_role_permissions($username, 172);
-	$delete_public_holiday = $api->check_role_permissions($username, 174);
+    $page_access = $api->check_role_permissions($username, 173);
+    $add_public_holiday = $api->check_role_permissions($username, 174);
+	$delete_public_holiday = $api->check_role_permissions($username, 176);
     
     $check_user_account_status = $api->check_user_account_status($username);
 

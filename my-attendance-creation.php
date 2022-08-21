@@ -6,11 +6,12 @@
     $api = new Api;
     $page_title = 'My Attendance Creation';
 
-    $page_access = $api->check_role_permissions($username, 129);
-	$request_attendance_creation = $api->check_role_permissions($username, 130);
-	$cancel_attendance_creation = $api->check_role_permissions($username, 132);
-	$tag_attendance_creation_for_recommendation = $api->check_role_permissions($username, 133);
-	$delete_attendance_creation = $api->check_role_permissions($username, 134);
+    $page_access = $api->check_role_permissions($username, 130);
+	$request_attendance_creation = $api->check_role_permissions($username, 131);
+	$cancel_attendance_creation = $api->check_role_permissions($username, 133);
+	$tag_attendance_creation_for_recommendation = $api->check_role_permissions($username, 134);
+	$tag_attendance_creation_as_pending = $api->check_role_permissions($username, 135);
+	$delete_attendance_creation = $api->check_role_permissions($username, 136);
     
     $check_user_account_status = $api->check_user_account_status($username);
 
@@ -84,6 +85,10 @@
 
                                                         if($tag_attendance_creation_for_recommendation > 0){
                                                             echo '<button type="button" class="btn btn-success waves-effect btn-label waves-light d-none multiple-for-recommendation" id="for-recommend-attendance-creation"><i class="bx bx-check label-icon"></i> For Recommendation</button>';
+                                                        }
+
+                                                        if($tag_attendance_creation_as_pending > 0){
+                                                            echo '<button type="button" class="btn btn-info waves-effect btn-label waves-light d-none multiple-pending" id="pending-attendance-creation"><i class="bx bx-check label-icon"></i> Tag As Pending</button>';
                                                         }
 
                                                         if($cancel_attendance_creation > 0){

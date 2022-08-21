@@ -6,9 +6,9 @@
     $api = new Api;
     $page_title = 'Leave Type';
 
-    $page_access = $api->check_role_permissions($username, 176);
-    $add_leave_type = $api->check_role_permissions($username, 177);
-	$delete_leave_type = $api->check_role_permissions($username, 179);
+    $page_access = $api->check_role_permissions($username, 178);
+    $add_leave_type = $api->check_role_permissions($username, 179);
+	$delete_leave_type = $api->check_role_permissions($username, 181);
     
     $check_user_account_status = $api->check_user_account_status($username);
 

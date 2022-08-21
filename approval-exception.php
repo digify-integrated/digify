@@ -6,9 +6,9 @@
     $api = new Api;
     $page_title = 'Approval Exception';
 
-    $page_access = $api->check_role_permissions($username, 146);
-    $add_approval_exception = $api->check_role_permissions($username, 147);
-	$delete_approval_exception = $api->check_role_permissions($username, 148);
+    $page_access = $api->check_role_permissions($username, 148);
+    $add_approval_exception = $api->check_role_permissions($username, 149);
+	$delete_approval_exception = $api->check_role_permissions($username, 150);
     
     $check_user_account_status = $api->check_user_account_status($username);
 

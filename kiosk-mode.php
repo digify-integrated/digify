@@ -7,8 +7,8 @@
     $page_title = 'Kiosk Mode';
 
     
-    $page_access = $api->check_role_permissions($username, 111);
-    $time_in_time_out = $api->check_role_permissions($username, 112);
+    $page_access = $api->check_role_permissions($username, 171);
+    $scan_badge = $api->check_role_permissions($username, 172);
     
     $check_user_account_status = $api->check_user_account_status($username);
 
@@ -80,9 +80,13 @@
                                                 <div class="col-md-12 text-center">
                                                     <div class="mb-4">
                                                         <div class="mb-4">
-                                                            <button type="button" class="btn btn-success waves-effect waves-light w-lg" id="scan-badge">
-                                                                <i class="bx bx-barcode d-block font-size-16 mb-1"></i> Scan Badge
-                                                            </button>
+                                                            <?php
+                                                                if($scan_badge > 0){
+                                                                    echo '<button type="button" class="btn btn-success waves-effect waves-light w-lg" id="scan-badge">
+                                                                            <i class="bx bx-barcode d-block font-size-16 mb-1"></i> Scan Badge
+                                                                        </button>';
+                                                                }
+                                                            ?>
                                                         </div>
                                                     </div>
                                                 </div>

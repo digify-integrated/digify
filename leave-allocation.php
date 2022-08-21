@@ -6,9 +6,9 @@
     $api = new Api;
     $page_title = 'Leave Allocation';
 
-    $page_access = $api->check_role_permissions($username, 181);
-    $add_leave_allocation = $api->check_role_permissions($username, 182);
-	$delete_leave_allocation = $api->check_role_permissions($username, 184);
+    $page_access = $api->check_role_permissions($username, 183);
+    $add_leave_allocation = $api->check_role_permissions($username, 184);
+	$delete_leave_allocation = $api->check_role_permissions($username, 186);
     
     $check_user_account_status = $api->check_user_account_status($username);
 

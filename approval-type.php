@@ -6,11 +6,11 @@
     $api = new Api;
     $page_title = 'Approval Type';
 
-    $page_access = $api->check_role_permissions($username, 136);
-	$add_approval_type = $api->check_role_permissions($username, 137);
-	$activate_approval_type = $api->check_role_permissions($username, 139);
-	$deactivate_approval_type = $api->check_role_permissions($username, 140);
-	$delete_approval_type = $api->check_role_permissions($username, 141);
+    $page_access = $api->check_role_permissions($username, 138);
+	$add_approval_type = $api->check_role_permissions($username, 139);
+	$activate_approval_type = $api->check_role_permissions($username, 141);
+	$deactivate_approval_type = $api->check_role_permissions($username, 142);
+	$delete_approval_type = $api->check_role_permissions($username, 143);
     
     $check_user_account_status = $api->check_user_account_status($username);
 

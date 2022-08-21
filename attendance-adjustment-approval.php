@@ -6,10 +6,10 @@
     $api = new Api;
     $page_title = 'Attendance Adjustment Approval';
 
-    $page_access = $api->check_role_permissions($username, 159);
-	$approve_attendance_adjustment = $api->check_role_permissions($username, 160);
-	$reject_attendance_adjustment = $api->check_role_permissions($username, 161);
-	$cancel_attendance_adjustment = $api->check_role_permissions($username, 162);
+    $page_access = $api->check_role_permissions($username, 161);
+	$approve_attendance_adjustment = $api->check_role_permissions($username, 162);
+	$reject_attendance_adjustment = $api->check_role_permissions($username, 163);
+	$cancel_attendance_adjustment = $api->check_role_permissions($username, 164);
     
     $check_user_account_status = $api->check_user_account_status($username);
 
