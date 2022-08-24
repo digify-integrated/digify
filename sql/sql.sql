@@ -3363,8 +3363,10 @@ BEGIN
 		SET @query = 'UPDATE attendance_adjustment SET STATUS = @status, SANCTION = @sanction, DECISION_REMARKS = @decision_remarks, DECISION_DATE = @decision_date, DECISION_BY = @decision_by, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE ADJUSTMENT_ID = @adjustment_id';
 	ELSEIF @status = 'REC' THEN
 		SET @query = 'UPDATE attendance_adjustment SET STATUS = @status, RECOMMENDATION_DATE = @decision_date, RECOMMENDATION_BY = @decision_by, RECOMMENDATION_REMARKS = @decision_remarks, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE ADJUSTMENT_ID = @adjustment_id';
-	ELSE
+	ELSEIF @status = 'FORREC' THEN
 		SET @query = 'UPDATE attendance_adjustment SET STATUS = @status, FOR_RECOMMENDATION_DATE = @decision_date, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE ADJUSTMENT_ID = @adjustment_id';
+	ELSE
+		SET @query = 'UPDATE attendance_adjustment SET STATUS = @status, FOR_RECOMMENDATION_DATE = null, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE ADJUSTMENT_ID = @adjustment_id';
     END IF;
 
 	PREPARE stmt FROM @query;
@@ -3387,8 +3389,10 @@ BEGIN
 		SET @query = 'UPDATE attendance_creation SET STATUS = @status, SANCTION = @sanction, DECISION_REMARKS = @decision_remarks, DECISION_DATE = @decision_date, DECISION_BY = @decision_by, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE CREATION_ID = @creation_id';
 	ELSEIF @status = 'REC' THEN
 		SET @query = 'UPDATE attendance_creation SET STATUS = @status, RECOMMENDATION_DATE = @decision_date, RECOMMENDATION_BY = @decision_by, RECOMMENDATION_REMARKS = @decision_remarks, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE CREATION_ID = @creation_id';
-	ELSE
+	ELSEIF @status = 'FORREC' THEN
 		SET @query = 'UPDATE attendance_creation SET STATUS = @status, FOR_RECOMMENDATION_DATE = @decision_date, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE CREATION_ID = @creation_id';
+	ELSE
+		SET @query = 'UPDATE attendance_creation SET STATUS = @status, FOR_RECOMMENDATION_DATE = null, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE CREATION_ID = @creation_id';
     END IF;
 
 	PREPARE stmt FROM @query;

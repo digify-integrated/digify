@@ -128,7 +128,7 @@ function initialize_click_events(){
         generate_modal('attendance adjustment details', 'Attendance Adjustment Details', 'LG' , '1', '0', 'element', '', '0', username);
     });
 
-    $(document).on('click','#request-attendance-adjustment',function() {        
+    $(document).on('click','#request-attendance-adjustment',function() {
         generate_modal('request attendance adjustment form', 'Request Attendance Adjustment', 'R' , '0', '1', 'form', 'request-attendance-adjustment-form', '1', username);
     });
 
@@ -356,7 +356,102 @@ function initialize_click_events(){
             });
         }
         else{
-            show_alert('Tag Multiple Attendance Adjustments For Recommendation', 'Please select the attendance adjustments you want to delete.', 'error');
+            show_alert('Tag Multiple Attendance Adjustments For Recommendation', 'Please select the attendance adjustments you want to tag for recommendation.', 'error');
+        }
+    });
+
+    $(document).on('click','.pending-attendance-adjustment',function() {
+        var adjustment_id = $(this).data('adjustment-id');
+        var transaction = 'pending attendance adjustment';
+
+        Swal.fire({
+            title: 'Tag Attendance Adjustment As Pending',
+            text: 'Are you sure you want to tag this attendance adjustment as pending?',
+            icon: 'info',
+            showCancelButton: !0,
+            confirmButtonText: 'Tag As Pending',
+            cancelButtonText: 'Cancel',
+            confirmButtonClass: 'btn btn-success mt-2',
+            cancelButtonClass: 'btn btn-secondary ms-2 mt-2',
+            buttonsStyling: !1
+        }).then(function(result) {
+            if (result.value) {
+                $.ajax({
+                    type: 'POST',
+                    url: 'controller.php',
+                    data: {username : username, adjustment_id : adjustment_id, transaction : transaction},
+                    success: function (response) {
+                        if(response === 'Pending' || response === 'Not Found'){
+                          if(response === 'Pending'){
+                            show_alert('Tag Attendance Adjustment As Pending', 'The attendance adjustment has been tagged as pending.', 'success');
+                          }
+                          else{
+                            show_alert('Tag Attendance Adjustment As Pending', 'The attendance adjustment does not exist.', 'info');
+                          }
+
+                          reload_datatable('#my-attendance-adjustment-datatable');
+                        }
+                        else{
+                          show_alert('Tag Attendance Adjustment As Pending', response, 'error');
+                        }
+                    }
+                });
+                return false;
+            }
+        });
+    });
+
+    $(document).on('click','#pending-attendance-adjustment',function() {
+        var adjustment_id = [];
+        var transaction = 'pending multiple attendance adjustment';
+
+        $('.datatable-checkbox-children').each(function(){
+            if($(this).is(':checked')){  
+                adjustment_id.push(this.value);  
+            }
+        });
+
+        if(adjustment_id.length > 0){
+            Swal.fire({
+                title: 'Tag Multiple Attendance Adjustments As Pending',
+                text: 'Are you sure you want to tag these attendance adjustments as pending?',
+                icon: 'info',
+                showCancelButton: !0,
+                confirmButtonText: 'Tag As Pending',
+                cancelButtonText: 'Cancel',
+                confirmButtonClass: 'btn btn-success mt-2',
+                cancelButtonClass: 'btn btn-secondary ms-2 mt-2',
+                buttonsStyling: !1
+            }).then(function(result) {
+                if (result.value) {
+                    
+                    $.ajax({
+                        type: 'POST',
+                        url: 'controller.php',
+                        data: {username : username, adjustment_id : adjustment_id, transaction : transaction},
+                        success: function (response) {
+                            if(response === 'Pending' || response === 'Not Found'){
+                                if(response === 'Pending'){
+                                    show_alert('Tag Multiple Attendance Adjustments As Pending', 'The attendance adjustments have been tagged as pending.', 'success');
+                                }
+                                else{
+                                    show_alert('Tag Multiple Attendance Adjustments As Pending', 'The attendance adjustment does not exist.', 'info');
+                                }
+      
+                                reload_datatable('#my-attendance-adjustment-datatable');
+                            }
+                            else{
+                                show_alert('Tag Multiple Attendance Adjustments As Pending', response, 'error');
+                            }
+                        }
+                    });
+                    
+                    return false;
+                }
+            });
+        }
+        else{
+            show_alert('Tag Multiple Attendance Adjustments As Pending', 'Please select the attendance adjustments you want to tag as pending.', 'error');
         }
     });
 

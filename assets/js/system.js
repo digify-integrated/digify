@@ -7758,6 +7758,7 @@ function hide_multiple_buttons(){
     $('.multiple-cancel').addClass('d-none');
     $('.multiple-delete').addClass('d-none');
     $('.multiple-cancel').addClass('d-none');
+    $('.multiple-pending').addClass('d-none');
     $('.multiple-for-recommendation').addClass('d-none');
     $('.multiple-recommendation').addClass('d-none');
     $('.multiple-reject').addClass('d-none');

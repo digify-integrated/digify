@@ -350,7 +350,102 @@ function initialize_click_events(){
             });
         }
         else{
-            show_alert('Tag Multiple Attendance Creations For Recommendation', 'Please select the attendance creations you want to delete.', 'error');
+            show_alert('Tag Multiple Attendance Creations For Recommendation', 'Please select the attendance creations you want to tag as pending.', 'error');
+        }
+    });
+
+    $(document).on('click','.pending-attendance-creation',function() {
+        var creation_id = $(this).data('creation-id');
+        var transaction = 'pending attendance creation';
+
+        Swal.fire({
+            title: 'Tag Attendance Creation As Pending',
+            text: 'Are you sure you want to tag this attendance creation as pending?',
+            icon: 'info',
+            showCancelButton: !0,
+            confirmButtonText: 'Tag As Pending',
+            cancelButtonText: 'Cancel',
+            confirmButtonClass: 'btn btn-success mt-2',
+            cancelButtonClass: 'btn btn-secondary ms-2 mt-2',
+            buttonsStyling: !1
+        }).then(function(result) {
+            if (result.value) {
+                $.ajax({
+                    type: 'POST',
+                    url: 'controller.php',
+                    data: {username : username, creation_id : creation_id, transaction : transaction},
+                    success: function (response) {
+                        if(response === 'Pending' || response === 'Not Found'){
+                          if(response === 'Pending'){
+                            show_alert('Tag Attendance Creation As Pending', 'The attendance creation has been tagged as pending.', 'success');
+                          }
+                          else{
+                            show_alert('Tag Attendance Creation As Pending', 'The attendance creation does not exist.', 'info');
+                          }
+
+                          reload_datatable('#my-attendance-creation-datatable');
+                        }
+                        else{
+                          show_alert('Tag Attendance Creation As Pending', response, 'error');
+                        }
+                    }
+                });
+                return false;
+            }
+        });
+    });
+
+    $(document).on('click','#pending-attendance-creation',function() {
+        var creation_id = [];
+        var transaction = 'pending multiple attendance creation';
+
+        $('.datatable-checkbox-children').each(function(){
+            if($(this).is(':checked')){  
+                creation_id.push(this.value);  
+            }
+        });
+
+        if(creation_id.length > 0){
+            Swal.fire({
+                title: 'Tag Multiple Attendance Creations As Pending',
+                text: 'Are you sure you want to tag these attendance creations as pending?',
+                icon: 'info',
+                showCancelButton: !0,
+                confirmButtonText: 'Tag As Pending',
+                cancelButtonText: 'Cancel',
+                confirmButtonClass: 'btn btn-success mt-2',
+                cancelButtonClass: 'btn btn-secondary ms-2 mt-2',
+                buttonsStyling: !1
+            }).then(function(result) {
+                if (result.value) {
+                    
+                    $.ajax({
+                        type: 'POST',
+                        url: 'controller.php',
+                        data: {username : username, creation_id : creation_id, transaction : transaction},
+                        success: function (response) {
+                            if(response === 'Pending' || response === 'Not Found'){
+                                if(response === 'Pending'){
+                                    show_alert('Tag Multiple Attendance Creations As Pending', 'The attendance creations have been tagged as pending.', 'success');
+                                }
+                                else{
+                                    show_alert('Tag Multiple Attendance Creations As Pending', 'The attendance creation does not exist.', 'info');
+                                }
+      
+                                reload_datatable('#my-attendance-creation-datatable');
+                            }
+                            else{
+                                show_alert('Tag Multiple Attendance Creations As Pending', response, 'error');
+                            }
+                        }
+                    });
+                    
+                    return false;
+                }
+            });
+        }
+        else{
+            show_alert('Tag Multiple Attendance Creations As Pending', 'Please select the attendance creations you want to tag as pending.', 'error');
         }
     });
 
