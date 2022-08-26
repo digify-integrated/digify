@@ -191,6 +191,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
                         if(!$insert_permission_role){
                             $error = $insert_permission_role;
+                            break;
                         }
                     }
 
@@ -405,6 +406,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
                             if(!$insert_upload_file_type){
                                 $error = $insert_upload_file_type;
+                                break;
                             }
                         }
                     }
@@ -2773,6 +2775,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
                     if(!$insert_approver){
                         $error = $insert_approver;
+                        break;
                     }
                 }
             }
@@ -2804,6 +2807,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
                     if(!$insert_approval_exception){
                         $error = $insert_approval_exception;
+                        break;
                     }
                 }
             }
@@ -2842,6 +2846,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
                             if(!$insert_public_holiday_work_location){
                                 $error = $insert_public_holiday_work_location;
+                                break;
                             }
                         }
                     }
@@ -3125,14 +3130,17 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                                         
                         if(!$delete_all_permission){
                             $error = $delete_all_permission;
+                            break;
                         }
                     }
                     else{
                         $error = $delete_policy;
+                        break;
                     }
                 }
                 else{
                     $error = 'Not Found';
+                    break;
                 }
             }
 
@@ -3185,10 +3193,12 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                                         
                     if(!$delete_permission){
                         $error = $delete_permission;
+                        break;
                     }
                 }
                 else{
                     $error = 'Not Found';
+                    break;
                 }
             }
 
@@ -3251,14 +3261,17 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                                         
                         if(!$delete_permission_role){
                             $error = $delete_permission_role;
+                            break;
                         }
                     }
                     else{
                         $error = $delete_role;
+                        break;
                     }
                 }
                 else{
                     $error = 'Not Found';
+                    break;
                 }
             }
 
@@ -3311,10 +3324,12 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                                         
                     if(!$delete_system_parameter){
                         $error = $delete_system_parameter;
+                        break;
                     }
                 }
                 else{
                     $error = 'Not Found';
+                    break;
                 }
             }
 
@@ -3436,14 +3451,17 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                                     
                         if(!$delete_all_upload_file_type){
                             $error = $delete_all_upload_file_type;
+                            break;
                         }                       
                     }
                     else{
                         $error = $delete_upload_setting;
+                        break;
                     }
                 }
                 else{
                     $error = 'Not Found';
+                    break;
                 }
             }
 
@@ -3496,10 +3514,12 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                                     
                     if(!$delete_company){
                         $error = $delete_company;
+                        break;
                     }
                 }
                 else{
                     $error = 'Not Found';
+                    break;
                 }
             }
 
@@ -3562,14 +3582,17 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                                         
                         if(!$delete_all_state){
                             $error = $delete_all_state;
+                            break;
                         }
                     }
                     else{
                         $error = $delete_country;
+                        break;
                     }
                 }
                 else{
                     $error = 'Not Found';
+                    break;
                 }
             }
 
@@ -3622,10 +3645,12 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                                     
                     if(!$delete_state){
                         $error = $delete_state;
+                        break;
                     }
                 }
                 else{
                     $error = 'Not Found';
+                    break;
                 }
             }
 
@@ -3715,22 +3740,27 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                                             
                                 if(!$delete_all_notification_role_recipient){
                                     $error = $delete_all_notification_role_recipient;
+                                    break;
                                 }
                             }
                             else{
                                 $error = $delete_all_notification_user_account_recipient;
+                                break;
                             }
                         }
                         else{
                             $error = $delete_all_notification_template;
+                            break;
                         }
                     }
                     else{
                         $error = $delete_notification_setting;
+                        break;
                     }
                 }
                 else{
                     $error = 'Not Found';
+                    break;
                 }
             }
 
@@ -3783,10 +3813,12 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                                     
                     if(!$delete_department){
                         $error = $delete_department;
+                        break;
                     }
                 }
                 else{
                     $error = 'Not Found';
+                    break;
                 }
             }
 
@@ -3839,10 +3871,12 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                                     
                     if(!$delete_job_position){
                         $error = $delete_job_position;
+                        break;
                     }
                 }
                 else{
                     $error = 'Not Found';
+                    break;
                 }
             }
 
@@ -3895,10 +3929,12 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                                     
                     if(!$delete_work_location){
                         $error = $delete_work_location;
+                        break;
                     }
                 }
                 else{
                     $error = 'Not Found';
+                    break;
                 }
             }
 
@@ -3951,10 +3987,12 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                                     
                     if(!$delete_departure_reason){
                         $error = $delete_departure_reason;
+                        break;
                     }
                 }
                 else{
                     $error = 'Not Found';
+                    break;
                 }
             }
 
@@ -4007,10 +4045,12 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                                     
                     if(!$delete_employee_type){
                         $error = $delete_employee_type;
+                        break;
                     }
                 }
                 else{
                     $error = 'Not Found';
+                    break;
                 }
             }
 
@@ -4063,10 +4103,12 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                                     
                     if(!$delete_employee){
                         $error = $delete_employee;
+                        break;
                     }
                 }
                 else{
                     $error = 'Not Found';
+                    break;
                 }
             }
 
@@ -4129,14 +4171,17 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                                     
                         if(!$delete_working_hours_schedule){
                             $error = $delete_working_hours_schedule;
+                            break;
                         }
                     }
                     else{
                         $error = $delete_working_hours;
+                        break;
                     }
                 }
                 else{
                     $error = 'Not Found';
+                    break;
                 }
             }
 
@@ -4189,10 +4234,12 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                                     
                     if(!$delete_attendance){
                         $error = $delete_attendance;
+                        break;
                     }
                 }
                 else{
                     $error = 'Not Found';
+                    break;
                 }
             }
 
@@ -4245,10 +4292,12 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                                     
                     if(!$delete_attendance_adjustment){
                         $error = $delete_attendance_adjustment;
+                        break;
                     }
                 }
                 else{
                     $error = 'Not Found';
+                    break;
                 }
             }
 
@@ -4301,10 +4350,12 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                                     
                     if(!$delete_attendance_creation){
                         $error = $delete_attendance_creation;
+                        break;
                     }
                 }
                 else{
                     $error = 'Not Found';
+                    break;
                 }
             }
 
@@ -4377,18 +4428,22 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                                             
                             if(!$delete_all_approval_exception){
                                 $error = $delete_all_approval_exception;
+                                break;
                             }
                         }
                         else{
                             $error = $delete_all_approval_approver;
+                            break;
                         }
                     }
                     else{
                         $error = $delete_approval_type;
+                        break;
                     }
                 }
                 else{
                     $error = 'Not Found';
+                    break;
                 }
             }
 
@@ -4504,10 +4559,12 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                                     
                     if(!$delete_approval_exception){
                         $error = $delete_approval_exception;
+                        break;
                     }
                 }
                 else{
                     $error = 'Not Found';
+                    break;
                 }
             }
 
@@ -4570,14 +4627,17 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                                         
                         if(!$delete_public_holiday){
                             $error = $delete_public_holiday;
+                            break;
                         }
                     }
                     else{
                         $error = $delete_all_public_holiday_work_location;
+                        break;
                     }
                 }
                 else{
                     $error = 'Not Found';
+                    break;
                 }
             }
 
@@ -4630,10 +4690,12 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                                     
                     if(!$delete_leave_type){
                         $error = $delete_leave_type;
+                        break;
                     }
                 }
                 else{
                     $error = 'Not Found';
+                    break;
                 }
             }
 
@@ -4686,10 +4748,70 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                                     
                     if(!$delete_leave_allocation){
                         $error = $delete_leave_allocation;
+                        break;
                     }
                 }
                 else{
                     $error = 'Not Found';
+                    break;
+                }
+            }
+
+            if(empty($error)){
+                echo 'Deleted';
+            }
+            else{
+                echo $error;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Delete leave
+    else if($transaction == 'delete leave'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['leave_id']) && !empty($_POST['leave_id'])){
+            $username = $_POST['username'];
+            $leave_id = $_POST['leave_id'];
+
+            $check_leave_exist = $api->check_leave_exist($leave_id);
+
+            if($check_leave_exist > 0){
+                $delete_leave = $api->delete_leave($leave_id, $username);
+                                    
+                if($delete_leave){
+                    echo 'Deleted';
+                }
+                else{
+                    echo $delete_leave;
+                }
+            }
+            else{
+                echo 'Not Found';
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Delete multiple leave
+    else if($transaction == 'delete multiple leave'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['leave_id'])){
+            $username = $_POST['username'];
+            $leave_ids = $_POST['leave_id'];
+
+            foreach($leave_ids as $leave_id){
+                $check_leave_exist = $api->check_leave_exist($leave_id);
+
+                if($check_leave_exist > 0){
+                    $delete_leave = $api->delete_leave($leave_id, $username);
+                                    
+                    if(!$delete_leave){
+                        $error = $delete_leave;
+                        break;
+                    }
+                }
+                else{
+                    $error = 'Not Found';
+                    break;
                 }
             }
 
@@ -4746,10 +4868,12 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                                     
                     if(!$update_user_account_lock_status){
                         $error = $update_user_account_lock_status;
+                        break;
                     }
                 }
                 else{
                     $error = 'Not Found';
+                    break;
                 }
             }
 
@@ -4806,10 +4930,12 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                                     
                     if(!$update_user_account_lock_status){
                         $error = $update_user_account_lock_status;
+                        break;
                     }
                 }
                 else{
                     $error = 'Not Found';
+                    break;
                 }
             }
 
@@ -4866,10 +4992,12 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                                     
                     if(!$update_user_account_status){
                         $error = $update_user_account_status;
+                        break;
                     }
                 }
                 else{
                     $error = 'Not Found';
+                    break;
                 }
             }
 
@@ -4922,10 +5050,12 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                                     
                     if(!$update_approval_type_status){
                         $error = $update_approval_type_status;
+                        break;
                     }
                 }
                 else{
                     $error = 'Not Found';
+                    break;
                 }
             }
 
@@ -4982,10 +5112,12 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                                     
                     if(!$update_user_account_status){
                         $error = $update_user_account_status;
+                        break;
                     }
                 }
                 else{
                     $error = 'Not Found';
+                    break;
                 }
             }
 
@@ -5038,10 +5170,12 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                                     
                     if(!$update_approval_type_status){
                         $error = $update_approval_type_status;
+                        break;
                     }
                 }
                 else{
                     $error = 'Not Found';
+                    break;
                 }
             }
 
@@ -5107,10 +5241,12 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                                     
                     if(!$update_employee_status){
                         $error = $update_employee_status;
+                        break;
                     }
                 }
                 else{
                     $error = 'Not Found';
+                    break;
                 }
             }
 
@@ -5167,10 +5303,12 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                                     
                     if(!$update_employee_status){
                         $error = $update_employee_status;
+                        break;
                     }
                 }
                 else{
                     $error = 'Not Found';
+                    break;
                 }
             }
 
@@ -5264,14 +5402,17 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
                         if(!$send_notification){
                             $error = $send_notification;
+                            break;
                         }
                     }
                     else{
                         $error = $update_attendance_adjustment_status;
+                        break;
                     }
                 }
                 else{
                     $error = 'Not Found';
+                    break;
                 }
             }
 
@@ -5361,14 +5502,17 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
                         if(!$send_notification){
                             $error = $send_notification;
+                            break;
                         }
                     }
                     else{
                         $error = $update_attendance_creation_status;
+                        break;
                     }
                 }
                 else{
                     $error = 'Not Found';
+                    break;
                 }
             }
 
@@ -5459,14 +5603,17 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
                         if(!$send_notification){
                             $error = $send_notification;
+                            break;
                         }
                     }
                     else{
                         $error = $update_attendance_adjustment_status;
+                        break;
                     }
                 }
                 else{
                     $error = 'Not Found';
+                    break;
                 }
             }
 
@@ -5553,14 +5700,17 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
                         if(!$send_notification){
                             $error = $send_notification;
+                            break;
                         }
                     }
                     else{
                         $error = $update_attendance_creation_status;
+                        break;
                     }
                 }
                 else{
                     $error = 'Not Found';
+                    break;
                 }
             }
 
@@ -5654,14 +5804,17 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
                         if(!$send_notification){
                             $error = $send_notification;
+                            break;
                         }
                     }
                     else{
                         $error = $update_attendance_adjustment_status;
+                        break;
                     }
                 }
                 else{
                     $error = 'Not Found';
+                    break;
                 }
             }
 
@@ -5751,14 +5904,17 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
                         if(!$send_notification){
                             $error = $send_notification;
+                            break;
                         }
                     }
                     else{
                         $error = $update_attendance_creation_status;
+                        break;
                     }
                 }
                 else{
                     $error = 'Not Found';
+                    break;
                 }
             }
 
@@ -5851,15 +6007,18 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                         $send_notification = $api->send_notification(4, $approver_id, $employee_id, $notification_title, $notification_message, $username);
 
                         if(!$send_notification){
-                           $error = $send_notification;
+                            $error = $send_notification;
+                            break;
                         }
                     }
                     else{
                         $error = $update_attendance_adjustment_status;
+                        break;
                     }
                 }
                 else{
                     $error = 'Not Found';
+                    break;
                 }
             }
 
@@ -5949,14 +6108,17 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
                         if(!$send_notification){
                             $error = $send_notification;
+                            break;
                         }
                     }
                     else{
                         $error = $update_attendance_creation_status;
+                        break;
                     }
                 }
                 else{
                     $error = 'Not Found';
+                    break;
                 }
             }
 
@@ -6047,14 +6209,17 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
                         if(!$send_notification){
                             $error = $send_notification;
+                            break;
                         }
                     }
                     else{
                         $error = $update_attendance_adjustment_status;
+                        break;
                     }
                 }
                 else{
                     $error = 'Not Found';
+                    break;
                 }
             }
 
@@ -6141,14 +6306,17 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
                         if(!$send_notification){
                             $error = $send_notification;
+                            break;
                         }
                     }
                     else{
                         $error = $update_attendance_creation_status;
+                        break;
                     }
                 }
                 else{
                     $error = 'Not Found';
+                    break;
                 }
             }
 
@@ -6241,15 +6409,18 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                         $send_notification = $api->send_notification(4, $approver_id, $employee_id, $notification_title, $notification_message, $username);
 
                         if(!$send_notification){
-                           $error = $send_notification;
+                            $error = $send_notification;
+                            break;
                         }
                     }
                     else{
                         $error = $update_attendance_adjustment_status;
+                        break;
                     }
                 }
                 else{
                     $error = 'Not Found';
+                    break;
                 }
             }
 
@@ -6428,19 +6599,23 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
                                 if(!$send_notification){
                                     $error = $send_notification;
+                                    break;
                                 }
                             }
                         }
                         else{
                             $error = $update_attendance;
+                            break;
                         }
                     }
                     else{
                         $error = $check_attendance_validation;
+                        break;
                     }
                 }
                 else{
                     $error = 'Not Found';
+                    break;
                 }
             }
 
@@ -6612,26 +6787,32 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
                                     if(!$send_notification){
                                         $error = $send_notification;
+                                        break;
                                     }
                                 }
                                 else{
                                     $error = $update_attendance_creation_status;
+                                    break;
                                 }
                             }
                             else{
                                 $error = $insert_attendance;
+                                break;
                             }
                         }
                         else{
                             $error = 'Max Attendance';
+                            break;
                         }
                     }
                     else{
                         $error = $check_attendance_validation;
+                        break;
                     }
                 }
                 else{
                     $error = 'Not Found';
+                    break;
                 }
             }
 
