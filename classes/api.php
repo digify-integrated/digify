@@ -458,10 +458,12 @@ class Api{
             'i' => 'minute',
             's' => 'second',
         );
+
         foreach ($string as $k => &$v) {
             if ($diff->$k) {
                 $v = $diff->$k . ' ' . $v . ($diff->$k > 1 ? 's' : '');
-            } else {
+            } 
+            else {
                 unset($string[$k]);
             }
         }
@@ -5294,6 +5296,7 @@ class Api{
 
                     if(!$insert_upload_file_type){
                         $error = $insert_upload_file_type;
+                        break;
                     }
                 }
 
@@ -7137,6 +7140,7 @@ class Api{
     
                                 if(!$insert_public_holiday_work_location){
                                     $error = $insert_public_holiday_work_location;
+                                    break;
                                 }
                             }
 
