@@ -240,10 +240,7 @@ class Api{
                 $transaction_log_id = $user_account_details[0]['TRANSACTION_LOG_ID'];
 
                 if($user_status == 'ACTIVE'){
-                    if($login_attemp >= 5){
-                        return 'Locked';
-                    }
-                    else{
+                    if($login_attemp < 5){
                         if($user_account_details[0]['PASSWORD'] === $password){
                             if(strtotime($system_date) > strtotime($password_expiry_date)){
                                 return 'Password Expired';
@@ -255,7 +252,7 @@ class Api{
                                     $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Log In', 'User ' . $username . ' logged in.');
                                         
                                     if($insert_transaction_log){
-                                        return true;
+                                        return 'Authenticated';
                                     }
                                     else{
                                         return $insert_transaction_log;
@@ -282,7 +279,10 @@ class Api{
                             else{
                                 return $update_login_attempt;
                             }
-                        }   
+                        }
+                    }
+                    else{
+                        return 'Locked';
                     }
                 }
                 else{
@@ -799,15 +799,15 @@ class Api{
 
     # -------------------------------------------------------------
     #
-    # Name       : time_interface_settings_exist
+    # Name       : check_interface_settings_exist
     # Purpose    : Checks if the interface setting exists.
     #
     # Returns    : Number
     #
     # -------------------------------------------------------------
-    public function time_interface_settings_exist($interface_setting_id){
+    public function check_interface_settings_exist($interface_setting_id){
         if ($this->databaseConnection()) {
-            $sql = $this->db_connection->prepare('CALL time_interface_settings_exist(:interface_setting_id)');
+            $sql = $this->db_connection->prepare('CALL check_interface_settings_exist(:interface_setting_id)');
             $sql->bindValue(':interface_setting_id', $interface_setting_id);
 
             if($sql->execute()){
@@ -8487,6 +8487,78 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : delete_leave
+    # Purpose    : Delete leave.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function delete_leave($leave_id, $username){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL delete_leave(:leave_id)');
+            $sql->bindValue(':leave_id', $leave_id);
+        
+            if($sql->execute()){
+                $delete_all_leave_supporting_document = $this->delete_all_leave_supporting_document($leave_id, $username);
+
+                if($delete_all_leave_supporting_document){
+                    return true;
+                }
+                else{
+                    return $delete_all_leave_supporting_document;
+                }                
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : delete_all_leave_supporting_document
+    # Purpose    : Delete all supporting document linked to leave.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function delete_all_leave_supporting_document($leave_id, $username){
+        if ($this->databaseConnection()) {
+            $error = '';
+
+            $sql = $this->db_connection->prepare('SELECT SUPPORTING_DOCUMENT FROM leave_supporting_document WHERE LEAVE_ID = :leave_id');
+            $sql->bindValue(':leave_id', $leave_id);
+        
+            if($sql->execute()){
+                while($row = $sql->fetch()){
+                    $supporting_document = $row['SUPPORTING_DOCUMENT'];
+
+                    if(!empty($supporting_document)){
+                        if(file_exists($supporting_document)){
+                            if (!unlink($supporting_document)) {
+                                $error = $supporting_document . ' cannot be deleted due to an error.';
+                            }
+                        }
+                    }
+                }
+
+                if(empty($error)){
+                    return true;
+                }
+                else{
+                    return $error;
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Get details methods
     # -------------------------------------------------------------
 
@@ -10634,6 +10706,7 @@ class Api{
                         $morning_work_to = $work_shift_schedule_details[0]['WEDNESDAY_MORNING_WORK_TO'];
                         $afternoon_work_from = $work_shift_schedule_details[0]['WEDNESDAY_AFTERNOON_WORK_FROM'];
                         $afternoon_work_to = $work_shift_schedule_details[0]['WEDNESDAY_AFTERNOON_WORK_TO'];
+                        break;
                     case 4:
                         $morning_work_from = $work_shift_schedule_details[0]['THURSDAY_MORNING_WORK_FROM'];
                         $morning_work_to = $work_shift_schedule_details[0]['THURSDAY_MORNING_WORK_TO'];
@@ -10874,8 +10947,8 @@ class Api{
             $time_in_day = date('N', strtotime($time_in));
             $time_in_date = $this->check_date('empty', $time_in, '', 'Y-m-d', '', '', '');
 
-            $late = $this->get_attendance_late_total($employee_id, $time_in);
-            $early_leaving = $this->get_attendance_early_leaving_total($employee_id, $time_in, $time_out);
+            $late = $this->get_attendance_late_total($employee_id, $time_in) / 60;
+            $early_leaving = $this->get_attendance_early_leaving_total($employee_id, $time_in, $time_out) / 60;
 
             $working_hours_schedule = $this->get_working_hours_schedule($employee_id, $time_in_date, $time_in_day);
             $working_hours_id = $working_hours_schedule[0]['WORKING_HOURS_ID'] ?? null;
@@ -10891,7 +10964,6 @@ class Api{
             }
 
             return $total_hours;
-           
         }
     }
     # -------------------------------------------------------------

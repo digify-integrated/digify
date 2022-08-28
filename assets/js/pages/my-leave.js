@@ -125,7 +125,7 @@ function initialize_click_events(){
         generate_modal('leave details', 'Leave Details', 'LG' , '1', '0', 'element', '', '0', username);
     });
 
-    $(document).on('click','#add-leave',function() {        
+    $(document).on('click','#add-leave',function() {
         generate_modal('add leave form', 'Add Leave', 'R' , '0', '1', 'form', 'add-leave-form', '1', username);
     });
 

@@ -1792,7 +1792,7 @@ BEGIN
 	DROP PREPARE stmt;
 END //
 
-CREATE PROCEDURE TIME_INterface_settings_exist(IN interface_setting_id INT)
+CREATE PROCEDURE check_interface_settings_exist(IN interface_setting_id INT)
 BEGIN
 	SET @interface_setting_id = interface_setting_id;
 

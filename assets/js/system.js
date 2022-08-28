@@ -5675,6 +5675,156 @@ function initialize_form_validation(form_type){
             }
         });
     }
+    else if(form_type == 'cancel leave form'){
+        $('#cancel-leave-form').validate({
+            submitHandler: function (form) {
+                transaction = 'cancel leave';
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'controller.php',
+                    data: $(form).serialize() + '&username=' + username + '&transaction=' + transaction,
+                    beforeSend: function(){
+                        document.getElementById('submit-form').disabled = true;
+                        $('#submit-form').html('<div class="spinner-border spinner-border-sm text-light" role="status"><span rclass="sr-only"></span></div>');
+                    },
+                    success: function (response) {
+                        if(response === 'Cancelled' || response === 'Not Found'){
+                            if(response === 'Cancelled'){
+                                show_alert('Leave Cancellation Success', 'The leave has been cancelled.', 'success');
+                            }
+                            else{
+                                show_alert('Leave Cancellation Error', 'The leave does not exist.', 'info');
+                            }
+
+                            $('#System-Modal').modal('hide');
+
+                            if($('#my-leave-datatable').length){
+                                reload_datatable('#my-leave-datatable');
+                            }
+
+                            if($('#leave-approval-datatable').length){
+                                reload_datatable('#leave-approval-datatable');
+                            }
+                        }
+                        else{
+                            show_alert('Leave Cancellation Error', response, 'error');
+                        }
+                    },
+                    complete: function(){
+                        document.getElementById('submit-form').disabled = false;
+                        $('#submit-form').html('Submit');
+                    }
+                });
+                return false;
+            },
+            rules: {
+                decision_remarks: {
+                    required: true
+                },
+            },
+            messages: {
+                decision_remarks: {
+                    required: 'Please enter the cancellation remarks',
+                },
+            },
+            errorPlacement: function(label, element) {
+                if((element.hasClass('select2') || element.hasClass('form-select2')) && element.next('.select2-container').length) {
+                    label.insertAfter(element.next('.select2-container'));
+                }
+                else if(element.parent('.input-group').length){
+                    label.insertAfter(element.parent());
+                }
+                else{
+                    label.insertAfter(element);
+                }
+            },
+            highlight: function(element) {
+                $(element).parent().addClass('has-danger');
+                $(element).addClass('form-control-danger');
+            },
+            success: function(label,element) {
+                $(element).parent().removeClass('has-danger')
+                $(element).removeClass('form-control-danger')
+                label.remove();
+            }
+        });
+    }
+    else if(form_type == 'cancel multiple leave form'){
+        $('#cancel-multiple-leave-form').validate({
+            submitHandler: function (form) {
+                transaction = 'cancel multiple leave';
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'controller.php',
+                    data: $(form).serialize() + '&username=' + username + '&transaction=' + transaction,
+                    beforeSend: function(){
+                        document.getElementById('submit-form').disabled = true;
+                        $('#submit-form').html('<div class="spinner-border spinner-border-sm text-light" role="status"><span rclass="sr-only"></span></div>');
+                    },
+                    success: function (response) {
+                        if(response === 'Cancelled' || response === 'Not Found'){
+                            if(response === 'Cancelled'){
+                                show_alert('Leave Cancellation Success', 'The leaves have been cancelled.', 'success');
+                            }
+                            else{
+                                show_alert('Leave Cancellation Error', 'The leave does not exist.', 'info');
+                            }
+
+                            $('#System-Modal').modal('hide');
+
+                            if($('#my-leave-datatable').length){
+                                reload_datatable('#my-leave-datatable');
+                            }
+
+                            if($('#leave-approval-datatable').length){
+                                reload_datatable('#leave-approval-datatable');
+                            }
+                        }
+                        else{
+                            show_alert('Multiple Leave Cancellation Error', response, 'error');
+                        }
+                    },
+                    complete: function(){
+                        document.getElementById('submit-form').disabled = false;
+                        $('#submit-form').html('Submit');
+                    }
+                });
+                return false;
+            },
+            rules: {
+                decision_remarks: {
+                    required: true
+                },
+            },
+            messages: {
+                decision_remarks: {
+                    required: 'Please enter the cancellation remarks',
+                },
+            },
+            errorPlacement: function(label, element) {
+                if((element.hasClass('select2') || element.hasClass('form-select2')) && element.next('.select2-container').length) {
+                    label.insertAfter(element.next('.select2-container'));
+                }
+                else if(element.parent('.input-group').length){
+                    label.insertAfter(element.parent());
+                }
+                else{
+                    label.insertAfter(element);
+                }
+            },
+            highlight: function(element) {
+                $(element).parent().addClass('has-danger');
+                $(element).addClass('form-control-danger');
+            },
+            success: function(label,element) {
+                $(element).parent().removeClass('has-danger')
+                $(element).removeClass('form-control-danger')
+                label.remove();
+            }
+        });
+    }
 }
 
 // Display functions
@@ -7141,6 +7291,10 @@ function generate_form(form_type, form_id, add, username){
                 else if(form_type == 'cancel attendance creation form' || form_type == 'cancel multiple attendance creation form' || form_type == 'reject attendance creation form' || form_type == 'reject multiple attendance creation form' || form_type == 'recommend attendance creation form' || form_type == 'recommend multiple attendance creation form' || form_type == 'approve attendance creation form' || form_type == 'approve multiple attendance creation form'){
                     var creation_id = sessionStorage.getItem('creation_id');
                     $('#creation_id').val(creation_id);
+                }
+                else if(form_type == 'cancel leave form' || form_type == 'cancel multiple leave form'){
+                    var leave_id = sessionStorage.getItem('leave_id');
+                    $('#leave_id').val(leave_id);
                 }
                 else if(form_type == 'approver form' || form_type == 'approval exception form'){
                     var approval_type_id = $('#approval-type-id').text();

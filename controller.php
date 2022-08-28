@@ -17,16 +17,13 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
             $authenticate = $api->authenticate($username, $password);
             
-            if($authenticate){
+            if($authenticate === 'Authenticated'){
                 $_SESSION['lock'] = 0;
                 $_SESSION['logged_in'] = 1;
                 $_SESSION['username'] = $username;
+            }
 
-                echo 'Authenticated';
-            }
-            else{
-                echo $authenticate;
-            }
+            echo $authenticate;
         }
     }
     # -------------------------------------------------------------
@@ -796,9 +793,9 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
             $username = $_POST['username'];
             $interface_setting_id = 1;
 
-            $time_interface_settings_exist = $api->time_interface_settings_exist($interface_setting_id);
+            $check_interface_settings_exist = $api->check_interface_settings_exist($interface_setting_id);
 
-            if($time_interface_settings_exist > 0){
+            if($check_interface_settings_exist > 0){
                 $login_background_upload = $api->time_interface_upload($_FILES['login_background'], 'login background', $interface_setting_id, $username);
 
                 if($login_background_upload){

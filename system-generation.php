@@ -2173,17 +2173,6 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                 </div>
                             </div>';
             }
-            else if($form_type == 'tag leave for approval form' || $form_type == 'tag multiple leave for approval form'){
-                $form .= '<div class="row">
-                                <div class="col-md-12">
-                                    <div class="mb-3">
-                                        <label for="decision_remarks" class="form-label">Recommendation Remarks</label>
-                                        <input type="hidden" id="leave_id" name="leave_id">
-                                        <textarea class="form-control form-maxlength" id="decision_remarks" name="decision_remarks" maxlength="500" rows="3"></textarea>
-                                    </div>
-                                </div>
-                            </div>';
-            }
             else if($form_type == 'approve leave form' || $form_type == 'approve multiple leave form'){
                 $form .= '<div class="row">
                                 <div class="col-md-12">
