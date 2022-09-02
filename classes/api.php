@@ -4763,7 +4763,7 @@ class Api{
     # Returns    : Number/String
     #
     # -------------------------------------------------------------
-    public function update_leave($leave_id, $leave_type, $reason, $leave_date, $start_time, $end_time, $username){
+    public function update_leave($leave_id, $leave_type, $reason, $leave_date, $start_time, $end_time, $total_hours, $username){
         if ($this->databaseConnection()) {
             $record_log = 'UPD->' . $username . '->' . date('Y-m-d h:i:s');
             $leave_details = $this->get_leave_details($leave_id);
@@ -4778,13 +4778,14 @@ class Api{
                 $transaction_log_id = $transaction_log_system_parameter[0]['ID'];
             }
 
-            $sql = $this->db_connection->prepare('CALL update_leave(:leave_id, :leave_type, :reason, :leave_date, :start_time, :end_time, :transaction_log_id, :record_log)');
+            $sql = $this->db_connection->prepare('CALL update_leave(:leave_id, :leave_type, :reason, :leave_date, :start_time, :end_time, :total_hours, :transaction_log_id, :record_log)');
             $sql->bindValue(':leave_id', $leave_id);
             $sql->bindValue(':leave_type', $leave_type);
             $sql->bindValue(':reason', $reason);
             $sql->bindValue(':leave_date', $leave_date);
             $sql->bindValue(':start_time', $start_time);
             $sql->bindValue(':end_time', $end_time);
+            $sql->bindValue(':total_hours', $total_hours);
             $sql->bindValue(':transaction_log_id', $transaction_log_id);
             $sql->bindValue(':record_log', $record_log);
         
@@ -7333,7 +7334,7 @@ class Api{
     # Returns    : Number/String
     #
     # -------------------------------------------------------------
-    public function insert_leave($employee_id, $leave_type, $reason, $leave_date, $start_time, $end_time, $username){
+    public function insert_leave($employee_id, $leave_type, $reason, $leave_date, $start_time, $end_time, $total_hours, $username){
         if ($this->databaseConnection()) {
             $record_log = 'INS->' . $username . '->' . date('Y-m-d h:i:s');
             $system_date_time = date('Y-m-d H:i:s');
@@ -7348,7 +7349,7 @@ class Api{
             $transaction_log_parameter_number = $transaction_log_system_parameter[0]['PARAMETER_NUMBER'];
             $transaction_log_id = $transaction_log_system_parameter[0]['ID'];
 
-            $sql = $this->db_connection->prepare('CALL insert_leave(:id, :employee_id, :leave_type, :reason, :leave_date, :start_time, :end_time, :system_date_time, :transaction_log_id, :record_log)');
+            $sql = $this->db_connection->prepare('CALL insert_leave(:id, :employee_id, :leave_type, :reason, :leave_date, :start_time, :end_time, :total_hours, :system_date_time, :transaction_log_id, :record_log)');
             $sql->bindValue(':id', $id);
             $sql->bindValue(':employee_id', $employee_id);
             $sql->bindValue(':leave_type', $leave_type);
@@ -7356,6 +7357,7 @@ class Api{
             $sql->bindValue(':leave_date', $leave_date);
             $sql->bindValue(':start_time', $start_time);
             $sql->bindValue(':end_time', $end_time);
+            $sql->bindValue(':total_hours', $total_hours);
             $sql->bindValue(':system_date_time', $system_date_time);
             $sql->bindValue(':transaction_log_id', $transaction_log_id);
             $sql->bindValue(':record_log', $record_log); 
@@ -10943,6 +10945,40 @@ class Api{
     #
     # -------------------------------------------------------------
     public function get_attendance_total_hours($employee_id, $time_in, $time_out){
+        if ($this->databaseConnection()) {
+            $time_in_day = date('N', strtotime($time_in));
+            $time_in_date = $this->check_date('empty', $time_in, '', 'Y-m-d', '', '', '');
+
+            $late = $this->get_attendance_late_total($employee_id, $time_in) / 60;
+            $early_leaving = $this->get_attendance_early_leaving_total($employee_id, $time_in, $time_out) / 60;
+
+            $working_hours_schedule = $this->get_working_hours_schedule($employee_id, $time_in_date, $time_in_day);
+            $working_hours_id = $working_hours_schedule[0]['WORKING_HOURS_ID'] ?? null;
+            $morning_work_from = $working_hours_schedule[0]['MORNING_WORK_FROM'] ?? null;
+            $morning_work_to = $working_hours_schedule[0]['MORNING_WORK_TO'] ?? null;
+            $afternoon_work_from = $working_hours_schedule[0]['AFTERNOON_WORK_FROM'] ?? null;
+            $afternoon_work_to = $working_hours_schedule[0]['AFTERNOON_WORK_TO'] ?? null;
+
+            $total_hours = (floor(((strtotime($morning_work_to) - strtotime($morning_work_from)) / 3600)) + floor(((strtotime($afternoon_work_to) - strtotime($afternoon_work_from)) / 3600))) - ($late + $early_leaving);
+
+            if($total_hours <= 0){
+                $total_hours = 0;
+            }
+
+            return $total_hours;
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : get_leave_total_hours
+    # Purpose    : Returns the total hours of leave
+    #
+    # Returns    : Number
+    #
+    # -------------------------------------------------------------
+    public function get_leave_total_hours($employee_id, $time_in, $time_out){
         if ($this->databaseConnection()) {
             $time_in_day = date('N', strtotime($time_in));
             $time_in_date = $this->check_date('empty', $time_in, '', 'Y-m-d', '', '', '');

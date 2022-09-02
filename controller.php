@@ -3013,7 +3013,9 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                 $check_time_validation = $api->check_time_validation($start_time, $end_time);
 
                 if(empty($check_time_validation)){
-                    $insert_leave = $api->insert_leave($employee_id, $leave_type, $reason, $leave_date, $start_time, $end_time, $username);
+                    $total_hours = $api->get_leave_total_hours($employee_id, $leave_date . ' ' . $start_time, $leave_date . ' ' . $end_time);
+
+                    $insert_leave = $api->insert_leave($employee_id, $leave_type, $reason, $leave_date, $start_time, $end_time, $total_hours, $username);
 
                     if(!$insert_leave){
                         $error = $insert_leave;
@@ -3054,7 +3056,12 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                 $check_time_validation = $api->check_time_validation($start_time, $end_time);
 
                 if(empty($check_time_validation)){
-                    $update_leave = $api->update_leave($leave_id, $leave_type, $reason, $leave_date, $start_time, $end_time, $username);
+                    $employee_details = $api->get_employee_details($username);
+                    $employee_id = $employee_details[0]['EMPLOYEE_ID'] ?? null;
+
+                    $total_hours = $api->get_leave_total_hours($employee_id, $leave_date . ' ' . $start_time, $leave_date . ' ' . $end_time);
+                    
+                    $update_leave = $api->update_leave($leave_id, $leave_type, $reason, $leave_date, $start_time, $end_time, $total_hours, $username);
 
                     if($update_leave){
                         echo 'Updated';
