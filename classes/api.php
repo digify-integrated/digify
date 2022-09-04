@@ -10978,7 +10978,7 @@ class Api{
     # Returns    : Number
     #
     # -------------------------------------------------------------
-    public function get_leave_total_hours($employee_id, $time_in, $time_out){
+    public function get_leave_total_hours($employee_id, $leave_date, $start_time, $end_time){
         if ($this->databaseConnection()) {
             $time_in_day = date('N', strtotime($time_in));
             $time_in_date = $this->check_date('empty', $time_in, '', 'Y-m-d', '', '', '');
