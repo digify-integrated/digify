@@ -10756,7 +10756,7 @@ class Api{
     # Returns    : Number
     #
     # -------------------------------------------------------------
-    public function get_attendance_late_total($employee_id, $time_in){
+    public function get_attendance_late_total($employee_id, $time_in, $include_late_policy = true){
         if ($this->databaseConnection()) {
             $time_in_day = date('N', strtotime($time_in));
             $time_in_time = $this->check_date('empty', $time_in, '', 'H:i:00', '', '', '');
@@ -10783,9 +10783,7 @@ class Api{
             if(strtotime($time_in_time) >= strtotime($working_hours_start)){
                 if(!empty($morning_work_from) && !empty($morning_work_to) && !empty($afternoon_work_from) && !empty($afternoon_work_to)){
                     if(strtotime($time_in_time) >= strtotime($afternoon_work_from)){
-                        $late = floor(((strtotime($morning_work_to) - strtotime($morning_work_from)) / 3600) * 60);
-
-                        $late = $late + floor(((strtotime($time_in_time) - strtotime($afternoon_work_from)) / 3600) * 60);
+                        $late = floor(((strtotime($time_in_time) - strtotime($afternoon_work_from)) / 3600) * 60);
                     }
                     else{
                         $late = floor(((strtotime($time_in_time) - strtotime($morning_work_from)) / 3600) * 60);
@@ -10813,9 +10811,11 @@ class Api{
 
                 $late = $late - $late_grace_period;
 
-                if($late_policy > 0){
-                    if($late > $late_policy){
-                        $late = (floor(((strtotime($morning_work_to) - strtotime($morning_work_from)) / 3600) * 60) + floor(((strtotime($afternoon_work_to) - strtotime($afternoon_work_from)) / 3600) * 60)) / 2;
+                if($include_late_policy){
+                    if($late_policy > 0){
+                        if($late > $late_policy){
+                            $late = (floor(((strtotime($morning_work_to) - strtotime($morning_work_from)) / 3600) * 60) + floor(((strtotime($afternoon_work_to) - strtotime($afternoon_work_from)) / 3600) * 60)) / 2;
+                        }
                     }
                 }
             }
@@ -10840,7 +10840,7 @@ class Api{
     # Returns    : Number
     #
     # -------------------------------------------------------------
-    public function get_attendance_early_leaving_total($employee_id, $time_in, $time_out){
+    public function get_attendance_early_leaving_total($employee_id, $time_in, $time_out, $include_early_leaving_policy = true){
         if ($this->databaseConnection()) {
             $time_in_day = date('N', strtotime($time_in));
             $time_out_time = $this->check_date('empty', $time_out, '', 'H:i:00', '', '', '');
@@ -10873,9 +10873,11 @@ class Api{
                 $early_leaving = 0;
             }
 
-            if($early_leaving_policy > 0){
-                if($early_leaving > $early_leaving_policy){
-                    $early_leaving = (floor(((strtotime($morning_work_to) - strtotime($morning_work_from)) / 3600) * 60) + floor(((strtotime($afternoon_work_to) - strtotime($afternoon_work_from)) / 3600) * 60)) / 2;
+            if($include_early_leaving_policy){
+                if($early_leaving_policy > 0){
+                    if($early_leaving > $early_leaving_policy){
+                        $early_leaving = (floor(((strtotime($morning_work_to) - strtotime($morning_work_from)) / 3600) * 60) + floor(((strtotime($afternoon_work_to) - strtotime($afternoon_work_from)) / 3600) * 60)) / 2;
+                    }
                 }
             }
 
@@ -10954,12 +10956,18 @@ class Api{
 
             $working_hours_schedule = $this->get_working_hours_schedule($employee_id, $time_in_date, $time_in_day);
             $working_hours_id = $working_hours_schedule[0]['WORKING_HOURS_ID'] ?? null;
-            $morning_work_from = $working_hours_schedule[0]['MORNING_WORK_FROM'] ?? null;
-            $morning_work_to = $working_hours_schedule[0]['MORNING_WORK_TO'] ?? null;
-            $afternoon_work_from = $working_hours_schedule[0]['AFTERNOON_WORK_FROM'] ?? null;
-            $afternoon_work_to = $working_hours_schedule[0]['AFTERNOON_WORK_TO'] ?? null;
 
-            $total_hours = (floor(((strtotime($morning_work_to) - strtotime($morning_work_from)) / 3600)) + floor(((strtotime($afternoon_work_to) - strtotime($afternoon_work_from)) / 3600))) - ($late + $early_leaving);
+            if(!empty($working_hours_id)){
+                $morning_work_from = $working_hours_schedule[0]['MORNING_WORK_FROM'] ?? null;
+                $morning_work_to = $working_hours_schedule[0]['MORNING_WORK_TO'] ?? null;
+                $afternoon_work_from = $working_hours_schedule[0]['AFTERNOON_WORK_FROM'] ?? null;
+                $afternoon_work_to = $working_hours_schedule[0]['AFTERNOON_WORK_TO'] ?? null;
+
+                $total_hours = (floor(((strtotime($morning_work_to) - strtotime($morning_work_from)) / 3600)) + floor(((strtotime($afternoon_work_to) - strtotime($afternoon_work_from)) / 3600))) - ($late + $early_leaving);
+            }
+            else{
+                $total_hours = floor(((strtotime($time_out) - strtotime($time_in)) / 3600));
+            }
 
             if($total_hours <= 0){
                 $total_hours = 0;
@@ -10978,22 +10986,29 @@ class Api{
     # Returns    : Number
     #
     # -------------------------------------------------------------
-    public function get_leave_total_hours($employee_id, $leave_date, $start_time, $end_time){
+    public function get_leave_total_hours($employee_id, $leave_date, $leave_start_time, $leave_end_time){
         if ($this->databaseConnection()) {
-            $time_in_day = date('N', strtotime($time_in));
-            $time_in_date = $this->check_date('empty', $time_in, '', 'Y-m-d', '', '', '');
+            $leave_day = date('N', strtotime($leave_date));
+            $leave_start_time = $this->check_date('empty', $leave_date . ' ' . $leave_start_time, '', 'H:i:00 Y-m-d', '', '', '');
+            $leave_end_time = $this->check_date('empty', $leave_date . ' ' . $leave_end_time, '', 'H:i:00 Y-m-d', '', '', '');
 
-            $late = $this->get_attendance_late_total($employee_id, $time_in) / 60;
-            $early_leaving = $this->get_attendance_early_leaving_total($employee_id, $time_in, $time_out) / 60;
+            $late = $this->get_attendance_late_total($employee_id, $leave_start_time, false) / 60;
+            $early_leaving = $this->get_attendance_early_leaving_total($employee_id, $leave_start_time, $leave_end_time, false) / 60;
 
-            $working_hours_schedule = $this->get_working_hours_schedule($employee_id, $time_in_date, $time_in_day);
+            $working_hours_schedule = $this->get_working_hours_schedule($employee_id, $leave_date, $leave_day);
             $working_hours_id = $working_hours_schedule[0]['WORKING_HOURS_ID'] ?? null;
-            $morning_work_from = $working_hours_schedule[0]['MORNING_WORK_FROM'] ?? null;
-            $morning_work_to = $working_hours_schedule[0]['MORNING_WORK_TO'] ?? null;
-            $afternoon_work_from = $working_hours_schedule[0]['AFTERNOON_WORK_FROM'] ?? null;
-            $afternoon_work_to = $working_hours_schedule[0]['AFTERNOON_WORK_TO'] ?? null;
+            
+            if(!empty($working_hours_id)){
+                $morning_work_from = $working_hours_schedule[0]['MORNING_WORK_FROM'] ?? null;
+                $morning_work_to = $working_hours_schedule[0]['MORNING_WORK_TO'] ?? null;
+                $afternoon_work_from = $working_hours_schedule[0]['AFTERNOON_WORK_FROM'] ?? null;
+                $afternoon_work_to = $working_hours_schedule[0]['AFTERNOON_WORK_TO'] ?? null;
 
-            $total_hours = (floor(((strtotime($morning_work_to) - strtotime($morning_work_from)) / 3600)) + floor(((strtotime($afternoon_work_to) - strtotime($afternoon_work_from)) / 3600))) - ($late + $early_leaving);
+                $total_hours = (floor(((strtotime($morning_work_to) - strtotime($morning_work_from)) / 3600)) + floor(((strtotime($afternoon_work_to) - strtotime($afternoon_work_from)) / 3600))) - ($late + $early_leaving);
+            }
+            else{
+                $total_hours = floor(((strtotime($leave_end_time) - strtotime($leave_start_time)) / 3600));
+            }
 
             if($total_hours <= 0){
                 $total_hours = 0;

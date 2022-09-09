@@ -6389,7 +6389,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                 $filter_status = $_POST['filter_status'];
                 $filter_leave_type = $_POST['filter_leave_type'];
 
-                $query = 'SELECT LEAVE_ID, LEAVE_TYPE_ID, LEAVE_DATE, START_TIME, END_TIME, STATUS, TRANSACTION_LOG_ID FROM leave_management WHERE EMPLOYEE_ID = :employee_id';
+                $query = 'SELECT LEAVE_ID, LEAVE_TYPE_ID, LEAVE_DATE, START_TIME, END_TIME, STATUS, TOTAL_HOURS, TRANSACTION_LOG_ID FROM leave_management WHERE EMPLOYEE_ID = :employee_id';
 
                 if((!empty($filter_creation_start_date) && !empty($filter_creation_end_date)) || (!empty($filter_leave_start_date) && !empty($filter_leave_end_date)) || (!empty($filter_for_approval_start_date) && !empty($filter_for_approval_end_date)) || (!empty($filter_decision_start_date) && !empty($filter_decision_end_date)) || !empty($filter_status) || !empty($filter_leave_type) ){
                     $query .= ' AND ';
@@ -6465,6 +6465,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                         $end_time = $api->check_date('empty', $row['END_TIME'], '', 'h:i:s a', '', '', '');
                         $leave_type_id = $row['LEAVE_TYPE_ID'];
                         $status = $row['STATUS'];
+                        $total_hours = number_format($row['TOTAL_HOURS']);
                         $transaction_log_id = $row['TRANSACTION_LOG_ID'];
 
                         $leave_type_details = $api->get_leave_type_details($leave_type_id);
@@ -6540,7 +6541,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                         $response[] = array(
                             'CHECK_BOX' => '<input class="form-check-input datatable-checkbox-children" data-cancel="'. $data_cancel .'" data-pending="'. $data_pending .'" data-for-approval="'. $data_for_approval .'" type="checkbox" value="'. $leave_id .'">',
                             'LEAVE_TYPE' => $leave_type,
-                            'LEAVE_DATE' => $leave_date . '<p class="text-muted mb-0">'. $start_time .' - '. $end_time .'</p>',
+                            'LEAVE_DATE' => $leave_date . '<p class="text-muted mb-0">'. $start_time .' - '. $end_time .'</p>' . '<p class="text-muted mb-0"> Total Hours: '. $total_hours .'</p>',
                             'STATUS' => $status_name,
                             'ACTION' => '<div class="d-flex gap-2">
                                 <button type="button" class="btn btn-primary waves-effect waves-light view-leave" data-leave-id="'. $leave_id .'" title="View Leave">
