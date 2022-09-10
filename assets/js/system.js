@@ -7157,6 +7157,35 @@ function display_form_details(form_type){
             initialize_leave_supporting_document_table('#leave-supporting-document-table');
         }
     }
+    else if(form_type == 'leave details'){
+        transaction = 'leave summary details';
+
+        var leave_id = sessionStorage.getItem('leave_id');
+
+        $.ajax({
+            url: 'controller.php',
+            method: 'POST',
+            dataType: 'JSON',
+            data: {leave_id : leave_id, transaction : transaction},
+            success: function(response) {
+                $('#employee').text(response[0].EMPLOYEE);
+                $('#leave_type').text(response[0].LEAVE_TYPE);
+                $('#leave_date').text(response[0].LEAVE_DATE);
+                $('#start_time').text(response[0].START_TIME);
+                $('#end_time').text(response[0].END_TIME);
+                $('#total_hours').text(response[0].TOTAL_HOURS);
+                $('#reason').text(response[0].REASON);
+                $('#created_date').text(response[0].CREATED_DATE);
+                $('#for_approval_date').text(response[0].FOR_APPROVAL_DATE);
+                $('#decision_date').text(response[0].DECISION_DATE);
+                $('#decision').text(response[0].DECISION_BY);
+                $('#decision_remarks').text(response[0].DECISION_REMARKS);
+                document.getElementById('leave_status').innerHTML = response[0].STATUS;
+
+                document.getElementById('supporting_documents').innerHTML = response[0].SUPPORTING_DOCUMENTS;
+            }
+        });
+    }
 }
 
 function initialize_transaction_log_table(datatable_name, buttons = false, show_all = false){
@@ -7440,7 +7469,7 @@ function generate_element(element_type, value, container, modal, username){
             if(modal == '1'){
                 $('#System-Modal').modal('show');
 
-                if(element_type == 'user account details' || element_type == 'system parameter details' || element_type == 'company details' || element_type == 'job position details' || element_type == 'work location details' || element_type == 'working hours details' || element_type == 'attendance details' || element_type == 'attendance adjustment details' || element_type == 'attendance creation details' || element_type == 'attendance cration details' || element_type == 'approval type details' || element_type == 'public holiday details'){
+                if(element_type == 'user account details' || element_type == 'system parameter details' || element_type == 'company details' || element_type == 'job position details' || element_type == 'work location details' || element_type == 'working hours details' || element_type == 'attendance details' || element_type == 'attendance adjustment details' || element_type == 'attendance creation details' || element_type == 'attendance cration details' || element_type == 'approval type details' || element_type == 'public holiday details' || element_type == 'leave details'){
                     display_form_details(element_type);
                 }
                 else if(element_type == 'scan badge form'){

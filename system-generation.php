@@ -2883,6 +2883,75 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                 </div>
                             </div>';
             }
+            else if($element_type == 'leave details'){
+                $element = '<div class="row">
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <table class="table table-nowrap mb-0">
+                                            <tbody>
+                                                <tr>
+                                                    <th scope="row">Employee :</th>
+                                                    <td id="employee" colspan="2"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">Leave Type :</th>
+                                                    <td id="leave_type"></td>
+                                                    <th scope="row">Leave Date :</th>
+                                                    <td id="leave_date"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">Start Time :</th>
+                                                    <td id="start_time"></td>
+                                                    <th scope="row">End Time :</th>
+                                                    <td id="end_time"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">Total Hours :</th>
+                                                    <td id="total_hours"></td>
+                                                    <th scope="row">Status :</th>
+                                                    <td id="leave_status"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">Reason :</th>
+                                                    <td id="reason" colspan="2"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">Created Date :</th>
+                                                    <td id="created_date"></td>
+                                                    <th scope="row">For Approval Date :</th>
+                                                    <td id="for_approval_date"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">Decision Date :</th>
+                                                    <td id="decision_date"></td>
+                                                    <th scope="row">Decision By :</th>
+                                                    <td id="decision By"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">Decision Remarks :</th>
+                                                    <td id="decision_remarks" colspan="2"></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <ul class="nav nav-tabs" role="tablist">
+                                        <li class="nav-item">
+                                            <a class="nav-link active" data-bs-toggle="tab" href="#supporting_documents" role="tab">
+                                                <span class="d-block d-sm-none"><i class="bx bx-time"></i></span>
+                                                <span class="d-none d-sm-block">Supporting Documents</span>    
+                                            </a>
+                                        </li>
+                                    </ul>
+                                    <div class="tab-content p-3 text-muted">
+                                        <div class="tab-pane active" id="supporting_documents" role="tabpanel"></div>
+                                    </div>
+                                </div>
+                            </div>';
+            }
 
             $response[] = array(
                 'ELEMENT' => $element

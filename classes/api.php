@@ -10447,6 +10447,7 @@ class Api{
                         'LEAVE_DATE' => $row['LEAVE_DATE'],
                         'START_TIME' => $row['START_TIME'],
                         'END_TIME' => $row['END_TIME'],
+                        'TOTAL_HOURS' => $row['TOTAL_HOURS'],
                         'STATUS' => $row['STATUS'],
                         'CREATED_DATE' => $row['CREATED_DATE'],
                         'FOR_APPROVAL_DATE' => $row['FOR_APPROVAL_DATE'],
@@ -12898,6 +12899,64 @@ class Api{
                 else{
                     $table .= '<tr>
                         <td colspan="5"><p class="text-center">No Attendance Adjustments</p></td>
+                    </tr>';
+                }
+
+                $table .= '</tbody>
+                </table>';
+
+                return $table;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+     # -------------------------------------------------------------
+    #
+    # Name       : generate_leave_supporting_documents_table
+    # Purpose    : Generates leave supporting document table.
+    #
+    # Returns    : String
+    #
+    # -------------------------------------------------------------
+    public function generate_leave_supporting_documents_table($leave_id){
+        if ($this->databaseConnection()) {
+            $table = '<table class="table table-bordered mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Supporting Document</th>
+                                <th>Upload Date</th>
+                                <th>Uploaded By</th>
+                            </tr>
+                        </thead>
+                        <tbody>';
+            
+            $sql = $this->db_connection->prepare('SELECT DOCUMENT_NAME, SUPPORTING_DOCUMENT, UPLOADED_BY, UPLOAD_DATE FROM leave_supporting_document WHERE LEAVE_ID = :leave_id');
+            $sql->bindValue(':leave_id', $leave_id);
+           
+            if($sql->execute()){
+                $count = $sql->rowCount();
+        
+                if($count > 0){
+                    while($row = $sql->fetch()){
+                        $document_name = $row['DOCUMENT_NAME'];
+                        $supporting_document = $row['SUPPORTING_DOCUMENT'];
+                        $uploaded_by = $row['UPLOADED_BY'];
+                        $upload_date = $this->check_date('summary', $row['UPLOAD_DATE'], '', 'F d, Y h:i a', '', '', '');
+
+                        $table .= '<tr>
+                                    <td><a href="'. $supporting_document .'" target="_blank">'. $document_name .'</a></td>
+                                    <td>'. $upload_date .'</td>
+                                    <td>'. $uploaded_by .'</td>
+                                </tr>';
+                    }
+                }
+                else{
+                    $table .= '<tr>
+                        <td colspan="5"><p class="text-center">No Leave Supporting Document</p></td>
                     </tr>';
                 }
 

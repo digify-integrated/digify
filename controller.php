@@ -8359,6 +8359,56 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     }
     # -------------------------------------------------------------
 
+    # Leave summary details
+    else if($transaction == 'leave summary details'){
+        if(isset($_POST['leave_id']) && !empty($_POST['leave_id'])){
+            $leave_id = $_POST['leave_id'];
+
+            $leave_details = $api->get_leave_details($leave_id);
+            $employee_id = $leave_details[0]['EMPLOYEE_ID'];
+            $status = $leave_details[0]['STATUS'];
+            $leave_type_id = $leave_details[0]['LEAVE_TYPE_ID'];
+
+            $leave_type_details = $api->get_leave_type_details($leave_type_id);
+            $leave_type = $leave_type_details[0]['LEAVE_TYPE'];
+            
+            $status_name = $api->get_leave_status($status)[0]['BADGE'];
+
+            $employee_details = $api->get_employee_details($employee_id);
+            $file_as = $employee_details[0]['FILE_AS'];
+
+            $generate_leave_supporting_documents_table = $api->generate_leave_supporting_documents_table($leave_id);
+
+            if(!empty($decision_by)){
+                $decision_by_details = $api->get_employee_details($decision_by);
+                $decision_by_file_as = $decision_by_details[0]['FILE_AS'];
+            }
+            else{
+                $decision_by_file_as = '--';
+            }
+
+            $response[] = array(
+                'EMPLOYEE' => $file_as,
+                'LEAVE_TYPE' => $leave_type,
+                'LEAVE_DATE' => $api->check_date('empty', $leave_details[0]['LEAVE_DATE'], '', 'F d, Y', '', '', ''),
+                'CREATED_DATE' => $api->check_date('empty', $leave_details[0]['CREATED_DATE'], '', 'F d, Y h:i a', '', '', ''),
+                'FOR_APPROVAL_DATE' => $api->check_date('empty', $leave_details[0]['FOR_APPROVAL_DATE'], '', 'F d, Y h:i a', '', '', ''),
+                'DECISION_DATE' => $api->check_date('empty', $leave_details[0]['DECISION_DATE'], '', 'F d, Y h:i a', '', '', ''),
+                'START_TIME' => $api->check_date('empty', $leave_details[0]['START_TIME'], '', 'h:i a', '', '', ''),
+                'END_TIME' => $api->check_date('empty', $leave_details[0]['END_TIME'], '', 'h:i a', '', '', ''),
+                'REASON' => $leave_details[0]['REASON'],
+                'TOTAL_HOURS' => $leave_details[0]['TOTAL_HOURS'],
+                'DECISION_BY' => $decision_by_file_as,
+                'DECISION_REMARKS' => $leave_details[0]['DECISION_REMARKS'],
+                'STATUS' => $status_name,
+                'SUPPORTING_DOCUMENTS' => $generate_leave_supporting_documents_table
+            );
+
+            echo json_encode($response);
+        }
+    }
+    # -------------------------------------------------------------
+
 }
 
 ?>
