@@ -4893,7 +4893,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     # -------------------------------------------------------------
 
     # Delete leave supporting document
-     else if($transaction == 'delete leave supporting document'){
+    else if($transaction == 'delete leave supporting document'){
         if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['leave_supporting_document_id']) && !empty($_POST['leave_supporting_document_id'])){
             $username = $_POST['username'];
             $leave_supporting_document_id = $_POST['leave_supporting_document_id'];

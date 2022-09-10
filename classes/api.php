@@ -8629,19 +8629,27 @@ class Api{
         if ($this->databaseConnection()) {
             $error = '';
 
-            $sql = $this->db_connection->prepare('SELECT SUPPORTING_DOCUMENT FROM leave_supporting_document WHERE LEAVE_ID = :leave_id');
+            $sql = $this->db_connection->prepare('SELECT LEAVE_SUPPORTING_DOCUMENT_ID, SUPPORTING_DOCUMENT FROM leave_supporting_document WHERE LEAVE_ID = :leave_id');
             $sql->bindValue(':leave_id', $leave_id);
         
             if($sql->execute()){
                 while($row = $sql->fetch()){
+                    $leave_supporting_document_id = $row['LEAVE_SUPPORTING_DOCUMENT_ID'];
                     $supporting_document = $row['SUPPORTING_DOCUMENT'];
 
-                    if(!empty($supporting_document)){
-                        if(file_exists($supporting_document)){
-                            if (!unlink($supporting_document)) {
-                                $error = $supporting_document . ' cannot be deleted due to an error.';
+                    $delete_leave_supporting_document = $this->delete_leave_supporting_document($leave_supporting_document_id, $username);
+                                    
+                    if($delete_leave_supporting_document){
+                        if(!empty($supporting_document)){
+                            if(file_exists($supporting_document)){
+                                if (!unlink($supporting_document)) {
+                                    $error = $supporting_document . ' cannot be deleted due to an error.';
+                                }
                             }
                         }
+                    }
+                    else{
+                        $error = $delete_leave_supporting_document;
                     }
                 }
 
