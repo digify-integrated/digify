@@ -5825,6 +5825,100 @@ function initialize_form_validation(form_type){
             }
         });
     }
+    else if(form_type == 'add leave supporting document form'){
+        $('#add-leave-supporting-document-form').validate({
+            submitHandler: function (form) {
+                transaction = 'submit leave supporting document';
+
+                var formData = new FormData(form);
+                formData.append('username', username);
+                formData.append('transaction', transaction);
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'controller.php',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    beforeSend: function(){
+                        document.getElementById('submit-form').disabled = true;
+                        $('#submit-form').html('<div class="spinner-border spinner-border-sm text-light" role="status"><span rclass="sr-only"></span></div>');
+                    },
+                    success: function (response) {
+                        if(response === 'Inserted'){
+                            show_alert('Add Leave Supporting Document Success', 'The leave supporting document has been inserted.', 'success');
+
+                            document.getElementById("document_name").value = '';
+                            document.getElementById("supporting_document").value = '';
+
+                            if($('#leave-supporting-document-table').length){
+                                reload_datatable('#leave-supporting-document-table');
+                            }
+                        }
+                        else if(response === 'Not Found'){
+                            show_alert('Add Leave Supporting Document Error', 'The leave does not exist.', 'info');
+
+                            $('#System-Modal').modal('hide');
+
+                            if($('#my-leave-datatable').length){
+                                reload_datatable('#my-leave-datatable');
+                            }
+                        }
+                        else if(response === 'File Size'){
+                            show_alert('Add Leave Supporting Document Error', 'The file uploaded exceeds the maximum file size.', 'error');
+                        }
+                        else if(response === 'File Type'){
+                            show_alert('Add Leave Supporting Document Error', 'The file uploaded is not supported.', 'error');
+                        }
+                        else{
+                            show_alert('Add Leave Supporting Document Error', response, 'error');
+                        }
+                    },
+                    complete: function(){
+                        document.getElementById('submit-form').disabled = false;
+                        $('#submit-form').html('Submit');
+                    }
+                });
+                return false;
+            },
+            rules: {
+                document_name: {
+                    required: true
+                },
+                supporting_document: {
+                    required: true
+                },
+            },
+            messages: {
+                document_name: {
+                    required: 'Please enter the document name',
+                },
+                supporting_document: {
+                    required: 'Please choose the leave supporting document',
+                },
+            },
+            errorPlacement: function(label, element) {
+                if((element.hasClass('select2') || element.hasClass('form-select2')) && element.next('.select2-container').length) {
+                    label.insertAfter(element.next('.select2-container'));
+                }
+                else if(element.parent('.input-group').length){
+                    label.insertAfter(element.parent());
+                }
+                else{
+                    label.insertAfter(element);
+                }
+            },
+            highlight: function(element) {
+                $(element).parent().addClass('has-danger');
+                $(element).addClass('form-control-danger');
+            },
+            success: function(label,element) {
+                $(element).parent().removeClass('has-danger')
+                $(element).removeClass('form-control-danger')
+                label.remove();
+            }
+        });
+    }
 }
 
 // Display functions
@@ -7054,6 +7148,14 @@ function display_form_details(form_type){
                 check_option_exist('#leave_type', response[0].LEAVE_TYPE_ID, '');
             }
         });
+    }
+    else if(form_type == 'add leave supporting document form'){
+        var leave_id = sessionStorage.getItem('leave_id');
+        $('#leave_id').val(leave_id);
+
+        if($('#leave-supporting-document-table').length){
+            initialize_leave_supporting_document_table('#leave-supporting-document-table');
+        }
     }
 }
 

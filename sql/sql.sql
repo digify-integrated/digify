@@ -563,7 +563,10 @@ CREATE TABLE leave_management(
 CREATE TABLE leave_supporting_document(
 	LEAVE_SUPPORTING_DOCUMENT_ID VARCHAR(100) PRIMARY KEY,
 	LEAVE_ID VARCHAR(100) NOT NULL,
+	DOCUMENT_NAME VARCHAR(100) NOT NULL,
 	SUPPORTING_DOCUMENT VARCHAR(500) NOT NULL,
+	UPLOADED_BY VARCHAR(50) NOT NULL,
+	UPLOAD_DATE DATETIME NOT NULL,
 	RECORD_LOG VARCHAR(100)
 );
 
@@ -3836,6 +3839,19 @@ BEGIN
 	DROP PREPARE stmt;
 END //
 
+CREATE PROCEDURE get_employee_leave_allocation_details(IN employee_id VARCHAR(100), IN leave_type_id VARCHAR(100), IN leave_date DATE)
+BEGIN
+	SET @employee_id = employee_id;
+	SET @leave_type_id = leave_type_id;
+	SET @leave_date = leave_date;
+
+	SET @query = 'SELECT LEAVE_ALLOCATION_ID, DURATION, AVAILED, VALIDITY_START_DATE, VALIDITY_END_DATE, TRANSACTION_LOG_ID, RECORD_LOG FROM leave_allocation WHERE EMPLOYEE_ID = @employee_id AND LEAVE_TYPE_ID = @leave_type_id AND (VALIDITY_START_DATE <= @leave_date AND VALIDITY_END_DATE >= @leave_date)';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
 CREATE PROCEDURE delete_leave_allocation(IN leave_allocation_id VARCHAR(100))
 BEGIN
 	SET @leave_allocation_id = leave_allocation_id;
@@ -3927,6 +3943,66 @@ BEGIN
 	SET @leave_id = leave_id;
 
 	SET @query = 'DELETE FROM leave_management WHERE LEAVE_ID = @leave_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE TABLE leave_supporting_document(
+	LEAVE_SUPPORTING_DOCUMENT_ID VARCHAR(100) PRIMARY KEY,
+	LEAVE_ID VARCHAR(100) NOT NULL,
+	DOCUMENT_NAME VARCHAR(100) NOT NULL,
+	SUPPORTING_DOCUMENT VARCHAR(500) NOT NULL,
+	UPLOADED_BY VARCHAR(50) NOT NULL,
+	UPLOAD_DATE DATETIME NOT NULL,
+	RECORD_LOG VARCHAR(100)
+);
+
+CREATE PROCEDURE check_leave_supporting_document_exist(IN leave_supporting_document_id VARCHAR(100))
+BEGIN
+	SET @leave_supporting_document_id = leave_supporting_document_id;
+
+	SET @query = 'SELECT COUNT(1) AS TOTAL FROM leave_supporting_document WHERE LEAVE_SUPPORTING_DOCUMENT_ID = @leave_supporting_document_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE insert_leave_supporting_document(IN leave_supporting_document_id VARCHAR(100), IN leave_id VARCHAR(100), IN document_name VARCHAR(100), IN supporting_document VARCHAR(500), IN uploaded_by VARCHAR(50), IN uploaded_date DATETIME, IN record_log VARCHAR(100))
+BEGIN
+	SET @leave_supporting_document_id = leave_supporting_document_id;
+	SET @leave_id = leave_id;
+	SET @document_name = document_name;
+	SET @supporting_document = supporting_document;
+	SET @uploaded_by = uploaded_by;
+	SET @uploaded_date = uploaded_date;
+	SET @record_log = record_log;
+
+	SET @query = 'INSERT INTO leave_supporting_document (LEAVE_SUPPORTING_DOCUMENT_ID, LEAVE_ID, DOCUMENT_NAME, SUPPORTING_DOCUMENT, UPLOADED_BY, UPLOAD_DATE, RECORD_LOG) VALUES(@leave_supporting_document_id, @leave_id, @document_name, @supporting_document, @uploaded_by, @uploaded_date, @record_log)';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE get_leave_supporting_document_details(IN leave_supporting_document_id VARCHAR(100))
+BEGIN
+	SET @leave_supporting_document_id = leave_supporting_document_id;
+
+	SET @query = 'SELECT LEAVE_ID, DOCUMENT_NAME, SUPPORTING_DOCUMENT, UPLOADED_BY, UPLOAD_DATE, RECORD_LOG FROM leave_supporting_document WHERE LEAVE_SUPPORTING_DOCUMENT_ID = @leave_supporting_document_id';
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE PROCEDURE delete_leave_supporting_document(IN leave_supporting_document_id VARCHAR(100))
+BEGIN
+	SET @leave_supporting_document_id = leave_supporting_document_id;
+
+	SET @query = 'DELETE FROM leave_supporting_document WHERE LEAVE_SUPPORTING_DOCUMENT_ID = @leave_supporting_document_id';
 
 	PREPARE stmt FROM @query;
 	EXECUTE stmt;

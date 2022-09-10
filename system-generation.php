@@ -2184,6 +2184,51 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                 </div>
                             </div>';
             }
+            else if($form_type == 'add leave supporting document form'){
+                $form .= '<div class="row">
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <input type="hidden" id="leave_id" name="leave_id">
+                                        <label for="document_name" class="form-label">Document Name <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control form-maxlength" autocomplete="off" id="document_name" name="document_name" maxlength="100">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <label for="supporting_document" class="form-label">Supporting Document <span class="text-danger">*</span></label><br/>
+                                        <input class="form-control" type="file" name="supporting_document" id="supporting_document">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <ul class="nav nav-tabs" role="tablist">
+                                        <li class="nav-item">
+                                            <a class="nav-link active" data-bs-toggle="tab" href="#supporting_document_tab" role="tab">
+                                                <span class="d-block d-sm-none"><i class="bx bx-time"></i></span>
+                                                <span class="d-none d-sm-block">Supporting Documents</span>    
+                                            </a>
+                                        </li>
+                                    </ul>
+                                    <div class="tab-content p-3 text-muted">
+                                        <div class="tab-pane active" id="supporting_document_tab" role="tabpanel">
+                                            <table id="leave-supporting-document-table" class="table table-bordered align-middle mb-0 table-hover table-striped dt-responsive nowrap w-100">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th>Supporting Document</th>
+                                                        <th>Upload Date</th>
+                                                        <th>Uploaded By</th>
+                                                        <th>Action</th>
+                                                    </tr>
+                                                </thead>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>';
+            }
 
             $form .= '</form>';
 
@@ -6308,7 +6353,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                             $validity_end_date = 'No Limit';
                         }
 
-                        if($update_leave_allocation > 0 && $availed == 0){
+                        if($update_leave_allocation > 0){
                             $update = '<button type="button" class="btn btn-info waves-effect waves-light update-leave-allocation" data-leave-allocation-id="'. $leave_allocation_id .'" title="Edit Leave Allocation">
                                             <i class="bx bx-pencil font-size-16 align-middle"></i>
                                         </button>';
@@ -6465,8 +6510,12 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                         $end_time = $api->check_date('empty', $row['END_TIME'], '', 'h:i:s a', '', '', '');
                         $leave_type_id = $row['LEAVE_TYPE_ID'];
                         $status = $row['STATUS'];
-                        $total_hours = number_format($row['TOTAL_HOURS']);
+                        $total_hours = number_format($row['TOTAL_HOURS'], 2);
                         $transaction_log_id = $row['TRANSACTION_LOG_ID'];
+
+                        $employee_leave_allocation_details = $api->get_employee_leave_allocation_details($employee_id, $leave_type_id, $leave_date);
+                        $duration = $employee_leave_allocation_details[0]['DURATION'] ?? 0;
+                        $availed = $employee_leave_allocation_details[0]['AVAILED'] ?? 0;
 
                         $leave_type_details = $api->get_leave_type_details($leave_type_id);
                         $leave_type = $leave_type_details[0]['LEAVE_TYPE'];
@@ -6517,9 +6566,14 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                             $update = '<button type="button" class="btn btn-info waves-effect waves-light update-leave" data-leave-id="'. $leave_id .'" title="Update Leave">
                                     <i class="bx bx-pencil font-size-16 align-middle"></i>
                                 </button>';
+
+                            $upload = '<button type="button" class="btn btn-info waves-effect waves-light add-leave-supporting-document" data-leave-id="'. $leave_id .'" title="Add Leave Supporting Document">
+                                    <i class="bx bx-paperclip font-size-16 align-middle"></i>
+                                </button>';
                         }
                         else{
                             $update = '';
+                            $upload = '';
                         }
 
                         if($view_transaction_log > 0 && !empty($transaction_log_id)){
@@ -6541,18 +6595,59 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                         $response[] = array(
                             'CHECK_BOX' => '<input class="form-check-input datatable-checkbox-children" data-cancel="'. $data_cancel .'" data-pending="'. $data_pending .'" data-for-approval="'. $data_for_approval .'" type="checkbox" value="'. $leave_id .'">',
                             'LEAVE_TYPE' => $leave_type,
-                            'LEAVE_DATE' => $leave_date . '<p class="text-muted mb-0">'. $start_time .' - '. $end_time .'</p>' . '<p class="text-muted mb-0"> Total Hours: '. $total_hours .'</p>',
+                            'LEAVE_DATE' => $leave_date . ' ' . $start_time .' - '. $end_time . '<p class="text-muted mb-0"> Total Hours: '. $total_hours .'</p>',
+                            'DURATION' => $availed . ' remaining out of ' . $duration . ' hour(s)',
                             'STATUS' => $status_name,
                             'ACTION' => '<div class="d-flex gap-2">
                                 <button type="button" class="btn btn-primary waves-effect waves-light view-leave" data-leave-id="'. $leave_id .'" title="View Leave">
                                     <i class="bx bx-show font-size-16 align-middle"></i>
                                 </button>
                                 '. $update .'
+                                '. $upload .'
                                 '. $for_approval .'
                                 '. $pending .'
                                 '. $cancel .'
                                 '. $transaction_log .'
                                 '. $delete .'
+                            </div>'
+                        );
+                    }
+    
+                    echo json_encode($response);
+                }
+                else{
+                    echo $sql->errorInfo()[2];
+                }
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Leave supporting document table
+    else if($type == 'leave supporting document table'){
+        if(isset($_POST['leave_id']) && !empty($_POST['leave_id'])){
+            if ($api->databaseConnection()) {
+                $leave_id = $_POST['leave_id'];
+    
+                $sql = $api->db_connection->prepare('SELECT LEAVE_SUPPORTING_DOCUMENT_ID, DOCUMENT_NAME, SUPPORTING_DOCUMENT, UPLOADED_BY, UPLOAD_DATE FROM leave_supporting_document WHERE LEAVE_ID = :leave_id');
+                $sql->bindValue(':leave_id', $leave_id);
+
+                if($sql->execute()){
+                    while($row = $sql->fetch()){
+                        $leave_supporting_document_id = $row['LEAVE_SUPPORTING_DOCUMENT_ID'];
+                        $document_name = $row['DOCUMENT_NAME'];
+                        $supporting_document = $row['SUPPORTING_DOCUMENT'];
+                        $uploaded_by = $row['UPLOADED_BY'];
+                        $upload_date = $api->check_date('empty', $row['UPLOAD_DATE'], '', 'm/d/Y h:i:s a', '', '', '');
+
+                        $response[] = array(
+                            'DOCUMENT_NAME' => '<a href="'. $supporting_document .'" target="_blank">' . $document_name . '</a>',
+                            'UPLOADED_BY' => $uploaded_by,
+                            'UPLOAD_DATE' => $upload_date,
+                            'ACTION' => '<div class="d-flex gap-2">
+                                <button type="button" class="btn btn-danger waves-effect waves-light delete-leave-supporting-document" data-leave-supporting-document-id="'. $leave_supporting_document_id .'" title="Delete Leave Supporting Document">
+                                    <i class="bx bx-trash font-size-16 align-middle"></i>
+                                </button>
                             </div>'
                         );
                     }

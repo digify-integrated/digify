@@ -200,6 +200,7 @@
                                                             </th>
                                                             <th class="all">Leave Type</th>
                                                             <th class="all">Leave Date</th>
+                                                            <th class="all">Allocation</th>
                                                             <th class="all">Status</th>
                                                             <th class="all">Action</th>
                                                         </tr>

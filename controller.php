@@ -3081,6 +3081,69 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     }
     # -------------------------------------------------------------
 
+    # Submit leave supporting document
+    else if($transaction == 'submit leave supporting document'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['leave_id']) && !empty($_POST['leave_id']) && isset($_POST['document_name']) && !empty($_POST['document_name'])){
+            $file_type = '';
+            $username = $_POST['username'];
+            $leave_id = $_POST['leave_id'];
+            $document_name = $_POST['document_name'];
+
+            $supporting_document_name = $_FILES['supporting_document']['name'];
+            $supporting_document_size = $_FILES['supporting_document']['size'];
+            $supporting_document_error = $_FILES['supporting_document']['error'];
+            $supporting_document_tmp_name = $_FILES['supporting_document']['tmp_name'];
+            $supporting_document_ext = explode('.', $supporting_document_name);
+            $supporting_document_actual_ext = strtolower(end($supporting_document_ext));
+
+            $upload_setting_details = $api->get_upload_setting_details(12);
+            $upload_file_type_details = $api->get_upload_file_type_details(12);
+            $file_max_size = $upload_setting_details[0]['MAX_FILE_SIZE'] * 1048576;
+
+            for($i = 0; $i < count($upload_file_type_details); $i++) {
+                $file_type .= $upload_file_type_details[$i]['FILE_TYPE'];
+
+                if($i != (count($upload_file_type_details) - 1)){
+                    $file_type .= ',';
+                }
+            }
+
+            $allowed_ext = explode(',', $file_type);
+
+            $check_leave_exist = $api->check_leave_exist($leave_id);
+
+            if($check_leave_exist > 0){
+                if(in_array($supporting_document_actual_ext, $allowed_ext)){
+                    if(!$supporting_document_error){
+                        if($supporting_document_size < $file_max_size){
+                            $insert_leave_supporting_document = $api->insert_leave_supporting_document($supporting_document_tmp_name, $supporting_document_actual_ext, $leave_id, $document_name, $username);
+    
+                            if($insert_leave_supporting_document){
+                                echo 'Inserted';
+                            }
+                            else{
+                                echo $insert_leave_supporting_document;
+                            }
+                        }
+                        else{
+                            echo 'File Size';
+                        }
+                    }
+                    else{
+                        echo 'There was an error uploading the file.';
+                    }
+                }
+                else{
+                    echo 'File Type';
+                }
+            }
+            else{
+                echo 'Not Found';
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
     # -------------------------------------------------------------
     #   Delete transactions
     # -------------------------------------------------------------
@@ -4824,6 +4887,31 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
             }
             else{
                 echo $error;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Delete leave supporting document
+     else if($transaction == 'delete leave supporting document'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['leave_supporting_document_id']) && !empty($_POST['leave_supporting_document_id'])){
+            $username = $_POST['username'];
+            $leave_supporting_document_id = $_POST['leave_supporting_document_id'];
+
+            $check_leave_supporting_document_exist = $api->check_leave_supporting_document_exist($leave_supporting_document_id);
+
+            if($check_leave_supporting_document_exist > 0){
+                $delete_leave_supporting_document = $api->delete_leave_supporting_document($leave_supporting_document_id, $username);
+                                    
+                if($delete_leave_supporting_document){
+                    echo 'Deleted';
+                }
+                else{
+                    echo $delete_leave_supporting_document;
+                }
+            }
+            else{
+                echo 'Not Found';
             }
         }
     }

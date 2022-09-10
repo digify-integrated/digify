@@ -1351,6 +1351,31 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : check_leave_supporting_document_exist
+    # Purpose    : Checks if the leave supporting document exists.
+    #
+    # Returns    : Number
+    #
+    # -------------------------------------------------------------
+    public function check_leave_supporting_document_exist($leave_supporting_document_id){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL check_leave_supporting_document_exist(:leave_supporting_document_id)');
+            $sql->bindValue(':leave_supporting_document_id', $leave_supporting_document_id);
+
+            if($sql->execute()){
+                $row = $sql->fetch();
+
+                return $row['TOTAL'];
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Update methods
     # -------------------------------------------------------------
     
@@ -4157,46 +4182,17 @@ class Api{
                 $attachment = $job_position_details[0]['ATTACHMENT'];
                 $transaction_log_id = $job_position_details[0]['TRANSACTION_LOG_ID'];
     
-                    if(file_exists($attachment)){
-                        if (unlink($attachment)) {
-                            if(move_uploaded_file($attachment_tmp_name, $file_destination)){
-                                $sql = $this->db_connection->prepare('CALL update_attendance_creation_attachment(:attendance_creation_attachment_id, :file_path, :record_log)');
-                                $sql->bindValue(':attendance_creation_attachment_id', $attendance_creation_attachment_id);
-                                $sql->bindValue(':file_path', $file_path);
-                                $sql->bindValue(':record_log', $record_log);
-                            
-                                if($sql->execute()){
-                                    $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated attendance creation attachment.');
-                                        
-                                    if($insert_transaction_log){
-                                        return true;
-                                    }
-                                    else{
-                                        return $insert_transaction_log;
-                                    }
-                                }
-                                else{
-                                    return $sql->errorInfo()[2];
-                                }
-                            }
-                            else{
-                                return 'There was an error uploading your file.';
-                            }
-                        }
-                        else {
-                            return $attachment . ' cannot be deleted due to an error.';
-                        }
-                    }
-                    else{
+                if(file_exists($attachment)){
+                    if (unlink($attachment)) {
                         if(move_uploaded_file($attachment_tmp_name, $file_destination)){
                             $sql = $this->db_connection->prepare('CALL update_attendance_creation_attachment(:attendance_creation_attachment_id, :file_path, :record_log)');
                             $sql->bindValue(':attendance_creation_attachment_id', $attendance_creation_attachment_id);
                             $sql->bindValue(':file_path', $file_path);
                             $sql->bindValue(':record_log', $record_log);
-                        
+                            
                             if($sql->execute()){
                                 $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated attendance creation attachment.');
-                                    
+                                        
                                 if($insert_transaction_log){
                                     return true;
                                 }
@@ -4212,10 +4208,39 @@ class Api{
                             return 'There was an error uploading your file.';
                         }
                     }
+                    else {
+                        return $attachment . ' cannot be deleted due to an error.';
+                    }
                 }
                 else{
-                    return $directory_checker;
+                    if(move_uploaded_file($attachment_tmp_name, $file_destination)){
+                        $sql = $this->db_connection->prepare('CALL update_attendance_creation_attachment(:attendance_creation_attachment_id, :file_path, :record_log)');
+                        $sql->bindValue(':attendance_creation_attachment_id', $attendance_creation_attachment_id);
+                        $sql->bindValue(':file_path', $file_path);
+                        $sql->bindValue(':record_log', $record_log);
+                        
+                        if($sql->execute()){
+                            $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated attendance creation attachment.');
+                                    
+                            if($insert_transaction_log){
+                                return true;
+                            }
+                            else{
+                                return $insert_transaction_log;
+                            }
+                        }
+                        else{
+                            return $sql->errorInfo()[2];
+                        }
+                    }
+                    else{
+                        return 'There was an error uploading your file.';
+                    }
                 }
+            }
+            else{
+                return $directory_checker;
+            }
         }
     }
     # -------------------------------------------------------------
@@ -7396,6 +7421,80 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : insert_leave_supporting_document
+    # Purpose    : Insert leave supporting document.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function insert_leave_supporting_document($supporting_document_tmp_name, $supporting_document_actual_ext, $leave_id, $document_name, $username){
+        if ($this->databaseConnection()) {
+            $record_log = 'INS->' . $username . '->' . date('Y-m-d h:i:s');
+            $system_date_time = date('Y-m-d H:i:s');
+
+            # Get system parameter id
+            $system_parameter = $this->get_system_parameter(27, 1);
+            $parameter_number = $system_parameter[0]['PARAMETER_NUMBER'];
+            $id = $system_parameter[0]['ID'];
+
+            $file_name = $this->generate_file_name(10);
+            $file_new = $file_name . '.' . $supporting_document_actual_ext;
+
+            $directory = './company/employee/leave_supporting_document/';
+            $file_destination = $_SERVER['DOCUMENT_ROOT'] . '/digify/company/employee/leave_supporting_document/' . $file_new;
+            $file_path = $directory . $file_new;
+
+            $directory_checker = $this->directory_checker($directory);
+
+            if($directory_checker){
+                $leave_details = $this->get_leave_details($leave_id);
+                $transaction_log_id = $leave_details[0]['TRANSACTION_LOG_ID'];
+    
+                if(move_uploaded_file($supporting_document_tmp_name, $file_destination)){
+                    $sql = $this->db_connection->prepare('CALL insert_leave_supporting_document(:id, :leave_id, :document_name, :file_path, :username, :system_date_time, :record_log)');
+                    $sql->bindValue(':id', $id);
+                    $sql->bindValue(':leave_id', $leave_id);
+                    $sql->bindValue(':document_name', $document_name);
+                    $sql->bindValue(':file_path', $file_path);
+                    $sql->bindValue(':username', $username);
+                    $sql->bindValue(':system_date_time', $system_date_time);
+                    $sql->bindValue(':record_log', $record_log);
+                    
+                    if($sql->execute()){
+                        # Update system parameter value
+                        $update_system_parameter_value = $this->update_system_parameter_value($parameter_number, 27, $username);
+
+                        if($update_system_parameter_value){
+                            $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Insert', 'User ' . $username . ' inserted leave supporting document.');
+                                
+                            if($insert_transaction_log){
+                                return true;
+                            }
+                            else{
+                                return $insert_transaction_log;
+                            }
+                        }
+                        else{
+                            return $update_system_parameter_value;
+                        }
+                    }
+                    else{
+                        return $sql->errorInfo()[2];
+                    }
+                }
+                else{
+                    return 'There was an error uploading your file.';
+                }
+            }
+            else{
+                return $directory_checker;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Delete methods
     # -------------------------------------------------------------
 
@@ -8551,6 +8650,47 @@ class Api{
                 }
                 else{
                     return $error;
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : delete_leave_supporting_document
+    # Purpose    : Delete leave supporting document.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function delete_leave_supporting_document($leave_supporting_document_id, $username){
+        if ($this->databaseConnection()) {
+            $leave_supporting_document_details = $this->get_leave_supporting_document_details($leave_supporting_document_id);
+            $supporting_document = $leave_supporting_document_details[0]['SUPPORTING_DOCUMENT'] ?? null;
+
+            $sql = $this->db_connection->prepare('CALL delete_leave_supporting_document(:leave_supporting_document_id)');
+            $sql->bindValue(':leave_supporting_document_id', $leave_supporting_document_id);
+        
+            if($sql->execute()){ 
+                if(!empty($supporting_document)){
+                    if(file_exists($supporting_document)){
+                        if (unlink($supporting_document)) {
+                            return true;
+                        }
+                        else {
+                            return $supporting_document . ' cannot be deleted due to an error.';
+                        }
+                    }
+                    else{
+                        return true;
+                    }
+                }
+                else{
+                    return true;
                 }
             }
             else{
@@ -10236,6 +10376,47 @@ class Api{
 
     # -------------------------------------------------------------
     #
+    # Name       : get_employee_leave_allocation_details
+    # Purpose    : Gets the employee leave allocation details.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_employee_leave_allocation_details($employee_id, $leave_type_id, $leave_date){
+        if ($this->databaseConnection()) {
+            $response = array();
+
+            $leave_date = $this->check_date('empty', $leave_date, '', 'Y-m-d', '', '', '');
+
+            $sql = $this->db_connection->prepare('CALL get_employee_leave_allocation_details(:employee_id, :leave_type_id, :leave_date)');
+            $sql->bindValue(':employee_id', $employee_id);
+            $sql->bindValue(':leave_type_id', $leave_type_id);
+            $sql->bindValue(':leave_date', $leave_date);
+
+            if($sql->execute()){
+                while($row = $sql->fetch()){
+                    $response[] = array(
+                        'LEAVE_ALLOCATION_ID' => $row['LEAVE_ALLOCATION_ID'],
+                        'VALIDITY_START_DATE' => $row['VALIDITY_START_DATE'],
+                        'VALIDITY_END_DATE' => $row['VALIDITY_END_DATE'],
+                        'DURATION' => $row['DURATION'],
+                        'AVAILED' => $row['AVAILED'],
+                        'TRANSACTION_LOG_ID' => $row['TRANSACTION_LOG_ID'],
+                        'RECORD_LOG' => $row['RECORD_LOG']
+                    );
+                }
+
+                return $response;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
     # Name       : get_leave_details
     # Purpose    : Gets the leave details.
     #
@@ -10265,6 +10446,42 @@ class Api{
                         'DECISION_BY' => $row['DECISION_BY'],
                         'DECISION_REMARKS' => $row['DECISION_REMARKS'],
                         'TRANSACTION_LOG_ID' => $row['TRANSACTION_LOG_ID'],
+                        'RECORD_LOG' => $row['RECORD_LOG']
+                    );
+                }
+
+                return $response;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : get_leave_supporting_document_details
+    # Purpose    : Gets the leave supporting document details.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_leave_supporting_document_details($leave_supporting_document_id){
+        if ($this->databaseConnection()) {
+            $response = array();
+
+            $sql = $this->db_connection->prepare('CALL get_leave_supporting_document_details(:leave_supporting_document_id)');
+            $sql->bindValue(':leave_supporting_document_id', $leave_supporting_document_id);
+
+            if($sql->execute()){
+                while($row = $sql->fetch()){
+                    $response[] = array(
+                        'LEAVE_ID' => $row['LEAVE_ID'],
+                        'DOCUMENT_NAME' => $row['DOCUMENT_NAME'],
+                        'SUPPORTING_DOCUMENT' => $row['SUPPORTING_DOCUMENT'],
+                        'UPLOADED_BY' => $row['UPLOADED_BY'],
+                        'UPLOAD_DATE' => $row['UPLOAD_DATE'],
                         'RECORD_LOG' => $row['RECORD_LOG']
                     );
                 }
@@ -10809,9 +11026,9 @@ class Api{
                     $late = 0;
                 }
 
-                $late = $late - $late_grace_period;
-
                 if($include_late_policy){
+                    $late = $late - $late_grace_period;
+
                     if($late_policy > 0){
                         if($late > $late_policy){
                             $late = (floor(((strtotime($morning_work_to) - strtotime($morning_work_from)) / 3600) * 60) + floor(((strtotime($afternoon_work_to) - strtotime($afternoon_work_from)) / 3600) * 60)) / 2;

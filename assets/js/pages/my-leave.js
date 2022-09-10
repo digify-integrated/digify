@@ -31,16 +31,18 @@ function initialize_my_leave_table(datatable_name, buttons = false, show_all = f
         { 'data' : 'CHECK_BOX' },
         { 'data' : 'LEAVE_TYPE' },
         { 'data' : 'LEAVE_DATE' },
+        { 'data' : 'DURATION' },
         { 'data' : 'STATUS' },
         { 'data' : 'ACTION' }
     ];
 
     var column_definition = [
         { 'width': '1%','bSortable': false, 'aTargets': 0 },
-        { 'width': '30%', 'aTargets': 1 },
-        { 'width': '15%', 'aTargets': 2 },
-        { 'width': '10%', 'aTargets': 3 },
-        { 'width': '20%','bSortable': false, 'aTargets': 4 }
+        { 'width': '20%', 'aTargets': 1 },
+        { 'width': '20%', 'aTargets': 2 },
+        { 'width': '15%', 'aTargets': 3 },
+        { 'width': '10%', 'aTargets': 4 },
+        { 'width': '20%','bSortable': false, 'aTargets': 5 }
     ];
 
     if(show_all){
@@ -114,6 +116,99 @@ function initialize_my_leave_table(datatable_name, buttons = false, show_all = f
     $(datatable_name).dataTable(settings);
 }
 
+function initialize_leave_supporting_document_table(datatable_name, buttons = false, show_all = false){
+    hide_multiple_buttons();
+    
+    var username = $('#username').text();
+    var leave_id = $('#leave_id').val();
+    var type = 'leave supporting document table';
+    var settings;
+
+    var column = [ 
+        { 'data' : 'DOCUMENT_NAME' },
+        { 'data' : 'UPLOAD_DATE' },
+        { 'data' : 'UPLOADED_BY' },
+        { 'data' : 'ACTION' }
+    ];
+
+    var column_definition = [
+        { 'width': '20%', 'aTargets': 0 },
+        { 'width': '20%', 'aTargets': 1 },
+        { 'width': '20%', 'aTargets': 2 },
+        { 'width': '20%','bSortable': false, 'aTargets': 3 }
+    ];
+
+    if(show_all){
+        length_menu = [ [-1], ['All'] ];
+    }
+    else{
+        length_menu = [ [10, 25, 50, 100, -1], [10, 25, 50, 100, 'All'] ];
+    }
+
+    if(buttons){
+        settings = {
+            'ajax': { 
+                'url' : 'system-generation.php',
+                'method' : 'POST',
+                'dataType': 'JSON',
+                'data': {'type' : type, 'username' : username, 'leave_id' : leave_id},
+                'dataSrc' : ''
+            },
+            dom:  "<'row'<'col-sm-3'l><'col-sm-6 text-center mb-2'B><'col-sm-3'f>>" +  "<'row'<'col-sm-12'tr>>" + "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+            buttons: [
+                'csv', 'excel', 'pdf'
+            ],
+            'order': [[ 1, 'desc' ]],
+            'columns' : column,
+            'scrollY': false,
+            'scrollX': true,
+            'scrollCollapse': true,
+            'fnDrawCallback': function( oSettings ) {
+                readjust_datatable_column();
+            },
+            'aoColumnDefs': column_definition,
+            'lengthMenu': length_menu,
+            'language': {
+                'emptyTable': 'No data found',
+                'searchPlaceholder': 'Search...',
+                'search': '',
+                'loadingRecords': '<div class="spinner-border spinner-border-lg text-info" role="status"><span class="sr-only">Loading...</span></div>'
+            }
+        };
+    }
+    else{
+        settings = {
+            'ajax': { 
+                'url' : 'system-generation.php',
+                'method' : 'POST',
+                'dataType': 'JSON',
+                'data': {'type' : type, 'username' : username, 'leave_id' : leave_id},
+                'dataSrc' : ''
+            },
+            'order': [[ 1, 'desc' ]],
+            'columns' : column,
+            'scrollY': false,
+            'scrollX': true,
+            'scrollCollapse': true,
+            'fnDrawCallback': function( oSettings ) {
+                readjust_datatable_column();
+            },
+            'aoColumnDefs': column_definition,
+            'lengthMenu': length_menu,
+            'language': {
+                'emptyTable': 'No data found',
+                'searchPlaceholder': 'Search...',
+                'search': '',
+                'loadingRecords': '<div class="spinner-border spinner-border-lg text-info" role="status"><span class="sr-only">Loading...</span></div>'
+            }
+        };
+    }
+
+    destroy_datatable(datatable_name);
+    
+    $(datatable_name).dataTable(settings);
+}
+
 function initialize_click_events(){
     var username = $('#username').text();
 
@@ -135,6 +230,14 @@ function initialize_click_events(){
         sessionStorage.setItem('leave_id', leave_id);
         
         generate_modal('update leave form', 'Update Leave', 'R' , '0', '1', 'form', 'update-leave-form', '0', username);
+    });
+
+    $(document).on('click','.add-leave-supporting-document',function() {
+        var leave_id = $(this).data('leave-id');
+
+        sessionStorage.setItem('leave_id', leave_id);
+        
+        generate_modal('add leave supporting document form', 'Add Leave Supporting Document', 'LG' , '0', '1', 'form', 'add-leave-supporting-document-form', '0', username);
     });
 
     $(document).on('click','.cancel-leave',function() {
@@ -349,6 +452,47 @@ function initialize_click_events(){
         else{
             show_alert('Tag Multiple Leaves For Approval', 'Please select the leaves you want to delete.', 'error');
         }
+    });
+
+    $(document).on('click','.delete-leave-supporting-document',function() {
+        var leave_supporting_document_id = $(this).data('leave-supporting-document-id');
+        var transaction = 'delete leave supporting document';
+
+        Swal.fire({
+            title: 'Delete Leave Supporting Document',
+            text: 'Are you sure you want to delete this leave supporting document?',
+            icon: 'warning',
+            showCancelButton: !0,
+            confirmButtonText: 'Delete',
+            cancelButtonText: 'Cancel',
+            confirmButtonClass: 'btn btn-danger mt-2',
+            cancelButtonClass: 'btn btn-secondary ms-2 mt-2',
+            buttonsStyling: !1
+        }).then(function(result) {
+            if (result.value) {
+                $.ajax({
+                    type: 'POST',
+                    url: 'controller.php',
+                    data: {username : username, leave_supporting_document_id : leave_supporting_document_id, transaction : transaction},
+                    success: function (response) {
+                        if(response === 'Deleted' || response === 'Not Found'){
+                            if(response === 'Deleted'){
+                                show_alert('Delete Leave Supporting Document', 'The leave supporting document has been deleted.', 'success');
+                            }
+                            else{
+                                show_alert('Delete Leave Supporting Document', 'The leave supporting document does not exist.', 'info');
+                            }
+
+                            reload_datatable('#leave-supporting-document-table');
+                        }
+                        else{
+                          show_alert('Delete Leave Supporting Document', response, 'error');
+                        }
+                    }
+                });
+                return false;
+            }
+        });
     });
 
     $(document).on('click','#apply-filter',function() {
