@@ -5618,6 +5618,276 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     }
     # -------------------------------------------------------------
 
+    # Cancel leave
+    else if($transaction == 'cancel leave'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['leave_id']) && !empty($_POST['leave_id']) && isset($_POST['decision_remarks']) && !empty($_POST['decision_remarks'])){
+            $username = $_POST['username'];
+            $leave_id = $_POST['leave_id'];
+            $decision_remarks = $_POST['decision_remarks'];
+
+            $employee_details = $api->get_employee_details($username);
+            $approver_id = $employee_details[0]['EMPLOYEE_ID'];
+            $file_as = $employee_details[0]['FILE_AS'];
+
+            $notification_template_details = $api->get_notification_template_details(16);
+            $notification_title = $notification_template_details[0]['NOTIFICATION_TITLE'] ?? null;
+            $notification_message = $notification_template_details[0]['NOTIFICATION_MESSAGE'] ?? null;
+            $notification_message = str_replace('{employee}', $file_as, $notification_message);
+
+            $check_leave_exist = $api->check_leave_exist($leave_id);
+
+            if($check_leave_exist > 0){
+                $leave_details = $api->get_leave_details($leave_id);
+				$employee_id = $leave_details[0]['EMPLOYEE_ID'];
+				$leave_status = $leave_details[0]['STATUS'];
+
+                $update_leave_status = $api->update_leave_status($leave_id, 'CAN', $decision_remarks, $username);
+    
+                if($update_leave_status){
+                    if($leave_status == 'FA'){
+                        $update_employee_leave_allocation = $api->update_employee_leave_allocation($leave_id, $employee_id, 'CAN', $username);
+
+                        if($update_employee_leave_allocation){
+                            $send_notification = $api->send_notification(16, null, $employee_id, $notification_title, $notification_message, $username);
+    
+                            if($send_notification){
+                                echo 'Cancelled';
+                            }
+                            else{
+                                echo $send_notification;
+                            }
+                        }
+                        else{
+                            echo $update_employee_leave_allocation;
+                        }
+                    }
+                    else{
+                        $send_notification = $api->send_notification(16, null, $employee_id, $notification_title, $notification_message, $username);
+    
+                        if($send_notification){
+                            echo 'Cancelled';
+                        }
+                        else{
+                            echo $send_notification;
+                        }
+                    }
+                }
+                else{
+                    echo $update_leave_status;
+                }
+            }
+            else{
+                echo 'Not Found';
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Cancel multiple leave
+    else if($transaction == 'cancel multiple leave'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['leave_id']) && !empty($_POST['leave_id']) && isset($_POST['decision_remarks']) && !empty($_POST['decision_remarks'])){
+            $username = $_POST['username'];
+            $leave_ids = explode(',', $_POST['leave_id']);
+            $decision_remarks = $_POST['decision_remarks'];
+            $error = '';
+
+            $employee_details = $api->get_employee_details($username);
+            $approver_id = $employee_details[0]['EMPLOYEE_ID'];
+            $file_as = $employee_details[0]['FILE_AS'];
+
+            $notification_template_details = $api->get_notification_template_details(16);
+            $notification_title = $notification_template_details[0]['NOTIFICATION_TITLE'] ?? null;
+            $notification_message = $notification_template_details[0]['NOTIFICATION_MESSAGE'] ?? null;
+            $notification_message = str_replace('{employee}', $file_as, $notification_message);
+
+            foreach($leave_ids as $leave_id){
+                $check_leave_exist = $api->check_leave_exist($leave_id);
+
+                if($check_leave_exist > 0){
+                    $leave_details = $api->get_leave_details($leave_id);
+                    $employee_id = $leave_details[0]['EMPLOYEE_ID'];
+                    $leave_status = $leave_details[0]['STATUS'];
+
+                    $update_leave_status = $api->update_leave_status($leave_id, 'CAN', $decision_remarks, $username);
+        
+                    if($update_leave_status){
+                        if($leave_status == 'FA'){
+                            $update_employee_leave_allocation = $api->update_employee_leave_allocation($leave_id, $employee_id, 'CAN', $username);
+
+                            if($update_employee_leave_allocation){
+                                $send_notification = $api->send_notification(16, null, $employee_id, $notification_title, $notification_message, $username);
+    
+                                if(!$send_notification){
+                                    $error = $send_notification;
+                                    break;
+                                }
+                            }
+                            else{
+                                $error = $update_employee_leave_allocation;
+                                break;
+                            }
+                        }
+                        else{
+                            $send_notification = $api->send_notification(16, null, $employee_id, $notification_title, $notification_message, $username);
+    
+                            if(!$send_notification){
+                                $error = $send_notification;
+                                break;
+                            }
+                        }
+                    }
+                    else{
+                        $error = $update_leave_status;
+                        break;
+                    }
+                }
+                else{
+                    $error = 'Not Found';
+                    break;
+                }
+            }
+
+            if(empty($error)){
+                echo 'Cancelled';
+            }
+            else{
+                echo $error;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #   For approval transactions
+    # -------------------------------------------------------------
+
+    # For approval leave
+    else if($transaction == 'for approval leave'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['leave_id']) && !empty($_POST['leave_id'])){
+            $username = $_POST['username'];
+            $leave_id = $_POST['leave_id'];
+
+            $employee_details = $api->get_employee_details($username);
+            $approver_id = $employee_details[0]['EMPLOYEE_ID'];
+            $file_as = $employee_details[0]['FILE_AS'];
+
+            $notification_template_details = $api->get_notification_template_details(15);
+            $notification_title = $notification_template_details[0]['NOTIFICATION_TITLE'] ?? null;
+            $notification_message = $notification_template_details[0]['NOTIFICATION_MESSAGE'] ?? null;
+            $notification_message = str_replace('{employee}', $file_as, $notification_message);
+
+            $check_leave_exist = $api->check_leave_exist($leave_id);
+
+            if($check_leave_exist > 0){
+                $leave_details = $api->get_leave_details($leave_id);
+				$employee_id = $leave_details[0]['EMPLOYEE_ID'];
+                
+                $check_employee_leave_allocation = $api->check_employee_leave_allocation($leave_id, $employee_id);
+
+                if($check_employee_leave_allocation > 0){
+                    $update_leave_status = $api->update_leave_status($leave_id, 'FA', null, $username);
+    
+                    if($update_leave_status){
+                        $update_employee_leave_allocation = $api->update_employee_leave_allocation($leave_id, $employee_id, 'FA', $username);
+
+                        if($update_employee_leave_allocation){
+                            $send_notification = $api->send_notification(15, $approver_id, $employee_id, $notification_title, $notification_message, $username);
+
+                            if($send_notification){
+                                echo 'For Approval';
+                            }
+                            else{
+                                echo $send_notification;
+                            }
+                        }
+                        else{
+                            echo $update_employee_leave_allocation;
+                        }
+                    }
+                    else{
+                        echo $update_leave_status;
+                    }
+                }
+                else{
+
+                }
+            }
+            else{
+                echo 'Not Found';
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # For approval multiple leave
+    else if($transaction == 'for approval multiple leave'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['leave_id']) && !empty($_POST['leave_id'])){
+            $username = $_POST['username'];
+            $leave_ids = $_POST['leave_id'];
+
+            $employee_details = $api->get_employee_details($username);
+            $approver_id = $employee_details[0]['EMPLOYEE_ID'];
+            $file_as = $employee_details[0]['FILE_AS'];
+
+            $notification_template_details = $api->get_notification_template_details(15);
+            $notification_title = $notification_template_details[0]['NOTIFICATION_TITLE'] ?? null;
+            $notification_message = $notification_template_details[0]['NOTIFICATION_MESSAGE'] ?? null;
+            $notification_message = str_replace('{employee}', $file_as, $notification_message);
+
+            foreach($leave_ids as $leave_id){
+                $check_leave_exist = $api->check_leave_exist($leave_id);
+
+                if($check_leave_exist > 0){
+                    $leave_details = $api->get_leave_details($leave_id);
+					$employee_id = $leave_details[0]['EMPLOYEE_ID'];
+
+                    $check_employee_leave_allocation = $api->check_employee_leave_allocation($leave_id, $employee_id);
+
+                    if($check_employee_leave_allocation > 0){
+                        $update_leave_status = $api->update_leave_status($leave_id, 'FA', null, $username);
+            
+                        if($update_leave_status){
+                            $update_employee_leave_allocation = $api->update_employee_leave_allocation($leave_id, $employee_id, 'FA', $username);
+    
+                            if($update_employee_leave_allocation){
+                                $send_notification = $api->send_notification(15, $approver_id, $employee_id, $notification_title, $notification_message, $username);
+    
+                                if(!$send_notification){
+                                    $error = $send_notification;
+                                    break;
+                                }
+                            }
+                            else{
+                                $error = $update_employee_leave_allocation;
+                                break;
+                            }
+                        }
+                        else{
+                            $error = $update_leave_status;
+                            break;
+                        }
+                    }
+                    else{
+                        $error = 'Not Found';
+                        break;
+                    }
+                }
+                else{
+                    $error = 'Not Found';
+                    break;
+                }
+            }
+
+            if(empty($error)){
+                echo 'For Approval';
+            }
+            else{
+                echo $error;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
     # -------------------------------------------------------------
     #   For recommendation transactions
     # -------------------------------------------------------------
@@ -6020,6 +6290,121 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     }
     # -------------------------------------------------------------
 
+    # Reject leave
+    else if($transaction == 'reject leave'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['leave_id']) && !empty($_POST['leave_id']) && isset($_POST['decision_remarks']) && !empty($_POST['decision_remarks'])){
+            $username = $_POST['username'];
+            $leave_id = $_POST['leave_id'];
+            $decision_remarks = $_POST['decision_remarks'];
+
+            $employee_details = $api->get_employee_details($username);
+            $approver_id = $employee_details[0]['EMPLOYEE_ID'];
+            $file_as = $employee_details[0]['FILE_AS'];
+
+            $notification_template_details = $api->get_notification_template_details(18);
+            $notification_title = $notification_template_details[0]['NOTIFICATION_TITLE'] ?? null;
+            $notification_message = $notification_template_details[0]['NOTIFICATION_MESSAGE'] ?? null;
+            $notification_message = str_replace('{employee}', $file_as, $notification_message);
+
+            $check_leave_exist = $api->check_leave_exist($leave_id);
+
+            if($check_leave_exist > 0){
+                $leave_details = $api->get_leave_details($leave_id);
+				$employee_id = $leave_details[0]['EMPLOYEE_ID'];
+
+                $update_leave_status = $api->update_leave_status($leave_id, 'REJ', $decision_remarks, $username);
+    
+                if($update_leave_status){
+                    $update_employee_leave_allocation = $api->update_employee_leave_allocation($leave_id, $employee_id, 'REJ', $username);
+
+                    if($update_employee_leave_allocation){
+                        $send_notification = $api->send_notification(18, $approver_id, $employee_id, $notification_title, $notification_message, $username);
+
+                        if($send_notification){
+                            echo 'Rejected';
+                        }
+                        else{
+                            echo $send_notification;
+                        }
+                    }
+                    else{
+                        echo $update_employee_leave_allocation;
+                    }
+                }
+                else{
+                    echo $update_leave_status;
+                }
+            }
+            else{
+                echo 'Not Found';
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Reject multiple leave
+    else if($transaction == 'reject multiple leave'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['leave_id']) && !empty($_POST['leave_id']) && isset($_POST['decision_remarks']) && !empty($_POST['decision_remarks'])){
+            $username = $_POST['username'];
+            $leave_ids = explode(',', $_POST['leave_id']);
+            $decision_remarks = $_POST['decision_remarks'];
+            $error = '';
+
+            $employee_details = $api->get_employee_details($username);
+            $approver_id = $employee_details[0]['EMPLOYEE_ID'];
+            $file_as = $employee_details[0]['FILE_AS'];
+
+            $notification_template_details = $api->get_notification_template_details(18);
+            $notification_title = $notification_template_details[0]['NOTIFICATION_TITLE'] ?? null;
+            $notification_message = $notification_template_details[0]['NOTIFICATION_MESSAGE'] ?? null;
+            $notification_message = str_replace('{employee}', $file_as, $notification_message);
+
+            foreach($leave_ids as $leave_id){
+                $check_leave_exist = $api->check_leave_exist($leave_id);
+
+                if($check_leave_exist > 0){
+                    $leave_details = $api->get_leave_details($leave_id);
+				    $employee_id = $leave_details[0]['EMPLOYEE_ID'];
+
+                    $update_leave_status = $api->update_leave_status($leave_id, 'REJ', $decision_remarks, $username);
+        
+                    if($update_leave_status){
+                        $update_employee_leave_allocation = $api->update_employee_leave_allocation($leave_id, $employee_id, 'REJ', $username);
+
+                        if($update_employee_leave_allocation){
+                            $send_notification = $api->send_notification(18, $approver_id, $employee_id, $notification_title, $notification_message, $username);
+
+                            if(!$send_notification){
+                                $error = $send_notification;
+                                break;
+                            }
+                        }
+                        else{
+                            $error = $update_employee_leave_allocation;
+                            break;
+                        }
+                    }
+                    else{
+                        $error = $update_leave_status;
+                        break;
+                    }
+                }
+                else{
+                    $error = 'Not Found';
+                    break;
+                }
+            }
+
+            if(empty($error)){
+                echo 'Rejected';
+            }
+            else{
+                echo $error;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
     # -------------------------------------------------------------
     #   Recommend transactions
     # -------------------------------------------------------------
@@ -6403,6 +6788,118 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                     }
                     else{
                         $error = $update_attendance_creation_status;
+                        break;
+                    }
+                }
+                else{
+                    $error = 'Not Found';
+                    break;
+                }
+            }
+
+            if(empty($error)){
+                echo 'Pending';
+            }
+            else{
+                echo $error;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Pending leave
+    else if($transaction == 'pending leave'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['leave_id']) && !empty($_POST['leave_id'])){
+            $username = $_POST['username'];
+            $leave_id = $_POST['leave_id'];
+
+            $employee_details = $api->get_employee_details($username);
+            $approver_id = $employee_details[0]['EMPLOYEE_ID'];
+            $file_as = $employee_details[0]['FILE_AS'];
+
+            $notification_template_details = $api->get_notification_template_details(19);
+            $notification_title = $notification_template_details[0]['NOTIFICATION_TITLE'] ?? null;
+            $notification_message = $notification_template_details[0]['NOTIFICATION_MESSAGE'] ?? null;
+            $notification_message = str_replace('{employee}', $file_as, $notification_message);
+
+            $check_leave_exist = $api->check_leave_exist($leave_id);
+
+            if($check_leave_exist > 0){
+                $leave_details = $api->get_leave_details($leave_id);
+				$employee_id = $leave_details[0]['EMPLOYEE_ID'];
+
+                $update_employee_leave_allocation = $api->update_employee_leave_allocation($leave_id, $employee_id, 'PEN', $username);
+
+                if($update_employee_leave_allocation){
+                    $update_leave_status = $api->update_leave_status($leave_id, 'PEN', null, $username);
+    
+                    if($update_leave_status){
+                        $send_notification = $api->send_notification(19, $approver_id, $employee_id, $notification_title, $notification_message, $username);
+    
+                        if($send_notification){
+                            echo 'Pending';
+                        }
+                        else{
+                            echo $send_notification;
+                        }
+                    }
+                    else{
+                        echo $update_leave_status;
+                    }
+                }
+                else{
+                    echo $update_employee_leave_allocation;
+                }
+            }
+            else{
+                echo 'Not Found';
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Pending multiple leave
+    else if($transaction == 'pending multiple leave'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['leave_id']) && !empty($_POST['leave_id'])){
+            $username = $_POST['username'];
+            $leave_ids = $_POST['leave_id'];
+
+            $employee_details = $api->get_employee_details($username);
+            $approver_id = $employee_details[0]['EMPLOYEE_ID'];
+            $file_as = $employee_details[0]['FILE_AS'];
+
+            $notification_template_details = $api->get_notification_template_details(19);
+            $notification_title = $notification_template_details[0]['NOTIFICATION_TITLE'] ?? null;
+            $notification_message = $notification_template_details[0]['NOTIFICATION_MESSAGE'] ?? null;
+            $notification_message = str_replace('{employee}', $file_as, $notification_message);
+
+            foreach($leave_ids as $leave_id){
+                $check_leave_exist = $api->check_leave_exist($leave_id);
+
+                if($check_leave_exist > 0){
+                    $leave_details = $api->get_leave_details($leave_id);
+					$employee_id = $leave_details[0]['EMPLOYEE_ID'];
+
+                    $update_employee_leave_allocation = $api->update_employee_leave_allocation($leave_id, $employee_id, 'PEN', $username);
+
+                    if($update_employee_leave_allocation){
+                        $update_leave_status = $api->update_leave_status($leave_id, 'PEN', null, $username);
+        
+                        if($update_leave_status){
+                            $send_notification = $api->send_notification(19, $approver_id, $employee_id, $notification_title, $notification_message, $username);
+    
+                            if(!$send_notification){
+                                $error = $send_notification;
+                                break;
+                            }
+                        }
+                        else{
+                            $error = $update_leave_status;
+                            break;
+                        }
+                    }
+                    else{
+                        $error = $update_employee_leave_allocation;
                         break;
                     }
                 }
@@ -6918,6 +7415,106 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     }
     # -------------------------------------------------------------
 
+    # Approve leave
+    else if($transaction == 'approve leave'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['leave_id']) && !empty($_POST['leave_id']) && isset($_POST['decision_remarks']) && !empty($_POST['decision_remarks'])){
+            $username = $_POST['username'];
+            $leave_id = $_POST['leave_id'];
+            $decision_remarks = $_POST['decision_remarks'];
+
+            $employee_details = $api->get_employee_details($username);
+            $approver_id = $employee_details[0]['EMPLOYEE_ID'];
+            $file_as = $employee_details[0]['FILE_AS'];
+
+            $notification_template_details = $api->get_notification_template_details(17);
+            $notification_title = $notification_template_details[0]['NOTIFICATION_TITLE'] ?? null;
+            $notification_message = $notification_template_details[0]['NOTIFICATION_MESSAGE'] ?? null;
+            $notification_message = str_replace('{employee}', $file_as, $notification_message);
+
+            $check_leave_exist = $api->check_leave_exist($leave_id);
+
+            if($check_leave_exist > 0){
+                $leave_details = $api->get_leave_details($leave_id);
+				$employee_id = $leave_details[0]['EMPLOYEE_ID'];
+
+                $update_leave_status = $api->update_leave_status($leave_id, 'APV', $decision_remarks, $username);
+    
+                if($update_leave_status){
+                    $send_notification = $api->send_notification(17, $approver_id, $employee_id, $notification_title, $notification_message, $username);
+
+                    if($send_notification){
+                        echo 'Approved';
+                    }
+                    else{
+                        echo $send_notification;
+                    }
+                }
+                else{
+                    echo $update_leave_status;
+                }
+            }
+            else{
+                echo 'Not Found';
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Approve multiple leave
+    else if($transaction == 'approve multiple leave'){
+        if(isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['leave_id']) && !empty($_POST['leave_id']) && isset($_POST['decision_remarks']) && !empty($_POST['decision_remarks'])){
+            $username = $_POST['username'];
+            $leave_ids = explode(',', $_POST['leave_id']);
+            $decision_remarks = $_POST['decision_remarks'];
+            $error = '';
+
+            $employee_details = $api->get_employee_details($username);
+            $approver_id = $employee_details[0]['EMPLOYEE_ID'];
+            $file_as = $employee_details[0]['FILE_AS'];
+
+            $notification_template_details = $api->get_notification_template_details(17);
+            $notification_title = $notification_template_details[0]['NOTIFICATION_TITLE'] ?? null;
+            $notification_message = $notification_template_details[0]['NOTIFICATION_MESSAGE'] ?? null;
+            $notification_message = str_replace('{employee}', $file_as, $notification_message);
+
+            foreach($leave_ids as $leave_id){
+                $check_leave_exist = $api->check_leave_exist($leave_id);
+
+                if($check_leave_exist > 0){
+                    $leave_details = $api->get_leave_details($leave_id);
+				    $employee_id = $leave_details[0]['EMPLOYEE_ID'];
+
+                    $update_leave_status = $api->update_leave_status($leave_id, 'APV', $decision_remarks, $username);
+        
+                    if($update_leave_status){
+                        $send_notification = $api->send_notification(17, $approver_id, $employee_id, $notification_title, $notification_message, $username);
+
+                        if(!$send_notification){
+                            $error = $send_notification;
+                            break;
+                        }
+                    }
+                    else{
+                        $error = $update_leave_status;
+                        break;
+                    }
+                }
+                else{
+                    $error = 'Not Found';
+                    break;
+                }
+            }
+
+            if(empty($error)){
+                echo 'Approved';
+            }
+            else{
+                echo $error;
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
     # -------------------------------------------------------------
     #   Notification transactions
     # -------------------------------------------------------------
@@ -7081,9 +7678,9 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
             $response[] = array(
                 'FILE_AS' => $user_account_details[0]['FILE_AS'],
                 'ACTIVE' => $account_status,
-                'PASSWORD_EXPIRY_DATE' => $api->check_date('empty', $user_account_details[0]['PASSWORD_EXPIRY_DATE'], '', 'F d, Y', '', '', ''),
+                'PASSWORD_EXPIRY_DATE' => $api->check_date('summary', $user_account_details[0]['PASSWORD_EXPIRY_DATE'], '', 'F d, Y', '', '', ''),
                 'FAILED_LOGIN' => $user_account_details[0]['FAILED_LOGIN'],
-                'LAST_FAILED_LOGIN' => $api->check_date('empty', $user_account_details[0]['LAST_FAILED_LOGIN'], '', 'F d, Y', '', '', ''),
+                'LAST_FAILED_LOGIN' => $api->check_date('summary', $user_account_details[0]['LAST_FAILED_LOGIN'], '', 'F d, Y', '', '', ''),
                 'ROLES' => $roles
             );
 
@@ -7877,8 +8474,8 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
             $response[] = array(
                 'EMPLOYEE' => $file_as,
-                'TIME_IN' => $api->check_date('empty', $attendance_details[0]['TIME_IN'], '', 'F d, Y H:i', '', '', ''),
-                'TIME_OUT' => $api->check_date('empty', $attendance_details[0]['TIME_OUT'], '', 'F d, Y H:i', '', '', ''),
+                'TIME_IN' => $api->check_date('summary', $attendance_details[0]['TIME_IN'], '', 'F d, Y H:i', '', '', ''),
+                'TIME_OUT' => $api->check_date('summary', $attendance_details[0]['TIME_OUT'], '', 'F d, Y H:i', '', '', ''),
                 'TIME_IN_NOTE' => $attendance_details[0]['TIME_IN_NOTE'],
                 'TIME_IN_IP_ADDRESS' => $attendance_details[0]['TIME_IN_IP_ADDRESS'],
                 'TIME_OUT_IP_ADDRESS' => $attendance_details[0]['TIME_OUT_IP_ADDRESS'],
@@ -8289,11 +8886,9 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                         </tr>';
             }
 
-            
-
             $response[] = array(
                 'PUBLIC_HOLIDAY' => $public_holiday_details[0]['PUBLIC_HOLIDAY'],
-                'HOLIDAY_DATE' => $api->check_date('empty', $public_holiday_details[0]['HOLIDAY_DATE'], '', 'F d, Y', '', '', ''),
+                'HOLIDAY_DATE' => $api->check_date('summary', $public_holiday_details[0]['HOLIDAY_DATE'], '', 'F d, Y', '', '', ''),
                 'HOLIDAY_TYPE' => $holiday_type_name,
                 'WORK_LOCATION_TABLE' => $work_location_table
             );
@@ -8368,6 +8963,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
             $employee_id = $leave_details[0]['EMPLOYEE_ID'];
             $status = $leave_details[0]['STATUS'];
             $leave_type_id = $leave_details[0]['LEAVE_TYPE_ID'];
+            $decision_by = $leave_details[0]['DECISION_BY'];
 
             $leave_type_details = $api->get_leave_type_details($leave_type_id);
             $leave_type = $leave_type_details[0]['LEAVE_TYPE'];
@@ -8381,7 +8977,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
             if(!empty($decision_by)){
                 $decision_by_details = $api->get_employee_details($decision_by);
-                $decision_by_file_as = $decision_by_details[0]['FILE_AS'];
+                $decision_by_file_as = $decision_by_details[0]['FILE_AS'] ?? $decision_by;
             }
             else{
                 $decision_by_file_as = '--';
@@ -8390,12 +8986,12 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
             $response[] = array(
                 'EMPLOYEE' => $file_as,
                 'LEAVE_TYPE' => $leave_type,
-                'LEAVE_DATE' => $api->check_date('empty', $leave_details[0]['LEAVE_DATE'], '', 'F d, Y', '', '', ''),
-                'CREATED_DATE' => $api->check_date('empty', $leave_details[0]['CREATED_DATE'], '', 'F d, Y h:i a', '', '', ''),
-                'FOR_APPROVAL_DATE' => $api->check_date('empty', $leave_details[0]['FOR_APPROVAL_DATE'], '', 'F d, Y h:i a', '', '', ''),
-                'DECISION_DATE' => $api->check_date('empty', $leave_details[0]['DECISION_DATE'], '', 'F d, Y h:i a', '', '', ''),
-                'START_TIME' => $api->check_date('empty', $leave_details[0]['START_TIME'], '', 'h:i a', '', '', ''),
-                'END_TIME' => $api->check_date('empty', $leave_details[0]['END_TIME'], '', 'h:i a', '', '', ''),
+                'LEAVE_DATE' => $api->check_date('summary', $leave_details[0]['LEAVE_DATE'], '', 'F d, Y', '', '', ''),
+                'CREATED_DATE' => $api->check_date('summary', $leave_details[0]['CREATED_DATE'], '', 'F d, Y h:i a', '', '', ''),
+                'FOR_APPROVAL_DATE' => $api->check_date('summary', $leave_details[0]['FOR_APPROVAL_DATE'], '', 'F d, Y h:i a', '', '', ''),
+                'DECISION_DATE' => $api->check_date('summary', $leave_details[0]['DECISION_DATE'], '', 'F d, Y h:i a', '', '', ''),
+                'START_TIME' => $api->check_date('summary', $leave_details[0]['START_TIME'], '', 'h:i a', '', '', ''),
+                'END_TIME' => $api->check_date('summary', $leave_details[0]['END_TIME'], '', 'h:i a', '', '', ''),
                 'REASON' => $leave_details[0]['REASON'],
                 'TOTAL_HOURS' => $leave_details[0]['TOTAL_HOURS'],
                 'DECISION_BY' => $decision_by_file_as,

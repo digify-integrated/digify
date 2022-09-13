@@ -2891,7 +2891,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                             <tbody>
                                                 <tr>
                                                     <th scope="row">Employee :</th>
-                                                    <td id="employee" colspan="2"></td>
+                                                    <td id="employee" colspan="4"></td>
                                                 </tr>
                                                 <tr>
                                                     <th scope="row">Leave Type :</th>
@@ -2913,7 +2913,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                                 </tr>
                                                 <tr>
                                                     <th scope="row">Reason :</th>
-                                                    <td id="reason" colspan="2"></td>
+                                                    <td id="reason" colspan="4"></td>
                                                 </tr>
                                                 <tr>
                                                     <th scope="row">Created Date :</th>
@@ -2925,11 +2925,11 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                                     <th scope="row">Decision Date :</th>
                                                     <td id="decision_date"></td>
                                                     <th scope="row">Decision By :</th>
-                                                    <td id="decision By"></td>
+                                                    <td id="decision_by"></td>
                                                 </tr>
                                                 <tr>
                                                     <th scope="row">Decision Remarks :</th>
-                                                    <td id="decision_remarks" colspan="2"></td>
+                                                    <td id="decision_remarks" colspan="4"></td>
                                                 </tr>
                                             </tbody>
                                         </table>
@@ -6410,6 +6410,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                         $validity_end_date = $api->check_date('empty', $row['VALIDITY_END_DATE'], '', 'm/d/Y', '', '', '');
                         $duration = $row['DURATION'];
                         $availed = $row['AVAILED'];
+                        $allocation = $duration - $availed;
                         $transaction_log_id = $row['TRANSACTION_LOG_ID'];
 
                         $employee_details = $api->get_employee_details($employee_id);
@@ -6454,7 +6455,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                             'FILE_AS' => $file_as,
                             'LEAVE_TYPE' => $leave_type,
                             'VALIDITY' => $validity_start_date . ' - ' . $validity_end_date,
-                            'DURATION' => $availed . ' remaining out of ' . $duration . ' hour(s)',
+                            'DURATION' => $allocation . ' hour(s) remaining out of ' . $duration . ' hour(s)',
                             'ACTION' => '<div class="d-flex gap-2">
                                 '. $update .'
                                 '. $transaction_log .'
@@ -6585,6 +6586,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                         $employee_leave_allocation_details = $api->get_employee_leave_allocation_details($employee_id, $leave_type_id, $leave_date);
                         $duration = $employee_leave_allocation_details[0]['DURATION'] ?? 0;
                         $availed = $employee_leave_allocation_details[0]['AVAILED'] ?? 0;
+                        $allocation = $duration - $availed;
 
                         $leave_type_details = $api->get_leave_type_details($leave_type_id);
                         $leave_type = $leave_type_details[0]['LEAVE_TYPE'];
@@ -6665,7 +6667,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                             'CHECK_BOX' => '<input class="form-check-input datatable-checkbox-children" data-cancel="'. $data_cancel .'" data-pending="'. $data_pending .'" data-for-approval="'. $data_for_approval .'" type="checkbox" value="'. $leave_id .'">',
                             'LEAVE_TYPE' => $leave_type,
                             'LEAVE_DATE' => $leave_date . ' ' . $start_time .' - '. $end_time . '<p class="text-muted mb-0"> Total Hours: '. $total_hours .'</p>',
-                            'DURATION' => $availed . ' remaining out of ' . $duration . ' hour(s)',
+                            'DURATION' => $allocation . ' hour(s) remaining out of ' . $duration . ' hour(s)',
                             'STATUS' => $status_name,
                             'ACTION' => '<div class="d-flex gap-2">
                                 <button type="button" class="btn btn-primary waves-effect waves-light view-leave" data-leave-id="'. $leave_id .'" title="View Leave">

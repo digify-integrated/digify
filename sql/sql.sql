@@ -4009,6 +4009,59 @@ BEGIN
 	DROP PREPARE stmt;
 END //
 
+CREATE PROCEDURE update_leave_status(IN leave_id VARCHAR(100), IN status VARCHAR(10), IN decision_remarks VARCHAR(500), IN decision_date DATETIME, IN decision_by VARCHAR(50), IN transaction_log_id VARCHAR(500), IN record_log VARCHAR(100))
+BEGIN
+	SET @leave_id = leave_id;
+	SET @status = status;
+	SET @decision_remarks = decision_remarks;
+	SET @decision_date = decision_date;
+	SET @decision_by = decision_by;
+	SET @transaction_log_id = transaction_log_id;
+	SET @record_log = record_log;
+
+	IF @status = 'APV' OR @status = 'REJ' OR @status = 'CAN' THEN
+		SET @query = 'UPDATE leave_management SET STATUS = @status, DECISION_REMARKS = @decision_remarks, DECISION_DATE = @decision_date, DECISION_BY = @decision_by, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE LEAVE_ID = @leave_id';
+	ELSEIF @status = 'FA' THEN
+		SET @query = 'UPDATE leave_management SET STATUS = @status, FOR_APPROVAL_DATE = @decision_date, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE LEAVE_ID = @leave_id';
+	ELSE
+		SET @query = 'UPDATE leave_management SET STATUS = @status, FOR_APPROVAL_DATE = null, TRANSACTION_LOG_ID = @transaction_log_id, RECORD_LOG = @record_log WHERE LEAVE_ID = @leave_id';
+    END IF;
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
+CREATE TABLE leave_allocation(
+	LEAVE_ALLOCATION_ID VARCHAR(100) PRIMARY KEY,
+	LEAVE_TYPE_ID VARCHAR(100) NOT NULL,
+	EMPLOYEE_ID VARCHAR(100) NOT NULL,
+	VALIDITY_START_DATE DATE NOT NULL,
+	VALIDITY_END_DATE DATE,
+	DURATION DOUBLE NOT NULL,
+	AVAILED DOUBLE NOT NULL,
+	TRANSACTION_LOG_ID VARCHAR(100),
+	RECORD_LOG VARCHAR(100)
+);
+
+CREATE PROCEDURE update_employee_leave_allocation(IN leave_allocation_id VARCHAR(100), IN total_hours DOUBLE, IN transaction_type VARCHAR(5), IN record_log VARCHAR(100))
+BEGIN
+	SET @leave_allocation_id = leave_allocation_id;
+	SET @total_hours = total_hours;
+	SET @transaction_type = transaction_type;
+	SET @record_log = record_log;
+
+	IF @transaction_type = 'REJ' OR @transaction_type = 'CAN' OR @transaction_type = 'PEN' THEN
+		SET @query = 'UPDATE leave_allocation SET AVAILED = (AVAILED - @total_hours), RECORD_LOG = @record_log WHERE LEAVE_ALLOCATION_ID = @leave_allocation_id';
+	ELSE
+		SET @query = 'UPDATE leave_allocation SET AVAILED = (AVAILED + @total_hours), RECORD_LOG = @record_log WHERE LEAVE_ALLOCATION_ID = @leave_allocation_id';
+    END IF;
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
 /* Insert Transactions */
 INSERT INTO global_user_account (USERNAME, PASSWORD, USER_STATUS, PASSWORD_EXPIRY_DATE, FAILED_LOGIN, LAST_FAILED_LOGIN, TRANSACTION_LOG_ID) VALUES ('ADMIN', '68aff5412f35ed76', 'Active', '2021-12-30', 0, null, 'TL-1');
 INSERT INTO global_system_parameters (PARAMETER_ID, PARAMETER, PARAMETER_DESCRIPTION, PARAMETER_EXTENSION, PARAMETER_NUMBER, TRANSACTION_LOG_ID) VALUES ('1', 'System Parameter', 'Parameter for system parameters.', '', 3, 'TL-2');

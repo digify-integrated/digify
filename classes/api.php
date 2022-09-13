@@ -334,7 +334,7 @@ class Api{
         $mail->addAddress($email, $email);
         $mail->Subject = $subject;
 
-        if($notification_type == 1 || $notification_type == 2 || $notification_type == 3 || $notification_type == 4 || $notification_type == 5 || $notification_type == 6 || $notification_type == 7 || $notification_type == 8 || $notification_type == 9 || $notification_type == 10 || $notification_type == 11 || $notification_type == 12 || $notification_type == 13 || $notification_type == 14){
+        if($notification_type == 1 || $notification_type == 2 || $notification_type == 3 || $notification_type == 4 || $notification_type == 5 || $notification_type == 6 || $notification_type == 7 || $notification_type == 8 || $notification_type == 9 || $notification_type == 10 || $notification_type == 11 || $notification_type == 12 || $notification_type == 13 || $notification_type == 14 || $notification_type == 15 || $notification_type == 16 || $notification_type == 17 || $notification_type == 18 || $notification_type == 19){
             if(!empty($link)){
                 $message = file_get_contents('email_template/basic-notification-with-button.html');
                 $message = str_replace('@link', $link, $message);
@@ -4842,6 +4842,118 @@ class Api{
                     else{
                         return $update_system_parameter_value;
                     }
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : update_leave_status
+    # Purpose    : Update leave status.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function update_leave_status($leave_id, $status, $decision_remarks, $username){
+        if ($this->databaseConnection()) {
+            
+            $system_date_time = date('Y-m-d H:i:s');
+
+            if($status == 'APV'){
+                $record_log = 'APV->' . $username . '->' . date('Y-m-d h:i:s');
+                $log_type = 'Approve';
+                $log = 'User ' . $username . ' approved leave (' . $leave_id . ').';
+            }
+            else if($status == 'CAN'){
+                $record_log = 'CAN->' . $username . '->' . date('Y-m-d h:i:s');
+                $log_type = 'Cancel';
+                $log = 'User ' . $username . ' cancelled leave (' . $leave_id . ').';
+            }
+            else if($status == 'FA'){
+                $record_log = 'FA->' . $username . '->' . date('Y-m-d h:i:s');
+                $log_type = 'For Approval';
+                $log = 'User ' . $username . ' tagged the leave for approval (' . $leave_id . ').';
+            }
+            else if($status == 'PEN'){
+                $record_log = 'PEN->' . $username . '->' . date('Y-m-d h:i:s');
+                $log_type = 'Pending';
+                $log = 'User ' . $username . ' tagged the leave as pending (' . $leave_id . ').';
+            }
+            else{
+                $record_log = 'REJ->' . $username . '->' . date('Y-m-d h:i:s');
+                $log_type = 'Reject';
+                $log = 'User ' . $username . ' rejected leave (' . $leave_id . ').';
+            }
+
+            $leave_details = $this->get_leave_details($leave_id);
+            $transaction_log_id = $leave_details[0]['TRANSACTION_LOG_ID'];
+
+            $sql = $this->db_connection->prepare("CALL update_leave_status(:leave_id, :status, :decision_remarks, :system_date_time, :username, :transaction_log_id, :record_log)");
+            $sql->bindValue(':leave_id', $leave_id);
+            $sql->bindValue(':status', $status);
+            $sql->bindValue(':decision_remarks', $decision_remarks);
+            $sql->bindValue(':system_date_time', $system_date_time);
+            $sql->bindValue(':username', $username);
+            $sql->bindValue(':transaction_log_id', $transaction_log_id);
+            $sql->bindValue(':record_log', $record_log);
+        
+            if($sql->execute()){
+                $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, $log_type, $log);
+
+                if($insert_transaction_log){
+                    return true;
+                }
+                else{
+                    return $insert_transaction_log;
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : update_employee_leave_allocation
+    # Purpose    : Updates employee leave allocation.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function update_employee_leave_allocation($leave_id, $employee_id, $transaction_type, $username){
+        if ($this->databaseConnection()) {
+            $record_log = 'UPD->' . $username . '->' . date('Y-m-d h:i:s');
+
+            $leave_details = $this->get_leave_details($leave_id);
+			$leave_type_id = $leave_details[0]['LEAVE_TYPE_ID'] ?? null;
+			$leave_date = $leave_details[0]['LEAVE_DATE'] ?? null;
+			$total_hours = $leave_details[0]['TOTAL_HOURS'] ?? null;
+            $transaction_log_id = $leave_details[0]['TRANSACTION_LOG_ID'];
+
+            $employee_leave_allocation_details = $this->get_employee_leave_allocation_details($employee_id, $leave_type_id, $leave_date);
+            $leave_allocation_id = $employee_leave_allocation_details[0]['LEAVE_ALLOCATION_ID'] ?? null;
+
+            $sql = $this->db_connection->prepare('CALL update_employee_leave_allocation(:leave_allocation_id, :total_hours, :transaction_type, :record_log)');
+            $sql->bindValue(':leave_allocation_id', $leave_allocation_id);
+            $sql->bindValue(':total_hours', $total_hours);
+            $sql->bindValue(':transaction_type', $transaction_type);
+            $sql->bindValue(':record_log', $record_log);
+        
+            if($sql->execute()){
+                $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Update', 'User ' . $username . ' updated leave allocation availment.');
+                                    
+                if($insert_transaction_log){
+                    return true;
+                }
+                else{
+                    return $insert_transaction_log;
                 }
             }
             else{
@@ -12071,6 +12183,35 @@ class Api{
             else{
                 return $sql->errorInfo()[2];
             }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : check_employee_leave_allocation
+    # Purpose    : Checks the employee leave allocation.
+    #
+    # Returns    : Date
+    #
+    # -------------------------------------------------------------
+    public function check_employee_leave_allocation($leave_id, $employee_id){
+        if ($this->databaseConnection()) {
+            $leave_details = $this->get_leave_details($leave_id);
+			$leave_type_id = $leave_details[0]['LEAVE_TYPE_ID'] ?? null;
+			$leave_date = $leave_details[0]['LEAVE_DATE'] ?? null;
+
+            if(!empty($leave_type_id) && !empty($leave_date)){
+                $employee_leave_allocation_details = $this->get_employee_leave_allocation_details($employee_id, $leave_type_id, $leave_date);
+                $duration = $employee_leave_allocation_details[0]['DURATION'] ?? 0;
+                $availed = $employee_leave_allocation_details[0]['AVAILED'] ?? 0;
+                $total = $duration - $availed;
+            }
+            else{
+                $total = 0;
+            }
+
+            return $total;
         }
     }
     # -------------------------------------------------------------

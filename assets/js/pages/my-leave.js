@@ -495,6 +495,101 @@ function initialize_click_events(){
         });
     });
 
+    $(document).on('click','.pending-leave',function() {
+        var leave_id = $(this).data('leave-id');
+        var transaction = 'pending leave';
+
+        Swal.fire({
+            title: 'Tag Leave As Pending',
+            text: 'Are you sure you want to tag this leave as pending?',
+            icon: 'info',
+            showCancelButton: !0,
+            confirmButtonText: 'Tag As Pending',
+            cancelButtonText: 'Cancel',
+            confirmButtonClass: 'btn btn-success mt-2',
+            cancelButtonClass: 'btn btn-secondary ms-2 mt-2',
+            buttonsStyling: !1
+        }).then(function(result) {
+            if (result.value) {
+                $.ajax({
+                    type: 'POST',
+                    url: 'controller.php',
+                    data: {username : username, leave_id : leave_id, transaction : transaction},
+                    success: function (response) {
+                        if(response === 'Pending' || response === 'Not Found'){
+                          if(response === 'Pending'){
+                            show_alert('Tag Leave As Pending', 'The leave has been tagged as pending.', 'success');
+                          }
+                          else{
+                            show_alert('Tag Leave As Pending', 'The leave does not exist.', 'info');
+                          }
+
+                          reload_datatable('#my-leave-datatable');
+                        }
+                        else{
+                          show_alert('Tag Leave As Pending', response, 'error');
+                        }
+                    }
+                });
+                return false;
+            }
+        });
+    });
+
+    $(document).on('click','#pending-leave',function() {
+        var leave_id = [];
+        var transaction = 'pending multiple leave';
+
+        $('.datatable-checkbox-children').each(function(){
+            if($(this).is(':checked')){  
+                leave_id.push(this.value);  
+            }
+        });
+
+        if(leave_id.length > 0){
+            Swal.fire({
+                title: 'Tag Multiple Leaves As Pending',
+                text: 'Are you sure you want to tag these leaves as pending?',
+                icon: 'info',
+                showCancelButton: !0,
+                confirmButtonText: 'Tag As Pending',
+                cancelButtonText: 'Cancel',
+                confirmButtonClass: 'btn btn-success mt-2',
+                cancelButtonClass: 'btn btn-secondary ms-2 mt-2',
+                buttonsStyling: !1
+            }).then(function(result) {
+                if (result.value) {
+                    
+                    $.ajax({
+                        type: 'POST',
+                        url: 'controller.php',
+                        data: {username : username, leave_id : leave_id, transaction : transaction},
+                        success: function (response) {
+                            if(response === 'Pending' || response === 'Not Found'){
+                                if(response === 'Pending'){
+                                    show_alert('Tag Multiple Leaves As Pending', 'The leaves have been tagged as pending.', 'success');
+                                }
+                                else{
+                                    show_alert('Tag Multiple Leaves As Pending', 'The leave does not exist.', 'info');
+                                }
+      
+                                reload_datatable('#my-leave-datatable');
+                            }
+                            else{
+                                show_alert('Tag Multiple Leaves As Pending', response, 'error');
+                            }
+                        }
+                    });
+                    
+                    return false;
+                }
+            });
+        }
+        else{
+            show_alert('Tag Multiple Leaves As Pending', 'Please select the leaves you want to tag as pending.', 'error');
+        }
+    });
+
     $(document).on('click','#apply-filter',function() {
         initialize_my_leave_table('#my-leave-datatable');
     });
