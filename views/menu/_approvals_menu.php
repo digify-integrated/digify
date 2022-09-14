@@ -7,9 +7,10 @@
     $attendance_creation_recommendation_page = $api->check_role_permissions($username, 154);
     $attendance_adjustment_approval_page = $api->check_role_permissions($username, 159);
     $attendance_creation_approval_page = $api->check_role_permissions($username, 164);
+    $leave_approval_page = $api->check_role_permissions($username, 196);
 
-    if($approval_type_page > 0 || $attendance_adjustment_recommendation_page > 0 || $attendance_creation_recommendation_page > 0 || $attendance_adjustment_approval_page > 0 || $attendance_creation_approval_page > 0){
-        if($attendance_adjustment_approval_page > 0 || $attendance_creation_approval_page > 0){
+    if($approval_type_page > 0 || $attendance_adjustment_recommendation_page > 0 || $attendance_creation_recommendation_page > 0 || $attendance_adjustment_approval_page > 0 || $attendance_creation_approval_page > 0 || $leave_approval_page > 0){
+        if($attendance_adjustment_approval_page > 0 || $attendance_creation_approval_page > 0 || $leave_approval_page > 0){
             $menu .= '<li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle arrow-none" href="javascript: void(0);" id="topnav-approval" role="button">
                             <span key="t-approval">Approval</span> <div class="arrow-down"></div>
@@ -22,6 +23,10 @@
 
                             if($attendance_creation_approval_page > 0){
                                 $menu .= '<a href="attendance-creation-approval.php" class="dropdown-item" key="t-attendance-creation-approval">Attendance Creation</a>';
+                            }
+
+                            if($leave_approval_page > 0){
+                                $menu .= '<a href="leave-approval.php" class="dropdown-item" key="t-leave-approval">Leave</a>';
                             }
 
                 $menu .= '</div>

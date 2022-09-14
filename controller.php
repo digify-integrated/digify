@@ -5644,7 +5644,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                 $update_leave_status = $api->update_leave_status($leave_id, 'CAN', $decision_remarks, $username);
     
                 if($update_leave_status){
-                    if($leave_status == 'FA'){
+                    if($leave_status == 'FA' || $leave_status == 'APV'){
                         $update_employee_leave_allocation = $api->update_employee_leave_allocation($leave_id, $employee_id, 'CAN', $username);
 
                         if($update_employee_leave_allocation){
@@ -5711,7 +5711,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                     $update_leave_status = $api->update_leave_status($leave_id, 'CAN', $decision_remarks, $username);
         
                     if($update_leave_status){
-                        if($leave_status == 'FA'){
+                        if($leave_status == 'FA' || $leave_status == 'APV'){
                             $update_employee_leave_allocation = $api->update_employee_leave_allocation($leave_id, $employee_id, 'CAN', $username);
 
                             if($update_employee_leave_allocation){
@@ -5809,7 +5809,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                     }
                 }
                 else{
-
+                    echo 'Leave Allocation';
                 }
             }
             else{
@@ -5868,7 +5868,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                         }
                     }
                     else{
-                        $error = 'Not Found';
+                        $error = 'Leave Allocation';
                         break;
                     }
                 }

@@ -127,16 +127,6 @@
                                                             </div>
                                                         </div>
                                                         <div class="mb-3">
-                                                            <p class="text-muted">Status</p>
-
-                                                            <select class="form-control filter-select2" id="filter_status">
-                                                                <option value="">All Status</option>
-                                                                <option value="PEN" selected>Pending</option>
-                                                                <option value="FORREC">For Recommendation</option>
-                                                                <option value="REC">Recommended</option>
-                                                            </select>
-                                                        </div>
-                                                        <div class="mb-3">
                                                             <p class="text-muted">Work Location</p>
 
                                                             <select class="form-control filter-select2" id="filter_work_location">

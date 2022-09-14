@@ -380,15 +380,18 @@ function initialize_click_events(){
                     url: 'controller.php',
                     data: {username : username, leave_id : leave_id, transaction : transaction},
                     success: function (response) {
-                        if(response === 'For Approval' || response === 'Not Found'){
-                          if(response === 'For Approval'){
-                            show_alert('Tag Leave For Approval', 'The leave has been tagged for approval.', 'success');
-                          }
-                          else{
-                            show_alert('Tag Leave For Approval', 'The leave does not exist.', 'info');
-                          }
+                        if(response === 'For Approval' || response === 'Not Found' || response === 'Leave Allocation'){
+                            if(response === 'For Approval'){
+                                show_alert('Tag Leave For Approval', 'The leave has been tagged for approval.', 'success');
+                            }
+                            else if(response === 'Leave Allocation'){
+                                show_alert('Tag Leave For Approval', 'Your leave application is greater than your allocation.', 'error');
+                            }
+                            else{
+                                show_alert('Tag Leave For Approval', 'The leave does not exist.', 'info');
+                            }
 
-                          reload_datatable('#my-leave-datatable');
+                            reload_datatable('#my-leave-datatable');
                         }
                         else{
                           show_alert('Tag Leave For Approval', response, 'error');
@@ -429,9 +432,12 @@ function initialize_click_events(){
                         url: 'controller.php',
                         data: {username : username, leave_id : leave_id, transaction : transaction},
                         success: function (response) {
-                            if(response === 'For Approval' || response === 'Not Found'){
+                            if(response === 'For Approval' || response === 'Not Found' || response === 'Leave Allocation'){
                                 if(response === 'For Approval'){
                                     show_alert('Tag Multiple Leaves For Approval', 'The leaves have been tagged for approval.', 'success');
+                                }
+                                else if(response === 'Leave Allocation'){
+                                    show_alert('Tag Multiple Leaves For Approval', 'Your leave application is greater than your allocation.', 'error');
                                 }
                                 else{
                                     show_alert('Tag Multiple Leaves For Approval', 'The leave does not exist.', 'info');

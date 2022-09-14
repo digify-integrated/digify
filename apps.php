@@ -103,7 +103,7 @@
                                     </div>
                                 </a>
                             </div>
-                            <div class="col-sm-2">
+                            <!--<div class="col-sm-2">
                                 <a class="dropdown-icon-item" href="#">
                                     <div class="card text-center">
                                         <div class="card-body">
@@ -150,7 +150,7 @@
                                         </div>
                                     </div>
                                 </a>
-                            </div>
+                            </div>-->
                             <div class="col-sm-2">
                                 <a class="dropdown-icon-item" href="general-setting.php">
                                     <div class="card text-center">

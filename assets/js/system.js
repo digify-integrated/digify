@@ -7707,7 +7707,7 @@ function generate_form(form_type, form_id, add, username){
                     var creation_id = sessionStorage.getItem('creation_id');
                     $('#creation_id').val(creation_id);
                 }
-                else if(form_type == 'cancel leave form' || form_type == 'cancel multiple leave form'){
+                else if(form_type == 'cancel leave form' || form_type == 'cancel multiple leave form' || form_type == 'approve leave form' || form_type == 'approve multiple leave form' || form_type == 'reject leave form' || form_type == 'reject multiple leave form'){
                     var leave_id = sessionStorage.getItem('leave_id');
                     $('#leave_id').val(leave_id);
                 }

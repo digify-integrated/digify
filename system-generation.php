@@ -5771,7 +5771,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
 
     # Attendance adjustment approval table
     else if($type == 'attendance adjustment approval table'){
-        if(isset($_POST['filter_creation_start_date']) && isset($_POST['filter_creation_end_date']) && isset($_POST['filter_recommendation_start_date']) && isset($_POST['filter_recommendation_end_date']) && isset($_POST['filter_status']) && isset($_POST['filter_work_location']) && isset($_POST['filter_department'])){
+        if(isset($_POST['filter_creation_start_date']) && isset($_POST['filter_creation_end_date']) && isset($_POST['filter_recommendation_start_date']) && isset($_POST['filter_recommendation_end_date']) && isset($_POST['filter_work_location']) && isset($_POST['filter_department'])){
             if ($api->databaseConnection()) {
                 # Get permission
                 $approve_attendance_adjustment = $api->check_role_permissions($username, 162);
@@ -5789,7 +5789,6 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                 $filter_creation_end_date = $api->check_date('empty', $_POST['filter_creation_end_date'], '', 'Y-m-d', '', '', '');
                 $filter_recommendation_start_date = $api->check_date('empty', $_POST['filter_recommendation_start_date'], '', 'Y-m-d', '', '', '');
                 $filter_recommendation_end_date = $api->check_date('empty', $_POST['filter_recommendation_end_date'], '', 'Y-m-d', '', '', '');
-                $filter_status = $_POST['filter_status'];
                 $filter_work_location = $_POST['filter_work_location'];
                 $filter_department = $_POST['filter_department'];
 
@@ -5952,7 +5951,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
 
     # Attendance creation approval table
     else if($type == 'attendance creation approval table'){
-        if(isset($_POST['filter_creation_start_date']) && isset($_POST['filter_creation_end_date']) && isset($_POST['filter_recommendation_start_date']) && isset($_POST['filter_recommendation_end_date']) && isset($_POST['filter_status']) && isset($_POST['filter_work_location']) && isset($_POST['filter_department'])){
+        if(isset($_POST['filter_creation_start_date']) && isset($_POST['filter_creation_end_date']) && isset($_POST['filter_recommendation_start_date']) && isset($_POST['filter_recommendation_end_date']) && isset($_POST['filter_work_location']) && isset($_POST['filter_department'])){
             if ($api->databaseConnection()) {
                 # Get permission
                 $approve_attendance_creation = $api->check_role_permissions($username, 167);
@@ -5970,7 +5969,6 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                 $filter_creation_end_date = $api->check_date('empty', $_POST['filter_creation_end_date'], '', 'Y-m-d', '', '', '');
                 $filter_recommendation_start_date = $api->check_date('empty', $_POST['filter_recommendation_start_date'], '', 'Y-m-d', '', '', '');
                 $filter_recommendation_end_date = $api->check_date('empty', $_POST['filter_recommendation_end_date'], '', 'Y-m-d', '', '', '');
-                $filter_status = $_POST['filter_status'];
                 $filter_work_location = $_POST['filter_work_location'];
                 $filter_department = $_POST['filter_department'];
 
@@ -6593,7 +6591,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
 
                         $status_name = $api->get_leave_status($status)[0]['BADGE'];
 
-                        if($cancel_leave > 0 && ($status == 'PEN' || $status == 'FA')){
+                        if($cancel_leave > 0 && ($status == 'PEN' || $status == 'FA' || ($status == 'APV' && strtotime($system_date) < strtotime($leave_date)))){
                             $cancel = '<button type="button" class="btn btn-warning waves-effect waves-light cancel-leave" data-leave-id="'. $leave_id .'" title="Cancel Leave">
                                         <i class="bx bx-calendar-x font-size-16 align-middle"></i>
                                     </button>';
@@ -6721,6 +6719,191 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                 </button>
                             </div>'
                         );
+                    }
+    
+                    echo json_encode($response);
+                }
+                else{
+                    echo $sql->errorInfo()[2];
+                }
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # Leave approval table
+    else if($type == 'leave approval table'){
+        if(isset($_POST['filter_leave_start_date']) && isset($_POST['filter_leave_end_date']) && isset($_POST['filter_creation_start_date']) && isset($_POST['filter_creation_end_date']) && isset($_POST['filter_for_approval_start_date']) && isset($_POST['filter_for_approval_end_date']) && isset($_POST['filter_leave_type']) && isset($_POST['filter_work_location']) && isset($_POST['filter_department'])){
+            if ($api->databaseConnection()) {
+                # Get permission
+                $approve_leave = $api->check_role_permissions($username, 197);
+                $reject_leave = $api->check_role_permissions($username, 198);
+                $cancel_leave = $api->check_role_permissions($username, 199);
+                $view_transaction_log = $api->check_role_permissions($username, 200);
+
+                $employee_details = $api->get_employee_details($username);
+                $employee_id = $employee_details[0]['EMPLOYEE_ID'] ?? null;
+
+                $approval_type_details = $api->get_approval_type_details('6');
+                $approval_type_status = $approval_type_details[0]['STATUS'];
+
+                $filter_leave_start_date = $api->check_date('empty', $_POST['filter_leave_start_date'], '', 'Y-m-d', '', '', '');
+                $filter_leave_end_date = $api->check_date('empty', $_POST['filter_leave_end_date'], '', 'Y-m-d', '', '', '');
+                $filter_creation_start_date = $api->check_date('empty', $_POST['filter_creation_start_date'], '', 'Y-m-d', '', '', '');
+                $filter_creation_end_date = $api->check_date('empty', $_POST['filter_creation_end_date'], '', 'Y-m-d', '', '', '');
+                $filter_for_approval_start_date = $api->check_date('empty', $_POST['filter_for_approval_start_date'], '', 'Y-m-d', '', '', '');
+                $filter_for_approval_end_date = $api->check_date('empty', $_POST['filter_for_approval_end_date'], '', 'Y-m-d', '', '', '');
+                $filter_leave_type = $_POST['filter_leave_type'];
+                $filter_work_location = $_POST['filter_work_location'];
+                $filter_department = $_POST['filter_department'];
+
+                $query = 'SELECT LEAVE_ID, EMPLOYEE_ID, LEAVE_TYPE_ID, LEAVE_DATE, START_TIME, END_TIME, STATUS, TOTAL_HOURS, TRANSACTION_LOG_ID FROM leave_management WHERE EMPLOYEE_ID IN (SELECT EMPLOYEE_ID FROM employee_details WHERE DEPARTMENT IN (SELECT DEPARTMENT FROM approval_approver WHERE APPROVAL_TYPE_ID = :approval_type_id AND EMPLOYEE_ID = :employee_id)) AND STATUS IN ("PEN", "FA")';
+
+                if((!empty($filter_leave_start_date) && !empty($filter_leave_end_date)) || (!empty($filter_creation_start_date) && !empty($filter_creation_end_date)) || (!empty($filter_for_approval_start_date) && !empty($filter_for_approval_end_date)) || !empty($filter_leave_type) || !empty($filter_work_location) || !empty($filter_department)){
+                    $query .= ' AND ';
+
+                    if(!empty($filter_leave_start_date) && !empty($filter_leave_start_date)){
+                        $filter[] = 'LEAVE_DATE BETWEEN :filter_creation_start_date AND :filter_creation_end_date';
+                    }
+
+                    if(!empty($filter_creation_start_date) && !empty($filter_creation_end_date)){
+                        $filter[] = 'DATE(CREATED_DATE) BETWEEN :filter_creation_start_date AND :filter_creation_end_date';
+                    }
+
+                    if(!empty($filter_for_approval_start_date) && !empty($filter_for_approval_end_date)){
+                        $filter[] = 'DATE(FOR_APPROVAL_DATE) BETWEEN :filter_for_approval_start_date AND :filter_for_approval_end_date';
+                    }
+                    
+                    if(!empty($filter_leave_type)){
+                        $filter[] = 'LEAVE_TYPE_ID = :filter_leave_type';
+                    }
+                    
+                    if(!empty($filter_work_location)){
+                        $filter[] = 'EMPLOYEE_ID IN (SELECT EMPLOYEE_ID FROM employee_details WHERE WORK_LOCATION = :filter_work_location)';
+                    }
+
+                    if(!empty($filter_department)){
+                        $filter[] = 'EMPLOYEE_ID IN (SELECT EMPLOYEE_ID FROM employee_details WHERE DEPARTMENT = :filter_department)';
+                    }
+
+                    if(!empty($filter)){
+                        $query .= implode(' AND ', $filter);
+                    }
+                }
+    
+                $sql = $api->db_connection->prepare($query);
+                $sql->bindValue(':approval_type_id', '6');
+                $sql->bindValue(':employee_id', $employee_id);
+
+                if((!empty($filter_leave_start_date) && !empty($filter_leave_end_date)) || (!empty($filter_creation_start_date) && !empty($filter_creation_end_date)) || (!empty($filter_for_approval_start_date) && !empty($filter_for_approval_end_date)) || !empty($filter_leave_type) || !empty($filter_work_location) || !empty($filter_department)){
+                    if(!empty($filter_leave_start_date) && !empty($filter_leave_start_date)){
+                        $sql->bindValue(':filter_leave_start_date', $filter_leave_start_date);
+                        $sql->bindValue(':filter_leave_start_date', $filter_leave_start_date);
+                    }
+
+                    if(!empty($filter_creation_start_date) && !empty($filter_creation_end_date)){
+                        $sql->bindValue(':filter_creation_start_date', $filter_creation_start_date);
+                        $sql->bindValue(':filter_creation_end_date', $filter_creation_end_date);
+                    }
+
+                    if(!empty($filter_for_approval_start_date) && !empty($filter_for_approval_end_date)){
+                        $sql->bindValue(':filter_for_approval_start_date', $filter_for_approval_start_date);
+                        $sql->bindValue(':filter_for_approval_end_date', $filter_for_approval_end_date);
+                    }
+
+                    if(!empty($filter_leave_type)){
+                        $sql->bindValue(':filter_leave_type', $filter_leave_type);
+                    }
+
+                    if(!empty($filter_work_location)){
+                        $sql->bindValue(':filter_work_location', $filter_work_location);
+                    }
+
+                    if(!empty($filter_department)){
+                        $sql->bindValue(':filter_department', $filter_department);
+                    }
+                }
+    
+                if($sql->execute()){
+                    while($row = $sql->fetch()){
+                        $leave_id = $row['LEAVE_ID'];
+                        $employee_id = $row['EMPLOYEE_ID'];
+                        $leave_date = $api->check_date('empty', $row['LEAVE_DATE'], '', 'm/d/Y', '', '', '');
+                        $start_time = $api->check_date('empty', $row['START_TIME'], '', 'h:i:s a', '', '', '');
+                        $end_time = $api->check_date('empty', $row['END_TIME'], '', 'h:i:s a', '', '', '');
+                        $leave_type_id = $row['LEAVE_TYPE_ID'];
+                        $status = $row['STATUS'];
+                        $total_hours = number_format($row['TOTAL_HOURS'], 2);
+                        $transaction_log_id = $row['TRANSACTION_LOG_ID'];
+
+                        $employee_details = $api->get_employee_details($employee_id);
+                        $file_as = $employee_details[0]['FILE_AS'] ?? null;
+
+                        $employee_leave_allocation_details = $api->get_employee_leave_allocation_details($employee_id, $leave_type_id, $leave_date);
+                        $duration = $employee_leave_allocation_details[0]['DURATION'] ?? 0;
+                        $availed = $employee_leave_allocation_details[0]['AVAILED'] ?? 0;
+                        $allocation = $duration - $availed;
+
+                        $leave_type_details = $api->get_leave_type_details($leave_type_id);
+                        $leave_type = $leave_type_details[0]['LEAVE_TYPE'];
+
+                        $status_name = $api->get_leave_status($status)[0]['BADGE'];
+
+                        if($approve_leave > 0){
+                            $approve = '<button type="button" class="btn btn-success waves-effect waves-light approve-leave" data-leave-id="'. $leave_id .'" title="Approve Leave">
+                                        <i class="bx bx-check font-size-16 align-middle"></i>
+                                    </button>';
+                        }
+                        else{
+                            $approve = '';
+                        }
+
+                        if($reject_leave > 0){
+                            $reject = '<button type="button" class="btn btn-danger waves-effect waves-light reject-leave" data-leave-id="'. $leave_id .'" title="Reject Leave">
+                                        <i class="bx bx-x font-size-16 align-middle"></i>
+                                    </button>';
+                        }
+                        else{
+                            $reject = '';
+                        }
+
+                        if($cancel_leave > 0){
+                            $cancel = '<button type="button" class="btn btn-warning waves-effect waves-light cancel-leave" data-leave-id="'. $leave_id .'" title="Cancel Leave">
+                                        <i class="bx bx-calendar-x font-size-16 align-middle"></i>
+                                    </button>';
+                        }
+                        else{
+                            $cancel = '';
+                        }
+
+                        if($view_transaction_log > 0 && !empty($transaction_log_id)){
+                            $transaction_log = '<button type="button" class="btn btn-dark waves-effect waves-light view-transaction-log" data-transaction-log-id="'. $transaction_log_id .'" title="View Transaction Log">
+                                                    <i class="bx bx-detail font-size-16 align-middle"></i>
+                                                </button>';
+                        }
+                        else{
+                            $transaction_log = '';
+                        }
+
+                        if(($approval_type_status == 'INACTIVE' && ($status == 'PEN' || $status == 'FA')) || $status == 'FA'){
+                            $response[] = array(
+                                'CHECK_BOX' => '<input class="form-check-input datatable-checkbox-children" data-cancel="1" data-approve="1" data-reject="1" type="checkbox" value="'. $leave_id .'">',
+                                'FILE_AS' => $file_as,
+                                'LEAVE_TYPE' => $leave_type,
+                                'LEAVE_DATE' => $leave_date . ' ' . $start_time .' - '. $end_time . '<p class="text-muted mb-0"> Total Hours: '. $total_hours .'</p>',
+                                'DURATION' => $allocation . ' hour(s) remaining out of ' . $duration . ' hour(s)',
+                                'STATUS' => $status_name,
+                                'ACTION' => '<div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-primary waves-effect waves-light view-leave" data-leave-id="'. $leave_id .'" title="View Leave">
+                                        <i class="bx bx-show font-size-16 align-middle"></i>
+                                    </button>
+                                    '. $approve .'
+                                    '. $reject .'
+                                    '. $cancel .'
+                                    '. $transaction_log .'
+                                </div>'
+                            );
+                        }
                     }
     
                     echo json_encode($response);

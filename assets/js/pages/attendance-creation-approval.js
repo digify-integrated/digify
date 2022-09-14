@@ -18,7 +18,6 @@ function initialize_attendance_creation_approval_table(datatable_name, buttons =
     var filter_creation_end_date = $('#filter_creation_end_date').val();
     var filter_recommendation_start_date = $('#filter_recommendation_start_date').val();
     var filter_recommendation_end_date = $('#filter_recommendation_end_date').val();
-    var filter_status = $('#filter_status').val();
     var filter_work_location = $('#filter_work_location').val();
     var filter_department = $('#filter_department').val();
     var type = 'attendance creation approval table';
@@ -57,7 +56,7 @@ function initialize_attendance_creation_approval_table(datatable_name, buttons =
                 'url' : 'system-generation.php',
                 'method' : 'POST',
                 'dataType': 'JSON',
-                'data': {'type' : type, 'username' : username, 'filter_creation_start_date' : filter_creation_start_date, 'filter_creation_end_date' : filter_creation_end_date, 'filter_recommendation_start_date' : filter_recommendation_start_date, 'filter_recommendation_end_date' : filter_recommendation_end_date, 'filter_status' : filter_status, 'filter_work_location' : filter_work_location, 'filter_department' : filter_department},
+                'data': {'type' : type, 'username' : username, 'filter_creation_start_date' : filter_creation_start_date, 'filter_creation_end_date' : filter_creation_end_date, 'filter_recommendation_start_date' : filter_recommendation_start_date, 'filter_recommendation_end_date' : filter_recommendation_end_date, 'filter_work_location' : filter_work_location, 'filter_department' : filter_department},
                 'dataSrc' : ''
             },
             dom:  "<'row'<'col-sm-3'l><'col-sm-6 text-center mb-2'B><'col-sm-3'f>>" +  "<'row'<'col-sm-12'tr>>" + "<'row'<'col-sm-5'i><'col-sm-7'p>>",
@@ -88,7 +87,7 @@ function initialize_attendance_creation_approval_table(datatable_name, buttons =
                 'url' : 'system-generation.php',
                 'method' : 'POST',
                 'dataType': 'JSON',
-                'data': {'type' : type, 'username' : username, 'filter_creation_start_date' : filter_creation_start_date, 'filter_creation_end_date' : filter_creation_end_date, 'filter_recommendation_start_date' : filter_recommendation_start_date, 'filter_recommendation_end_date' : filter_recommendation_end_date, 'filter_status' : filter_status, 'filter_work_location' : filter_work_location, 'filter_department' : filter_department},
+                'data': {'type' : type, 'username' : username, 'filter_creation_start_date' : filter_creation_start_date, 'filter_creation_end_date' : filter_creation_end_date, 'filter_recommendation_start_date' : filter_recommendation_start_date, 'filter_recommendation_end_date' : filter_recommendation_end_date, 'filter_work_location' : filter_work_location, 'filter_department' : filter_department},
                 'dataSrc' : ''
             },
             'order': [[ 1, 'desc' ]],

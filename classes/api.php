@@ -12200,12 +12200,17 @@ class Api{
             $leave_details = $this->get_leave_details($leave_id);
 			$leave_type_id = $leave_details[0]['LEAVE_TYPE_ID'] ?? null;
 			$leave_date = $leave_details[0]['LEAVE_DATE'] ?? null;
+			$total_hours = $leave_details[0]['TOTAL_HOURS'] ?? 0;
 
             if(!empty($leave_type_id) && !empty($leave_date)){
                 $employee_leave_allocation_details = $this->get_employee_leave_allocation_details($employee_id, $leave_type_id, $leave_date);
                 $duration = $employee_leave_allocation_details[0]['DURATION'] ?? 0;
                 $availed = $employee_leave_allocation_details[0]['AVAILED'] ?? 0;
-                $total = $duration - $availed;
+                $total = $duration - ($total_hours + $availed);
+
+                if($total < 0){
+                    $total = 0;
+                }
             }
             else{
                 $total = 0;
