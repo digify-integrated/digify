@@ -2024,7 +2024,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                     <label class="form-label">Leave Type <span class="text-danger">*</span></label>
                                     <select class="form-control form-select2" id="leave_type" name="leave_type">
                                     <option value="">--</option>';
-                                    $form .= $api->generate_leave_type_options();
+                                    $form .= $api->generate_leave_type_variation_options('LIMITED');
                                     $form .='</select>
                                 </div>
                             </div>
@@ -6587,9 +6587,17 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                         $allocation = $duration - $availed;
 
                         $leave_type_details = $api->get_leave_type_details($leave_type_id);
-                        $leave_type = $leave_type_details[0]['LEAVE_TYPE'];
+                        $leave_type = $leave_type_details[0]['LEAVE_TYPE'] ?? null;
+                        $allocation_type = $leave_type_details[0]['ALLOCATION_TYPE'] ?? null;
 
                         $status_name = $api->get_leave_status($status)[0]['BADGE'];
+
+                        if($allocation_type == 'LIMITED'){
+                            $duration = $allocation . ' hour(s) remaining out of ' . $duration . ' hour(s)';
+                        }
+                        else{
+                            $duration = 'No Limit';
+                        }
 
                         if($cancel_leave > 0 && ($status == 'PEN' || $status == 'FA' || ($status == 'APV' && strtotime($system_date) < strtotime($leave_date)))){
                             $cancel = '<button type="button" class="btn btn-warning waves-effect waves-light cancel-leave" data-leave-id="'. $leave_id .'" title="Cancel Leave">
@@ -6665,7 +6673,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                             'CHECK_BOX' => '<input class="form-check-input datatable-checkbox-children" data-cancel="'. $data_cancel .'" data-pending="'. $data_pending .'" data-for-approval="'. $data_for_approval .'" type="checkbox" value="'. $leave_id .'">',
                             'LEAVE_TYPE' => $leave_type,
                             'LEAVE_DATE' => $leave_date . ' ' . $start_time .' - '. $end_time . '<p class="text-muted mb-0"> Total Hours: '. $total_hours .'</p>',
-                            'DURATION' => $allocation . ' hour(s) remaining out of ' . $duration . ' hour(s)',
+                            'DURATION' => $duration,
                             'STATUS' => $status_name,
                             'ACTION' => '<div class="d-flex gap-2">
                                 <button type="button" class="btn btn-primary waves-effect waves-light view-leave" data-leave-id="'. $leave_id .'" title="View Leave">
@@ -6845,9 +6853,17 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                         $allocation = $duration - $availed;
 
                         $leave_type_details = $api->get_leave_type_details($leave_type_id);
-                        $leave_type = $leave_type_details[0]['LEAVE_TYPE'];
+                        $leave_type = $leave_type_details[0]['LEAVE_TYPE'] ?? null;
+                        $allocation_type = $leave_type_details[0]['ALLOCATION_TYPE'] ?? null;
 
                         $status_name = $api->get_leave_status($status)[0]['BADGE'];
+
+                        if($allocation_type == 'LIMITED'){
+                            $duration = $allocation . ' hour(s) remaining out of ' . $duration . ' hour(s)';
+                        }
+                        else{
+                            $duration = 'No Limit';
+                        }
 
                         if($approve_leave > 0){
                             $approve = '<button type="button" class="btn btn-success waves-effect waves-light approve-leave" data-leave-id="'. $leave_id .'" title="Approve Leave">
@@ -6891,7 +6907,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['username']) 
                                 'FILE_AS' => $file_as,
                                 'LEAVE_TYPE' => $leave_type,
                                 'LEAVE_DATE' => $leave_date . ' ' . $start_time .' - '. $end_time . '<p class="text-muted mb-0"> Total Hours: '. $total_hours .'</p>',
-                                'DURATION' => $allocation . ' hour(s) remaining out of ' . $duration . ' hour(s)',
+                                'DURATION' => $duration,
                                 'STATUS' => $status_name,
                                 'ACTION' => '<div class="d-flex gap-2">
                                     <button type="button" class="btn btn-primary waves-effect waves-light view-leave" data-leave-id="'. $leave_id .'" title="View Leave">

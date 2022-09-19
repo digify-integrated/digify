@@ -5780,7 +5780,8 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
             if($check_leave_exist > 0){
                 $leave_details = $api->get_leave_details($leave_id);
-				$employee_id = $leave_details[0]['EMPLOYEE_ID'];
+				$employee_id = $leave_details[0]['EMPLOYEE_ID'] ?? null;
+                $leave_type_id = $leave_details[0]['LEAVE_TYPE_ID'] ?? null;
                 
                 $check_employee_leave_allocation = $api->check_employee_leave_allocation($leave_id, $employee_id);
 
@@ -5788,20 +5789,35 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                     $update_leave_status = $api->update_leave_status($leave_id, 'FA', null, $username);
     
                     if($update_leave_status){
-                        $update_employee_leave_allocation = $api->update_employee_leave_allocation($leave_id, $employee_id, 'FA', $username);
+                        $leave_type_details = $api->get_leave_type_details($leave_type_id);
+                        $allocation_type = $leave_type_details[0]['ALLOCATION_TYPE'] ?? null;
 
-                        if($update_employee_leave_allocation){
+                        if($allocation_type == 'LIMITED'){
+                            $update_employee_leave_allocation = $api->update_employee_leave_allocation($leave_id, $employee_id, 'FA', $username);
+
+                            if($update_employee_leave_allocation){
+                                $send_notification = $api->send_notification(15, $approver_id, $employee_id, $notification_title, $notification_message, $username);
+    
+                                if($send_notification){
+                                    echo 'For Approval';
+                                }
+                                else{
+                                    echo $send_notification;
+                                }
+                            }
+                            else{
+                                echo $update_employee_leave_allocation;
+                            }
+                        }
+                        else{
                             $send_notification = $api->send_notification(15, $approver_id, $employee_id, $notification_title, $notification_message, $username);
-
+    
                             if($send_notification){
                                 echo 'For Approval';
                             }
                             else{
                                 echo $send_notification;
                             }
-                        }
-                        else{
-                            echo $update_employee_leave_allocation;
                         }
                     }
                     else{
@@ -5839,7 +5855,8 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
                 if($check_leave_exist > 0){
                     $leave_details = $api->get_leave_details($leave_id);
-					$employee_id = $leave_details[0]['EMPLOYEE_ID'];
+					$employee_id = $leave_details[0]['EMPLOYEE_ID'] ?? null;
+                    $leave_type_id = $leave_details[0]['LEAVE_TYPE_ID'] ?? null;
 
                     $check_employee_leave_allocation = $api->check_employee_leave_allocation($leave_id, $employee_id);
 
@@ -5847,20 +5864,33 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                         $update_leave_status = $api->update_leave_status($leave_id, 'FA', null, $username);
             
                         if($update_leave_status){
-                            $update_employee_leave_allocation = $api->update_employee_leave_allocation($leave_id, $employee_id, 'FA', $username);
+                            $leave_type_details = $api->get_leave_type_details($leave_type_id);
+                            $allocation_type = $leave_type_details[0]['ALLOCATION_TYPE'] ?? null;
+
+                            if($allocation_type == 'LIMITED'){
+                                $update_employee_leave_allocation = $api->update_employee_leave_allocation($leave_id, $employee_id, 'FA', $username);
     
-                            if($update_employee_leave_allocation){
-                                $send_notification = $api->send_notification(15, $approver_id, $employee_id, $notification_title, $notification_message, $username);
-    
-                                if(!$send_notification){
-                                    $error = $send_notification;
+                                if($update_employee_leave_allocation){
+                                    $send_notification = $api->send_notification(15, $approver_id, $employee_id, $notification_title, $notification_message, $username);
+        
+                                    if(!$send_notification){
+                                        $error = $send_notification;
+                                        break;
+                                    }
+                                }
+                                else{
+                                    $error = $update_employee_leave_allocation;
                                     break;
                                 }
                             }
                             else{
-                                $error = $update_employee_leave_allocation;
-                                break;
-                            }
+                                $send_notification = $api->send_notification(15, $approver_id, $employee_id, $notification_title, $notification_message, $username);
+        
+                                if(!$send_notification){
+                                    $error = $send_notification;
+                                    break;
+                                }
+                            }                            
                         }
                         else{
                             $error = $update_leave_status;

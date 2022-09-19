@@ -12203,13 +12203,21 @@ class Api{
 			$total_hours = $leave_details[0]['TOTAL_HOURS'] ?? 0;
 
             if(!empty($leave_type_id) && !empty($leave_date)){
-                $employee_leave_allocation_details = $this->get_employee_leave_allocation_details($employee_id, $leave_type_id, $leave_date);
-                $duration = $employee_leave_allocation_details[0]['DURATION'] ?? 0;
-                $availed = $employee_leave_allocation_details[0]['AVAILED'] ?? 0;
-                $total = $duration - ($total_hours + $availed);
+                $leave_type_details = $this->get_leave_type_details($leave_type_id);
+                $allocation_type = $leave_type_details[0]['ALLOCATION_TYPE'] ?? null;
 
-                if($total < 0){
-                    $total = 0;
+                if($allocation_type == 'LIMITED'){
+                    $employee_leave_allocation_details = $this->get_employee_leave_allocation_details($employee_id, $leave_type_id, $leave_date);
+                    $duration = $employee_leave_allocation_details[0]['DURATION'] ?? 0;
+                    $availed = $employee_leave_allocation_details[0]['AVAILED'] ?? 0;
+                    $total = $duration - ($total_hours + $availed);
+    
+                    if($total < 0){
+                        $total = 0;
+                    }
+                }
+                else{
+                    $total = 1;   
                 }
             }
             else{
@@ -12930,6 +12938,42 @@ class Api{
             $option = '';
             
             $sql = $this->db_connection->prepare('CALL generate_leave_type_options()');
+
+            if($sql->execute()){
+                $count = $sql->rowCount();
+        
+                if($count > 0){
+                    while($row = $sql->fetch()){
+                        $leave_type_id = $row['LEAVE_TYPE_ID'];
+                        $leave_type = $row['LEAVE_TYPE'];
+    
+                        $option .= "<option value='". $leave_type_id ."'>". $leave_type ."</option>";
+                    }
+    
+                    return $option;
+                }
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : generate_leave_type_variation_options
+    # Purpose    : Generates leave type options of dropdown.
+    #
+    # Returns    : String
+    #
+    # -------------------------------------------------------------
+    public function generate_leave_type_variation_options($variation_type){
+        if ($this->databaseConnection()) {
+            $option = '';
+            
+            $sql = $this->db_connection->prepare('CALL generate_leave_type_variation_options(:variation_type)');
+            $sql->bindValue(':variation_type', $variation_type);
 
             if($sql->execute()){
                 $count = $sql->rowCount();

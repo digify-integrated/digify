@@ -3764,6 +3764,21 @@ BEGIN
 	DROP PREPARE stmt;
 END //
 
+CREATE PROCEDURE generate_leave_type_variation_options(IN variation_type VARCHAR(10))
+BEGIN
+	SET @variation_type = variation_type;
+
+	IF @variation_type = 'LIMITED' OR @variation_type = 'NOLIMIT' THEN
+		SET @query = 'SELECT LEAVE_TYPE_ID, LEAVE_TYPE FROM leave_type WHERE ALLOCATION_TYPE = @variation_type ORDER BY LEAVE_TYPE';
+	ELSE
+		SET @query = 'SELECT LEAVE_TYPE_ID, LEAVE_TYPE FROM leave_type ORDER BY LEAVE_TYPE';
+	END IF;
+
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DROP PREPARE stmt;
+END //
+
 CREATE PROCEDURE check_leave_allocation_overlap(IN leave_allocation_id VARCHAR(100), IN employee_id VARCHAR(100), IN leave_type VARCHAR(100))
 BEGIN
 	SET @leave_allocation_id = leave_allocation_id;
