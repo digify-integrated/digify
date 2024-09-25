@@ -17,7 +17,7 @@ $(document).ready(function () {
             }
         },
         errorPlacement: function(error, element) {
-            showNotification('Attention Required: Error Found', error, 'error', 2000);
+            showNotification('Action Needed: Issue Detected', error, 'error', 2500);
         },
         highlight: function(element) {
             const $element = $(element);
@@ -34,22 +34,21 @@ $(document).ready(function () {
     
             $.ajax({
                 type: 'POST',
-                url: 'components/authentication/controller/authentication-controller.php',
-                data: $(form).serialize() + '&transaction=' + transaction,
-                dataType: 'json',
+                url: 'apps/security/authentication/controller/authentication-controller.php',
+                data: $(form).serialize() + '&transaction=' + encodeURIComponent(transaction),
+                dataType: 'JSON',
                 beforeSend: function() {
                     disableFormSubmitButton('signin');
                 },
                 success: function(response) {
                     if (response.success) {
                         window.location.href = response.redirectLink;
-                    } 
+                    }
                     else {
-                        if(response.passwordExpired){
+                        if (response.passwordExpired) {
                             setNotification(response.title, response.message, response.messageType);
                             window.location.href = response.redirectLink;
-                        }
-                        else{
+                        } else {
                             showNotification(response.title, response.message, response.messageType);
                             enableFormSubmitButton('signin');
                         }

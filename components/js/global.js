@@ -3,6 +3,7 @@
 
     $(function() {
         checkNotification();
+        passwordAddOn();
         maxLength();
 
         sessionStorage.setItem('Layout', 'vertical');
@@ -16,28 +17,6 @@
         $(document).on('click','#copy-error-message',function() {
             copyToClipboard('error-dialog');
         });
-
-        $(document).on('click','.password-addon',function() {
-            if (0 < $(this).siblings('input').length) {
-                var inputField = $(this).siblings('input');
-                var eyeIcon = $(this).find('i');
-        
-                if (inputField.attr('type') === 'password') {
-                    inputField.attr('type', 'text');
-                    eyeIcon.removeClass('ti-eye').addClass('ti-eye-off');
-                }
-                else {
-                    inputField.attr('type', 'password');
-                    eyeIcon.removeClass('ti-eye-off').addClass('ti-eye');
-                }
-            }
-        });
-
-        if($('.password-addon').length){
-            document.querySelectorAll('.password-addon').forEach(button => {
-                button.tabIndex = -1;
-            });
-        }        
 
         $(document).on('click','#datatable-checkbox',function() {
             var status = $(this).is(':checked') ? true : false;
@@ -61,7 +40,7 @@ function discardCreate(windows_location){
         confirmButtonText: 'Discard',
         cancelButtonText: 'Cancel',
         customClass: {
-            confirmButton: 'btn btn-danger mt-2',
+            confirmButton: 'btn btn-warning mt-2',
             cancelButton: 'btn btn-secondary ms-2 mt-2'
         },
         buttonsStyling: false
@@ -70,6 +49,23 @@ function discardCreate(windows_location){
             window.location = windows_location;
         }
     });
+}
+
+function passwordAddOn(){
+    if ($('.password-addon').length) {
+        $('.password-addon').on('click', function() {
+            const inputField = $(this).siblings('input');
+            const eyeIcon = $(this).find('i');
+
+            if (inputField.length) {
+                const isPassword = inputField.attr('type') === 'password';
+                inputField.attr('type', isPassword ? 'text' : 'password');
+                eyeIcon.toggleClass('ti-eye ti-eye-off');
+            }
+        });
+
+        $('.password-addon').attr('tabindex', -1); // Set tabIndex in one go
+    }
 }
 
 function maxLength(){
@@ -82,30 +78,29 @@ function maxLength(){
     }
 }
 
-function checkOptionExist(element, option){
+function checkOptionExist(element, option) {
     $(element).val(option).trigger('change');
 }
 
-function reloadDatatable(datatable){
+function reloadDatatable(datatable) {
     toggleHideActionDropdown();
-    $(datatable).DataTable().ajax.reload();
+    $(datatable).DataTable().ajax.reload(null, false);
 }
 
-function destroyDatatable(datatable_name){
-    $(datatable_name).DataTable().clear().destroy();
+function destroyDatatable(datatable) {
+    $(datatable).DataTable().clear().destroy();
 }
 
-function clearDatatable(datatable_name){
-    $(datatable_name).dataTable().fnClearTable();
+function clearDatatable(datatable) {
+    $(datatable).DataTable().clear().draw();
 }
 
 function readjustDatatableColumn() {
     const adjustDataTable = () => {
         const tables = $.fn.dataTable.tables({ visible: true, api: true });
-        tables.columns.adjust();
-        tables.fixedColumns().relayout();
+        tables.columns.adjust().fixedColumns().relayout();
     };
-  
+
     $('a[data-bs-toggle="tab"], a[data-bs-toggle="pill"], #System-Modal').on('shown.bs.tab shown.bs.modal', adjustDataTable);
 }
 
@@ -128,12 +123,16 @@ function handleColorTheme(e) {
 }
 
 function copyToClipboard(elementID) {
-    const element = document.getElementById(elementID);
-    const text = element.innerHTML;
+    const text = document.getElementById(elementID)?.textContent || '';
+
+    if (!text) {
+        showNotification('Copy Error', 'No text found', 'danger');
+        return;
+    }
 
     navigator.clipboard.writeText(text)
         .then(() => showNotification('Copy Successful', 'Text copied to clipboard', 'success'))
-        .catch((err) => showNotification('Copy Error', err, 'danger'));
+        .catch(() => showNotification('Copy Error', 'Failed to copy text', 'danger'));
 }
 
 function showErrorDialog(error){

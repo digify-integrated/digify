@@ -61,6 +61,6 @@ define('MAX_FAILED_OTP_ATTEMPTS', 5); // Max failed OTP attempts
 define('DEFAULT_OTP_DURATION', 5); // Duration for OTP validity (in minutes)
 define('BASE_USER_ACCOUNT_DURATION', 1); // Base account duration (in days)
 define('DEFAULT_SESSION_INACTIVITY', 30); // Session inactivity timeout (in minutes)
-define('DEFAULT_PASSWORD_RECOVERY_LINK', 'http://localhost/modernize/password-reset.php?id='); // Link for password recovery
+define('DEFAULT_PASSWORD_RECOVERY_LINK', 'http://localhost/digify/password-reset.php?id='); // Link for password recovery
 define('ALLOW_REGISTRATION', 'No'); // Allow user registration (Yes/No)
 ?>

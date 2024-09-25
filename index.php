@@ -1,8 +1,8 @@
 <?php
     require('components/configurations/config.php');
-    #require('components/global/model/database-model.php');
+    require('components/model/database-model.php');
 
-    #$databaseModel = new DatabaseModel();
+    $databaseModel = new DatabaseModel();
 
     $pageTitle = 'Digify';
 
@@ -73,6 +73,6 @@
         <?php require_once('components/view/_error_modal.php'); ?>
         <?php require_once('components/view/_index_required_js.php'); ?>
 
-        <script src="./apps/security/js/index.js?v=<?php echo rand(); ?>"></script>
+        <script src="./apps/security/authentication/js/index.js?v=<?php echo rand(); ?>"></script>
     </body>
 </html>
