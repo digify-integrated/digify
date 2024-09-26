@@ -29,24 +29,24 @@ END //
 
 /* Update Stored Procedure */
 
-CREATE PROCEDURE updateLoginAttempt(IN p_user_account_id INT, IN p_failed_login_attempts INT, IN p_last_failed_login_attempt DATETIME)
+CREATE PROCEDURE updateLoginAttempt(IN p_user_account_id INT, IN p_failed_login_attempts VARCHAR(255), IN p_last_failed_login_attempt DATETIME)
 BEGIN
 	UPDATE user_account 
     SET failed_login_attempts = p_failed_login_attempts, last_failed_login_attempt = p_last_failed_login_attempt
     WHERE user_account_id = p_user_account_id;
 END //
 
-CREATE PROCEDURE updateAccountLock(IN p_user_account_id INT, IN p_locked VARCHAR(5), IN p_account_lock_duration INT)
+CREATE PROCEDURE updateAccountLock(IN p_user_account_id INT, IN p_locked VARCHAR(255), IN p_account_lock_duration VARCHAR(255))
 BEGIN
 	UPDATE user_account 
     SET locked = p_locked, account_lock_duration = p_account_lock_duration 
     WHERE user_account_id = p_user_account_id;
 END //
 
-CREATE PROCEDURE updateOTP(IN p_user_account_id INT, IN p_otp VARCHAR(255), IN p_otp_expiry_date DATETIME)
+CREATE PROCEDURE updateOTP(IN p_user_account_id INT, IN p_otp VARCHAR(255), IN p_otp_expiry_date VARCHAR(255), IN p_failed_otp_attempts VARCHAR(255))
 BEGIN
 	UPDATE user_account 
-    SET otp = p_otp, otp_expiry_date = p_otp_expiry_date, failed_otp_attempts = 0
+    SET otp = p_otp, otp_expiry_date = p_otp_expiry_date, failed_otp_attempts = p_failed_otp_attempts
     WHERE user_account_id = p_user_account_id;
 END //
 
@@ -57,21 +57,21 @@ BEGIN
     WHERE user_account_id = p_user_account_id;
 END //
 
-CREATE PROCEDURE updateFailedOTPAttempts(IN p_user_account_id INT, IN p_failed_otp_attempts INT)
+CREATE PROCEDURE updateFailedOTPAttempts(IN p_user_account_id INT, IN p_failed_otp_attempts VARCHAR(255))
 BEGIN
 	UPDATE user_account 
     SET failed_otp_attempts = p_failed_otp_attempts
     WHERE user_account_id = p_user_account_id;
 END //
 
-CREATE PROCEDURE updateOTPAsExpired(IN p_user_account_id INT, IN p_otp_expiry_date DATETIME)
+CREATE PROCEDURE updateOTPAsExpired(IN p_user_account_id INT, IN p_otp_expiry_date VARCHAR(255))
 BEGIN
 	UPDATE user_account 
     SET otp_expiry_date = p_otp_expiry_date
     WHERE user_account_id = p_user_account_id;
 END //
 
-CREATE PROCEDURE updateResetToken(IN p_user_account_id INT, IN p_reset_token VARCHAR(255), IN p_reset_token_expiry_date DATETIME)
+CREATE PROCEDURE updateResetToken(IN p_user_account_id INT, IN p_reset_token VARCHAR(255), IN p_reset_token_expiry_date VARCHAR(255))
 BEGIN
 	UPDATE user_account 
     SET reset_token = p_reset_token, reset_token_expiry_date = p_reset_token_expiry_date

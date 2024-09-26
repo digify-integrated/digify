@@ -1,10 +1,34 @@
 <?php
     require('components/configurations/config.php');
+    require('apps/security/authentication/model/authentication-model.php');
     require('components/model/database-model.php');
+    require('components/model/security-model.php');
 
     $databaseModel = new DatabaseModel();
+    $authenticationModel = new AuthenticationModel($databaseModel);
+    $securityModel = new SecurityModel();
 
-    $pageTitle = 'Digify';
+    $pageTitle = 'Password Reset';
+
+    if (isset($_GET['id']) && !empty($_GET['id']) && isset($_GET['token']) && !empty($_GET['token'])) {
+        $id = $_GET['id'];
+        $token = $_GET['token'];
+        $userID = $securityModel->decryptData($id);
+        $token = $securityModel->decryptData($token);
+
+        $loginCredentialsDetails = $authenticationModel->getLoginCredentials($userID, null);
+        $resetToken =  $securityModel->decryptData($loginCredentialsDetails['reset_token']);
+        $resetTokenExpiryDate = $securityModel->decryptData($loginCredentialsDetails['reset_token_expiry_date']);
+
+        if($token != $resetToken || strtotime(date('Y-m-d H:i:s')) > strtotime($resetTokenExpiryDate)){
+            header('location: 404.php');
+            exit;
+        }
+    }
+    else{
+        header('location: index.php');
+        exit;
+    }
 
     require('components/configurations/session-check.php');
 ?>
@@ -32,30 +56,29 @@
                                                     <a href="index.php" class="text-nowrap logo-img d-block mb-3">
                                                         <img src="./assets/images/logos/logo-dark.svg" class="dark-logo" alt="Logo-Dark" />
                                                     </a>
-                                                    <h2 class="mb-2 mt-4 fs-6 fw-bolder">Welcome to <span class="text-primary">Digify Integrated Solutions</span></h2>
-                                                    <p class="mb-9">Your Partner in Progress, Redefining Digital Excellence</p>
-                                                    <form id="signin-form" method="post" action="#">
+                                                    <h2 class="mb-2 mt-4 fs-7 fw-bolder">Password <span class="text-primary">Reset</span></h2>
+                                                    <p class="mb-9">Enter your new password.</p>
+                                                    <form id="password-reset-form" method="post" action="#">
+                                                        <input type="hidden" id="user_account_id" name="user_account_id" value="<?php echo $userID; ?>">
                                                         <div class="mb-3">
-                                                            <label for="username" class="form-label">Username</label>
-                                                            <input type="text" class="form-control" id="username" name="username" autocomplete="off">
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <div class="d-flex align-items-center justify-content-between">
-                                                                <label for="password" class="form-label">Password</label>
-                                                                <a class="text-primary link-dark fs-2" href="forgot-password.php" tabindex="100">Forgot Password?</a>
-                                                            </div>
+                                                            <label for="new_password" class="form-label">New Password</label>
                                                             <div class="input-group">
-                                                                <input type="password" class="form-control" id="password" name="password">
+                                                                <input type="password" class="form-control" id="new_password" name="new_password">
                                                                 <button class="btn btn-dark rounded-end d-flex align-items-center password-addon" type="button">
                                                                     <i class="ti ti-eye"></i>
                                                                 </button>
                                                             </div>
                                                         </div>
-                                                        <button id="signin" type="submit" class="btn btn-dark w-100 py-8 mb-4 rounded-1">Login</button>
-                                                        <div class="d-flex align-items-center">
-                                                            <p class="fs-12 mb-0 fw-medium">Don’t have an account yet?</p>
-                                                            <a class="text-primary fw-bolder ms-2" href="./main/authentication-register2.html">Sign Up Now</a>
+                                                        <div class="mb-3">
+                                                            <label for="confirm_password" class="form-label">Confirm Password</label>
+                                                            <div class="input-group">
+                                                                <input type="password" class="form-control" id="confirm_password" name="confirm_password">
+                                                                <button class="btn btn-dark rounded-end d-flex align-items-center password-addon" type="button">
+                                                                    <i class="ti ti-eye"></i>
+                                                                </button>
+                                                            </div>
                                                         </div>
+                                                        <button id="reset" type="submit" class="btn btn-dark w-100 py-8 rounded-1">Reset Password</button>
                                                     </form>
                                                 </div>
                                             </div>
@@ -73,6 +96,6 @@
         <?php require_once('components/view/_error_modal.php'); ?>
         <?php require_once('components/view/_index_required_js.php'); ?>
 
-        <script src="./apps/security/authentication/js/index.js?v=<?php echo rand(); ?>"></script>
+        <script src="./apps/security/authentication/js/password-reset.js?v=<?php echo rand(); ?>"></script>
     </body>
 </html>

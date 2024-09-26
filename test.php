@@ -4,7 +4,7 @@
 
     $securityModel = new SecurityModel();
 
-    $text = 'P@ssw0rd';
+    $text = '0';
 
     echo $securityModel->encryptData($text);
 ?>
