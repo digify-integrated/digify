@@ -1,9 +1,11 @@
 <?php
 class AuthenticationModel {
     public $db;
+    public $securityModel;
 
-    public function __construct(DatabaseModel $db) {
+    public function __construct(DatabaseModel $db, SecurityModel $securityModel) {
         $this->db = $db;
+        $this->securityModel = $securityModel;
     }
 
     # -------------------------------------------------------------
@@ -21,6 +23,15 @@ class AuthenticationModel {
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    public function getPasswordHistory($p_user_account_id) {
+        $stmt = $this->db->getConnection()->prepare('CALL getPasswordHistory(:p_user_account_id)');
+        $stmt->bindValue(':p_user_account_id', $p_user_account_id, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Check exist methods
     # -------------------------------------------------------------
 
@@ -29,6 +40,39 @@ class AuthenticationModel {
         $stmt = $this->db->getConnection()->prepare('CALL checkLoginCredentialsExist(:p_user_account_id, :p_credentials)');
         $stmt->bindValue(':p_user_account_id', $p_user_account_id, PDO::PARAM_INT);
         $stmt->bindValue(':p_credentials', $p_credentials, PDO::PARAM_STR);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    public function checkSignUpEmailExist($p_email) {
+        $stmt = $this->db->getConnection()->prepare('CALL checkSignUpEmailExist(:p_email)');
+        $stmt->bindValue(':p_credentials', $p_credentials, PDO::PARAM_STR);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    public function checkSignUpUsernameExist($p_username) {
+        $stmt = $this->db->getConnection()->prepare('CALL checkSignUpUsernameExist(:p_username)');
+        $stmt->bindValue(':p_username', $p_username, PDO::PARAM_STR);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #   Check exist methods
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    public function checkAccessRights($p_user_account_id, $p_menu_item_id, $p_access_type) {
+        $stmt = $this->db->getConnection()->prepare('CALL checkAccessRights(:p_user_account_id, :p_menu_item_id, :p_access_type)');
+        $stmt->bindValue(':p_user_account_id', $p_user_account_id, PDO::PARAM_INT);
+        $stmt->bindValue(':p_menu_item_id', $p_menu_item_id, PDO::PARAM_INT);
+        $stmt->bindValue(':p_access_type', $p_access_type, PDO::PARAM_STR);
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
@@ -105,6 +149,157 @@ class AuthenticationModel {
         $stmt->bindValue(':p_resetToken_expiry_date', $p_resetToken_expiry_date, PDO::PARAM_STR);
         $stmt->execute();
     }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    public function updateUserPassword($p_user_account_id, $p_password, $p_password_expiry_date, $p_locked, $p_failed_login_attempts, $p_account_lock_duration) {
+        $stmt = $this->db->getConnection()->prepare('CALL updateUserPassword(:p_user_account_id, :p_password, :p_password_expiry_date, :p_locked, :p_failed_login_attempts, :p_account_lock_duration)');
+        $stmt->bindValue(':p_user_account_id', $p_user_account_id, PDO::PARAM_INT);
+        $stmt->bindValue(':p_password', $p_password, PDO::PARAM_STR);
+        $stmt->bindValue(':p_password_expiry_date', $p_password_expiry_date, PDO::PARAM_STR);
+        $stmt->bindValue(':p_locked', $p_locked, PDO::PARAM_STR);
+        $stmt->bindValue(':p_failed_login_attempts', $p_failed_login_attempts, PDO::PARAM_STR);
+        $stmt->bindValue(':p_account_lock_duration', $p_account_lock_duration, PDO::PARAM_STR);
+        $stmt->execute();
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    public function updateResetTokenAsExpired($p_user_account_id, $p_reset_token_expiry_date) {
+        $stmt = $this->db->getConnection()->prepare('CALL updateResetTokenAsExpired(:p_user_account_id, :p_reset_token_expiry_date)');
+        $stmt->bindValue(':p_user_account_id', $p_user_account_id, PDO::PARAM_INT);
+        $stmt->bindValue(':p_reset_token_expiry_date', $p_reset_token_expiry_date, PDO::PARAM_STR);
+        $stmt->execute();
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #   Build methods
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    public function buildMenuItem($p_user_account_id, $p_menu_group_id) {
+        $menuItems = [];
+
+        $stmt = $this->db->getConnection()->prepare('CALL buildMenuItem(:p_user_account_id, :p_menu_group_id)');
+        $stmt->bindValue(':p_user_account_id', $p_user_account_id, PDO::PARAM_INT);
+        $stmt->bindValue(':p_menu_group_id', $p_menu_group_id, PDO::PARAM_INT);
+        $stmt->execute();
+        $count = $stmt->rowCount();
+
+        if($count > 0){
+            $options = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $stmt->closeCursor();
+
+            foreach ($options as $row) {
+                $menuItemID = $row['menu_item_id'];
+                $menuItemName = $row['menu_item_name'];
+                $menuItemURL = $row['menu_item_url'] ?? null;
+                $parentID = $row['parent_id'];
+                $appModuleID = $row['app_module_id'];
+                $menuItemIcon = !empty($row['menu_item_icon']) ? $row['menu_item_icon'] : null;
+
+                $menuItem = [
+                    'MENU_ITEM_ID' => $menuItemID,
+                    'MENU_ITEM_NAME' => $menuItemName,
+                    'MENU_ITEM_URL' => $menuItemURL,
+                    'PARENT_ID' => $parentID,
+                    'MENU_ITEM_ICON' => $menuItemIcon,
+                    'APP_MODULE_ID' => $appModuleID,
+                    'CHILDREN' => []
+                ];
+
+                $menuItems[$menuItemID] = $menuItem;
+            }
+
+            foreach ($menuItems as $menuItem) {
+                if (!empty($menuItem['PARENT_ID'])) {
+                    $menuItems[$menuItem['PARENT_ID']]['CHILDREN'][] = &$menuItems[$menuItem['MENU_ITEM_ID']];
+                }
+            }
+
+            $rootMenuItems = array_filter($menuItems, function ($item) {
+                return empty($item['PARENT_ID']);
+            });
+
+            $html = '';
+
+            foreach ($rootMenuItems as $rootMenuItem) {
+                $html .= $this->buildMenuItemHTML($rootMenuItem);
+            }
+
+            return $html;
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    public function buildMenuItemHTML($menuItemDetails, $level = 1) {
+        $html = '';
+        $menuItemID = $this->securityModel->encryptData($menuItemDetails['MENU_ITEM_ID']);
+        $appModuleID = $this->securityModel->encryptData($menuItemDetails['APP_MODULE_ID']);
+        $menuItemName = $menuItemDetails['MENU_ITEM_NAME'];
+        $menuItemIcon = $menuItemDetails['MENU_ITEM_ICON'];
+        $menuItemURL = $menuItemDetails['MENU_ITEM_URL'];
+        $children = $menuItemDetails['CHILDREN'];
+    
+        $menuItemURL = !empty($menuItemURL) ? (strpos($menuItemURL, '?page_id=') !== false ? $menuItemURL : $menuItemURL . '?app_module_id=' . $appModuleID . '&page_id=' . $menuItemID) : 'javascript:void(0)';
+    
+        if ($level === 1) {
+            if (empty($children)) {
+                $html .= '<li class="sidebar-item">
+                                <a class="sidebar-link" href="'. $menuItemURL .'" aria-expanded="false">
+                                    <span>
+                                        <i class="'. $menuItemIcon .'"></i>
+                                    </span>
+                                    <span class="hide-menu">'. $menuItemName .'</span>
+                                </a>
+                            </li>';
+            }
+            else {
+                $html .= '<li class="sidebar-item">
+                                <a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false">
+                                    <i class="'. $menuItemIcon .'"></i>
+                                    <span class="hide-menu">'. $menuItemName .'</span>
+                                </a>
+                                <ul aria-expanded="false" class="collapse first-level">';
+    
+                foreach ($children as $child) {
+                    $html .= $this->buildMenuItemHTML($child, $level + 1);
+                }
+    
+                $html .= '</ul>
+                        </li>';
+            }
+        }
+        else {
+            if (empty($children)) {
+                $html .= '<li class="sidebar-item">
+                                <a class="sidebar-link" href="'. $menuItemURL .'">
+                                    <span class="icon-small"></span>
+                                    '. $menuItemName .'
+                                </a>
+                            </li>';
+            }
+            else {
+                $html .= ' <li class="sidebar-item">
+                                <a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false">
+                                    <span class="icon-small"></span>
+                                    <span class="hide-menu">'. $menuItemName .'</span>
+                                </a>
+                                <ul aria-expanded="false" class="collapse two-level">';
+    
+                foreach ($children as $child) {
+                    $html .= $this->buildMenuItemHTML($child, $level + 1);
+                }
+    
+                $html .= '</ul>
+                        </li>';
+            }
+        }
+    
+        return $html;
+    }    
     # -------------------------------------------------------------
 }
 ?>

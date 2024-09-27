@@ -1,4 +1,5 @@
 /* Users Table */
+DROP TABLE IF EXISTS user_account;
 
 CREATE TABLE user_account (
     user_account_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
@@ -25,34 +26,33 @@ CREATE TABLE user_account (
     last_password_reset DATETIME,
     multiple_session VARCHAR(255) DEFAULT 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D',
     session_token VARCHAR(255),
-    user_verified VARCHAR(255) DEFAULT 'WkgqlkcpSeEd7eWC8gl3iPwksfGbJYGy3VcisSyDeQ0%3D',
     linked_id INT UNSIGNED,
-    registration_date DATETIME,
-    registration_verification_token VARCHAR(255),
-    registration_verification_token_expiry_date VARCHAR(255),
-    registration_verification_date DATETIME,
-    created_date DATETIME NOT NULL DEFAULT NOW(),
-    last_log_by INT UNSIGNED NOT NULL,
+    created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    last_log_by INT UNSIGNED DEFAULT 1,
     FOREIGN KEY (last_log_by) REFERENCES user_account(user_account_id)
 );
 
 CREATE INDEX user_account_index_user_account_id ON user_account(user_account_id);
 CREATE INDEX user_account_index_email ON user_account(email);
 
-INSERT INTO user_account (file_as, username, email, password, locked, active, password_expiry_date, two_factor_auth, user_verified, last_log_by) VALUES ('Digify Bot', 'digifybot', 'digifybot@gmail.com', 'Lu%2Be%2BRZfTv%2F3T0GR%2Fwes8QPJvE3Etx1p7tmryi74LNk%3D', 'WkgqlkcpSeEd7eWC8gl3iPwksfGbJYGy3VcisSyDeQ0', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20', 'aUIRg2jhRcYVcr0%2BiRDl98xjv81aR4Ux63bP%2BF2hQbE%3D', 'WkgqlkcpSeEd7eWC8gl3iPwksfGbJYGy3VcisSyDeQ0', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20', '1');
-INSERT INTO user_account (file_as, username, email, password, locked, active, password_expiry_date, two_factor_auth, user_verified, last_log_by) VALUES ('Administrator', 'ldagulto', 'lawrenceagulto.317@gmail.com', 'Lu%2Be%2BRZfTv%2F3T0GR%2Fwes8QPJvE3Etx1p7tmryi74LNk%3D', 'WkgqlkcpSeEd7eWC8gl3iPwksfGbJYGy3VcisSyDeQ0', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20', 'aUIRg2jhRcYVcr0%2BiRDl98xjv81aR4Ux63bP%2BF2hQbE%3D', 'WkgqlkcpSeEd7eWC8gl3iPwksfGbJYGy3VcisSyDeQ0', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20', '1');
+INSERT INTO user_account (file_as, username, email, password, locked, active, password_expiry_date, two_factor_auth, last_log_by) VALUES ('Digify Bot', 'digifybot', 'digifybot@gmail.com', 'Lu%2Be%2BRZfTv%2F3T0GR%2Fwes8QPJvE3Etx1p7tmryi74LNk%3D', 'WkgqlkcpSeEd7eWC8gl3iPwksfGbJYGy3VcisSyDeQ0', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20', 'aUIRg2jhRcYVcr0%2BiRDl98xjv81aR4Ux63bP%2BF2hQbE%3D', 'WkgqlkcpSeEd7eWC8gl3iPwksfGbJYGy3VcisSyDeQ0', '1');
+INSERT INTO user_account (file_as, username, email, password, locked, active, password_expiry_date, two_factor_auth, last_log_by) VALUES ('Administrator', 'ldagulto', 'lawrenceagulto.317@gmail.com', 'Lu%2Be%2BRZfTv%2F3T0GR%2Fwes8QPJvE3Etx1p7tmryi74LNk%3D', 'WkgqlkcpSeEd7eWC8gl3iPwksfGbJYGy3VcisSyDeQ0', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20', 'aUIRg2jhRcYVcr0%2BiRDl98xjv81aR4Ux63bP%2BF2hQbE%3D', 'WkgqlkcpSeEd7eWC8gl3iPwksfGbJYGy3VcisSyDeQ0', '1');
 
 /* ----------------------------------------------------------------------------------------------------------------------------- */
 
 /* Password History Table */
+
+DROP TABLE IF EXISTS password_history;
 
 CREATE TABLE password_history (
     password_history_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
     user_account_id INT UNSIGNED NOT NULL,
     password VARCHAR(255) NOT NULL,
     password_change_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-    created_date DATETIME NOT NULL DEFAULT NOW(),
-    FOREIGN KEY (user_account_id) REFERENCES user_account(user_account_id)
+    created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    last_log_by INT UNSIGNED DEFAULT 1,
+    FOREIGN KEY (user_account_id) REFERENCES user_account(user_account_id),
+    FOREIGN KEY (last_log_by) REFERENCES user_account(user_account_id)
 );
 
 CREATE INDEX password_history_index_password_history_id ON password_history(password_history_id);

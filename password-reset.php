@@ -5,8 +5,8 @@
     require('components/model/security-model.php');
 
     $databaseModel = new DatabaseModel();
-    $authenticationModel = new AuthenticationModel($databaseModel);
     $securityModel = new SecurityModel();
+    $authenticationModel = new AuthenticationModel($databaseModel, $systemModel);
 
     $pageTitle = 'Password Reset';
 
@@ -94,7 +94,7 @@
         <div class="dark-transparent sidebartoggler"></div>
 
         <?php require_once('components/view/_error_modal.php'); ?>
-        <?php require_once('components/view/_index_required_js.php'); ?>
+        <?php require_once('components/view/_required_js.php'); ?>
 
         <script src="./apps/security/authentication/js/password-reset.js?v=<?php echo rand(); ?>"></script>
     </body>

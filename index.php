@@ -42,7 +42,7 @@
                                                         <div class="mb-3">
                                                             <div class="d-flex align-items-center justify-content-between">
                                                                 <label for="password" class="form-label">Password</label>
-                                                                <a class="text-primary link-dark fs-2" href="forgot-password.php" tabindex="100">Forgot Password?</a>
+                                                                <a class="text-primary link-dark fs-2 mb-2" href="forgot-password.php" tabindex="100">Forgot Password?</a>
                                                             </div>
                                                             <div class="input-group">
                                                                 <input type="password" class="form-control" id="password" name="password">
@@ -51,11 +51,7 @@
                                                                 </button>
                                                             </div>
                                                         </div>
-                                                        <button id="signin" type="submit" class="btn btn-dark w-100 py-8 mb-4 rounded-1">Login</button>
-                                                        <div class="d-flex align-items-center">
-                                                            <p class="fs-12 mb-0 fw-medium">Don’t have an account yet?</p>
-                                                            <a class="text-primary fw-bolder ms-2" href="./main/authentication-register2.html">Sign Up Now</a>
-                                                        </div>
+                                                        <button id="signin" type="submit" class="btn btn-dark w-100 py-8 rounded-1">Login</button>
                                                     </form>
                                                 </div>
                                             </div>
@@ -71,7 +67,7 @@
         <div class="dark-transparent sidebartoggler"></div>
 
         <?php require_once('components/view/_error_modal.php'); ?>
-        <?php require_once('components/view/_index_required_js.php'); ?>
+        <?php require_once('components/view/_required_js.php'); ?>
 
         <script src="./apps/security/authentication/js/index.js?v=<?php echo rand(); ?>"></script>
     </body>

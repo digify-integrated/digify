@@ -1,6 +1,22 @@
 <?php
 session_start();
 
+require_once '../../../../components/configurations/config.php';
+require_once '../../../../components/model/database-model.php';
+require_once '../../../../components/model/security-model.php';
+require_once '../../../../components/model/system-model.php';
+require_once '../../authentication/model/authentication-model.php';
+require_once '../../security-setting/model/security-setting-model.php';
+require_once '../../email-setting/model/email-setting-model.php';
+require_once '../../notification-setting/model/notification-setting-model.php';
+
+require_once '../../../../assets/libs/phpmailer/src/PHPMailer.php';
+require_once '../../../../assets/libs/phpmailer/src/Exception.php';
+require_once '../../../../assets/libs/phpmailer/src/SMTP.php';
+
+$controller = new AuthenticationController(new AuthenticationModel(new DatabaseModel), new SecuritySettingModel(new DatabaseModel), new EmailSettingModel(new DatabaseModel), new NotificationSettingModel(new DatabaseModel), new SystemModel(), new SecurityModel());
+$controller->handleRequest();
+
 # -------------------------------------------------------------
 class AuthenticationController {
     private $authenticationModel;
@@ -159,7 +175,7 @@ class AuthenticationController {
             return;
         }
     
-        $email = htmlspecialchars($_POST['email'], ENT_QUOTES, 'UTF-8');
+        $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
 
         $checkLoginCredentialsExist = $this->authenticationModel->checkLoginCredentialsExist(null, $email);
         $total = $checkLoginCredentialsExist['total'] ?? 0;
@@ -217,7 +233,7 @@ class AuthenticationController {
         $resetTokenExpiryDate = $this->securityModel->encryptData(date('Y-m-d H:i:s', strtotime('+'. $resetPasswordTokenDuration .' minutes')));
     
         $this->authenticationModel->updateResetToken($userAccountID, $encryptedResetToken, $resetTokenExpiryDate);
-        $this->sendPasswordReset($email, $encryptedUserID, $encryptedResetToken, $resetPasswordTokenDuration);
+        $this->sendPasswordReset($email, $encryptedUserID, $encryptedResetToken, $resetPasswordTokenDuration, 2);
 
         $response = [
             'success' => true,
@@ -241,13 +257,13 @@ class AuthenticationController {
             return;
         }
     
-        $userAccountID = htmlspecialchars($_POST['user_account_id'], ENT_QUOTES, 'UTF-8');
-        $otpCode1 = htmlspecialchars($_POST['otp_code_1'], ENT_QUOTES, 'UTF-8');
-        $otpCode2 = htmlspecialchars($_POST['otp_code_2'], ENT_QUOTES, 'UTF-8');
-        $otpCode3 = htmlspecialchars($_POST['otp_code_3'], ENT_QUOTES, 'UTF-8');
-        $otpCode4 = htmlspecialchars($_POST['otp_code_4'], ENT_QUOTES, 'UTF-8');
-        $otpCode5 = htmlspecialchars($_POST['otp_code_5'], ENT_QUOTES, 'UTF-8');
-        $otpCode6 = htmlspecialchars($_POST['otp_code_6'], ENT_QUOTES, 'UTF-8');
+        $userAccountID = filter_input(INPUT_POST, 'user_account_id', FILTER_SANITIZE_NUMBER_INT);
+        $otpCode1 = filter_input(INPUT_POST, 'otp_code_1', FILTER_VALIDATE_INT, ['options' => ['min_range' => 0, 'max_range' => 9]]);
+        $otpCode2 = filter_input(INPUT_POST, 'otp_code_2', FILTER_VALIDATE_INT, ['options' => ['min_range' => 0, 'max_range' => 9]]);
+        $otpCode3 = filter_input(INPUT_POST, 'otp_code_3', FILTER_VALIDATE_INT, ['options' => ['min_range' => 0, 'max_range' => 9]]);
+        $otpCode4 = filter_input(INPUT_POST, 'otp_code_4', FILTER_VALIDATE_INT, ['options' => ['min_range' => 0, 'max_range' => 9]]);
+        $otpCode5 = filter_input(INPUT_POST, 'otp_code_5', FILTER_VALIDATE_INT, ['options' => ['min_range' => 0, 'max_range' => 9]]);
+        $otpCode6 = filter_input(INPUT_POST, 'otp_code_6', FILTER_VALIDATE_INT, ['options' => ['min_range' => 0, 'max_range' => 9]]);
         $otpVerificationCode = $otpCode1 . $otpCode2 . $otpCode3 . $otpCode4 . $otpCode5 . $otpCode6;
 
         $checkLoginCredentialsExist = $this->authenticationModel->checkLoginCredentialsExist($userAccountID, null);
@@ -376,9 +392,8 @@ class AuthenticationController {
             return;
         }
     
-        $userAccountID = htmlspecialchars($_POST['user_account_id'], ENT_QUOTES, 'UTF-8');
-        $newPassword = htmlspecialchars($_POST['new_password'], ENT_QUOTES, 'UTF-8');
-        $encryptedPassword = $this->securityModel->encryptData($newPassword);
+        $userAccountID = filter_input(INPUT_POST, 'user_account_id', FILTER_SANITIZE_NUMBER_INT);
+        $newPassword = filter_input(INPUT_POST, 'new_password', FILTER_SANITIZE_STRING);
 
         $checkLoginCredentialsExist = $this->authenticationModel->checkLoginCredentialsExist($userAccountID, null);
         $total = $checkLoginCredentialsExist['total'] ?? 0;
@@ -459,9 +474,10 @@ class AuthenticationController {
         $defaultPasswordDuration = $securitySettingDetails['value'] ?? DEFAULT_PASSWORD_DURATION;
     
         $passwordExpiryDate = $this->securityModel->encryptData(date('Y-m-d', strtotime('+'. $defaultPasswordDuration .' days')));
+        
+        $encryptedPassword = $this->securityModel->encryptData($newPassword);
 
-        $this->authenticationModel->updateUserPassword($userAccountID, $email, $encryptedPassword, $passwordExpiryDate);
-        $this->authenticationModel->insertPasswordHistory($userAccountID, $email, $encryptedPassword);
+        $this->authenticationModel->updateUserPassword($userAccountID, $encryptedPassword, $passwordExpiryDate, $this->securityModel->encryptData('No'), $this->securityModel->encryptData(0), $this->securityModel->encryptData(0));
 
         $resetTokenExpiryDate = $this->securityModel->encryptData(date('Y-m-d H:i:s', strtotime('-1 year')));
         $this->authenticationModel->updateResetTokenAsExpired($userAccountID, $resetTokenExpiryDate);
@@ -515,7 +531,7 @@ class AuthenticationController {
         $failedLoginAttempts = $this->securityModel->encryptData(0);
     
         $this->authenticationModel->updateOTP($userAccountID, $encryptedOTP, $otpExpiryDate, $failedLoginAttempts);
-        $this->sendOTP($email, $otp);
+        $this->sendOTP($email, $otp, 1);
     }
     # -------------------------------------------------------------
 
@@ -554,7 +570,7 @@ class AuthenticationController {
             $response = [
                 'success' => false,
                 'title' => 'Authentication Failed',
-                'message' => 'Invalid credentials. Please check and try again', 
+                'message' => 'Invalid credentials. Please check and try again.', 
                 'messageType' => 'error'
             ];
         }
@@ -628,7 +644,7 @@ class AuthenticationController {
         $failedLoginAttempts = $this->securityModel->encryptData(0);
     
         $this->authenticationModel->updateOTP($userAccountID, $encryptedOTP, $otpExpiryDate, $failedLoginAttempts);
-        $this->sendOTP($email, $otp);
+        $this->sendOTP($email, $otp, 1);
     
         $response = [
             'success' => true,
@@ -645,15 +661,17 @@ class AuthenticationController {
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
-    public function sendOTP($email, $otp) {
-        $emailSetting = $this->emailSettingModel->getEmailSetting(1);
-        $mailFromName = $emailSetting['mail_from_name'] ?? null;
-        $mailFromEmail = $emailSetting['mail_from_email'] ?? null;
-
+    public function sendOTP($email, $otp, $notificationSettingID) {
         $securitySettingDetails = $this->securitySettingModel->getSecuritySetting(6);
         $otpDuration = $securitySettingDetails['value'] ?? DEFAULT_OTP_DURATION;
 
-        $notificationSettingDetails = $this->notificationSettingModel->getEmailNotificationTemplate(1);
+        $notificationSettingDetails = $this->notificationSettingModel->getEmailNotificationTemplate($notificationSettingID);
+        $emailSettingID = $notificationSettingDetails['email_setting_id'] ?? null;
+
+        $emailSetting = $this->emailSettingModel->getEmailSetting($emailSettingID);
+        $mailFromName = $emailSetting['mail_from_name'] ?? null;
+        $mailFromEmail = $emailSetting['mail_from_email'] ?? null;
+
         $emailSubject = $notificationSettingDetails['email_notification_subject'] ?? null;
         $emailBody = $notificationSettingDetails['email_notification_body'] ?? null;
         $emailBody = str_replace('#{OTP_CODE}', $otp, $emailBody);
@@ -681,7 +699,7 @@ class AuthenticationController {
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
-    public function sendPasswordReset($email, $userAccountID, $resetToken, $resetPasswordTokenDuration) {
+    public function sendPasswordReset($email, $userAccountID, $resetToken, $resetPasswordTokenDuration, $notificationSettingID) {
         $emailSetting = $this->emailSettingModel->getEmailSetting(1);
         $mailFromName = $emailSetting['mail_from_name'];
         $mailFromEmail = $emailSetting['mail_from_email'];
@@ -689,7 +707,13 @@ class AuthenticationController {
         $securitySettingDetails = $this->securitySettingModel->getSecuritySetting(3);
         $defaultForgotPasswordLink = $securitySettingDetails['value'] ?? null;
 
-        $notificationSettingDetails = $this->notificationSettingModel->getEmailNotificationTemplate(2);
+        $notificationSettingDetails = $this->notificationSettingModel->getEmailNotificationTemplate($notificationSettingID);
+        $emailSettingID = $notificationSettingDetails['email_setting_id'] ?? null;
+
+        $emailSetting = $this->emailSettingModel->getEmailSetting($emailSettingID);
+        $mailFromName = $emailSetting['mail_from_name'] ?? null;
+        $mailFromEmail = $emailSetting['mail_from_email'] ?? null;
+
         $emailSubject = $notificationSettingDetails['email_notification_subject'] ?? null;
         $emailBody = $notificationSettingDetails['email_notification_body'] ?? null;
         $emailBody = str_replace('#{RESET_LINK}', $defaultForgotPasswordLink . $userAccountID .'&token=' . $resetToken, $emailBody);
@@ -723,6 +747,23 @@ class AuthenticationController {
     # -------------------------------------------------------------
     private function checkPasswordHasExpired($passwordExpiryDate) {
         return (new DateTime() > new DateTime($passwordExpiryDate));
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    private function checkPasswordHistory($userAccountID, $currentPassword) {
+        $total = 0;
+        $passwordHistory = $this->authenticationModel->getPasswordHistory($userAccountID);
+    
+        foreach ($passwordHistory as $history) {
+            $password = $this->securityModel->decryptData($history['password']);
+    
+            if ($password === $currentPassword) {
+                $total++;
+            }
+        }
+    
+        return $total;
     }
     # -------------------------------------------------------------
 
@@ -804,20 +845,4 @@ class AuthenticationController {
     # -------------------------------------------------------------
 
 }
-
-require_once '../../../../components/configurations/config.php';
-require_once '../../../../components/model/database-model.php';
-require_once '../../../../components/model/security-model.php';
-require_once '../../../../components/model/system-model.php';
-require_once '../../authentication/model/authentication-model.php';
-require_once '../../security-setting/model/security-setting-model.php';
-require_once '../../email-setting/model/email-setting-model.php';
-require_once '../../notification-setting/model/notification-setting-model.php';
-
-require_once '../../../../assets/libs/phpmailer/src/PHPMailer.php';
-require_once '../../../../assets/libs/phpmailer/src/Exception.php';
-require_once '../../../../assets/libs/phpmailer/src/SMTP.php';
-
-$controller = new AuthenticationController(new AuthenticationModel(new DatabaseModel), new SecuritySettingModel(new DatabaseModel), new EmailSettingModel(new DatabaseModel), new NotificationSettingModel(new DatabaseModel), new SystemModel(), new SecurityModel());
-$controller->handleRequest();
 ?>

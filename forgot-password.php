@@ -56,7 +56,7 @@
         <div class="dark-transparent sidebartoggler"></div>
 
         <?php require_once('components/view/_error_modal.php'); ?>
-        <?php require_once('components/view/_index_required_js.php'); ?>
+        <?php require_once('components/view/_required_js.php'); ?>
 
         <script src="./apps/security/authentication/js/forgot-password.js?v=<?php echo rand(); ?>"></script>
     </body>

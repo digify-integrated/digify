@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 26, 2024 at 11:26 AM
+-- Generation Time: Sep 27, 2024 at 11:34 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -25,11 +25,101 @@ DELIMITER $$
 --
 -- Procedures
 --
+DROP PROCEDURE IF EXISTS `buildAppModuleStack`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `buildAppModuleStack` (IN `p_user_account_id` INT)   BEGIN
+    SELECT DISTINCT(am.app_module_id) as app_module_id, am.app_module_name, am.menu_item_id, app_logo, app_module_description
+    FROM app_module am
+    JOIN menu_item mi ON mi.app_module_id = am.app_module_id
+    WHERE EXISTS (
+        SELECT 1
+        FROM role_permission mar
+        WHERE mar.menu_item_id = mi.menu_item_id
+        AND mar.read_access = 1
+        AND mar.role_id IN (
+            SELECT role_id
+            FROM role_user_account
+            WHERE user_account_id = p_user_account_id
+        )
+    )
+    ORDER BY am.order_sequence, am.app_module_name;
+END$$
+
+DROP PROCEDURE IF EXISTS `buildMenuGroup`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `buildMenuGroup` (IN `p_user_account_id` INT, IN `p_app_module_id` INT)   BEGIN
+    SELECT DISTINCT(mg.menu_group_id) as menu_group_id, mg.menu_group_name as menu_group_name
+    FROM menu_group mg
+    JOIN menu_item mi ON mi.menu_group_id = mg.menu_group_id
+    WHERE EXISTS (
+        SELECT 1
+        FROM role_permission mar
+        WHERE mar.menu_item_id = mi.menu_item_id
+        AND mar.read_access = 1
+        AND mar.role_id IN (
+            SELECT role_id
+            FROM role_user_account
+            WHERE user_account_id = p_user_account_id
+        )
+    )
+    AND mg.app_module_id = p_app_module_id
+    ORDER BY mg.order_sequence;
+END$$
+
+DROP PROCEDURE IF EXISTS `buildMenuItem`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `buildMenuItem` (IN `p_user_account_id` INT, IN `p_menu_group_id` INT)   BEGIN
+    SELECT mi.menu_item_id, mi.menu_item_name, mi.menu_group_id, mi.menu_item_url, mi.parent_id, mi.app_module_id, mi.menu_item_icon
+    FROM menu_item AS mi
+    INNER JOIN role_permission AS mar ON mi.menu_item_id = mar.menu_item_id
+    INNER JOIN role_user_account AS ru ON mar.role_id = ru.role_id
+    WHERE mar.read_access = 1 AND ru.user_account_id = p_user_account_id AND mi.menu_group_id = p_menu_group_id
+    ORDER BY mi.order_sequence, mi.menu_item_name;
+END$$
+
+DROP PROCEDURE IF EXISTS `checkAccessRights`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `checkAccessRights` (IN `p_user_account_id` INT, IN `p_menu_item_id` INT, IN `p_access_type` VARCHAR(10))   BEGIN
+	IF p_access_type = 'read' THEN
+        SELECT COUNT(role_id) AS total
+        FROM role_user_account
+        WHERE user_account_id = p_user_account_id AND role_id IN (SELECT role_id FROM role_permission where read_access = 1 AND menu_item_id = p_menu_item_id);
+    ELSEIF p_access_type = 'write' THEN
+        SELECT COUNT(role_id) AS total
+        FROM role_user_account
+        WHERE user_account_id = p_user_account_id AND role_id IN (SELECT role_id FROM role_permission where write_access = 1 AND menu_item_id = p_menu_item_id);
+    ELSEIF p_access_type = 'create' THEN
+        SELECT COUNT(role_id) AS total
+        FROM role_user_account
+        WHERE user_account_id = p_user_account_id AND role_id IN (SELECT role_id FROM role_permission where create_access = 1 AND menu_item_id = p_menu_item_id);       
+    ELSEIF p_access_type = 'delete' THEN
+        SELECT COUNT(role_id) AS total
+        FROM role_user_account
+        WHERE user_account_id = p_user_account_id AND role_id IN (SELECT role_id FROM role_permission where delete_access = 1 AND menu_item_id = p_menu_item_id);
+    ELSEIF p_access_type = 'import' THEN
+        SELECT COUNT(role_id) AS total
+        FROM role_user_account
+        WHERE user_account_id = p_user_account_id AND role_id IN (SELECT role_id FROM role_permission where import_access = 1 AND menu_item_id = p_menu_item_id);
+    ELSEIF p_access_type = 'export' THEN
+        SELECT COUNT(role_id) AS total
+        FROM role_user_account
+        WHERE user_account_id = p_user_account_id AND role_id IN (SELECT role_id FROM role_permission where export_access = 1 AND menu_item_id = p_menu_item_id);
+    ELSE
+        SELECT COUNT(role_id) AS total
+        FROM role_user_account
+        WHERE user_account_id = p_user_account_id AND role_id IN (SELECT role_id FROM role_permission where log_notes_access = 1 AND menu_item_id = p_menu_item_id);
+    END IF;
+END$$
+
 DROP PROCEDURE IF EXISTS `checkLoginCredentialsExist`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `checkLoginCredentialsExist` (IN `p_user_account_id` INT, IN `p_credentials` VARCHAR(255))   BEGIN
-	SELECT COUNT(*) AS total
+    SELECT COUNT(*) AS total
     FROM user_account
-    WHERE user_account_id = p_user_account_id OR username = p_credentials OR email = p_credentials;
+    WHERE user_account_id = p_user_account_id
+       OR username = BINARY p_credentials
+       OR email = BINARY p_credentials;
+END$$
+
+DROP PROCEDURE IF EXISTS `getAppModule`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getAppModule` (IN `p_app_module_id` INT)   BEGIN
+	SELECT * FROM app_module
+	WHERE app_module_id = p_app_module_id;
 END$$
 
 DROP PROCEDURE IF EXISTS `getEmailNotificationTemplate`$$
@@ -46,8 +136,24 @@ END$$
 
 DROP PROCEDURE IF EXISTS `getLoginCredentials`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getLoginCredentials` (IN `p_user_account_id` INT, IN `p_credentials` VARCHAR(255))   BEGIN
-	SELECT * FROM user_account
-    WHERE user_account_id = p_user_account_id OR username = p_credentials OR email = p_credentials;
+    SELECT *
+    FROM user_account
+    WHERE user_account_id = p_user_account_id
+       OR username = BINARY p_credentials
+       OR email = BINARY p_credentials;
+END$$
+
+DROP PROCEDURE IF EXISTS `getMenuItem`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getMenuItem` (IN `p_menu_item_id` INT)   BEGIN
+	SELECT * FROM menu_item
+	WHERE menu_item_id = p_menu_item_id;
+END$$
+
+DROP PROCEDURE IF EXISTS `getPasswordHistory`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getPasswordHistory` (IN `p_user_account_id` INT)   BEGIN
+    SELECT password 
+    FROM password_history
+    WHERE user_account_id = p_user_account_id;
 END$$
 
 DROP PROCEDURE IF EXISTS `getSecuritySetting`$$
@@ -56,55 +162,234 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getSecuritySetting` (IN `p_security
 	WHERE security_setting_id = p_security_setting_id;
 END$$
 
+DROP PROCEDURE IF EXISTS `insertPasswordHistory`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `insertPasswordHistory` (IN `p_user_account_id` INT, IN `p_password` VARCHAR(255))   BEGIN
+    INSERT INTO password_history (user_account_id, password) 
+    VALUES (p_user_account_id, p_password);
+END$$
+
 DROP PROCEDURE IF EXISTS `updateAccountLock`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `updateAccountLock` (IN `p_user_account_id` INT, IN `p_locked` VARCHAR(255), IN `p_account_lock_duration` VARCHAR(255))   BEGIN
-	UPDATE user_account 
-    SET locked = p_locked, account_lock_duration = p_account_lock_duration 
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    UPDATE user_account
+    SET locked = p_locked, 
+        account_lock_duration = p_account_lock_duration
     WHERE user_account_id = p_user_account_id;
+
+    COMMIT;
 END$$
 
 DROP PROCEDURE IF EXISTS `updateFailedOTPAttempts`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `updateFailedOTPAttempts` (IN `p_user_account_id` INT, IN `p_failed_otp_attempts` VARCHAR(255))   BEGIN
-	UPDATE user_account 
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+    
+    UPDATE user_account
     SET failed_otp_attempts = p_failed_otp_attempts
     WHERE user_account_id = p_user_account_id;
+
+    COMMIT;
 END$$
 
 DROP PROCEDURE IF EXISTS `updateLastConnection`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `updateLastConnection` (IN `p_user_account_id` INT, IN `p_session_token` VARCHAR(255), IN `p_last_connection_date` DATETIME)   BEGIN
-	UPDATE user_account 
-    SET session_token = p_session_token, last_connection_date = p_last_connection_date
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+    
+    UPDATE user_account
+    SET session_token = p_session_token, 
+        last_connection_date = p_last_connection_date
     WHERE user_account_id = p_user_account_id;
+
+    COMMIT;
 END$$
 
 DROP PROCEDURE IF EXISTS `updateLoginAttempt`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `updateLoginAttempt` (IN `p_user_account_id` INT, IN `p_failed_login_attempts` VARCHAR(255), IN `p_last_failed_login_attempt` DATETIME)   BEGIN
-	UPDATE user_account 
-    SET failed_login_attempts = p_failed_login_attempts, last_failed_login_attempt = p_last_failed_login_attempt
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    UPDATE user_account
+    SET failed_login_attempts = p_failed_login_attempts, 
+        last_failed_login_attempt = p_last_failed_login_attempt
     WHERE user_account_id = p_user_account_id;
+
+    COMMIT;
 END$$
 
 DROP PROCEDURE IF EXISTS `updateOTP`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `updateOTP` (IN `p_user_account_id` INT, IN `p_otp` VARCHAR(255), IN `p_otp_expiry_date` VARCHAR(255), IN `p_failed_otp_attempts` VARCHAR(255))   BEGIN
-	UPDATE user_account 
-    SET otp = p_otp, otp_expiry_date = p_otp_expiry_date, failed_otp_attempts = p_failed_otp_attempts
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    UPDATE user_account
+    SET otp = p_otp, 
+        otp_expiry_date = p_otp_expiry_date, 
+        failed_otp_attempts = p_failed_otp_attempts
     WHERE user_account_id = p_user_account_id;
+
+    COMMIT;
 END$$
 
 DROP PROCEDURE IF EXISTS `updateOTPAsExpired`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `updateOTPAsExpired` (IN `p_user_account_id` INT, IN `p_otp_expiry_date` VARCHAR(255))   BEGIN
-	UPDATE user_account 
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    UPDATE user_account
     SET otp_expiry_date = p_otp_expiry_date
     WHERE user_account_id = p_user_account_id;
+
+    COMMIT;
 END$$
 
 DROP PROCEDURE IF EXISTS `updateResetToken`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `updateResetToken` (IN `p_user_account_id` INT, IN `p_reset_token` VARCHAR(255), IN `p_reset_token_expiry_date` VARCHAR(255))   BEGIN
-	UPDATE user_account 
-    SET reset_token = p_reset_token, reset_token_expiry_date = p_reset_token_expiry_date
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    UPDATE user_account
+    SET reset_token = p_reset_token, 
+        reset_token_expiry_date = p_reset_token_expiry_date
+    WHERE user_account_id = p_user_account_id;
+
+    COMMIT;
+END$$
+
+DROP PROCEDURE IF EXISTS `updateResetTokenAsExpired`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `updateResetTokenAsExpired` (IN `p_user_account_id` INT, IN `p_reset_token_expiry_date` VARCHAR(255))   BEGIN
+    UPDATE user_account
+    SET reset_token_expiry_date = p_reset_token_expiry_date
     WHERE user_account_id = p_user_account_id;
 END$$
 
+DROP PROCEDURE IF EXISTS `updateUserPassword`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `updateUserPassword` (IN `p_user_account_id` INT, IN `p_password` VARCHAR(255), IN `p_password_expiry_date` VARCHAR(255), IN `p_locked` VARCHAR(255), IN `p_failed_login_attempts` VARCHAR(255), IN `p_account_lock_duration` VARCHAR(255))   BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    INSERT INTO password_history (user_account_id, password) 
+    VALUES (p_user_account_id, p_password);
+
+    UPDATE user_account
+    SET password = p_password, 
+        password_expiry_date = p_password_expiry_date, 
+        last_password_change = NOW(), 
+        locked = p_locked, 
+        failed_login_attempts = p_failed_login_attempts, 
+        account_lock_duration = p_account_lock_duration, 
+        last_log_by = p_user_account_id
+    WHERE user_account_id = p_user_account_id;
+
+    COMMIT;
+END$$
+
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `app_module`
+--
+
+DROP TABLE IF EXISTS `app_module`;
+CREATE TABLE `app_module` (
+  `app_module_id` int(10) UNSIGNED NOT NULL,
+  `app_module_name` varchar(100) NOT NULL,
+  `app_module_description` varchar(500) NOT NULL,
+  `app_logo` varchar(500) DEFAULT NULL,
+  `menu_item_id` int(10) UNSIGNED NOT NULL,
+  `menu_item_name` varchar(100) NOT NULL,
+  `order_sequence` tinyint(10) NOT NULL,
+  `created_date` datetime DEFAULT current_timestamp(),
+  `last_log_by` int(10) UNSIGNED DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `app_module`
+--
+
+INSERT INTO `app_module` (`app_module_id`, `app_module_name`, `app_module_description`, `app_logo`, `menu_item_id`, `menu_item_name`, `order_sequence`, `created_date`, `last_log_by`) VALUES
+(1, 'Settings', 'Centralized management hub for comprehensive organizational oversight and control', './apps/security/app-module/image/logo/1/setting.png', 1, 'App Module', 100, '2024-09-27 16:14:50', 1),
+(2, 'Employees', 'Centralize employee information', './apps/security/app-module/image/logo/2/kwDc.png', 23, 'Inventory Overview', 1, '2024-09-27 16:14:50', 1),
+(3, 'Customer', 'Bring all your customer information into one easy-to-access location', './apps/security/app-module/image/logo/3/rL4r.png', 50, 'Customer', 3, '2024-09-27 16:14:50', 1),
+(4, 'Website Studio', 'Create and customize your website', './apps/security/app-module/image/logo/4/TnX0.png', 54, 'Websites', 1, '2024-09-27 16:14:50', 1),
+(5, 'CRM', 'Track leads and close opportunities', './apps/security/app-module/image/logo/5/CxLn.png', 73, 'My Bookings', 3, '2024-09-27 16:14:50', 1);
+
+--
+-- Triggers `app_module`
+--
+DROP TRIGGER IF EXISTS `app_module_trigger_insert`;
+DELIMITER $$
+CREATE TRIGGER `app_module_trigger_insert` AFTER INSERT ON `app_module` FOR EACH ROW BEGIN
+    DECLARE audit_log TEXT DEFAULT 'App module created.';
+
+    INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
+    VALUES ('app_module', NEW.app_module_id, audit_log, NEW.last_log_by, NOW());
+END
+$$
+DELIMITER ;
+DROP TRIGGER IF EXISTS `app_module_trigger_update`;
+DELIMITER $$
+CREATE TRIGGER `app_module_trigger_update` AFTER UPDATE ON `app_module` FOR EACH ROW BEGIN
+    DECLARE audit_log TEXT DEFAULT 'App module changed. <br/>';
+
+    IF NEW.app_module_name <> OLD.app_module_name THEN
+        SET audit_log = CONCAT(audit_log, "App Module Name: ", OLD.app_module_name, " -> ", NEW.app_module_name, "<br/>");
+    END IF;
+
+    IF NEW.app_module_description <> OLD.app_module_description THEN
+        SET audit_log = CONCAT(audit_log, "App Module Description: ", OLD.app_module_description, " -> ", NEW.app_module_description, "<br/>");
+    END IF;
+
+    IF NEW.menu_item_name <> OLD.menu_item_name THEN
+        SET audit_log = CONCAT(audit_log, "Menu Item: ", OLD.menu_item_name, " -> ", NEW.menu_item_name, "<br/>");
+    END IF;
+
+    IF NEW.order_sequence <> OLD.order_sequence THEN
+        SET audit_log = CONCAT(audit_log, "Order Sequence: ", OLD.order_sequence, " -> ", NEW.order_sequence, "<br/>");
+    END IF;
+    
+    IF LENGTH(audit_log) > 0 THEN
+        INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
+        VALUES ('app_module', NEW.app_module_id, audit_log, NEW.last_log_by, NOW());
+    END IF;
+END
+$$
 DELIMITER ;
 
 -- --------------------------------------------------------
@@ -129,12 +414,10 @@ CREATE TABLE `audit_log` (
 --
 
 INSERT INTO `audit_log` (`audit_log_id`, `table_name`, `reference_id`, `log`, `changed_by`, `changed_at`, `created_date`) VALUES
-(1, 'notification_setting', 1, 'Notification setting created.', 1, '2024-09-26 14:45:02', '2024-09-26 14:45:02'),
-(2, 'notification_setting', 2, 'Notification setting created.', 1, '2024-09-26 14:45:02', '2024-09-26 14:45:02'),
-(3, 'notification_setting', 3, 'Notification setting created.', 1, '2024-09-26 14:45:02', '2024-09-26 14:45:02'),
-(4, 'notification_setting_email_template', 1, 'Email notification template created.', 1, '2024-09-26 14:45:02', '2024-09-26 14:45:02'),
-(5, 'notification_setting_email_template', 2, 'Email notification template created.', 1, '2024-09-26 14:45:02', '2024-09-26 14:45:02'),
-(6, 'notification_setting_email_template', 3, 'Email notification template created.', 1, '2024-09-26 14:45:02', '2024-09-26 14:45:02');
+(1, 'app_module', 1, 'App module changed. <br/>', 1, '2024-09-27 16:57:27', '2024-09-27 16:57:27'),
+(2, 'app_module', 1, 'App module changed. <br/>Menu Item: Account Setting -> Menu Item<br/>', 1, '2024-09-27 16:57:32', '2024-09-27 16:57:32'),
+(3, 'app_module', 1, 'App module changed. <br/>', 1, '2024-09-27 17:01:49', '2024-09-27 17:01:49'),
+(4, 'app_module', 1, 'App module changed. <br/>Menu Item: Menu Item -> App Module<br/>', 1, '2024-09-27 17:01:51', '2024-09-27 17:01:51');
 
 -- --------------------------------------------------------
 
@@ -236,6 +519,195 @@ DELIMITER ;
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `internal_notes`
+--
+
+DROP TABLE IF EXISTS `internal_notes`;
+CREATE TABLE `internal_notes` (
+  `internal_notes_id` int(10) UNSIGNED NOT NULL,
+  `table_name` varchar(255) NOT NULL,
+  `reference_id` int(11) NOT NULL,
+  `internal_note` varchar(5000) NOT NULL,
+  `internal_note_by` int(10) UNSIGNED NOT NULL,
+  `internal_note_date` datetime NOT NULL DEFAULT current_timestamp(),
+  `created_date` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `internal_notes_attachment`
+--
+
+DROP TABLE IF EXISTS `internal_notes_attachment`;
+CREATE TABLE `internal_notes_attachment` (
+  `internal_notes_attachment_id` int(10) UNSIGNED NOT NULL,
+  `internal_notes_id` int(10) UNSIGNED NOT NULL,
+  `attachment_file_name` varchar(500) NOT NULL,
+  `attachment_file_size` double NOT NULL,
+  `attachment_path_file` varchar(500) NOT NULL,
+  `created_date` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `menu_group`
+--
+
+DROP TABLE IF EXISTS `menu_group`;
+CREATE TABLE `menu_group` (
+  `menu_group_id` int(10) UNSIGNED NOT NULL,
+  `menu_group_name` varchar(100) NOT NULL,
+  `app_module_id` int(10) UNSIGNED NOT NULL,
+  `app_module_name` varchar(100) NOT NULL,
+  `order_sequence` tinyint(10) NOT NULL,
+  `created_date` datetime DEFAULT current_timestamp(),
+  `last_log_by` int(10) UNSIGNED DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `menu_group`
+--
+
+INSERT INTO `menu_group` (`menu_group_id`, `menu_group_name`, `app_module_id`, `app_module_name`, `order_sequence`, `created_date`, `last_log_by`) VALUES
+(1, 'Technical', 1, 'Settings', 100, '2024-09-27 16:25:41', 2),
+(2, 'Administration', 1, 'Settings', 5, '2024-09-27 16:25:41', 2);
+
+--
+-- Triggers `menu_group`
+--
+DROP TRIGGER IF EXISTS `menu_group_trigger_insert`;
+DELIMITER $$
+CREATE TRIGGER `menu_group_trigger_insert` AFTER INSERT ON `menu_group` FOR EACH ROW BEGIN
+    DECLARE audit_log TEXT DEFAULT 'Menu group created.';
+
+    INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
+    VALUES ('menu_group', NEW.menu_group_id, audit_log, NEW.last_log_by, NOW());
+END
+$$
+DELIMITER ;
+DROP TRIGGER IF EXISTS `menu_group_trigger_update`;
+DELIMITER $$
+CREATE TRIGGER `menu_group_trigger_update` AFTER UPDATE ON `menu_group` FOR EACH ROW BEGIN
+    DECLARE audit_log TEXT DEFAULT 'Menu group changed.';
+
+    IF NEW.menu_group_name <> OLD.menu_group_name THEN
+        SET audit_log = CONCAT(audit_log, "Menu Group Name: ", OLD.menu_group_name, " -> ", NEW.menu_group_name, "<br/>");
+    END IF;
+    
+      IF NEW.app_module_name <> OLD.app_module_name THEN
+        SET audit_log = CONCAT(audit_log, "App Module: ", OLD.app_module_name, " -> ", NEW.app_module_name, "<br/>");
+    END IF;
+
+    IF NEW.order_sequence <> OLD.order_sequence THEN
+        SET audit_log = CONCAT(audit_log, "Order Sequence: ", OLD.order_sequence, " -> ", NEW.order_sequence, "<br/>");
+    END IF;
+    
+    IF LENGTH(audit_log) > 0 THEN
+        INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
+        VALUES ('menu_group', NEW.menu_group_id, audit_log, NEW.last_log_by, NOW());
+    END IF;
+END
+$$
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `menu_item`
+--
+
+DROP TABLE IF EXISTS `menu_item`;
+CREATE TABLE `menu_item` (
+  `menu_item_id` int(10) UNSIGNED NOT NULL,
+  `menu_item_name` varchar(100) NOT NULL,
+  `menu_item_url` varchar(50) DEFAULT NULL,
+  `menu_item_icon` varchar(50) DEFAULT NULL,
+  `menu_group_id` int(10) UNSIGNED NOT NULL,
+  `menu_group_name` varchar(100) NOT NULL,
+  `app_module_id` int(10) UNSIGNED NOT NULL,
+  `app_module_name` varchar(100) NOT NULL,
+  `parent_id` int(10) UNSIGNED DEFAULT NULL,
+  `parent_name` varchar(100) DEFAULT NULL,
+  `order_sequence` tinyint(10) NOT NULL,
+  `created_date` datetime DEFAULT current_timestamp(),
+  `last_log_by` int(10) UNSIGNED DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `menu_item`
+--
+
+INSERT INTO `menu_item` (`menu_item_id`, `menu_item_name`, `menu_item_url`, `menu_item_icon`, `menu_group_id`, `menu_group_name`, `app_module_id`, `app_module_name`, `parent_id`, `parent_name`, `order_sequence`, `created_date`, `last_log_by`) VALUES
+(1, 'App Module', 'app-module.php', 'ti ti-box', 1, 'Technical', 1, 'Settings', 0, '', 1, '2024-09-27 16:25:55', 2),
+(2, 'General Settings', 'general-settings.php', 'ti ti-settings', 1, 'Technical', 1, 'Settings', 0, '', 7, '2024-09-27 16:25:55', 2),
+(3, 'Users & Companies', '', 'ti ti-users', 2, 'Administration', 1, 'Settings', 0, '', 21, '2024-09-27 16:25:55', 2),
+(4, 'User Account', 'user-account.php', '', 2, 'Administration', 1, 'Settings', 3, 'Users & Companies', 21, '2024-09-27 16:25:55', 2),
+(5, 'Company', 'company.php', '', 2, 'Administration', 1, 'Settings', 3, 'Users & Companies', 3, '2024-09-27 16:25:55', 2),
+(6, 'Role', 'role.php', 'ti ti-sitemap', 2, 'Administration', 1, 'Settings', NULL, NULL, 3, '2024-09-27 16:25:55', 2),
+(7, 'User Interface', '', 'ti ti-layout-sidebar', 1, 'Technical', 1, 'Settings', NULL, NULL, 16, '2024-09-27 16:25:55', 2),
+(8, 'Menu Group', 'menu-group.php', '', 1, 'Technical', 1, 'Settings', 7, 'User Interface', 1, '2024-09-27 16:25:55', 2),
+(9, 'Menu Item', 'menu-item.php', '', 1, 'Technical', 1, 'Settings', 7, 'User Interface', 2, '2024-09-27 16:25:55', 2),
+(10, 'System Action', 'system-action.php', '', 1, 'Technical', 1, 'Settings', 7, 'User Interface', 2, '2024-09-27 16:25:55', 2);
+
+--
+-- Triggers `menu_item`
+--
+DROP TRIGGER IF EXISTS `menu_item_trigger_insert`;
+DELIMITER $$
+CREATE TRIGGER `menu_item_trigger_insert` AFTER INSERT ON `menu_item` FOR EACH ROW BEGIN
+    DECLARE audit_log TEXT DEFAULT 'Menu item created.';
+
+    INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
+    VALUES ('menu_item', NEW.menu_item_id, audit_log, NEW.last_log_by, NOW());
+END
+$$
+DELIMITER ;
+DROP TRIGGER IF EXISTS `menu_item_trigger_update`;
+DELIMITER $$
+CREATE TRIGGER `menu_item_trigger_update` AFTER UPDATE ON `menu_item` FOR EACH ROW BEGIN
+    DECLARE audit_log TEXT DEFAULT 'Menu item changed. <br/>';
+
+    IF NEW.menu_item_name <> OLD.menu_item_name THEN
+        SET audit_log = CONCAT(audit_log, "Menu Item Name: ", OLD.menu_item_name, " -> ", NEW.menu_item_name, "<br/>");
+    END IF;
+
+    IF NEW.menu_item_url <> OLD.menu_item_url THEN
+        SET audit_log = CONCAT(audit_log, "Menu Item URL: ", OLD.menu_item_url, " -> ", NEW.menu_item_url, "<br/>");
+    END IF;
+
+    IF NEW.menu_item_icon <> OLD.menu_item_icon THEN
+        SET audit_log = CONCAT(audit_log, "Menu Item Icon: ", OLD.menu_item_icon, " -> ", NEW.menu_item_icon, "<br/>");
+    END IF;
+
+    IF NEW.menu_group_name <> OLD.menu_group_name THEN
+        SET audit_log = CONCAT(audit_log, "Menu Group: ", OLD.menu_group_name, " -> ", NEW.menu_group_name, "<br/>");
+    END IF;
+
+    IF NEW.app_module_name <> OLD.app_module_name THEN
+        SET audit_log = CONCAT(audit_log, "App Module: ", OLD.app_module_name, " -> ", NEW.app_module_name, "<br/>");
+    END IF;
+
+    IF NEW.parent_name <> OLD.parent_name THEN
+        SET audit_log = CONCAT(audit_log, "Parent: ", OLD.parent_name, " -> ", NEW.parent_name, "<br/>");
+    END IF;
+
+    IF NEW.order_sequence <> OLD.order_sequence THEN
+        SET audit_log = CONCAT(audit_log, "Order Sequence: ", OLD.order_sequence, " -> ", NEW.order_sequence, "<br/>");
+    END IF;
+    
+    IF LENGTH(audit_log) > 0 THEN
+        INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
+        VALUES ('menu_item', NEW.menu_item_id, audit_log, NEW.last_log_by, NOW());
+    END IF;
+END
+$$
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `notification_setting`
 --
 
@@ -318,6 +790,8 @@ CREATE TABLE `notification_setting_email_template` (
   `notification_setting_id` int(10) UNSIGNED NOT NULL,
   `email_notification_subject` varchar(200) NOT NULL,
   `email_notification_body` longtext NOT NULL,
+  `email_setting_id` int(10) UNSIGNED NOT NULL,
+  `email_setting_name` varchar(100) NOT NULL,
   `created_date` datetime NOT NULL DEFAULT current_timestamp(),
   `last_log_by` int(10) UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -326,10 +800,10 @@ CREATE TABLE `notification_setting_email_template` (
 -- Dumping data for table `notification_setting_email_template`
 --
 
-INSERT INTO `notification_setting_email_template` (`notification_setting_email_id`, `notification_setting_id`, `email_notification_subject`, `email_notification_body`, `created_date`, `last_log_by`) VALUES
-(1, 1, 'Login OTP - Secure Access to Your Account', '<p>To ensure the security of your account, we have generated a unique One-Time Password (OTP) for you to use during the login process. Please use the following OTP to access your account:</p>\n<p><br>OTP: <strong>#{OTP_CODE}</strong></p>\n<p><br>Please note that this OTP is valid for &nbsp;<strong>#{OTP_CODE_VALIDITY}</strong>. Once you have logged in successfully, we recommend enabling two-factor authentication for an added layer of security.<br>If you did not initiate this login or believe it was sent to you in error, please disregard this email and delete it immediately. Your account\'s security remains our utmost priority.</p>\n<p>Note: This is an automatically generated email. Please do not reply to this address.</p>', '2024-09-26 14:45:02', 1),
-(2, 2, 'Password Reset Request - Action Required', '<p>We received a request to reset your password. To proceed with the password reset, please follow the steps below:</p>\n<ol>\n<li>\n<p>Click on the following link to reset your password:&nbsp; <strong><a href=\"#{RESET_LINK}\">Password Reset Link</a></strong></p>\n</li>\n<li>\n<p>If you did not request this password reset, please ignore this email. Your account remains secure.</p>\n</li>\n</ol>\n<p>Please note that this link is time-sensitive and will expire after <strong>#{RESET_LINK_VALIDITY}</strong>. If you do not reset your password within this timeframe, you may need to request another password reset.</p>\n<p><br>If you did not initiate this password reset request or believe it was sent to you in error, please disregard this email and delete it immediately. Your account\'s security remains our utmost priority.<br><br>Note: This is an automatically generated email. Please do not reply to this address.</p>', '2024-09-26 14:45:02', 1),
-(3, 3, 'Sign Up Verification - Action Required', '<p>Thank you for registering! To complete your registration, please verify your email address by clicking the link below:</p>\n<p><a href=\"#{REGISTRATION_VERIFICATION_LINK}\">Click to verify your account</a></p>\n<p>Important: This link is time-sensitive and will expire after #{REGISTRATION_VERIFICATION_VALIDITY}. If you do not verify your email within this timeframe, you may need to request another verification link.</p>\n<p>If you did not register for an account with us, please ignore this email. Your account will not be activated.</p>\n<p>Note: This is an automatically generated email. Please do not reply to this address.</p>', '2024-09-26 14:45:02', 1);
+INSERT INTO `notification_setting_email_template` (`notification_setting_email_id`, `notification_setting_id`, `email_notification_subject`, `email_notification_body`, `email_setting_id`, `email_setting_name`, `created_date`, `last_log_by`) VALUES
+(1, 1, 'Login OTP - Secure Access to Your Account', '<p>To ensure the security of your account, we have generated a unique One-Time Password (OTP) for you to use during the login process. Please use the following OTP to access your account:</p>\n<p><br>OTP: <strong>#{OTP_CODE}</strong></p>\n<p><br>Please note that this OTP is valid for &nbsp;<strong>#{OTP_CODE_VALIDITY}</strong>. Once you have logged in successfully, we recommend enabling two-factor authentication for an added layer of security.<br>If you did not initiate this login or believe it was sent to you in error, please disregard this email and delete it immediately. Your account\'s security remains our utmost priority.</p>\n<p>Note: This is an automatically generated email. Please do not reply to this address.</p>', 1, 'Security Email Setting', '2024-09-27 09:48:33', 1),
+(2, 2, 'Password Reset Request - Action Required', '<p>We received a request to reset your password. To proceed with the password reset, please follow the steps below:</p>\n<ol>\n<li>\n<p>Click on the following link to reset your password:&nbsp; <strong><a href=\"#{RESET_LINK}\">Password Reset Link</a></strong></p>\n</li>\n<li>\n<p>If you did not request this password reset, please ignore this email. Your account remains secure.</p>\n</li>\n</ol>\n<p>Please note that this link is time-sensitive and will expire after <strong>#{RESET_LINK_VALIDITY}</strong>. If you do not reset your password within this timeframe, you may need to request another password reset.</p>\n<p><br>If you did not initiate this password reset request or believe it was sent to you in error, please disregard this email and delete it immediately. Your account\'s security remains our utmost priority.<br><br>Note: This is an automatically generated email. Please do not reply to this address.</p>', 1, 'Security Email Setting', '2024-09-27 09:48:33', 1),
+(3, 3, 'Sign Up Verification - Action Required', '<p>Thank you for registering! To complete your registration, please verify your email address by clicking the link below:</p>\n<p><a href=\"#{REGISTRATION_VERIFICATION_LINK}\">Click to verify your account</a></p>\n<p>Important: This link is time-sensitive and will expire after #{REGISTRATION_VERIFICATION_VALIDITY}. If you do not verify your email within this timeframe, you may need to request another verification link.</p>\n<p>If you did not register for an account with us, please ignore this email. Your account will not be activated.</p>\n<p>Note: This is an automatically generated email. Please do not reply to this address.</p>', 1, 'Security Email Setting', '2024-09-27 09:48:33', 1);
 
 --
 -- Triggers `notification_setting_email_template`
@@ -355,6 +829,10 @@ CREATE TRIGGER `notification_setting_email_template_trigger_update` AFTER UPDATE
 
     IF NEW.email_notification_body <> OLD.email_notification_body THEN
         SET audit_log = CONCAT(audit_log, "Email Notification Body: ", OLD.email_notification_body, " -> ", NEW.email_notification_body, "<br/>");
+    END IF;
+
+    IF NEW.email_setting_name <> OLD.email_setting_name THEN
+        SET audit_log = CONCAT(audit_log, "Email Setting Name: ", OLD.email_setting_name, " -> ", NEW.email_setting_name, "<br/>");
     END IF;
 
     IF LENGTH(audit_log) > 0 THEN
@@ -472,8 +950,123 @@ CREATE TABLE `password_history` (
   `user_account_id` int(10) UNSIGNED NOT NULL,
   `password` varchar(255) NOT NULL,
   `password_change_date` datetime DEFAULT current_timestamp(),
-  `created_date` datetime NOT NULL DEFAULT current_timestamp()
+  `created_date` datetime DEFAULT current_timestamp(),
+  `last_log_by` int(10) UNSIGNED DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `password_history`
+--
+
+INSERT INTO `password_history` (`password_history_id`, `user_account_id`, `password`, `password_change_date`, `created_date`, `last_log_by`) VALUES
+(1, 2, 'ZW2SGXn0B41ZvY7Nl92uFaBW1LRhTxwaem5sgn8clRE%3D', '2024-09-27 12:27:47', '2024-09-27 12:27:47', 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `role`
+--
+
+DROP TABLE IF EXISTS `role`;
+CREATE TABLE `role` (
+  `role_id` int(10) UNSIGNED NOT NULL,
+  `role_name` varchar(100) NOT NULL,
+  `role_description` varchar(200) NOT NULL,
+  `created_date` datetime DEFAULT current_timestamp(),
+  `last_log_by` int(10) UNSIGNED DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `role`
+--
+
+INSERT INTO `role` (`role_id`, `role_name`, `role_description`, `created_date`, `last_log_by`) VALUES
+(1, 'Administrator', 'Full access to all features and data within the system. This role have similar access levels to the Admin but is not as powerful as the Super Admin.', '2024-09-27 16:42:19', 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `role_permission`
+--
+
+DROP TABLE IF EXISTS `role_permission`;
+CREATE TABLE `role_permission` (
+  `role_permission_id` int(10) UNSIGNED NOT NULL,
+  `role_id` int(10) UNSIGNED NOT NULL,
+  `role_name` varchar(100) NOT NULL,
+  `menu_item_id` int(10) UNSIGNED NOT NULL,
+  `menu_item_name` varchar(100) NOT NULL,
+  `read_access` tinyint(1) NOT NULL DEFAULT 0,
+  `write_access` tinyint(1) NOT NULL DEFAULT 0,
+  `create_access` tinyint(1) NOT NULL DEFAULT 0,
+  `delete_access` tinyint(1) NOT NULL DEFAULT 0,
+  `import_access` tinyint(1) NOT NULL DEFAULT 0,
+  `export_access` tinyint(1) NOT NULL DEFAULT 0,
+  `log_notes_access` tinyint(1) NOT NULL DEFAULT 0,
+  `date_assigned` datetime NOT NULL DEFAULT current_timestamp(),
+  `created_date` datetime DEFAULT current_timestamp(),
+  `last_log_by` int(10) UNSIGNED DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `role_permission`
+--
+
+INSERT INTO `role_permission` (`role_permission_id`, `role_id`, `role_name`, `menu_item_id`, `menu_item_name`, `read_access`, `write_access`, `create_access`, `delete_access`, `import_access`, `export_access`, `log_notes_access`, `date_assigned`, `created_date`, `last_log_by`) VALUES
+(1, 1, 'Administrator', 1, 'App Module', 1, 1, 1, 1, 1, 1, 1, '2024-09-27 16:45:02', '2024-09-27 16:45:02', 1),
+(2, 1, 'Administrator', 2, 'General Settings', 1, 1, 1, 1, 1, 1, 1, '2024-09-27 16:45:02', '2024-09-27 16:45:02', 1),
+(3, 1, 'Administrator', 3, 'Users & Companies', 1, 0, 0, 0, 0, 0, 0, '2024-09-27 16:45:02', '2024-09-27 16:45:02', 1),
+(4, 1, 'Administrator', 4, 'User Account', 1, 1, 1, 1, 1, 1, 1, '2024-09-27 16:45:02', '2024-09-27 16:45:02', 1),
+(5, 1, 'Administrator', 5, 'Company', 1, 1, 1, 1, 1, 1, 1, '2024-09-27 16:45:02', '2024-09-27 16:45:02', 1),
+(6, 1, 'Administrator', 6, 'Role', 1, 1, 1, 1, 1, 1, 1, '2024-09-27 16:45:02', '2024-09-27 16:45:02', 1),
+(7, 1, 'Administrator', 7, 'User Interface', 1, 0, 0, 0, 0, 0, 0, '2024-09-27 16:45:02', '2024-09-27 16:45:02', 1),
+(8, 1, 'Administrator', 8, 'Menu Group', 1, 1, 1, 1, 1, 1, 1, '2024-09-27 16:45:02', '2024-09-27 16:45:02', 1),
+(9, 1, 'Administrator', 9, 'Menu Item', 1, 1, 1, 1, 1, 1, 1, '2024-09-27 16:45:02', '2024-09-27 16:45:02', 1),
+(10, 1, 'Administrator', 10, 'System Action', 1, 1, 1, 1, 1, 1, 1, '2024-09-27 16:45:02', '2024-09-27 16:45:02', 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `role_system_action_permission`
+--
+
+DROP TABLE IF EXISTS `role_system_action_permission`;
+CREATE TABLE `role_system_action_permission` (
+  `role_system_action_permission_id` int(10) UNSIGNED NOT NULL,
+  `role_id` int(10) UNSIGNED NOT NULL,
+  `role_name` varchar(100) NOT NULL,
+  `system_action_id` int(10) UNSIGNED NOT NULL,
+  `system_action_name` varchar(100) NOT NULL,
+  `system_action_access` tinyint(1) NOT NULL DEFAULT 0,
+  `date_assigned` datetime NOT NULL DEFAULT current_timestamp(),
+  `created_date` datetime DEFAULT current_timestamp(),
+  `last_log_by` int(10) UNSIGNED DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `role_user_account`
+--
+
+DROP TABLE IF EXISTS `role_user_account`;
+CREATE TABLE `role_user_account` (
+  `role_user_account_id` int(10) UNSIGNED NOT NULL,
+  `role_id` int(10) UNSIGNED NOT NULL,
+  `role_name` varchar(100) NOT NULL,
+  `user_account_id` int(10) UNSIGNED NOT NULL,
+  `file_as` varchar(300) NOT NULL,
+  `date_assigned` datetime NOT NULL DEFAULT current_timestamp(),
+  `created_date` datetime DEFAULT current_timestamp(),
+  `last_log_by` int(10) UNSIGNED DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `role_user_account`
+--
+
+INSERT INTO `role_user_account` (`role_user_account_id`, `role_id`, `role_name`, `user_account_id`, `file_as`, `date_assigned`, `created_date`, `last_log_by`) VALUES
+(1, 1, 'Administrator', 2, 'Administrator', '2024-09-27 16:42:19', '2024-09-27 16:42:19', 1);
 
 -- --------------------------------------------------------
 
@@ -497,7 +1090,7 @@ CREATE TABLE `security_setting` (
 INSERT INTO `security_setting` (`security_setting_id`, `security_setting_name`, `value`, `created_date`, `last_log_by`) VALUES
 (1, 'Max Failed Login Attempt', '5', '2024-09-25 14:56:28', 1),
 (2, 'Max Failed OTP Attempt', '5', '2024-09-25 14:56:28', 1),
-(3, 'Default Forgot Password Link', 'http://localhost/modernize/password-reset.php?id=', '2024-09-25 14:56:28', 1),
+(3, 'Default Forgot Password Link', 'http://localhost/digify/password-reset.php?id=', '2024-09-25 14:56:28', 1),
 (4, 'Password Expiry Duration', '180', '2024-09-25 14:56:28', 1),
 (5, 'Session Timeout Duration', '240', '2024-09-25 14:56:28', 1),
 (6, 'OTP Duration', '5', '2024-09-25 14:56:28', 1),
@@ -549,6 +1142,55 @@ DELIMITER ;
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `system_action`
+--
+
+DROP TABLE IF EXISTS `system_action`;
+CREATE TABLE `system_action` (
+  `system_action_id` int(10) UNSIGNED NOT NULL,
+  `system_action_name` varchar(100) NOT NULL,
+  `system_action_description` varchar(200) NOT NULL,
+  `created_date` datetime DEFAULT current_timestamp(),
+  `last_log_by` int(10) UNSIGNED DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Triggers `system_action`
+--
+DROP TRIGGER IF EXISTS `system_action_trigger_insert`;
+DELIMITER $$
+CREATE TRIGGER `system_action_trigger_insert` AFTER INSERT ON `system_action` FOR EACH ROW BEGIN
+    DECLARE audit_log TEXT DEFAULT 'System action created.';
+
+    INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
+    VALUES ('system_action', NEW.system_action_id, audit_log, NEW.last_log_by, NOW());
+END
+$$
+DELIMITER ;
+DROP TRIGGER IF EXISTS `system_action_trigger_update`;
+DELIMITER $$
+CREATE TRIGGER `system_action_trigger_update` AFTER UPDATE ON `system_action` FOR EACH ROW BEGIN
+    DECLARE audit_log TEXT DEFAULT 'System action changed. <br/>';
+
+    IF NEW.system_action_name <> OLD.system_action_name THEN
+        SET audit_log = CONCAT(audit_log, "System Action Name: ", OLD.system_action_name, " -> ", NEW.system_action_name, "<br/>");
+    END IF;
+
+    IF NEW.system_action_description <> OLD.system_action_description THEN
+        SET audit_log = CONCAT(audit_log, "System Action Description: ", OLD.system_action_description, " -> ", NEW.system_action_description, "<br/>");
+    END IF;
+    
+    IF LENGTH(audit_log) > 0 THEN
+        INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
+        VALUES ('system_action', NEW.system_action_id, audit_log, NEW.last_log_by, NOW());
+    END IF;
+END
+$$
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `user_account`
 --
 
@@ -578,27 +1220,85 @@ CREATE TABLE `user_account` (
   `last_password_reset` datetime DEFAULT NULL,
   `multiple_session` varchar(255) DEFAULT 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D',
   `session_token` varchar(255) DEFAULT NULL,
-  `user_verified` varchar(255) DEFAULT 'WkgqlkcpSeEd7eWC8gl3iPwksfGbJYGy3VcisSyDeQ0%3D',
   `linked_id` int(10) UNSIGNED DEFAULT NULL,
-  `registration_date` datetime DEFAULT NULL,
-  `registration_verification_token` varchar(255) DEFAULT NULL,
-  `registration_verification_token_expiry_date` varchar(255) DEFAULT NULL,
-  `registration_verification_date` datetime DEFAULT NULL,
-  `created_date` datetime NOT NULL DEFAULT current_timestamp(),
-  `last_log_by` int(10) UNSIGNED NOT NULL
+  `created_date` datetime DEFAULT current_timestamp(),
+  `last_log_by` int(10) UNSIGNED DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `user_account`
 --
 
-INSERT INTO `user_account` (`user_account_id`, `file_as`, `email`, `username`, `password`, `profile_picture`, `locked`, `active`, `last_failed_login_attempt`, `failed_login_attempts`, `last_connection_date`, `password_expiry_date`, `reset_token`, `reset_token_expiry_date`, `receive_notification`, `two_factor_auth`, `otp`, `otp_expiry_date`, `failed_otp_attempts`, `last_password_change`, `account_lock_duration`, `last_password_reset`, `multiple_session`, `session_token`, `user_verified`, `linked_id`, `registration_date`, `registration_verification_token`, `registration_verification_token_expiry_date`, `registration_verification_date`, `created_date`, `last_log_by`) VALUES
-(1, 'Digify Bot', 'digifybot@gmail.com', 'digifybot', 'Lu%2Be%2BRZfTv%2F3T0GR%2Fwes8QPJvE3Etx1p7tmryi74LNk%3D', NULL, 'WkgqlkcpSeEd7eWC8gl3iPwksfGbJYGy3VcisSyDeQ0', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20', NULL, NULL, NULL, 'aUIRg2jhRcYVcr0%2BiRDl98xjv81aR4Ux63bP%2BF2hQbE%3D', NULL, NULL, 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'WkgqlkcpSeEd7eWC8gl3iPwksfGbJYGy3VcisSyDeQ0', NULL, NULL, NULL, NULL, NULL, NULL, 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', NULL, 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20', NULL, NULL, NULL, NULL, NULL, '2024-09-26 09:25:42', 1),
-(2, 'Administrator', 'lawrenceagulto.317@gmail.com', 'ldagulto', 'Lu%2Be%2BRZfTv%2F3T0GR%2Fwes8QPJvE3Etx1p7tmryi74LNk%3D', NULL, 'WkgqlkcpSeEd7eWC8gl3iPwksfGbJYGy3VcisSyDeQ0', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20', '0000-00-00 00:00:00', '', '2024-09-26 16:11:50', 'aUIRg2jhRcYVcr0%2BiRDl98xjv81aR4Ux63bP%2BF2hQbE%3D', 'rW33MMKlGhQIpFcjazbkg43kevQ8zzjS4FcMkVjz7qI%3D', '2VEr9dGjbdAR9jpDd%2FCrA3w9zPU2Ptsf5VXi2PZ12dFoMgkMGPLS%2FpVK70Ta%2B%2Bdp', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20', 'dapvi9CbGqvemNdCIUrrmxm4DF8BAUWVc86mvG5ckWI%3D', 'ycTLgfn8bM5tyq24oXCqCFLW9xA99zYKlF5extosZ5UgYL4UAW%2BiGbSkOQoeg4go', '', NULL, NULL, NULL, 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', '15uPEf1pu%2FVVq7D%2BaOanAXbLzX8H2jZKwdxfuZ4CFMQ%3D', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20', NULL, NULL, NULL, NULL, NULL, '2024-09-26 09:25:42', 1);
+INSERT INTO `user_account` (`user_account_id`, `file_as`, `email`, `username`, `password`, `profile_picture`, `locked`, `active`, `last_failed_login_attempt`, `failed_login_attempts`, `last_connection_date`, `password_expiry_date`, `reset_token`, `reset_token_expiry_date`, `receive_notification`, `two_factor_auth`, `otp`, `otp_expiry_date`, `failed_otp_attempts`, `last_password_change`, `account_lock_duration`, `last_password_reset`, `multiple_session`, `session_token`, `linked_id`, `created_date`, `last_log_by`) VALUES
+(1, 'Digify Bot', 'digifybot@gmail.com', 'digifybot', 'Lu%2Be%2BRZfTv%2F3T0GR%2Fwes8QPJvE3Etx1p7tmryi74LNk%3D', NULL, 'WkgqlkcpSeEd7eWC8gl3iPwksfGbJYGy3VcisSyDeQ0', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20', NULL, NULL, NULL, 'aUIRg2jhRcYVcr0%2BiRDl98xjv81aR4Ux63bP%2BF2hQbE%3D', NULL, NULL, 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'WkgqlkcpSeEd7eWC8gl3iPwksfGbJYGy3VcisSyDeQ0', NULL, NULL, NULL, NULL, NULL, NULL, 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', NULL, NULL, '2024-09-27 11:49:59', 1),
+(2, 'Administrator', 'lawrenceagulto.317@gmail.com', 'ldagulto', 'ZW2SGXn0B41ZvY7Nl92uFaBW1LRhTxwaem5sgn8clRE%3D', NULL, '9lZtEofygdjMs3EsZV1V38KQF%2FPjp7btRHLFnck7DpM%3D', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20', '0000-00-00 00:00:00', '', '2024-09-27 12:29:16', 'j3TPQ%2FkOvrVcj0dMsNNs%2BicQ3gQo7W812x4%2BN2Q72oM%3D', 'wWt3OtHh0FKAhB31glK%2FdLfDTWMQdhqvZ%2FtRgmWl8EU%3D', 'P4tR005eyn3kNWp4tUtAQ17HIhZPD2zHiMAUfRmlAiAM6qi4fe8MjMopfWWK3xk9', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'C2mK9Y%2BYHLb8Wcftkr83B0%2Fqlo5tkd10F42LBsF0e2E%3D', 'GsNsMxUI5L8f4sMiuMAaCW%2FZAapfXjIjmK8WJ89AyAfSJtrQ6uLFQTjB%2Fow7C4S1', '', '2024-09-27 12:27:47', '', NULL, 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'ThkQx4Y2Zen4yaKHtZutx2XoPdxQ1o81cXAxJo3J6X4%3D', NULL, '2024-09-27 11:49:59', 2);
+
+--
+-- Triggers `user_account`
+--
+DROP TRIGGER IF EXISTS `user_account_trigger_insert`;
+DELIMITER $$
+CREATE TRIGGER `user_account_trigger_insert` AFTER INSERT ON `user_account` FOR EACH ROW BEGIN
+    DECLARE audit_log TEXT DEFAULT 'User account created.';
+
+    INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
+    VALUES ('user_account', NEW.user_account_id, audit_log, NEW.last_log_by, NOW());
+END
+$$
+DELIMITER ;
+DROP TRIGGER IF EXISTS `user_account_trigger_update`;
+DELIMITER $$
+CREATE TRIGGER `user_account_trigger_update` AFTER UPDATE ON `user_account` FOR EACH ROW BEGIN
+    DECLARE audit_log TEXT DEFAULT 'User account changed.<br/>';
+
+    IF NEW.file_as <> OLD.file_as THEN
+        SET audit_log = CONCAT(audit_log, "File As: ", OLD.file_as, " -> ", NEW.file_as, "<br/>");
+    END IF;
+
+    IF NEW.email <> OLD.email THEN
+        SET audit_log = CONCAT(audit_log, "Email: ", OLD.email, " -> ", NEW.email, "<br/>");
+    END IF;
+
+    IF NEW.username <> OLD.username THEN
+        SET audit_log = CONCAT(audit_log, "Username: ", OLD.username, " -> ", NEW.username, "<br/>");
+    END IF;
+
+    IF NEW.last_failed_login_attempt <> OLD.last_failed_login_attempt THEN
+        SET audit_log = CONCAT(audit_log, "Last Failed Login Attempt: ", OLD.last_failed_login_attempt, " -> ", NEW.last_failed_login_attempt, "<br/>");
+    END IF;
+
+    IF NEW.last_connection_date <> OLD.last_connection_date THEN
+        SET audit_log = CONCAT(audit_log, "Last Connection Date: ", OLD.last_connection_date, " -> ", NEW.last_connection_date, "<br/>");
+    END IF;
+
+    IF NEW.last_password_change <> OLD.last_password_change THEN
+        SET audit_log = CONCAT(audit_log, "Last Password Change: ", OLD.last_password_change, " -> ", NEW.last_password_change, "<br/>");
+    END IF;
+
+    IF NEW.last_password_reset <> OLD.last_password_reset THEN
+        SET audit_log = CONCAT(audit_log, "Last Password Reset: ", OLD.last_password_reset, " -> ", NEW.last_password_reset, "<br/>");
+    END IF;
+    
+    IF LENGTH(audit_log) > 0 THEN
+        INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
+        VALUES ('user_account', NEW.user_account_id, audit_log, NEW.last_log_by, NOW());
+    END IF;
+END
+$$
+DELIMITER ;
 
 --
 -- Indexes for dumped tables
 --
+
+--
+-- Indexes for table `app_module`
+--
+ALTER TABLE `app_module`
+  ADD PRIMARY KEY (`app_module_id`),
+  ADD KEY `last_log_by` (`last_log_by`),
+  ADD KEY `app_module_index_app_module_id` (`app_module_id`),
+  ADD KEY `app_module_index_menu_item_id` (`menu_item_id`);
 
 --
 -- Indexes for table `audit_log`
@@ -617,6 +1317,43 @@ ALTER TABLE `email_setting`
   ADD PRIMARY KEY (`email_setting_id`),
   ADD KEY `last_log_by` (`last_log_by`),
   ADD KEY `email_setting_index_email_setting_id` (`email_setting_id`);
+
+--
+-- Indexes for table `internal_notes`
+--
+ALTER TABLE `internal_notes`
+  ADD PRIMARY KEY (`internal_notes_id`),
+  ADD KEY `internal_note_by` (`internal_note_by`),
+  ADD KEY `internal_notes_index_internal_notes_id` (`internal_notes_id`),
+  ADD KEY `internal_notes_index_table_name` (`table_name`),
+  ADD KEY `internal_notes_index_reference_id` (`reference_id`);
+
+--
+-- Indexes for table `internal_notes_attachment`
+--
+ALTER TABLE `internal_notes_attachment`
+  ADD PRIMARY KEY (`internal_notes_attachment_id`),
+  ADD KEY `internal_notes_attachment_index_internal_notes_id` (`internal_notes_attachment_id`),
+  ADD KEY `internal_notes_attachment_index_table_name` (`internal_notes_id`);
+
+--
+-- Indexes for table `menu_group`
+--
+ALTER TABLE `menu_group`
+  ADD PRIMARY KEY (`menu_group_id`),
+  ADD KEY `last_log_by` (`last_log_by`),
+  ADD KEY `app_module_id` (`app_module_id`),
+  ADD KEY `menu_group_index_menu_group_id` (`menu_group_id`);
+
+--
+-- Indexes for table `menu_item`
+--
+ALTER TABLE `menu_item`
+  ADD PRIMARY KEY (`menu_item_id`),
+  ADD KEY `last_log_by` (`last_log_by`),
+  ADD KEY `menu_group_id` (`menu_group_id`),
+  ADD KEY `menu_item_index_menu_item_id` (`menu_item_id`),
+  ADD KEY `menu_item_index_app_module_id` (`app_module_id`);
 
 --
 -- Indexes for table `notification_setting`
@@ -658,8 +1395,47 @@ ALTER TABLE `notification_setting_system_template`
 --
 ALTER TABLE `password_history`
   ADD PRIMARY KEY (`password_history_id`),
+  ADD KEY `last_log_by` (`last_log_by`),
   ADD KEY `password_history_index_password_history_id` (`password_history_id`),
   ADD KEY `password_history_index_user_account_id` (`user_account_id`);
+
+--
+-- Indexes for table `role`
+--
+ALTER TABLE `role`
+  ADD PRIMARY KEY (`role_id`),
+  ADD KEY `last_log_by` (`last_log_by`),
+  ADD KEY `role_index_role_id` (`role_id`);
+
+--
+-- Indexes for table `role_permission`
+--
+ALTER TABLE `role_permission`
+  ADD PRIMARY KEY (`role_permission_id`),
+  ADD KEY `last_log_by` (`last_log_by`),
+  ADD KEY `role_permission_index_role_permission_id` (`role_permission_id`),
+  ADD KEY `role_permission_index_menu_item_id` (`menu_item_id`),
+  ADD KEY `role_permission_index_role_id` (`role_id`);
+
+--
+-- Indexes for table `role_system_action_permission`
+--
+ALTER TABLE `role_system_action_permission`
+  ADD PRIMARY KEY (`role_system_action_permission_id`),
+  ADD KEY `last_log_by` (`last_log_by`),
+  ADD KEY `role_system_action_permission_index_system_action_permission_id` (`role_system_action_permission_id`),
+  ADD KEY `role_system_action_permission_index_system_action_id` (`system_action_id`),
+  ADD KEY `role_system_action_permissionn_index_role_id` (`role_id`);
+
+--
+-- Indexes for table `role_user_account`
+--
+ALTER TABLE `role_user_account`
+  ADD PRIMARY KEY (`role_user_account_id`),
+  ADD KEY `last_log_by` (`last_log_by`),
+  ADD KEY `role_user_account_index_role_user_account_id` (`role_user_account_id`),
+  ADD KEY `role_user_account_permission_index_user_account_id` (`user_account_id`),
+  ADD KEY `role_user_account_permissionn_index_role_id` (`role_id`);
 
 --
 -- Indexes for table `security_setting`
@@ -668,6 +1444,14 @@ ALTER TABLE `security_setting`
   ADD PRIMARY KEY (`security_setting_id`),
   ADD KEY `last_log_by` (`last_log_by`),
   ADD KEY `security_setting_index_security_setting_id` (`security_setting_id`);
+
+--
+-- Indexes for table `system_action`
+--
+ALTER TABLE `system_action`
+  ADD PRIMARY KEY (`system_action_id`),
+  ADD KEY `last_log_by` (`last_log_by`),
+  ADD KEY `system_action_index_system_action_id` (`system_action_id`);
 
 --
 -- Indexes for table `user_account`
@@ -683,16 +1467,46 @@ ALTER TABLE `user_account`
 --
 
 --
+-- AUTO_INCREMENT for table `app_module`
+--
+ALTER TABLE `app_module`
+  MODIFY `app_module_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
 -- AUTO_INCREMENT for table `audit_log`
 --
 ALTER TABLE `audit_log`
-  MODIFY `audit_log_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `audit_log_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `email_setting`
 --
 ALTER TABLE `email_setting`
   MODIFY `email_setting_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `internal_notes`
+--
+ALTER TABLE `internal_notes`
+  MODIFY `internal_notes_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `internal_notes_attachment`
+--
+ALTER TABLE `internal_notes_attachment`
+  MODIFY `internal_notes_attachment_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `menu_group`
+--
+ALTER TABLE `menu_group`
+  MODIFY `menu_group_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `menu_item`
+--
+ALTER TABLE `menu_item`
+  MODIFY `menu_item_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `notification_setting`
@@ -722,13 +1536,43 @@ ALTER TABLE `notification_setting_system_template`
 -- AUTO_INCREMENT for table `password_history`
 --
 ALTER TABLE `password_history`
-  MODIFY `password_history_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `password_history_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `role`
+--
+ALTER TABLE `role`
+  MODIFY `role_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `role_permission`
+--
+ALTER TABLE `role_permission`
+  MODIFY `role_permission_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+
+--
+-- AUTO_INCREMENT for table `role_system_action_permission`
+--
+ALTER TABLE `role_system_action_permission`
+  MODIFY `role_system_action_permission_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `role_user_account`
+--
+ALTER TABLE `role_user_account`
+  MODIFY `role_user_account_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `security_setting`
 --
 ALTER TABLE `security_setting`
   MODIFY `security_setting_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+
+--
+-- AUTO_INCREMENT for table `system_action`
+--
+ALTER TABLE `system_action`
+  MODIFY `system_action_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `user_account`
@@ -741,6 +1585,12 @@ ALTER TABLE `user_account`
 --
 
 --
+-- Constraints for table `app_module`
+--
+ALTER TABLE `app_module`
+  ADD CONSTRAINT `app_module_ibfk_1` FOREIGN KEY (`last_log_by`) REFERENCES `user_account` (`user_account_id`);
+
+--
 -- Constraints for table `audit_log`
 --
 ALTER TABLE `audit_log`
@@ -751,6 +1601,33 @@ ALTER TABLE `audit_log`
 --
 ALTER TABLE `email_setting`
   ADD CONSTRAINT `email_setting_ibfk_1` FOREIGN KEY (`last_log_by`) REFERENCES `user_account` (`user_account_id`);
+
+--
+-- Constraints for table `internal_notes`
+--
+ALTER TABLE `internal_notes`
+  ADD CONSTRAINT `internal_notes_ibfk_1` FOREIGN KEY (`internal_note_by`) REFERENCES `user_account` (`user_account_id`);
+
+--
+-- Constraints for table `internal_notes_attachment`
+--
+ALTER TABLE `internal_notes_attachment`
+  ADD CONSTRAINT `internal_notes_attachment_ibfk_1` FOREIGN KEY (`internal_notes_id`) REFERENCES `internal_notes` (`internal_notes_id`);
+
+--
+-- Constraints for table `menu_group`
+--
+ALTER TABLE `menu_group`
+  ADD CONSTRAINT `menu_group_ibfk_1` FOREIGN KEY (`last_log_by`) REFERENCES `user_account` (`user_account_id`),
+  ADD CONSTRAINT `menu_group_ibfk_2` FOREIGN KEY (`app_module_id`) REFERENCES `app_module` (`app_module_id`);
+
+--
+-- Constraints for table `menu_item`
+--
+ALTER TABLE `menu_item`
+  ADD CONSTRAINT `menu_item_ibfk_1` FOREIGN KEY (`last_log_by`) REFERENCES `user_account` (`user_account_id`),
+  ADD CONSTRAINT `menu_item_ibfk_2` FOREIGN KEY (`menu_group_id`) REFERENCES `menu_group` (`menu_group_id`),
+  ADD CONSTRAINT `menu_item_ibfk_3` FOREIGN KEY (`app_module_id`) REFERENCES `app_module` (`app_module_id`);
 
 --
 -- Constraints for table `notification_setting`
@@ -783,13 +1660,50 @@ ALTER TABLE `notification_setting_system_template`
 -- Constraints for table `password_history`
 --
 ALTER TABLE `password_history`
-  ADD CONSTRAINT `password_history_ibfk_1` FOREIGN KEY (`user_account_id`) REFERENCES `user_account` (`user_account_id`);
+  ADD CONSTRAINT `password_history_ibfk_1` FOREIGN KEY (`user_account_id`) REFERENCES `user_account` (`user_account_id`),
+  ADD CONSTRAINT `password_history_ibfk_2` FOREIGN KEY (`last_log_by`) REFERENCES `user_account` (`user_account_id`);
+
+--
+-- Constraints for table `role`
+--
+ALTER TABLE `role`
+  ADD CONSTRAINT `role_ibfk_1` FOREIGN KEY (`last_log_by`) REFERENCES `user_account` (`user_account_id`);
+
+--
+-- Constraints for table `role_permission`
+--
+ALTER TABLE `role_permission`
+  ADD CONSTRAINT `role_permission_ibfk_1` FOREIGN KEY (`menu_item_id`) REFERENCES `menu_item` (`menu_item_id`),
+  ADD CONSTRAINT `role_permission_ibfk_2` FOREIGN KEY (`role_id`) REFERENCES `role` (`role_id`),
+  ADD CONSTRAINT `role_permission_ibfk_3` FOREIGN KEY (`last_log_by`) REFERENCES `user_account` (`user_account_id`);
+
+--
+-- Constraints for table `role_system_action_permission`
+--
+ALTER TABLE `role_system_action_permission`
+  ADD CONSTRAINT `role_system_action_permission_ibfk_1` FOREIGN KEY (`system_action_id`) REFERENCES `system_action` (`system_action_id`),
+  ADD CONSTRAINT `role_system_action_permission_ibfk_2` FOREIGN KEY (`role_id`) REFERENCES `role` (`role_id`),
+  ADD CONSTRAINT `role_system_action_permission_ibfk_3` FOREIGN KEY (`last_log_by`) REFERENCES `user_account` (`user_account_id`);
+
+--
+-- Constraints for table `role_user_account`
+--
+ALTER TABLE `role_user_account`
+  ADD CONSTRAINT `role_user_account_ibfk_1` FOREIGN KEY (`user_account_id`) REFERENCES `user_account` (`user_account_id`),
+  ADD CONSTRAINT `role_user_account_ibfk_2` FOREIGN KEY (`role_id`) REFERENCES `role` (`role_id`),
+  ADD CONSTRAINT `role_user_account_ibfk_3` FOREIGN KEY (`last_log_by`) REFERENCES `user_account` (`user_account_id`);
 
 --
 -- Constraints for table `security_setting`
 --
 ALTER TABLE `security_setting`
   ADD CONSTRAINT `security_setting_ibfk_1` FOREIGN KEY (`last_log_by`) REFERENCES `user_account` (`user_account_id`);
+
+--
+-- Constraints for table `system_action`
+--
+ALTER TABLE `system_action`
+  ADD CONSTRAINT `system_action_ibfk_1` FOREIGN KEY (`last_log_by`) REFERENCES `user_account` (`user_account_id`);
 
 --
 -- Constraints for table `user_account`
