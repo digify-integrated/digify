@@ -6,7 +6,7 @@
 
     $databaseModel = new DatabaseModel();
     $securityModel = new SecurityModel();
-    $authenticationModel = new AuthenticationModel($databaseModel, $systemModel);
+    $authenticationModel = new AuthenticationModel($databaseModel, $securityModel);
 
     $pageTitle = 'OTP Verification';
 

@@ -34,6 +34,10 @@
     else{
         $detailID = null;
     }
+
+    if(isset($_GET['import']) && empty($_GET['import'])){
+        header('location:' . $pageLink);
+    }
     
     $newRecord = isset($_GET['new']);
 

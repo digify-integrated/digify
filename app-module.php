@@ -21,18 +21,21 @@
                     <?php 
                         require_once('components/view/_breadcrumbs.php'); 
 
-                        /*if($newRecord){
-                            require_once('components/app-module/view/_app_module_new.php');
+                        if($newRecord){
+                            require_once('apps/security/app-module/view/_app_module_new.php');
                         }
                         else if(!empty($detailID)){
-                            require_once('components/app-module/view/_app_module_details.php');
+                            require_once('apps/security/app-module/view/_app_module_details.php');
+                        }
+                        else if(isset($_GET['import']) && !empty($_GET['import'])){
+                            require_once('components/view/_import.php');
                         }
                         else{
-                            require_once('components/app-module/view/_app_module.php');
-                        }*/
+                            require_once('apps/security/app-module/view/_app_module.php');
+                        }
                     ?>
                 </div>
-                <?php #require_once('components/global/view/_customizer.php'); ?>
+                <?php require_once('components/view/_customizer.php'); ?>
             </div>
         </div>
     </div>
@@ -49,16 +52,24 @@
     <script src="./assets/libs/select2/dist/js/select2.min.js"></script>
 
     <?php
-        $scriptLink = 'app-module.js';
+        $version = rand();
 
-        if($newRecord){
-            $scriptLink = 'app-module-new.js';
-        }
-        else if(!empty($detailID)){
-            $scriptLink = 'app-module-details.js';
+        if ($newRecord) {
+            $scriptFile = './apps/security/app-module/js/app-module-new.js';
+        } 
+        elseif (!empty($detailID)) {
+            $scriptFile = './apps/security/app-module/js/app-module-details.js';
+        } 
+        elseif (isset($_GET['import']) && !empty($_GET['import'])) {
+            $scriptFile = './components/js/import.js'; 
+        } 
+        else {
+            $scriptFile = './apps/security/app-module/js/app-module.js';
         }
 
-        echo '<script src="./apps/security/app-module/js/'. $scriptLink .'?v=' . rand() .'"></script>';
+        $scriptLink = '<script src="' . $scriptFile . '?v=' . $version . '"></script>';
+
+        echo $scriptLink;
     ?>
 </body>
 

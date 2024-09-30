@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 27, 2024 at 11:34 AM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- Generation Time: Sep 30, 2024 at 09:03 AM
+-- Server version: 10.4.28-MariaDB
+-- PHP Version: 8.2.4
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -114,6 +114,13 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `checkLoginCredentialsExist` (IN `p_
     WHERE user_account_id = p_user_account_id
        OR username = BINARY p_credentials
        OR email = BINARY p_credentials;
+END$$
+
+DROP PROCEDURE IF EXISTS `generateAppModuleTable`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `generateAppModuleTable` ()   BEGIN
+	SELECT app_module_id, app_module_name, app_module_description, app_logo, order_sequence 
+    FROM app_module 
+    ORDER BY app_module_id;
 END$$
 
 DROP PROCEDURE IF EXISTS `getAppModule`$$
@@ -417,7 +424,19 @@ INSERT INTO `audit_log` (`audit_log_id`, `table_name`, `reference_id`, `log`, `c
 (1, 'app_module', 1, 'App module changed. <br/>', 1, '2024-09-27 16:57:27', '2024-09-27 16:57:27'),
 (2, 'app_module', 1, 'App module changed. <br/>Menu Item: Account Setting -> Menu Item<br/>', 1, '2024-09-27 16:57:32', '2024-09-27 16:57:32'),
 (3, 'app_module', 1, 'App module changed. <br/>', 1, '2024-09-27 17:01:49', '2024-09-27 17:01:49'),
-(4, 'app_module', 1, 'App module changed. <br/>Menu Item: Menu Item -> App Module<br/>', 1, '2024-09-27 17:01:51', '2024-09-27 17:01:51');
+(4, 'app_module', 1, 'App module changed. <br/>Menu Item: Menu Item -> App Module<br/>', 1, '2024-09-27 17:01:51', '2024-09-27 17:01:51'),
+(5, 'user_account', 2, 'User account changed.<br/>', 2, '2024-09-28 19:23:42', '2024-09-28 19:23:42'),
+(6, 'user_account', 2, 'User account changed.<br/>', 2, '2024-09-28 19:23:42', '2024-09-28 19:23:42'),
+(7, 'user_account', 2, 'User account changed.<br/>Last Connection Date: 2024-09-27 12:29:16 -> 2024-09-28 19:24:21<br/>', 2, '2024-09-28 19:24:21', '2024-09-28 19:24:21'),
+(8, 'user_account', 2, 'User account changed.<br/>', 2, '2024-09-28 19:26:45', '2024-09-28 19:26:45'),
+(9, 'user_account', 2, 'User account changed.<br/>', 2, '2024-09-28 19:26:45', '2024-09-28 19:26:45'),
+(10, 'user_account', 2, 'User account changed.<br/>Last Connection Date: 2024-09-28 19:24:21 -> 2024-09-28 19:27:00<br/>', 2, '2024-09-28 19:27:00', '2024-09-28 19:27:00'),
+(11, 'user_account', 2, 'User account changed.<br/>', 2, '2024-09-29 08:39:42', '2024-09-29 08:39:42'),
+(12, 'user_account', 2, 'User account changed.<br/>', 2, '2024-09-29 08:39:42', '2024-09-29 08:39:42'),
+(13, 'user_account', 2, 'User account changed.<br/>Last Connection Date: 2024-09-28 19:27:00 -> 2024-09-29 08:40:03<br/>', 2, '2024-09-29 08:40:03', '2024-09-29 08:40:03'),
+(14, 'user_account', 2, 'User account changed.<br/>', 2, '2024-09-30 09:41:49', '2024-09-30 09:41:49'),
+(15, 'user_account', 2, 'User account changed.<br/>', 2, '2024-09-30 09:41:49', '2024-09-30 09:41:49'),
+(16, 'user_account', 2, 'User account changed.<br/>Last Connection Date: 2024-09-29 08:40:03 -> 2024-09-30 09:42:08<br/>', 2, '2024-09-30 09:42:08', '2024-09-30 09:42:08');
 
 -- --------------------------------------------------------
 
@@ -1231,7 +1250,7 @@ CREATE TABLE `user_account` (
 
 INSERT INTO `user_account` (`user_account_id`, `file_as`, `email`, `username`, `password`, `profile_picture`, `locked`, `active`, `last_failed_login_attempt`, `failed_login_attempts`, `last_connection_date`, `password_expiry_date`, `reset_token`, `reset_token_expiry_date`, `receive_notification`, `two_factor_auth`, `otp`, `otp_expiry_date`, `failed_otp_attempts`, `last_password_change`, `account_lock_duration`, `last_password_reset`, `multiple_session`, `session_token`, `linked_id`, `created_date`, `last_log_by`) VALUES
 (1, 'Digify Bot', 'digifybot@gmail.com', 'digifybot', 'Lu%2Be%2BRZfTv%2F3T0GR%2Fwes8QPJvE3Etx1p7tmryi74LNk%3D', NULL, 'WkgqlkcpSeEd7eWC8gl3iPwksfGbJYGy3VcisSyDeQ0', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20', NULL, NULL, NULL, 'aUIRg2jhRcYVcr0%2BiRDl98xjv81aR4Ux63bP%2BF2hQbE%3D', NULL, NULL, 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'WkgqlkcpSeEd7eWC8gl3iPwksfGbJYGy3VcisSyDeQ0', NULL, NULL, NULL, NULL, NULL, NULL, 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', NULL, NULL, '2024-09-27 11:49:59', 1),
-(2, 'Administrator', 'lawrenceagulto.317@gmail.com', 'ldagulto', 'ZW2SGXn0B41ZvY7Nl92uFaBW1LRhTxwaem5sgn8clRE%3D', NULL, '9lZtEofygdjMs3EsZV1V38KQF%2FPjp7btRHLFnck7DpM%3D', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20', '0000-00-00 00:00:00', '', '2024-09-27 12:29:16', 'j3TPQ%2FkOvrVcj0dMsNNs%2BicQ3gQo7W812x4%2BN2Q72oM%3D', 'wWt3OtHh0FKAhB31glK%2FdLfDTWMQdhqvZ%2FtRgmWl8EU%3D', 'P4tR005eyn3kNWp4tUtAQ17HIhZPD2zHiMAUfRmlAiAM6qi4fe8MjMopfWWK3xk9', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'C2mK9Y%2BYHLb8Wcftkr83B0%2Fqlo5tkd10F42LBsF0e2E%3D', 'GsNsMxUI5L8f4sMiuMAaCW%2FZAapfXjIjmK8WJ89AyAfSJtrQ6uLFQTjB%2Fow7C4S1', '', '2024-09-27 12:27:47', '', NULL, 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'ThkQx4Y2Zen4yaKHtZutx2XoPdxQ1o81cXAxJo3J6X4%3D', NULL, '2024-09-27 11:49:59', 2);
+(2, 'Administrator', 'lawrenceagulto.317@gmail.com', 'ldagulto', 'ZW2SGXn0B41ZvY7Nl92uFaBW1LRhTxwaem5sgn8clRE%3D', NULL, '9lZtEofygdjMs3EsZV1V38KQF%2FPjp7btRHLFnck7DpM%3D', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20', '0000-00-00 00:00:00', '', '2024-09-30 09:42:08', 'j3TPQ%2FkOvrVcj0dMsNNs%2BicQ3gQo7W812x4%2BN2Q72oM%3D', 'wWt3OtHh0FKAhB31glK%2FdLfDTWMQdhqvZ%2FtRgmWl8EU%3D', 'P4tR005eyn3kNWp4tUtAQ17HIhZPD2zHiMAUfRmlAiAM6qi4fe8MjMopfWWK3xk9', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', '%2B%2FSz6%2Bx2PktUQbKGYB4QPoejOP9jITKKv2TaVT3cHvo%3D', 'cUcU4iyQtRwNnMq0YINirGY4502yrXcoKm9EnxwtwX%2B%2FphnxoTwde6zLsKvCSHDX', '', '2024-09-27 12:27:47', '', NULL, 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'ZFh0KSoGIEYbVA43iBFcbbDeE4XDFUWqvpHaBG8jtmA%3D', NULL, '2024-09-27 11:49:59', 2);
 
 --
 -- Triggers `user_account`
@@ -1476,7 +1495,7 @@ ALTER TABLE `app_module`
 -- AUTO_INCREMENT for table `audit_log`
 --
 ALTER TABLE `audit_log`
-  MODIFY `audit_log_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `audit_log_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `email_setting`

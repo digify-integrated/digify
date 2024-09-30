@@ -1,9 +1,4 @@
 <?php
-    require('components/configurations/config.php');
-    require('components/model/database-model.php');
-
-    $databaseModel = new DatabaseModel();
-
     $pageTitle = 'Forgot Password';
 
     require('components/configurations/session-check.php');

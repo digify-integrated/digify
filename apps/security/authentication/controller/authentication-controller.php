@@ -14,7 +14,7 @@ require_once '../../../../assets/libs/phpmailer/src/PHPMailer.php';
 require_once '../../../../assets/libs/phpmailer/src/Exception.php';
 require_once '../../../../assets/libs/phpmailer/src/SMTP.php';
 
-$controller = new AuthenticationController(new AuthenticationModel(new DatabaseModel), new SecuritySettingModel(new DatabaseModel), new EmailSettingModel(new DatabaseModel), new NotificationSettingModel(new DatabaseModel), new SystemModel(), new SecurityModel());
+$controller = new AuthenticationController(new AuthenticationModel(new DatabaseModel, new SecurityModel), new SecuritySettingModel(new DatabaseModel), new EmailSettingModel(new DatabaseModel), new NotificationSettingModel(new DatabaseModel), new SystemModel(), new SecurityModel());
 $controller->handleRequest();
 
 # -------------------------------------------------------------
