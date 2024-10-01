@@ -1,16 +1,19 @@
 <?php
 session_start();
 
-# -------------------------------------------------------------
-#
-# Function: AppModuleController
-# Description: 
-# The AppModuleController class handles app module related operations and interactions.
-#
-# Parameters: None
-#
-# Returns: None
-#
+require_once '../../../../components/configurations/config.php';
+require_once '../../../../components/model/database-model.php';
+require_once '../../../../components/model/security-model.php';
+require_once '../../../../components/model/system-model.php';
+require_once '../../authentication/model/authentication-model.php';
+require_once '../../app-module/model/app-module-model.php';
+require_once '../../security-setting/model/security-setting-model.php';
+require_once '../../menu-item/model/menu-item-model.php';
+require_once '../../upload-setting/model/upload-setting-model.php';
+
+$controller = new AppModuleController(new AppModuleModel(new DatabaseModel), new AuthenticationModel(new DatabaseModel, new SecurityModel), new MenuItemModel(new DatabaseModel), new UploadSettingModel(new DatabaseModel), new SecurityModel(), new SystemModel());
+$controller->handleRequest();
+
 # -------------------------------------------------------------
 class AppModuleController {
     private $appModuleModel;
@@ -20,23 +23,6 @@ class AppModuleController {
     private $securityModel;
     private $systemModel;
 
-    # -------------------------------------------------------------
-    #
-    # Function: __construct
-    # Description: 
-    # The constructor initializes the object with the provided AppModuleModel, AuthenticationModel and SecurityModel instances.
-    # These instances are used for app module related, user related operations and security related operations, respectively.
-    #
-    # Parameters:
-    # - @param AppModuleModel $appModuleModel     The AppModuleModel instance for app module related operations.
-    # - @param AuthenticationModel $authenticationModel     The AuthenticationModel instance for user related operations.
-    # - @param MenuItemModel $menuItemModel     The MenuItemModel instance for menu item related operations.
-    # - @param UploadSettingModel $uploadSettingModel     The UploadSettingModel instance for upload setting related operations.
-    # - @param SecurityModel $securityModel   The SecurityModel instance for security related operations.
-    # - @param SystemModel $systemModel   The SystemModel instance for system related operations.
-    #
-    # Returns: None
-    #
     # -------------------------------------------------------------
     public function __construct(AppModuleModel $appModuleModel, AuthenticationModel $authenticationModel, MenuItemModel $menuItemModel, UploadSettingModel $uploadSettingModel, SecurityModel $securityModel, SystemModel $systemModel) {
         $this->appModuleModel = $appModuleModel;
@@ -48,18 +34,6 @@ class AppModuleController {
     }
     # -------------------------------------------------------------
 
-    # -------------------------------------------------------------
-    #
-    # Function: handleRequest
-    # Description: 
-    # This method checks the request method and dispatches the corresponding transaction based on the provided transaction parameter.
-    # The transaction determines which action should be performed.
-    #
-    # Parameters:
-    # - $transaction (string): The type of transaction.
-    #
-    # Returns: Array
-    #
     # -------------------------------------------------------------
     public function handleRequest(){
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -152,7 +126,7 @@ class AppModuleController {
                     $response = [
                         'success' => false,
                         'title' => 'Error: Transaction Failed',
-                        'message' => 'An error occurred while processing your transaction. Please try again or contact our support team for assistance.',
+                        'message' => 'We encountered an issue while processing your request. Please try again, and if the problem persists, reach out to our support team for assistance.',
                         'messageType' => 'error'
                     ];
                     
@@ -168,55 +142,32 @@ class AppModuleController {
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
-    #
-    # Function: addAppModule
-    # Description: 
-    # Inserts a app module.
-    #
-    # Parameters: None
-    #
-    # Returns: Array
-    #
-    # -------------------------------------------------------------
     public function addAppModule() {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             return;
         }
 
-        if (isset($_POST['app_module_name']) && !empty($_POST['app_module_name']) && isset($_POST['app_module_description']) && !empty($_POST['app_module_description']) && isset($_POST['menu_item_id']) && !empty($_POST['menu_item_id']) && isset($_POST['order_sequence']) && !empty($_POST['order_sequence'])) {
-            $userID = $_SESSION['user_account_id'];
-            $appModuleName = $_POST['app_module_name'];
-            $appModuleDescription = $_POST['app_module_description'];
-            $menuItemID = htmlspecialchars($_POST['menu_item_id'], ENT_QUOTES, 'UTF-8');
-            $orderSequence = htmlspecialchars($_POST['order_sequence'], ENT_QUOTES, 'UTF-8');
+        $userID = $_SESSION['user_account_id'];
+        $appModuleName = filter_input(INPUT_POST, 'app_module_name', FILTER_SANITIZE_STRING);
+        $appModuleDescription = filter_input(INPUT_POST, 'app_module_description', FILTER_SANITIZE_STRING);
+        $menuItemID = filter_input(INPUT_POST, 'menu_item_id', FILTER_VALIDATE_INT);
+        $orderSequence = filter_input(INPUT_POST, 'order_sequence', FILTER_VALIDATE_INT);
 
-            $menuItemDetails = $this->menuItemModel->getMenuItem($menuItemID);
-            $menuItemName = $menuItemDetails['menu_item_name'];
+        $menuItemDetails = $this->menuItemModel->getMenuItem($menuItemID);
+        $menuItemName = $menuItemDetails['menu_item_name'];
         
-            $appModuleID = $this->appModuleModel->insertAppModule($appModuleName, $appModuleDescription, $menuItemID, $menuItemName, $orderSequence, $userID);
+        $appModuleID = $this->appModuleModel->saveAppModule(null, $appModuleName, $appModuleDescription, $menuItemID, $menuItemName, $orderSequence, $userID);
     
-            $response = [
-                'success' => true,
-                'appModuleID' => $this->securityModel->encryptData($appModuleID),
-                'title' => 'Insert App Module Success',
-                'message' => 'The app module has been inserted successfully.',
-                'messageType' => 'success'
-            ];
+        $response = [
+            'success' => true,
+            'appModuleID' => $this->securityModel->encryptData($appModuleID),
+            'title' => 'Save App Module',
+            'message' => 'The app module has been saved successfully.',
+            'messageType' => 'success'
+        ];
             
-            echo json_encode($response);
-            exit;
-        }
-        else{
-            $response = [
-                'success' => false,
-                'title' => 'Error: Transaction Failed',
-                'message' => 'An error occurred while processing your transaction. Please try again or contact our support team for assistance.',
-                'messageType' => 'error'
-            ];
-            
-            echo json_encode($response);
-            exit;
-        }
+        echo json_encode($response);
+        exit;
     }
     # -------------------------------------------------------------
 
@@ -225,84 +176,51 @@ class AppModuleController {
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
-    #
-    # Function: updateAppModule
-    # Description: 
-    # Updates the app module if it exists; otherwise, return an error message.
-    #
-    # Parameters: None
-    #
-    # Returns: Array
-    #
-    # -------------------------------------------------------------
     public function updateAppModule() {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             return;
         }
         
-        if (isset($_POST['app_module_id']) && !empty($_POST['app_module_id']) && isset($_POST['app_module_name']) && !empty($_POST['app_module_name']) && isset($_POST['app_module_description']) && !empty($_POST['app_module_description']) && isset($_POST['order_sequence']) && !empty($_POST['order_sequence'])) {
-            $userID = $_SESSION['user_account_id'];
-            $appModuleID = htmlspecialchars($_POST['app_module_id'], ENT_QUOTES, 'UTF-8');
-            $appModuleName = $_POST['app_module_name'];
-            $appModuleDescription = $_POST['app_module_description'];
-            $menuItemID = htmlspecialchars($_POST['menu_item_id'], ENT_QUOTES, 'UTF-8');
-            $orderSequence = htmlspecialchars($_POST['order_sequence'], ENT_QUOTES, 'UTF-8');
-        
-            $checkAppModuleExist = $this->appModuleModel->checkAppModuleExist($appModuleID);
-            $total = $checkAppModuleExist['total'] ?? 0;
+        $userID = $_SESSION['user_account_id'];
+        $appModuleID = filter_input(INPUT_POST, 'app_module_id', FILTER_VALIDATE_INT);
+        $appModuleName = filter_input(INPUT_POST, 'app_module_name', FILTER_SANITIZE_STRING);
+        $appModuleDescription = filter_input(INPUT_POST, 'app_module_description', FILTER_SANITIZE_STRING);
+        $menuItemID = filter_input(INPUT_POST, 'menu_item_id', FILTER_VALIDATE_INT);
+        $orderSequence = filter_input(INPUT_POST, 'order_sequence', FILTER_VALIDATE_INT);
+    
+        $checkAppModuleExist = $this->appModuleModel->checkAppModuleExist($appModuleID);
+        $total = $checkAppModuleExist['total'] ?? 0;
 
-            if($total === 0){
-                $response = [
-                    'success' => false,
-                    'notExist' => true,
-                    'title' => 'Update App Module Error',
-                    'message' => 'The app module does not exist.',
-                    'messageType' => 'error'
-                ];
-                
-                echo json_encode($response);
-                exit;
-            }
-
-            $menuItemDetails = $this->menuItemModel->getMenuItem($menuItemID);
-            $menuItemName = $menuItemDetails['menu_item_name'];
-
-            $this->appModuleModel->updateAppModule($appModuleID, $appModuleName, $appModuleDescription, $menuItemID, $menuItemName, $orderSequence, $userID);
-                
-            $response = [
-                'success' => true,
-                'title' => 'Update App Module Success',
-                'message' => 'The app module has been updated successfully.',
-                'messageType' => 'success'
-            ];
-            
-            echo json_encode($response);
-            exit;
-        }
-        else{
+        if($total === 0){
             $response = [
                 'success' => false,
-                'title' => 'Error: Transaction Failed',
-                'message' => 'An error occurred while processing your transaction. Please try again or contact our support team for assistance.',
+                'notExist' => true,
+                'title' => 'Save App Module',
+                'message' => 'The app module does not exist.',
                 'messageType' => 'error'
             ];
             
             echo json_encode($response);
             exit;
         }
+
+        $menuItemDetails = $this->menuItemModel->getMenuItem($menuItemID);
+        $menuItemName = $menuItemDetails['menu_item_name'];
+
+        $this->appModuleModel->saveAppModule($appModuleID, $appModuleName, $appModuleDescription, $menuItemID, $menuItemName, $orderSequence, $userID);
+            
+        $response = [
+            'success' => true,
+            'title' => 'Save App Module',
+            'message' => 'The app module has been saved successfully.',
+            'messageType' => 'success'
+        ];
+        
+        echo json_encode($response);
+        exit;
     }
     # -------------------------------------------------------------
 
-    # -------------------------------------------------------------
-    #
-    # Function: updateAppLogo
-    # Description: 
-    # Handles the update of the app logo.
-    #
-    # Parameters: None
-    #
-    # Returns: Array
-    #
     # -------------------------------------------------------------
     public function updateAppLogo() {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -468,16 +386,6 @@ class AppModuleController {
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
-    #
-    # Function: deleteAppModule
-    # Description: 
-    # Delete the app module if it exists; otherwise, return an error message.
-    #
-    # Parameters: None
-    #
-    # Returns: Array
-    #
-    # -------------------------------------------------------------
     public function deleteAppModule() {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             return;
@@ -546,16 +454,6 @@ class AppModuleController {
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
-    #
-    # Function: deleteMultipleAppModule
-    # Description: 
-    # Delete the selected app modules if it exists; otherwise, skip it.
-    #
-    # Parameters: None
-    #
-    # Returns: Array
-    #
-    # -------------------------------------------------------------
     public function deleteMultipleAppModule() {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             return;
@@ -619,84 +517,48 @@ class AppModuleController {
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
-    #
-    # Function: getAppModuleDetails
-    # Description: 
-    # Handles the retrieval of app module details.
-    #
-    # Parameters: None
-    #
-    # Returns: Array
-    #
-    # -------------------------------------------------------------
     public function getAppModuleDetails() {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             return;
         }
     
-        if (isset($_POST['app_module_id']) && !empty($_POST['app_module_id'])) {
-            $userID = $_SESSION['user_account_id'];
-            $appModuleID = htmlspecialchars($_POST['app_module_id'], ENT_QUOTES, 'UTF-8');
+        $userID = $_SESSION['user_account_id'];
+        $appModuleID = filter_input(INPUT_POST, 'app_module_id', FILTER_VALIDATE_INT);
 
-            $checkAppModuleExist = $this->appModuleModel->checkAppModuleExist($appModuleID);
-            $total = $checkAppModuleExist['total'] ?? 0;
+        $checkAppModuleExist = $this->appModuleModel->checkAppModuleExist($appModuleID);
+        $total = $checkAppModuleExist['total'] ?? 0;
 
-            if($total === 0){
-                $response = [
-                    'success' => false,
-                    'notExist' => true,
-                    'title' => 'Get App Module Details Error',
-                    'message' => 'The app module does not exist.',
-                    'messageType' => 'error'
-                ];
-                
-                echo json_encode($response);
-                exit;
-            }
-    
-            $appModuleDetails = $this->appModuleModel->getAppModule($appModuleID);
-            $appLogo = $this->systemModel->checkImage($appModuleDetails['app_logo'] ?? null, 'app module logo');
-
-            $response = [
-                'success' => true,
-                'appModuleName' => $appModuleDetails['app_module_name'] ?? null,
-                'appModuleDescription' => $appModuleDetails['app_module_description'] ?? null,
-                'menuItemID' => $appModuleDetails['menu_item_id'] ?? null,
-                'menuItemName' => $appModuleDetails['menu_item_name'] ?? null,
-                'appVersion' => $appModuleDetails['app_version'] ?? null,
-                'orderSequence' => $appModuleDetails['order_sequence'] ?? null,
-                'appLogo' => $appLogo
-            ];
-
-            echo json_encode($response);
-            exit;
-        }
-        else{
+        if($total === 0){
             $response = [
                 'success' => false,
-                'title' => 'Error: Transaction Failed',
-                'message' => 'An error occurred while processing your transaction. Please try again or contact our support team for assistance.',
+                'notExist' => true,
+                'title' => 'Get App Module Details',
+                'message' => 'The app module does not exist.',
                 'messageType' => 'error'
             ];
             
             echo json_encode($response);
             exit;
         }
+
+        $appModuleDetails = $this->appModuleModel->getAppModule($appModuleID);
+        $appLogo = $this->systemModel->checkImage($appModuleDetails['app_logo'] ?? null, 'app module logo');
+
+        $response = [
+            'success' => true,
+            'appModuleName' => $appModuleDetails['app_module_name'] ?? null,
+            'appModuleDescription' => $appModuleDetails['app_module_description'] ?? null,
+            'menuItemID' => $appModuleDetails['menu_item_id'] ?? null,
+            'menuItemName' => $appModuleDetails['menu_item_name'] ?? null,
+            'orderSequence' => $appModuleDetails['order_sequence'] ?? null,
+            'appLogo' => $appLogo
+        ];
+
+        echo json_encode($response);
+        exit;
     }
     # -------------------------------------------------------------
 }
 # -------------------------------------------------------------
-
-require_once '../../global/config/config.php';
-require_once '../../global/model/database-model.php';
-require_once '../../global/model/security-model.php';
-require_once '../../global/model/system-model.php';
-require_once '../../app-module/model/app-module-model.php';
-require_once '../../menu-item/model/menu-item-model.php';
-require_once '../../upload-setting/model/upload-setting-model.php';
-require_once '../../authentication/model/authentication-model.php';
-
-$controller = new AppModuleController(new AppModuleModel(new DatabaseModel), new AuthenticationModel(new DatabaseModel), new MenuItemModel(new DatabaseModel), new UploadSettingModel(new DatabaseModel), new SecurityModel(), new SystemModel());
-$controller->handleRequest();
 
 ?>

@@ -12,7 +12,9 @@ class MenuItemModel {
         $stmt = $this->db->getConnection()->prepare('CALL getMenuItem(:p_menu_item_id)');
         $stmt->bindValue(':p_menu_item_id', $p_menu_item_id, PDO::PARAM_INT);
         $stmt->execute();
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt->closeCursor();
+        return $result;
     }
     # -------------------------------------------------------------
 }

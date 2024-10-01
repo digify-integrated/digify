@@ -18,7 +18,9 @@ class AuthenticationModel {
         $stmt->bindValue(':p_user_account_id', $p_user_account_id, PDO::PARAM_INT);
         $stmt->bindValue(':p_credentials', $p_credentials, PDO::PARAM_STR);
         $stmt->execute();
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt->closeCursor();
+        return $result;
     }
     # -------------------------------------------------------------
 
@@ -41,7 +43,9 @@ class AuthenticationModel {
         $stmt->bindValue(':p_user_account_id', $p_user_account_id, PDO::PARAM_INT);
         $stmt->bindValue(':p_credentials', $p_credentials, PDO::PARAM_STR);
         $stmt->execute();
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt->closeCursor();
+        return $result;
     }
     # -------------------------------------------------------------
 
@@ -50,7 +54,9 @@ class AuthenticationModel {
         $stmt = $this->db->getConnection()->prepare('CALL checkSignUpEmailExist(:p_email)');
         $stmt->bindValue(':p_credentials', $p_credentials, PDO::PARAM_STR);
         $stmt->execute();
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt->closeCursor();
+        return $result;
     }
     # -------------------------------------------------------------
 
@@ -59,7 +65,9 @@ class AuthenticationModel {
         $stmt = $this->db->getConnection()->prepare('CALL checkSignUpUsernameExist(:p_username)');
         $stmt->bindValue(':p_username', $p_username, PDO::PARAM_STR);
         $stmt->execute();
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt->closeCursor();
+        return $result;
     }
     # -------------------------------------------------------------
 
@@ -74,7 +82,9 @@ class AuthenticationModel {
         $stmt->bindValue(':p_menu_item_id', $p_menu_item_id, PDO::PARAM_INT);
         $stmt->bindValue(':p_access_type', $p_access_type, PDO::PARAM_STR);
         $stmt->execute();
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt->closeCursor();
+        return $result;
     }
     # -------------------------------------------------------------
 
@@ -89,6 +99,7 @@ class AuthenticationModel {
         $stmt->bindValue(':p_failed_login_attempts', $p_failed_login_attempts, PDO::PARAM_STR);
         $stmt->bindValue(':p_last_failed_login_attempt', $p_last_failed_login_attempt, PDO::PARAM_STR);
         $stmt->execute();
+        $stmt->closeCursor();
     }
     # -------------------------------------------------------------
 
@@ -99,6 +110,7 @@ class AuthenticationModel {
         $stmt->bindValue(':p_locked', $p_locked, PDO::PARAM_STR);
         $stmt->bindValue(':p_lock_duration', $p_lock_duration, PDO::PARAM_INT);
         $stmt->execute();
+        $stmt->closeCursor();
     }
     # -------------------------------------------------------------
 
@@ -110,6 +122,7 @@ class AuthenticationModel {
         $stmt->bindValue(':p_otp_expiry_date', $p_otp_expiry_date, PDO::PARAM_STR);
         $stmt->bindValue(':p_failed_otp_attempts', $p_failed_otp_attempts, PDO::PARAM_STR);
         $stmt->execute();
+        $stmt->closeCursor();
     }
     # -------------------------------------------------------------
 
@@ -120,6 +133,7 @@ class AuthenticationModel {
         $stmt->bindValue(':p_session_token', $p_session_token, PDO::PARAM_STR);
         $stmt->bindValue(':p_last_connection_date', $p_last_connection_date, PDO::PARAM_STR);
         $stmt->execute();
+        $stmt->closeCursor();
     }
     # -------------------------------------------------------------
 
@@ -129,6 +143,7 @@ class AuthenticationModel {
         $stmt->bindValue(':p_user_account_id', $p_user_account_id, PDO::PARAM_INT);
         $stmt->bindValue(':p_otp_expiry_date', $p_otp_expiry_date, PDO::PARAM_STR);
         $stmt->execute();
+        $stmt->closeCursor();
     }
     # -------------------------------------------------------------
 
@@ -138,6 +153,7 @@ class AuthenticationModel {
         $stmt->bindValue(':p_user_account_id', $p_user_account_id, PDO::PARAM_INT);
         $stmt->bindValue(':p_failed_otp_attempts', $p_failed_otp_attempts, PDO::PARAM_INT);
         $stmt->execute();
+        $stmt->closeCursor();
     }
     # -------------------------------------------------------------
 
@@ -148,6 +164,7 @@ class AuthenticationModel {
         $stmt->bindValue(':p_resetToken', $p_resetToken, PDO::PARAM_STR);
         $stmt->bindValue(':p_resetToken_expiry_date', $p_resetToken_expiry_date, PDO::PARAM_STR);
         $stmt->execute();
+        $stmt->closeCursor();
     }
     # -------------------------------------------------------------
 
@@ -161,6 +178,7 @@ class AuthenticationModel {
         $stmt->bindValue(':p_failed_login_attempts', $p_failed_login_attempts, PDO::PARAM_STR);
         $stmt->bindValue(':p_account_lock_duration', $p_account_lock_duration, PDO::PARAM_STR);
         $stmt->execute();
+        $stmt->closeCursor();
     }
     # -------------------------------------------------------------
 
@@ -170,6 +188,7 @@ class AuthenticationModel {
         $stmt->bindValue(':p_user_account_id', $p_user_account_id, PDO::PARAM_INT);
         $stmt->bindValue(':p_reset_token_expiry_date', $p_reset_token_expiry_date, PDO::PARAM_STR);
         $stmt->execute();
+        $stmt->closeCursor();
     }
     # -------------------------------------------------------------
 

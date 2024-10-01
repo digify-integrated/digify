@@ -28,6 +28,7 @@ class EmailSettingModel {
         $stmt->bindValue(':p_mail_from_email', $p_mail_from_email, PDO::PARAM_STR);
         $stmt->bindValue(':p_last_log_by', $p_last_log_by, PDO::PARAM_INT);
         $stmt->execute();
+        $stmt->closeCursor();
     }
     # -------------------------------------------------------------
 
@@ -54,6 +55,8 @@ class EmailSettingModel {
         
         $result = $this->db->getConnection()->query('SELECT @p_email_setting_id AS email_setting_id');
         $menuItemID = $result->fetch(PDO::FETCH_ASSOC)['email_setting_id'];
+
+        $stmt->closeCursor();
         
         return $menuItemID;
     }
@@ -68,7 +71,9 @@ class EmailSettingModel {
         $stmt = $this->db->getConnection()->prepare('CALL checkEmailSettingExist(:p_email_setting_id)');
         $stmt->bindValue(':p_email_setting_id', $p_email_setting_id, PDO::PARAM_INT);
         $stmt->execute();
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt->closeCursor();
+        return $result;
     }
     # -------------------------------------------------------------
 
@@ -81,6 +86,7 @@ class EmailSettingModel {
         $stmt = $this->db->getConnection()->prepare('CALL deleteEmailSetting(:p_email_setting_id)');
         $stmt->bindValue(':p_email_setting_id', $p_email_setting_id, PDO::PARAM_INT);
         $stmt->execute();
+        $stmt->closeCursor();
     }
     # -------------------------------------------------------------
 
@@ -93,7 +99,9 @@ class EmailSettingModel {
         $stmt = $this->db->getConnection()->prepare('CALL getEmailSetting(:p_email_setting_id)');
         $stmt->bindValue(':p_email_setting_id', $p_email_setting_id, PDO::PARAM_INT);
         $stmt->execute();
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt->closeCursor();
+        return $result;
     }
     # -------------------------------------------------------------
 }

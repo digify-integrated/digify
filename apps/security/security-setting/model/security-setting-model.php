@@ -46,6 +46,7 @@ class SecuritySettingModel {
         $stmt->bindValue(':p_registration_verification_token_duration', $p_registration_verification_token_duration, PDO::PARAM_INT);
         $stmt->bindValue(':p_last_log_by', $p_last_log_by, PDO::PARAM_INT);
         $stmt->execute();
+        $stmt->closeCursor();
     }
     # -------------------------------------------------------------
 
@@ -69,7 +70,9 @@ class SecuritySettingModel {
         $stmt = $this->db->getConnection()->prepare('CALL getSecuritySetting(:p_security_setting_id)');
         $stmt->bindValue(':p_security_setting_id', $p_security_setting_id, PDO::PARAM_INT);
         $stmt->execute();
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt->closeCursor();
+        return $result;
     }
     # -------------------------------------------------------------
 }

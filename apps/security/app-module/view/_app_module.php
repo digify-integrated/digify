@@ -1,12 +1,12 @@
 <div class="card card-body">
     <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-4 mt-3 mt-md-0">
             <div class="position-relative">
                 <input type="text" class="form-control product-search ps-5" id="datatable-search" placeholder="Search..." />
                 <i class="ti ti-search position-absolute top-50 start-0 translate-middle-y fs-6 text-dark ms-3"></i>
             </div>
         </div>
-        <div class="col-md-1">
+        <div class="col-md-2 mt-3 mt-md-0">
             <div class="position-relative">
                 <select id="datatable-length" class="form-control">
                     <option value="-1">All</option>
@@ -19,7 +19,7 @@
                 </select>
             </div>
         </div>
-        <div class="col-md-7 text-end d-flex justify-content-md-end justify-content-center mt-3 mt-md-0">
+        <div class="col-md-6 text-end d-flex justify-content-md-end justify-content-center mt-3 mt-md-0">
             <div class="card-actions cursor-pointer ms-auto d-flex button-group">
                 <?php
                     if ($deleteAccess['total'] > 0 || $exportAccess['total'] > 0) {
@@ -59,7 +59,7 @@
             <div class="card mb-0">
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table id="app-module-table" class="table search-table align-middle text-nowrap w-100 mb-4">
+                        <table id="app-module-table" class="table w-100 table-hover display text-nowrap dataTable">
                             <thead class="text-dark">
                                 <tr>
                                     <th class="all">
@@ -68,8 +68,6 @@
                                         </div>
                                     </th>
                                     <th>App Module</th>
-                                    <th>Order Sequence</th>
-                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody></tbody>

@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 30, 2024 at 09:03 AM
--- Server version: 10.4.28-MariaDB
--- PHP Version: 8.2.4
+-- Generation Time: Oct 01, 2024 at 11:26 AM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -20,6 +20,8 @@ SET time_zone = "+00:00";
 --
 -- Database: `digifydb`
 --
+CREATE DATABASE IF NOT EXISTS `digifydb` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE `digifydb`;
 
 DELIMITER $$
 --
@@ -107,6 +109,13 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `checkAccessRights` (IN `p_user_acco
     END IF;
 END$$
 
+DROP PROCEDURE IF EXISTS `checkAppModuleExist`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `checkAppModuleExist` (IN `p_app_module_id` INT)   BEGIN
+	SELECT COUNT(*) AS total
+    FROM app_module
+    WHERE app_module_id = p_app_module_id;
+END$$
+
 DROP PROCEDURE IF EXISTS `checkLoginCredentialsExist`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `checkLoginCredentialsExist` (IN `p_user_account_id` INT, IN `p_credentials` VARCHAR(255))   BEGIN
     SELECT COUNT(*) AS total
@@ -121,6 +130,36 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `generateAppModuleTable` ()   BEGIN
 	SELECT app_module_id, app_module_name, app_module_description, app_logo, order_sequence 
     FROM app_module 
     ORDER BY app_module_id;
+END$$
+
+DROP PROCEDURE IF EXISTS `generateInternalNotes`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `generateInternalNotes` (IN `p_table_name` VARCHAR(255), IN `p_reference_id` INT)   BEGIN
+	SELECT internal_notes_id, internal_note, internal_note_by, internal_note_date
+    FROM internal_notes
+    WHERE table_name = p_table_name AND reference_id  = p_reference_id
+    ORDER BY internal_note_date DESC;
+END$$
+
+DROP PROCEDURE IF EXISTS `generateLogNotes`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `generateLogNotes` (IN `p_table_name` VARCHAR(255), IN `p_reference_id` INT)   BEGIN
+	SELECT log, changed_by, changed_at
+    FROM audit_log
+    WHERE table_name = p_table_name AND reference_id  = p_reference_id
+    ORDER BY changed_at DESC;
+END$$
+
+DROP PROCEDURE IF EXISTS `generateMenuItemOptions`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `generateMenuItemOptions` (IN `p_menu_item_id` INT)   BEGIN
+    IF p_menu_item_id IS NOT NULL AND p_menu_item_id != '' THEN
+        SELECT menu_item_id, menu_item_name 
+        FROM menu_item 
+        WHERE menu_item_id != p_menu_item_id
+        ORDER BY menu_item_name;
+    ELSE
+        SELECT menu_item_id, menu_item_name 
+        FROM menu_item 
+        ORDER BY menu_item_name;
+    END IF;
 END$$
 
 DROP PROCEDURE IF EXISTS `getAppModule`$$
@@ -169,10 +208,62 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getSecuritySetting` (IN `p_security
 	WHERE security_setting_id = p_security_setting_id;
 END$$
 
+DROP PROCEDURE IF EXISTS `getUploadSetting`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getUploadSetting` (IN `p_upload_setting_id` INT)   BEGIN
+	SELECT * FROM upload_setting
+	WHERE upload_setting_id = p_upload_setting_id;
+END$$
+
+DROP PROCEDURE IF EXISTS `getUploadSettingFileExtension`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getUploadSettingFileExtension` (IN `p_upload_setting_id` INT)   BEGIN
+	SELECT * FROM upload_setting_file_extension
+	WHERE upload_setting_id = p_upload_setting_id;
+END$$
+
 DROP PROCEDURE IF EXISTS `insertPasswordHistory`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `insertPasswordHistory` (IN `p_user_account_id` INT, IN `p_password` VARCHAR(255))   BEGIN
     INSERT INTO password_history (user_account_id, password) 
     VALUES (p_user_account_id, p_password);
+END$$
+
+DROP PROCEDURE IF EXISTS `saveAppModule`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `saveAppModule` (IN `p_app_module_id` INT, IN `p_app_module_name` VARCHAR(100), IN `p_app_module_description` VARCHAR(500), IN `p_menu_item_id` INT, IN `p_menu_item_name` VARCHAR(100), IN `p_order_sequence` TINYINT(10), IN `p_last_log_by` INT, OUT `p_new_app_module_id` INT)   BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    IF p_app_module_id IS NULL OR NOT EXISTS (SELECT 1 FROM app_module WHERE app_module_id = p_app_module_id) THEN
+        INSERT INTO app_module (app_module_name, app_module_description, menu_item_id, menu_item_name, order_sequence, last_log_by) 
+        VALUES(p_app_module_name, p_app_module_description, p_menu_item_id, p_menu_item_name, p_order_sequence, p_last_log_by);
+        
+        SET p_new_app_module_id = LAST_INSERT_ID();
+    ELSE
+        UPDATE app_module
+        SET app_module_name = p_app_module_name,
+            app_module_description = p_app_module_description,
+            menu_item_id = p_menu_item_id,
+            menu_item_name = p_menu_item_name,
+            order_sequence = p_order_sequence,
+            last_log_by = p_last_log_by
+        WHERE app_module_id = p_app_module_id;
+        
+        UPDATE menu_group
+        SET app_module_name = p_app_module_name,
+            last_log_by = p_last_log_by
+        WHERE app_module_id = p_app_module_id;
+
+        UPDATE menu_item
+        SET app_module_name = p_app_module_name,
+            last_log_by = p_last_log_by
+        WHERE app_module_id = p_app_module_id;
+
+        SET p_new_app_module_id = p_app_module_id;
+    END IF;
+
+    COMMIT;
 END$$
 
 DROP PROCEDURE IF EXISTS `updateAccountLock`$$
@@ -355,7 +446,9 @@ INSERT INTO `app_module` (`app_module_id`, `app_module_name`, `app_module_descri
 (2, 'Employees', 'Centralize employee information', './apps/security/app-module/image/logo/2/kwDc.png', 23, 'Inventory Overview', 1, '2024-09-27 16:14:50', 1),
 (3, 'Customer', 'Bring all your customer information into one easy-to-access location', './apps/security/app-module/image/logo/3/rL4r.png', 50, 'Customer', 3, '2024-09-27 16:14:50', 1),
 (4, 'Website Studio', 'Create and customize your website', './apps/security/app-module/image/logo/4/TnX0.png', 54, 'Websites', 1, '2024-09-27 16:14:50', 1),
-(5, 'CRM', 'Track leads and close opportunities', './apps/security/app-module/image/logo/5/CxLn.png', 73, 'My Bookings', 3, '2024-09-27 16:14:50', 1);
+(5, 'CRM', 'Track leads and close opportunities', './apps/security/app-module/image/logo/5/CxLn.png', 73, 'My Bookings', 3, '2024-09-27 16:14:50', 1),
+(6, 'test2', 'test2', NULL, 5, 'Company', 23, '2024-10-01 13:52:51', 2),
+(7, 'test', 'test', NULL, 1, 'App Module', 2, '2024-10-01 14:00:35', 2);
 
 --
 -- Triggers `app_module`
@@ -436,7 +529,14 @@ INSERT INTO `audit_log` (`audit_log_id`, `table_name`, `reference_id`, `log`, `c
 (13, 'user_account', 2, 'User account changed.<br/>Last Connection Date: 2024-09-28 19:27:00 -> 2024-09-29 08:40:03<br/>', 2, '2024-09-29 08:40:03', '2024-09-29 08:40:03'),
 (14, 'user_account', 2, 'User account changed.<br/>', 2, '2024-09-30 09:41:49', '2024-09-30 09:41:49'),
 (15, 'user_account', 2, 'User account changed.<br/>', 2, '2024-09-30 09:41:49', '2024-09-30 09:41:49'),
-(16, 'user_account', 2, 'User account changed.<br/>Last Connection Date: 2024-09-29 08:40:03 -> 2024-09-30 09:42:08<br/>', 2, '2024-09-30 09:42:08', '2024-09-30 09:42:08');
+(16, 'user_account', 2, 'User account changed.<br/>Last Connection Date: 2024-09-29 08:40:03 -> 2024-09-30 09:42:08<br/>', 2, '2024-09-30 09:42:08', '2024-09-30 09:42:08'),
+(17, 'user_account', 2, 'User account changed.<br/>Last Failed Login Attempt: 0000-00-00 00:00:00 -> 2024-10-01 10:01:26<br/>', 2, '2024-10-01 10:01:26', '2024-10-01 10:01:26'),
+(18, 'user_account', 2, 'User account changed.<br/>Last Failed Login Attempt: 2024-10-01 10:01:26 -> 0000-00-00 00:00:00<br/>', 2, '2024-10-01 10:01:30', '2024-10-01 10:01:30'),
+(19, 'user_account', 2, 'User account changed.<br/>', 2, '2024-10-01 10:01:30', '2024-10-01 10:01:30'),
+(20, 'user_account', 2, 'User account changed.<br/>Last Connection Date: 2024-09-30 09:42:08 -> 2024-10-01 10:01:50<br/>', 2, '2024-10-01 10:01:50', '2024-10-01 10:01:50'),
+(21, 'app_module', 6, 'App module created.', 2, '2024-10-01 13:52:51', '2024-10-01 13:52:51'),
+(22, 'app_module', 7, 'App module created.', 2, '2024-10-01 14:00:35', '2024-10-01 14:00:35'),
+(23, 'app_module', 6, 'App module changed. <br/>App Module Name: test -> test2<br/>App Module Description: test -> test2<br/>Menu Item: App Module -> Company<br/>Order Sequence: 2 -> 23<br/>', 2, '2024-10-01 17:08:37', '2024-10-01 17:08:37');
 
 -- --------------------------------------------------------
 
@@ -1250,7 +1350,7 @@ CREATE TABLE `user_account` (
 
 INSERT INTO `user_account` (`user_account_id`, `file_as`, `email`, `username`, `password`, `profile_picture`, `locked`, `active`, `last_failed_login_attempt`, `failed_login_attempts`, `last_connection_date`, `password_expiry_date`, `reset_token`, `reset_token_expiry_date`, `receive_notification`, `two_factor_auth`, `otp`, `otp_expiry_date`, `failed_otp_attempts`, `last_password_change`, `account_lock_duration`, `last_password_reset`, `multiple_session`, `session_token`, `linked_id`, `created_date`, `last_log_by`) VALUES
 (1, 'Digify Bot', 'digifybot@gmail.com', 'digifybot', 'Lu%2Be%2BRZfTv%2F3T0GR%2Fwes8QPJvE3Etx1p7tmryi74LNk%3D', NULL, 'WkgqlkcpSeEd7eWC8gl3iPwksfGbJYGy3VcisSyDeQ0', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20', NULL, NULL, NULL, 'aUIRg2jhRcYVcr0%2BiRDl98xjv81aR4Ux63bP%2BF2hQbE%3D', NULL, NULL, 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'WkgqlkcpSeEd7eWC8gl3iPwksfGbJYGy3VcisSyDeQ0', NULL, NULL, NULL, NULL, NULL, NULL, 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', NULL, NULL, '2024-09-27 11:49:59', 1),
-(2, 'Administrator', 'lawrenceagulto.317@gmail.com', 'ldagulto', 'ZW2SGXn0B41ZvY7Nl92uFaBW1LRhTxwaem5sgn8clRE%3D', NULL, '9lZtEofygdjMs3EsZV1V38KQF%2FPjp7btRHLFnck7DpM%3D', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20', '0000-00-00 00:00:00', '', '2024-09-30 09:42:08', 'j3TPQ%2FkOvrVcj0dMsNNs%2BicQ3gQo7W812x4%2BN2Q72oM%3D', 'wWt3OtHh0FKAhB31glK%2FdLfDTWMQdhqvZ%2FtRgmWl8EU%3D', 'P4tR005eyn3kNWp4tUtAQ17HIhZPD2zHiMAUfRmlAiAM6qi4fe8MjMopfWWK3xk9', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', '%2B%2FSz6%2Bx2PktUQbKGYB4QPoejOP9jITKKv2TaVT3cHvo%3D', 'cUcU4iyQtRwNnMq0YINirGY4502yrXcoKm9EnxwtwX%2B%2FphnxoTwde6zLsKvCSHDX', '', '2024-09-27 12:27:47', '', NULL, 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'ZFh0KSoGIEYbVA43iBFcbbDeE4XDFUWqvpHaBG8jtmA%3D', NULL, '2024-09-27 11:49:59', 2);
+(2, 'Administrator', 'lawrenceagulto.317@gmail.com', 'ldagulto', 'ZW2SGXn0B41ZvY7Nl92uFaBW1LRhTxwaem5sgn8clRE%3D', NULL, '9lZtEofygdjMs3EsZV1V38KQF%2FPjp7btRHLFnck7DpM%3D', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20', '0000-00-00 00:00:00', '', '2024-10-01 10:01:50', 'j3TPQ%2FkOvrVcj0dMsNNs%2BicQ3gQo7W812x4%2BN2Q72oM%3D', 'wWt3OtHh0FKAhB31glK%2FdLfDTWMQdhqvZ%2FtRgmWl8EU%3D', 'P4tR005eyn3kNWp4tUtAQ17HIhZPD2zHiMAUfRmlAiAM6qi4fe8MjMopfWWK3xk9', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'SpkVpKH%2BVQ8YXt8Wylw75V4YKYVUHSNe5PbXRy2tigU%3D', '%2B82TMvfduvLGbS%2FwFhVsHKRhzPcTpjSkdQESEb%2BU9KIxkD4HYnUAccUzz3619hoW', '', '2024-09-27 12:27:47', '', NULL, 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'tKe3w346uHaBt7MeQD3HnXCSsj50O1STgdVuDoHvJLU%3D', NULL, '2024-09-27 11:49:59', 2);
 
 --
 -- Triggers `user_account`
@@ -1489,13 +1589,13 @@ ALTER TABLE `user_account`
 -- AUTO_INCREMENT for table `app_module`
 --
 ALTER TABLE `app_module`
-  MODIFY `app_module_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `app_module_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `audit_log`
 --
 ALTER TABLE `audit_log`
-  MODIFY `audit_log_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `audit_log_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT for table `email_setting`

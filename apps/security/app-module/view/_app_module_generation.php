@@ -19,16 +19,6 @@ if(isset($_POST['type']) && !empty($_POST['type'])){
     
     switch ($type) {
         # -------------------------------------------------------------
-        #
-        # Type: app module table
-        # Description:
-        # Generates the app module table.
-        #
-        # Parameters: None
-        #
-        # Returns: Array
-        #
-        # -------------------------------------------------------------
         case 'app module table':
             $sql = $databaseModel->getConnection()->prepare('CALL generateAppModuleTable()');
             $sql->execute();
@@ -64,13 +54,7 @@ if(isset($_POST['type']) && !empty($_POST['type'])){
                                                 </div>
                                             </div>
                                         </div>',
-                    'ORDER_SEQUENCE' => $orderSequence,
-                    'ACTION' => '<div class="d-flex gap-2">
-                                    <a href="'. $pageLink .'&id='. $appModuleIDEncrypted .'" class="text-info" title="View Details">
-                                        <i class="ti ti-eye fs-5"></i>
-                                    </a>
-                                    '. $deleteButton .'
-                                </div>'
+                    'LINK' => $pageLink .'&id='. $appModuleIDEncrypted
                 ];
             }
 
@@ -78,16 +62,6 @@ if(isset($_POST['type']) && !empty($_POST['type'])){
         break;
         # -------------------------------------------------------------
 
-        # -------------------------------------------------------------
-        #
-        # Type: app module options
-        # Description:
-        # Generates the app module options.
-        #
-        # Parameters: None
-        #
-        # Returns: Array
-        #
         # -------------------------------------------------------------
         case 'app module options':
             $sql = $databaseModel->getConnection()->prepare('CALL generateAppModuleOptions()');
@@ -111,16 +85,6 @@ if(isset($_POST['type']) && !empty($_POST['type'])){
         break;
         # -------------------------------------------------------------
 
-        # -------------------------------------------------------------
-        #
-        # Type: app module radio filter
-        # Description:
-        # Generates the app module options.
-        #
-        # Parameters: None
-        #
-        # Returns: Array
-        #
         # -------------------------------------------------------------
         case 'app module radio filter':
             $sql = $databaseModel->getConnection()->prepare('CALL generateAppModuleOptions()');

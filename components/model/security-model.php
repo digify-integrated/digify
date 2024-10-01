@@ -17,17 +17,24 @@ class SecurityModel {
     # -------------------------------------------------------------
     public function decryptData($ciphertext) {
         $decodedData = base64_decode(rawurldecode($ciphertext));
-
+    
         if (!$decodedData) return false;
-
+    
         $iv_length = openssl_cipher_iv_length('aes-256-cbc');
+    
+        if (strlen($decodedData) < $iv_length) {
+            return false;
+        }
+    
         $iv = substr($decodedData, 0, $iv_length);
+    
         $ciphertext = substr($decodedData, $iv_length);
-
+    
         $plainText = openssl_decrypt($ciphertext, 'aes-256-cbc', ENCRYPTION_KEY, OPENSSL_RAW_DATA, $iv);
-        
+    
         return $plainText ? $plainText : false;
     }
+    
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------

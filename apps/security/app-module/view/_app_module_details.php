@@ -1,5 +1,5 @@
 <div class="row">
-    <div class="col-lg-8">
+    <div class="col-lg-12">
         <div class="card">
             <div class="card-header d-flex align-items-center">
                 <h5 class="card-title mb-0">App Module</h5>
@@ -7,8 +7,8 @@
                     <button type="button" class="btn btn-dark dropdown-toggle action-dropdown mb-0" data-bs-toggle="dropdown" aria-expanded="false">Action</button>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <?php
-                           echo $createAccess['total'] > 0 ? '<li><a class="dropdown-item" href="'. $pageLink .'&new">Create App Module</a></li>' : '';
-                           echo $deleteAccess['total'] > 0 ? '<li><button class="dropdown-item" type="button" id="delete-app-module">Delete App Module</button></li>' : '';
+                           echo $createAccess['total'] > 0 ? '<li><a class="dropdown-item" href="'. $pageLink .'&new">Create</a></li>' : '';
+                           echo $deleteAccess['total'] > 0 ? '<li><button class="dropdown-item" type="button" id="delete-app-module">Delete</button></li>' : '';
                         ?>
                     </ul>
                 </div>
@@ -20,6 +20,16 @@
             </div>
             <div class="card-body">
                 <div class="row">
+                    <div class="col-lg-12 mb-3">
+                        <div class="border border-4 border-white d-flex align-items-center justify-content-center rounded-circle overflow-hidden round-100">
+                            <label for="app_module_logo" class="cursor-pointer bg-light">
+                                <img src="./assets/images/default/upload-placeholder.png" alt="employee-image" id="employee-image" class="img-fluid" width="100" height="100">
+                                <input type="file" class="form-control d-none" id="app_module_logo" name="app_module_logo">
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
                     <div class="col-lg-6 mb-3">
                         <p class="mb-1 fs-2">Display Name</p>
                         <h6 class="fw-semibold mb-0" id="app_module_name_summary">--</h6>
@@ -28,36 +38,16 @@
                         <p class="mb-1 fs-2">Description</p>
                         <h6 class="fw-semibold mb-0" id="app_module_description_summary">--</h6>
                     </div>
+                </div>
+                <div class="row">
                     <div class="col-lg-6 mb-3">
                         <p class="mb-1 fs-2">Default Page</p>
                         <h6 class="fw-semibold mb-0" id="menu_item_summary">--</h6>
-                    </div>
-                    <div class="col-lg-6 mb-3">
-                        <p class="mb-1 fs-2">App Version</p>
-                        <h6 class="fw-semibold mb-0" id="app_version_summary">--</h6>
                     </div>
                     <div class="col-lg-6 mb-0">
                         <p class="mb-1 fs-2">Order Sequence</p>
                         <h6 class="fw-semibold mb-0" id="order_sequence_summary">--</h6>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-4">
-        <div class="card">
-            <div class="card-header d-flex align-items-center">
-                <h5 class="card-title mb-0">App Logo</h5>
-            </div>
-            <div class="card-body p-4">
-                <div class="text-center">
-                    <img src="./assets/images/default/app-module-logo.png" alt="" id="app_module_logo" width="100" height="100">
-                    <?php
-                        echo $writeAccess['total'] > 0 ? '<div class="d-flex align-items-center justify-content-center my-4 gap-6">
-                                                                <button class="btn btn-primary" data-bs-toggle="modal" id="update-app-logo" data-bs-target="#app-logo-modal">Upload</button>
-                                                            </div>' : '';
-                    ?>
-                    <p class="mb-0 mt-2">Allowed JPG, JPEG or PNG. Max size of 500kb</p>
                 </div>
             </div>
         </div>
@@ -135,4 +125,4 @@
     </div>
 </div>
 
-<?php require_once('components/global/view/_internal_log_notes.php'); ?>
+<?php require_once('components/view/_internal_log_notes.php'); ?>
