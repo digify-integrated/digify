@@ -11,6 +11,14 @@ require_once '../../security-setting/model/security-setting-model.php';
 require_once '../../menu-item/model/menu-item-model.php';
 require_once '../../upload-setting/model/upload-setting-model.php';
 
+require_once '../../../../assets/libs/PhpSpreadsheet/phpspreadsheet-autoload.php';
+
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Shared\Date;
+use PhpOffice\PhpSpreadsheet\Calculation\Calculation;
+use PhpOffice\PhpSpreadsheet\Calculation\Category;
+
 $controller = new AppModuleController(new AppModuleModel(new DatabaseModel), new AuthenticationModel(new DatabaseModel, new SecurityModel), new MenuItemModel(new DatabaseModel), new UploadSettingModel(new DatabaseModel), new SecurityModel(), new SystemModel());
 $controller->handleRequest();
 
@@ -122,6 +130,9 @@ class AppModuleController {
                 case 'delete multiple app module':
                     $this->deleteMultipleAppModule();
                     break;
+                case 'export data':
+                    $this->exportData();
+                    break;
                 default:
                     $response = [
                         'success' => false,
@@ -227,157 +238,155 @@ class AppModuleController {
             return;
         }
 
-        if (isset($_POST['app_module_id']) && !empty($_POST['app_module_id'])) {
-            $userID = $_SESSION['user_account_id'];
+        $userID = $_SESSION['user_account_id'];
 
-            $appModuleID = htmlspecialchars($_POST['app_module_id'], ENT_QUOTES, 'UTF-8');
+        $appModuleID = filter_input(INPUT_POST, 'app_module_id', FILTER_VALIDATE_INT);
 
-            $checkAppModuleExist = $this->appModuleModel->checkAppModuleExist($appModuleID);
-            $total = $checkAppModuleExist['total'] ?? 0;
+        $checkAppModuleExist = $this->appModuleModel->checkAppModuleExist($appModuleID);
+        $total = $checkAppModuleExist['total'] ?? 0;
 
-            if($total === 0){
-                $response = [
-                    'success' => false,
-                    'notExist' => true,
-                    'title' => 'Update App Logo Error',
-                    'message' => 'The app logo does not exist.',
-                    'messageType' => 'error'
-                ];
-                
-                echo json_encode($response);
-                exit;
-            }
-
-            $appLogoFileName = $_FILES['app_logo']['name'];
-            $appLogoFileSize = $_FILES['app_logo']['size'];
-            $appLogoFileError = $_FILES['app_logo']['error'];
-            $appLogoTempName = $_FILES['app_logo']['tmp_name'];
-            $appLogoFileExtension = explode('.', $appLogoFileName);
-            $appLogoActualFileExtension = strtolower(end($appLogoFileExtension));
-
-            $uploadSetting = $this->uploadSettingModel->getUploadSetting(1);
-            $maxFileSize = $uploadSetting['max_file_size'];
-
-            $uploadSettingFileExtension = $this->uploadSettingModel->getUploadSettingFileExtension(1);
-            $allowedFileExtensions = [];
-
-            foreach ($uploadSettingFileExtension as $row) {
-                $allowedFileExtensions[] = $row['file_extension'];
-            }
-
-            if (!in_array($appLogoActualFileExtension, $allowedFileExtensions)) {
-                $response = [
-                    'success' => false,
-                    'title' => 'Update App Logo Error',
-                    'message' => 'The file uploaded is not supported.',
-                    'messageType' => 'error'
-                ];
-                
-                echo json_encode($response);
-                exit;
-            }
-            
-            if(empty($appLogoTempName)){
-                $response = [
-                    'success' => false,
-                    'title' => 'Update App Logo Error',
-                    'message' => 'Please choose the app logo.',
-                    'messageType' => 'error'
-                ];
-                
-                echo json_encode($response);
-                exit;
-            }
-            
-            if($appLogoFileError){
-                $response = [
-                    'success' => false,
-                    'title' => 'Update App Logo Error',
-                    'message' => 'An error occurred while uploading the file.',
-                    'messageType' => 'error'
-                ];
-                
-                echo json_encode($response);
-                exit;
-            }
-            
-            if($appLogoFileSize > ($maxFileSize * 1024)){
-                $response = [
-                    'success' => false,
-                    'title' => 'Update App Logo Error',
-                    'message' => 'The app logo exceeds the maximum allowed size of ' . number_format($maxFileSize) . ' kb.',
-                    'messageType' => 'error'
-                ];
-                
-                echo json_encode($response);
-                exit;
-            }
-
-            $fileName = $this->securityModel->generateFileName();
-            $fileNew = $fileName . '.' . $appLogoActualFileExtension;
-            
-            define('PROJECT_BASE_DIR', dirname(__DIR__));
-            define('APP_LOGO_DIR', 'image/logo/');
-
-            $directory = PROJECT_BASE_DIR . '/'. APP_LOGO_DIR. $appModuleID. '/';
-            $fileDestination = $directory. $fileNew;
-            $filePath = './components/app-module/image/logo/'. $appModuleID . '/' . $fileNew;
-
-            $directoryChecker = $this->securityModel->directoryChecker(str_replace('./', '../../', $directory));
-
-            if(!$directoryChecker){
-                $response = [
-                    'success' => false,
-                    'title' => 'Update App Logo Error',
-                    'message' => $directoryChecker,
-                    'messageType' => 'error'
-                ];
-                
-                echo json_encode($response);
-                exit;
-            }
-
-            $appDetails = $this->appModuleModel->getAppModule($appModuleID);
-            $appLogoPath = !empty($appDetails['app_logo']) ? str_replace('./components/', '../../', $appDetails['app_logo']) : null;
-
-            if(file_exists($appLogoPath)){
-                if (!unlink($appLogoPath)) {
-                    $response = [
-                        'success' => false,
-                        'title' => 'Update App Logo Error',
-                        'message' => 'The app logo cannot be deleted due to an error.',
-                        'messageType' => 'error'
-                    ];
-                    
-                    echo json_encode($response);
-                    exit;
-                }
-            }
-
-            if(!move_uploaded_file($appLogoTempName, $fileDestination)){
-                $response = [
-                    'success' => false,
-                    'title' => 'Update App Logo Error',
-                    'message' => 'The app logo cannot be uploaded due to an error.',
-                    'messageType' => 'error'
-                ];
-                
-                echo json_encode($response);
-                exit;
-            }
-
-            $this->appModuleModel->updateAppLogo($appModuleID, $filePath, $userID);
-
+        if($total === 0){
             $response = [
-                'success' => true,
-                'title' => 'Update App Logo Success',
-                'message' => 'The app logo has been updated successfully.',
-                'messageType' => 'success'
+                'success' => false,
+                'notExist' => true,
+                'title' => 'Update App Logo',
+                'message' => 'The app logo does not exist.',
+                'messageType' => 'error'
             ];
-
+                
             echo json_encode($response);
             exit;
         }
+
+        $appLogoFileName = $_FILES['app_logo']['name'];
+        $appLogoFileSize = $_FILES['app_logo']['size'];
+        $appLogoFileError = $_FILES['app_logo']['error'];
+        $appLogoTempName = $_FILES['app_logo']['tmp_name'];
+        $appLogoFileExtension = explode('.', $appLogoFileName);
+        $appLogoActualFileExtension = strtolower(end($appLogoFileExtension));
+
+        $uploadSetting = $this->uploadSettingModel->getUploadSetting(1);
+        $maxFileSize = $uploadSetting['max_file_size'];
+
+        $uploadSettingFileExtension = $this->uploadSettingModel->getUploadSettingFileExtension(1);
+        $allowedFileExtensions = [];
+
+        foreach ($uploadSettingFileExtension as $row) {
+            $allowedFileExtensions[] = $row['file_extension'];
+        }
+
+        if (!in_array($appLogoActualFileExtension, $allowedFileExtensions)) {
+            $response = [
+                'success' => false,
+                'title' => 'Update App Logo',
+                'message' => 'The file uploaded is not supported.',
+                'messageType' => 'error'
+            ];
+                
+            echo json_encode($response);
+            exit;
+        }
+            
+        if(empty($appLogoTempName)){
+            $response = [
+                'success' => false,
+                'title' => 'Update App Logo',
+                'message' => 'Please choose the app logo.',
+                'messageType' => 'error'
+            ];
+                
+            echo json_encode($response);
+            exit;
+        }
+            
+        if($appLogoFileError){
+            $response = [
+                'success' => false,
+                'title' => 'Update App Logo',
+                'message' => 'An error occurred while uploading the file.',
+                'messageType' => 'error'
+            ];
+                
+            echo json_encode($response);
+            exit;
+        }
+            
+        if($appLogoFileSize > ($maxFileSize * 1024)){
+            $response = [
+                'success' => false,
+                'title' => 'Update App Logo',
+                'message' => 'The app logo exceeds the maximum allowed size of ' . number_format($maxFileSize) . ' kb.',
+                'messageType' => 'error'
+            ];
+                
+            echo json_encode($response);
+            exit;
+        }
+
+        $fileName = $this->securityModel->generateFileName();
+        $fileNew = $fileName . '.' . $appLogoActualFileExtension;
+            
+        define('PROJECT_BASE_DIR', dirname(__DIR__));
+        define('APP_LOGO_DIR', 'image/logo/');
+
+        $directory = PROJECT_BASE_DIR . '/'. APP_LOGO_DIR. $appModuleID. '/';
+        $fileDestination = $directory. $fileNew;
+        $filePath = '../security/app-module/image/logo/'. $appModuleID . '/' . $fileNew;
+
+        $directoryChecker = $this->securityModel->directoryChecker(str_replace('./', '../', $directory));
+
+        if(!$directoryChecker){
+            $response = [
+                'success' => false,
+                'title' => 'Update App Logo Error',
+                'message' => $directoryChecker,
+                'messageType' => 'error'
+            ];
+                
+            echo json_encode($response);
+            exit;
+        }
+
+        $appModuleDetails = $this->appModuleModel->getAppModule($appModuleID);
+        $appLogoPath = !empty($appModuleDetails['app_logo']) ? str_replace('../', '../../../../apps/', $appModuleDetails['app_logo']) : null;
+
+        if(file_exists($appLogoPath)){
+            if (!unlink($appLogoPath)) {
+                $response = [
+                    'success' => false,
+                    'title' => 'Update App Logo',
+                    'message' => 'The app logo cannot be deleted due to an error.',
+                    'messageType' => 'error'
+                ];
+                    
+                echo json_encode($response);
+                exit;
+            }
+        }
+
+        if(!move_uploaded_file($appLogoTempName, $fileDestination)){
+            $response = [
+                'success' => false,
+                'title' => 'Update App Logo',
+                'message' => 'The app logo cannot be uploaded due to an error.',
+                'messageType' => 'error'
+            ];
+                
+            echo json_encode($response);
+            exit;
+        }
+
+        $this->appModuleModel->updateAppLogo($appModuleID, $filePath, $userID);
+
+        $response = [
+            'success' => true,
+            'title' => 'Update App Logo',
+            'message' => 'The app logo has been updated successfully.',
+            'messageType' => 'success'
+        ];
+
+        echo json_encode($response);
+        exit;
     }
     # -------------------------------------------------------------
 
@@ -391,48 +400,94 @@ class AppModuleController {
             return;
         }
 
-        if (isset($_POST['app_module_id']) && !empty($_POST['app_module_id'])) {
-            $appModuleID = htmlspecialchars($_POST['app_module_id'], ENT_QUOTES, 'UTF-8');
+        $appModuleID = filter_input(INPUT_POST, 'app_module_id', FILTER_VALIDATE_INT);
         
-            $checkAppModuleExist = $this->appModuleModel->checkAppModuleExist($appModuleID);
-            $total = $checkAppModuleExist['total'] ?? 0;
+        $checkAppModuleExist = $this->appModuleModel->checkAppModuleExist($appModuleID);
+        $total = $checkAppModuleExist['total'] ?? 0;
 
-            if($total === 0){
+        if($total === 0){
+            $response = [
+                'success' => false,
+                'notExist' => true,
+                'title' => 'Delete App Module',
+                'message' => 'The app module does not exist.',
+                'messageType' => 'error'
+            ];
+                
+            echo json_encode($response);
+            exit;
+        }
+
+        $appModuleDetails = $this->appModuleModel->getAppModule($appModuleID);
+        $appLogoPath = !empty($appModuleDetails['app_logo']) ? str_replace('../', '../../../../apps/', $appModuleDetails['app_logo']) : null;
+
+        if(file_exists($appLogoPath)){
+            if (!unlink($appLogoPath)) {
                 $response = [
                     'success' => false,
-                    'notExist' => true,
-                    'title' => 'Delete App Module Error',
-                    'message' => 'The app module does not exist.',
+                    'title' => 'Delete App Module',
+                    'message' => 'The app logo cannot be deleted due to an error.',
                     'messageType' => 'error'
                 ];
-                
+                    
                 echo json_encode($response);
                 exit;
             }
+        }
 
-            $appDetails = $this->appModuleModel->getAppModule($appModuleID);
-            $appLogoPath = !empty($appDetails['app_logo']) ? str_replace('./components/', '../../', $appDetails['app_logo']) : null;
+        $this->appModuleModel->deleteAppModule($appModuleID);
+                
+        $response = [
+            'success' => true,
+            'title' => 'Delete App Module',
+            'message' => 'The app module has been deleted successfully.',
+            'messageType' => 'success'
+        ];
+            
+        echo json_encode($response);
+        exit;
+    }
+    # -------------------------------------------------------------
 
-            if(file_exists($appLogoPath)){
-                if (!unlink($appLogoPath)) {
-                    $response = [
-                        'success' => false,
-                        'title' => 'Delete App Logo Error',
-                        'message' => 'The app logo cannot be deleted due to an error.',
-                        'messageType' => 'error'
-                    ];
+    # -------------------------------------------------------------
+    public function deleteMultipleAppModule() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            return;
+        }
+
+        if (isset($_POST['app_module_id']) && !empty($_POST['app_module_id'])) {
+            $appModuleIDs = $_POST['app_module_id'];
+    
+            foreach($appModuleIDs as $appModuleID){
+                $checkAppModuleExist = $this->appModuleModel->checkAppModuleExist($appModuleID);
+                $total = $checkAppModuleExist['total'] ?? 0;
+
+                if($total > 0){
+                    $appModuleDetails = $this->appModuleModel->getAppModule($appModuleID);
+                    $appLogoPath = !empty($appModuleDetails['app_logo']) ? str_replace('../', '../../../../apps/', $appModuleDetails['app_logo']) : null;
+
+                    if(file_exists($appLogoPath)){
+                        if (!unlink($appLogoPath)) {
+                            $response = [
+                                'success' => false,
+                                'title' => 'Delete Multiple App Module',
+                                'message' => 'The app logo cannot be deleted due to an error.',
+                                'messageType' => 'error'
+                            ];
+                            
+                            echo json_encode($response);
+                            exit;
+                        }
+                    }
                     
-                    echo json_encode($response);
-                    exit;
+                    $this->appModuleModel->deleteAppModule($appModuleID);
                 }
             }
-
-            $this->appModuleModel->deleteAppModule($appModuleID);
                 
             $response = [
                 'success' => true,
-                'title' => 'Delete App Module Success',
-                'message' => 'The app module has been deleted successfully.',
+                'title' => 'Delete Multiple App Module',
+                'message' => 'The selected app modules have been deleted successfully.',
                 'messageType' => 'success'
             ];
             
@@ -454,49 +509,77 @@ class AppModuleController {
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
-    public function deleteMultipleAppModule() {
+    #   Export methods
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    public function exportData() {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             return;
         }
 
-        if (isset($_POST['app_module_id']) && !empty($_POST['app_module_id'])) {
-            $appModuleIDs = $_POST['app_module_id'];
-    
-            foreach($appModuleIDs as $appModuleID){
-                $checkAppModuleExist = $this->appModuleModel->checkAppModuleExist($appModuleID);
-                $total = $checkAppModuleExist['total'] ?? 0;
-
-                if($total > 0){
-                    $appDetails = $this->appModuleModel->getAppModule($appModuleID);
-                    $appLogoPath = !empty($appDetails['app_logo']) ? str_replace('./components/', '../../', $appDetails['app_logo']) : null;
-
-                    if(file_exists($appLogoPath)){
-                        if (!unlink($appLogoPath)) {
-                            $response = [
-                                'success' => false,
-                                'title' => 'Delete App Logo Error',
-                                'message' => 'The app logo cannot be deleted due to an error.',
-                                'messageType' => 'error'
-                            ];
-                            
-                            echo json_encode($response);
-                            exit;
-                        }
-                    }
-                    
-                    $this->appModuleModel->deleteAppModule($appModuleID);
-                }
-            }
-                
-            $response = [
-                'success' => true,
-                'title' => 'Delete Multiple App Module Success',
-                'message' => 'The selected app modules have been deleted successfully.',
-                'messageType' => 'success'
-            ];
+        if (isset($_POST['export_to']) && !empty($_POST['export_to']) && isset($_POST['export_id']) && !empty($_POST['export_id']) && isset($_POST['table_column']) && !empty($_POST['table_column'])) {
+            $exportTo = $_POST['export_to'];
+            $exportIDs = $_POST['export_id']; 
+            $tableColumns = $_POST['table_column'];
+            $tableName = 'app_module';
             
-            echo json_encode($response);
-            exit;
+            if ($exportTo == 'csv') {
+                $filename = "app_modules_export_" . date('Y-m-d_H-i-s') . ".csv";
+            
+                header('Content-Type: text/csv');
+                header('Content-Disposition: attachment; filename="' . $filename . '"');
+                
+                $output = fopen('php://output', 'w');
+
+                fputcsv($output, $tableColumns);
+                
+                $columns = implode(", ", $tableColumns);
+                
+                $ids = implode(",", array_map('intval', $exportIDs));
+                $appModuleDetails = $this->appModuleModel->exportAppModule($columns, $ids);
+
+                foreach ($appModuleDetails as $appModuleDetail) {
+                    fputcsv($output, $appModuleDetail);
+                }
+
+                fclose($output);
+                exit;
+            }
+            else {
+                $filename = "app_modules_export_" . date('Y-m-d_H-i-s') . ".xlsx";
+
+                // Create a new Spreadsheet object
+                $spreadsheet = new Spreadsheet();
+                $sheet = $spreadsheet->getActiveSheet();
+
+                // Set column headers
+                $colIndex = 'A';
+                foreach ($tableColumns as $column) {
+                    $sheet->setCellValue($colIndex . '1', ucfirst(str_replace('_', ' ', $column)));
+                    $colIndex++;
+                }
+
+                // Populate data rows
+                $rowNumber = 2; // Start at the second row
+                foreach ($appModuleDetails as $appModuleDetail) {
+                    $colIndex = 'A';
+                    foreach ($tableColumns as $column) {
+                        $sheet->setCellValue($colIndex . $rowNumber, $appModuleDetail[$column]);
+                        $colIndex++;
+                    }
+                    $rowNumber++;
+                }
+
+                // Set headers for the Excel file download
+                header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+                header('Content-Disposition: attachment; filename="' . $filename . '"');
+
+                // Write the file to output
+                $writer = new Xlsx($spreadsheet);
+                $writer->save('php://output');
+                exit;
+            }
         }
         else{
             $response = [
@@ -542,7 +625,7 @@ class AppModuleController {
         }
 
         $appModuleDetails = $this->appModuleModel->getAppModule($appModuleID);
-        $appLogo = $this->systemModel->checkImage($appModuleDetails['app_logo'] ?? null, 'app module logo');
+        $appLogo = $this->systemModel->checkImage(str_replace('../', './apps/', $appModuleDetails['app_logo'])  ?? null, 'app module logo');
 
         $response = [
             'success' => true,

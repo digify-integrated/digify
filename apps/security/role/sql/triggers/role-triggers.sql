@@ -5,7 +5,7 @@ CREATE TRIGGER role_trigger_update
 AFTER UPDATE ON role
 FOR EACH ROW
 BEGIN
-    DECLARE audit_log TEXT DEFAULT 'Role changed. <br/>';
+    DECLARE audit_log TEXT DEFAULT 'Role changed.<br/><br/>';
 
     IF NEW.role_name <> OLD.role_name THEN
         SET audit_log = CONCAT(audit_log, "Role Name: ", OLD.role_name, " -> ", NEW.role_name, "<br/>");
@@ -15,7 +15,7 @@ BEGIN
         SET audit_log = CONCAT(audit_log, "Role Description: ", OLD.role_description, " -> ", NEW.role_description, "<br/>");
     END IF;
     
-    IF LENGTH(audit_log) > 0 THEN
+    IF audit_log <> 'Role changed.<br/><br/>' THEN
         INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
         VALUES ('role', NEW.role_id, audit_log, NEW.last_log_by, NOW());
     END IF;
@@ -37,7 +37,7 @@ CREATE TRIGGER role_permission_trigger_update
 AFTER UPDATE ON role_permission
 FOR EACH ROW
 BEGIN
-    DECLARE audit_log TEXT DEFAULT 'Role permission changed. <br/>';
+    DECLARE audit_log TEXT DEFAULT 'Role permission changed.<br/><br/>';
 
     IF NEW.role_name <> OLD.role_name THEN
         SET audit_log = CONCAT(audit_log, "Role Name: ", OLD.role_name, " -> ", NEW.role_name, "<br/>");
@@ -75,7 +75,7 @@ BEGIN
         SET audit_log = CONCAT(audit_log, "Log Notes Access: ", OLD.log_notes_access, " -> ", NEW.log_notes_access, "<br/>");
     END IF;
     
-    IF LENGTH(audit_log) > 0 THEN
+    IF audit_log <> 'Role permission changed.<br/><br/>' THEN
         INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
         VALUES ('role_permission', NEW.role_permission_id, audit_log, NEW.last_log_by, NOW());
     END IF;
@@ -97,7 +97,7 @@ CREATE TRIGGER role_system_action_permission_trigger_update
 AFTER UPDATE ON role_system_action_permission
 FOR EACH ROW
 BEGIN
-    DECLARE audit_log TEXT DEFAULT 'Role system action permission changed. <br/>';
+    DECLARE audit_log TEXT DEFAULT 'Role system action permission changed.<br/><br/>';
 
     IF NEW.role_name <> OLD.role_name THEN
         SET audit_log = CONCAT(audit_log, "Role Name: ", OLD.role_name, " -> ", NEW.role_name, "<br/>");
@@ -111,7 +111,7 @@ BEGIN
         SET audit_log = CONCAT(audit_log, "System Action Access: ", OLD.system_action_access, " -> ", NEW.system_action_access, "<br/>");
     END IF;
     
-    IF LENGTH(audit_log) > 0 THEN
+    IF audit_log <> 'Role system action permission changed.<br/><br/>' THEN
         INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
         VALUES ('role_system_action_permission', NEW.role_system_action_permission_id, audit_log, NEW.last_log_by, NOW());
     END IF;
@@ -143,7 +143,7 @@ BEGIN
         SET audit_log = CONCAT(audit_log, "User Account Name: ", OLD.file_as, " -> ", NEW.file_as, "<br/>");
     END IF;
     
-    IF LENGTH(audit_log) > 0 THEN
+    IF audit_log <> 'Role user account changed.<br/><br/>' THEN
         INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
         VALUES ('role_user_account', NEW.role_user_account_id, audit_log, NEW.last_log_by, NOW());
     END IF;

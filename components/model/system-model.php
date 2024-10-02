@@ -2,15 +2,19 @@
 
 class SystemModel {
     # -------------------------------------------------------------
-    public function timeElapsedString($dateTime) {
+    public function timeElapsedString($dateTime) { 
         $timestamp = strtotime($dateTime);
         if ($timestamp === false) {
             return 'Invalid date';
         }
-
+    
         $currentTimestamp = time();
         $diffSeconds = $currentTimestamp - $timestamp;
-
+    
+        if ($diffSeconds > 86400) {
+            return date('M j, Y \a\t h:i A', $timestamp);
+        }
+    
         $intervals = [
             31536000 => 'year',
             2592000 => 'month',
@@ -20,20 +24,20 @@ class SystemModel {
             60 => 'minute',
             1 => 'second'
         ];
-
+    
         if ($diffSeconds < 60) {
             return 'Just Now';
         }
-
+    
         foreach ($intervals as $seconds => $label) {
             $count = floor($diffSeconds / $seconds);
             if ($count > 0) {
                 return sprintf('%d %s ago', $count, $label . ($count > 1 ? 's' : ''));
             }
         }
-
+    
         return date('M j, Y \a\t h:i A', $timestamp);
-    }
+    }    
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
@@ -134,7 +138,7 @@ class SystemModel {
     # -------------------------------------------------------------
     public function checkImage($image, $type) {
         $image = $image ?? '';
-        $imagePath = str_replace('./components/', '../../', $image);
+        $imagePath = str_replace('./apps/', '../../../../apps/', $image);
 
         return (empty($image) || !file_exists($imagePath) && !file_exists($image))
             ? $this->getDefaultImage($type)

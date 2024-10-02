@@ -35,7 +35,7 @@ $(document).ready(function () {
             $.ajax({
                 type: 'POST',
                 url: 'apps/security/authentication/controller/authentication-controller.php',
-                data: $(form).serialize() + '&transaction=' + encodeURIComponent(transaction),
+                data: $(form).serialize() + '&transaction=' + transaction,
                 dataType: 'JSON',
                 beforeSend: function() {
                     disableFormSubmitButton('signin');

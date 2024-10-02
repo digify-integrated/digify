@@ -36,12 +36,12 @@ class AppModuleModel {
         $stmt->bindValue(':p_menu_item_name', $p_menu_item_name, PDO::PARAM_STR);
         $stmt->bindValue(':p_order_sequence', $p_order_sequence, PDO::PARAM_INT);
         $stmt->bindValue(':p_last_log_by', $p_last_log_by, PDO::PARAM_INT);
-        $stmt->closeCursor();
+        $stmt->execute();
 
         $result = $this->db->getConnection()->query('SELECT @p_new_app_module_id AS app_module_id');
         $appModuleID = $result->fetch(PDO::FETCH_ASSOC)['app_module_id'];
 
-        $stmt->execute();
+        $stmt->closeCursor();
         
         return $appModuleID;
     }
@@ -63,6 +63,19 @@ class AppModuleModel {
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #   Delete methods
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    public function deleteAppModule($p_app_module_id) {
+        $stmt = $this->db->getConnection()->prepare('CALL deleteAppModule(:p_app_module_id)');
+        $stmt->bindValue(':p_app_module_id', $p_app_module_id, PDO::PARAM_INT);
+        $stmt->execute();
+        $stmt->closeCursor();
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Get methods
     # -------------------------------------------------------------
 
@@ -72,6 +85,22 @@ class AppModuleModel {
         $stmt->bindValue(':p_app_module_id', $p_app_module_id, PDO::PARAM_INT);
         $stmt->execute();
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt->closeCursor();
+        return $result;
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #   Export methods
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    public function exportAppModule($p_app_module_columns, $p_app_module_ids) {
+        $stmt = $this->db->getConnection()->prepare('CALL exportAppModule(:p_app_module_columns, :p_app_module_ids)');
+        $stmt->bindValue(':p_app_module_columns', $p_app_module_columns, PDO::PARAM_STR);
+        $stmt->bindValue(':p_app_module_ids', $p_app_module_ids, PDO::PARAM_STR);
+        $stmt->execute();
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
         $stmt->closeCursor();
         return $result;
     }

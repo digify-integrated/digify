@@ -1,12 +1,13 @@
 /* Upload Setting Table */
 
+DROP TABLE IF EXISTS upload_setting;
 CREATE TABLE upload_setting(
 	upload_setting_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
 	upload_setting_name VARCHAR(100) NOT NULL,
 	upload_setting_description VARCHAR(200) NOT NULL,
 	max_file_size DOUBLE NOT NULL,
-    created_date DATETIME NOT NULL DEFAULT NOW(),
-    last_log_by INT UNSIGNED NOT NULL,
+    created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    last_log_by INT UNSIGNED DEFAULT 1,
     FOREIGN KEY (last_log_by) REFERENCES user_account(user_account_id)
 );
 
@@ -24,6 +25,7 @@ INSERT INTO upload_setting (upload_setting_id, upload_setting_name, upload_setti
 
 /* Upload Setting File Extension Table */
 
+DROP TABLE IF EXISTS upload_setting_file_extension;
 CREATE TABLE upload_setting_file_extension(
     upload_setting_file_extension_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
 	upload_setting_id INT UNSIGNED NOT NULL,
@@ -32,9 +34,9 @@ CREATE TABLE upload_setting_file_extension(
 	file_extension_name VARCHAR(100) NOT NULL,
 	file_extension VARCHAR(10) NOT NULL,
 	date_assigned DATETIME DEFAULT CURRENT_TIMESTAMP,
-    created_date DATETIME NOT NULL DEFAULT NOW(),
-    last_log_by INT UNSIGNED NOT NULL,
-	FOREIGN KEY (last_log_by) REFERENCES user_account(user_account_id)
+    created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    last_log_by INT UNSIGNED DEFAULT 1,
+    FOREIGN KEY (last_log_by) REFERENCES user_account(user_account_id)
 );
 
 CREATE INDEX upload_setting_file_ext_index_upload_setting_file_extension_id ON upload_setting_file_extension(upload_setting_file_extension_id);

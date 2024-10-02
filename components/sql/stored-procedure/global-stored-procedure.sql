@@ -19,3 +19,12 @@ BEGIN
     )
     ORDER BY am.order_sequence, am.app_module_name;
 END //
+
+DROP PROCEDURE IF EXISTS generateExportOption//
+CREATE PROCEDURE generateExportOption(IN p_databasename VARCHAR(500), IN p_table_name VARCHAR(500))
+BEGIN
+    SELECT column_name 
+    FROM information_schema.columns 
+    WHERE table_schema = p_databasename 
+    AND table_name = p_table_name;
+END //

@@ -1,5 +1,5 @@
 <div class="row">
-    <div class="col-lg-12">
+    <div class="col-lg-8">
         <div class="card">
             <div class="card-header d-flex align-items-center">
                 <h5 class="card-title mb-0">App Module</h5>
@@ -14,40 +14,52 @@
                 </div>
                 <?php
                     echo $writeAccess['total'] > 0 ? '<div class="card-actions cursor-pointer ms-auto d-flex button-group">
-                                                            <button class="btn btn-info mb-0 px-4" data-bs-toggle="modal" id="edit-details" data-bs-target="#app-module-modal">Edit</button>
+                                                            <button class="btn btn-info mb-0 me-0 px-4" data-bs-toggle="modal" id="edit-details" data-bs-target="#app-module-modal">Edit</button>
                                                         </div>' : '';
                 ?>
             </div>
             <div class="card-body">
                 <div class="row">
                     <div class="col-lg-12 mb-3">
-                        <div class="border border-4 border-white d-flex align-items-center justify-content-center rounded-circle overflow-hidden round-100">
-                            <label for="app_module_logo" class="cursor-pointer bg-light">
-                                <img src="./assets/images/default/upload-placeholder.png" alt="employee-image" id="employee-image" class="img-fluid" width="100" height="100">
-                                <input type="file" class="form-control d-none" id="app_module_logo" name="app_module_logo">
-                            </label>
-                        </div>
+                        <p class="mb-1 fs-2">Display Name</p>
+                        <h6 class="fw-semibold fs-3 mb-0" id="app_module_name_summary">--</h6>
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-lg-6 mb-3">
-                        <p class="mb-1 fs-2">Display Name</p>
-                        <h6 class="fw-semibold mb-0" id="app_module_name_summary">--</h6>
-                    </div>
-                    <div class="col-lg-6 mb-3">
+                    <div class="col-lg-12 mb-3">
                         <p class="mb-1 fs-2">Description</p>
-                        <h6 class="fw-semibold mb-0" id="app_module_description_summary">--</h6>
+                        <h6 class="fw-semibold fs-3 mb-0" id="app_module_description_summary">--</h6>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-lg-6 mb-3">
                         <p class="mb-1 fs-2">Default Page</p>
-                        <h6 class="fw-semibold mb-0" id="menu_item_summary">--</h6>
+                        <h6 class="fw-semibold fs-3 mb-0" id="menu_item_summary">--</h6>
                     </div>
                     <div class="col-lg-6 mb-0">
                         <p class="mb-1 fs-2">Order Sequence</p>
-                        <h6 class="fw-semibold mb-0" id="order_sequence_summary">--</h6>
+                        <h6 class="fw-semibold fs-3 mb-0" id="order_sequence_summary">--</h6>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header d-flex align-items-center">
+                <h5 class="card-title mb-0">App Module Logo</h5>
+                <?php
+                    echo $writeAccess['total'] > 0 ? '<div class="card-actions cursor-pointer ms-auto d-flex button-group">
+                                                            <button class="btn btn-primary mb-0 me-0" data-bs-toggle="modal" id="update-app-logo" data-bs-target="#app-logo-modal">Upload</button>
+                                                        </div>' : '';
+                ?>
+            </div>
+            <div class="card-body p-4">
+                <div class="text-center">
+                    <img src="./assets/images/default/app-module-logo.png" alt="" id="app_module_logo" width="80" height="80">
+                    <p class="fs-2 text-center mb-0 mt-2">
+                      Set the app module image. Only *.png, *.jpg and *.jpeg image files are accepted.
+                    </p>
                 </div>
             </div>
         </div>
@@ -55,7 +67,7 @@
 </div>
 
 <div class="modal fade" id="app-module-modal" tabindex="-1" aria-labelledby="app-module-modal" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+    <div class="modal-dialog modal-dialog-scrollable modal-r">
         <div class="modal-content">
             <div class="modal-header border-bottom">
                 <h5 class="modal-title fw-8">Edit App Module Details</h5>
@@ -64,16 +76,18 @@
             <div class="modal-body">
                 <form id="app-module-form" method="post" action="#">
                     <div class="row">
-                        <div class="col-lg-6">
+                        <div class="col-md-12">
                             <div class="mb-3">
                                 <label class="form-label" for="app_module_name">Display Name <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control maxlength" id="app_module_name" name="app_module_name" maxlength="100" autocomplete="off">
                             </div>
                         </div>
-                        <div class="col-lg-6">
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
                             <div class="mb-3">
                                 <label class="form-label" for="app_module_description">Description <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control maxlength" id="app_module_description" name="app_module_description" maxlength="100" autocomplete="off">
+                                <textarea class="form-control maxlength" id="app_module_description" name="app_module_description" maxlength="100" rows="3"></textarea>
                             </div>
                         </div>
                     </div>
@@ -84,7 +98,7 @@
                                 <select id="menu_item_id" name="menu_item_id" class="select2 form-control"></select>
                             </div>
                         </div>
-                        <div class="col-lg-6">
+                        <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label" for="order_sequence">Order Sequence <span class="text-danger">*</span></label>
                                 <input type="number" class="form-control" id="order_sequence" name="order_sequence" min="0">
@@ -105,7 +119,7 @@
     <div class="modal-dialog modal-dialog-scrollable modal-r">
         <div class="modal-content">
             <div class="modal-header border-bottom">
-                <h5 class="modal-title fw-8">Update App Logo</h5>
+                <h5 class="modal-title fw-8">App Logo</h5>
                 <button type="button" class="btn-close fs-2" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">

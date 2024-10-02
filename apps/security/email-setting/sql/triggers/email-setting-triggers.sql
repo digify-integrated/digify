@@ -4,7 +4,7 @@ CREATE TRIGGER email_setting_trigger_update
 AFTER UPDATE ON email_setting
 FOR EACH ROW
 BEGIN
-    DECLARE audit_log TEXT DEFAULT 'Email setting changed<br/>';
+    DECLARE audit_log TEXT DEFAULT 'Email setting changed.<br/><br/>';
 
     IF NEW.email_setting_name <> OLD.email_setting_name THEN
         SET audit_log = CONCAT(audit_log, "Email Setting Name: ", OLD.email_setting_name, " -> ", NEW.email_setting_name, "<br/>");
@@ -46,7 +46,7 @@ BEGIN
         SET audit_log = CONCAT(audit_log, "Mail From Email: ", OLD.mail_from_email, " -> ", NEW.mail_from_email, "<br/>");
     END IF;
     
-    IF LENGTH(audit_log) > 0 THEN
+    IF audit_log <> 'Email setting changed.<br/><br/>' THEN
         INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
         VALUES ('email_setting', NEW.email_setting_id, audit_log, NEW.last_log_by, NOW());
     END IF;

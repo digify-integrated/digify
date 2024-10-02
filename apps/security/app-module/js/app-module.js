@@ -6,6 +6,10 @@
             appModuleTable('#app-module-table');
         }
 
+        $(document).on('click','#submit-export',function() {
+            exportData();
+        });
+
         $(document).on('click','.delete-app-module',function() {
             const app_module_id = $(this).data('app-module-id');
             const transaction = 'delete app module';
@@ -91,7 +95,7 @@
                     if (result.value) {
                         $.ajax({
                             type: 'POST',
-                            url: 'components/app-module/controller/app-module-controller.php',
+                            url: 'apps/security/app-module/controller/app-module-controller.php',
                             dataType: 'json',
                             data: {
                                 app_module_id: app_module_id,
@@ -129,6 +133,10 @@
             }
         });
 
+        $(document).on('click','#export-data',function() {
+            generateDropdownOptions('export options');
+        });
+
         $('#datatable-search').on('keyup', function () {
             var table = $('#app-module-table').DataTable();
             table.search(this.value).draw();
@@ -141,6 +149,63 @@
         });
     });
 })(jQuery);
+
+function exportData() {
+    const transaction = 'export data';
+    var export_to = $('#export_to').val();
+    var table_column = $('#table_column').val();
+
+    let export_id = [];
+
+    $('.datatable-checkbox-children').each((index, element) => {
+        if ($(element).is(':checked')) {
+            export_id.push(element.value);
+        }
+    });
+    
+    $.ajax({
+        type: 'POST',
+        url: 'apps/security/app-module/controller/app-module-controller.php',
+        data: {
+            transaction: transaction,
+            export_id: export_id,
+            export_to: export_to,
+            table_column: table_column,
+        },
+        xhrFields: {
+            responseType: 'blob' // Expect a file blob from the server
+        },
+        beforeSend: function() {
+            disableFormSubmitButton('submit-export');
+        },
+        success: function (response, status, xhr) {
+            var filename = "";                   
+            var disposition = xhr.getResponseHeader('Content-Disposition');
+
+            if (disposition && disposition.indexOf('attachment') !== -1) {
+                var matches = /filename="(.+)"/.exec(disposition);
+                if (matches != null && matches[1]) {
+                    filename = matches[1];
+                }
+            }
+
+            var blob = new Blob([response], { type: xhr.getResponseHeader('Content-Type') });
+            var link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = filename || "export." + export_to;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        },
+        error: function(xhr, status, error) {
+            handleSystemError(xhr, status, error);
+        },
+        complete: function() {
+            enableFormSubmitButton('submit-export');
+        }
+    });
+}
+
 
 function appModuleTable(datatable_name) {
     toggleHideActionDropdown();
@@ -204,4 +269,55 @@ function appModuleTable(datatable_name) {
 
     destroyDatatable(datatable_name);
     $(datatable_name).dataTable(settings);
+}
+
+function generateDropdownOptions(type){
+    switch (type) {
+        case 'export options':
+            var table_name = 'app_module';
+
+            $.ajax({
+                url: 'components/view/_export_generation.php',
+                method: 'POST',
+                dataType: 'json',
+                data: {
+                    type : type,
+                    table_name : table_name
+                },
+                success: function(response) {
+                    var select = document.getElementById('table_column');
+
+                    select.options.length = 0;
+
+                    response.forEach(function(opt) {
+                        var option = new Option(opt.text, opt.id);
+                        select.appendChild(option);
+                    });
+                },
+                error: function(xhr, status, error) {
+                    var fullErrorMessage = `XHR status: ${status}, Error: ${error}`;
+                    if (xhr.responseText) {
+                        fullErrorMessage += `, Response: ${xhr.responseText}`;
+                    }
+                    showErrorDialog(fullErrorMessage);
+                },
+                complete: function(){
+                    if($('#table_column').length){
+                        $('#table_column').bootstrapDualListbox({
+                            nonSelectedListLabel: 'Non-selected',
+                            selectedListLabel: 'Selected',
+                            preserveSelectionOnMove: 'moved',
+                            moveOnSelect: false,
+                            helperSelectNamePostfix: false,
+                            sortByInputOrder: false     
+                        });
+
+                        $('#table_column').bootstrapDualListbox('refresh', true);
+
+                        initializeDualListBoxIcon();
+                    }
+                }
+            });
+            break;
+    }
 }

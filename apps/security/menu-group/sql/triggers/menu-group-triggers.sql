@@ -5,7 +5,7 @@ CREATE TRIGGER menu_group_trigger_update
 AFTER UPDATE ON menu_group
 FOR EACH ROW
 BEGIN
-    DECLARE audit_log TEXT DEFAULT 'Menu group changed.';
+    DECLARE audit_log TEXT DEFAULT 'Menu group changed.<br/><br/>';
 
     IF NEW.menu_group_name <> OLD.menu_group_name THEN
         SET audit_log = CONCAT(audit_log, "Menu Group Name: ", OLD.menu_group_name, " -> ", NEW.menu_group_name, "<br/>");
@@ -19,7 +19,7 @@ BEGIN
         SET audit_log = CONCAT(audit_log, "Order Sequence: ", OLD.order_sequence, " -> ", NEW.order_sequence, "<br/>");
     END IF;
     
-    IF LENGTH(audit_log) > 0 THEN
+    IF audit_log <> 'Menu group changed.<br/><br/>' THEN
         INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
         VALUES ('menu_group', NEW.menu_group_id, audit_log, NEW.last_log_by, NOW());
     END IF;

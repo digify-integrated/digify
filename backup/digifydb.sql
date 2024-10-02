@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 01, 2024 at 11:26 AM
+-- Generation Time: Oct 02, 2024 at 11:34 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -125,11 +125,45 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `checkLoginCredentialsExist` (IN `p_
        OR email = BINARY p_credentials;
 END$$
 
+DROP PROCEDURE IF EXISTS `deleteAppModule`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `deleteAppModule` (IN `p_app_module_id` INT)   BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    DELETE FROM app_module WHERE app_module_id = p_app_module_id;
+
+    COMMIT;
+END$$
+
+DROP PROCEDURE IF EXISTS `exportAppModule`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `exportAppModule` (IN `p_app_module_columns` TEXT, IN `p_app_module_ids` TEXT)   BEGIN
+	SET @sql = CONCAT('SELECT ', p_app_module_columns, ' FROM app_module WHERE app_module_id IN (', p_app_module_ids, ')');
+    
+    PREPARE stmt FROM @sql;
+    
+    EXECUTE stmt;
+    
+    DEALLOCATE PREPARE stmt;
+END$$
+
 DROP PROCEDURE IF EXISTS `generateAppModuleTable`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `generateAppModuleTable` ()   BEGIN
 	SELECT app_module_id, app_module_name, app_module_description, app_logo, order_sequence 
     FROM app_module 
     ORDER BY app_module_id;
+END$$
+
+DROP PROCEDURE IF EXISTS `generateExportOption`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `generateExportOption` (IN `p_databasename` VARCHAR(500), IN `p_table_name` VARCHAR(500))   BEGIN
+    SELECT column_name 
+    FROM information_schema.columns 
+    WHERE table_schema = p_databasename 
+    AND table_name = p_table_name
+    ORDER BY column_name;
 END$$
 
 DROP PROCEDURE IF EXISTS `generateInternalNotes`$$
@@ -279,6 +313,23 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `updateAccountLock` (IN `p_user_acco
     SET locked = p_locked, 
         account_lock_duration = p_account_lock_duration
     WHERE user_account_id = p_user_account_id;
+
+    COMMIT;
+END$$
+
+DROP PROCEDURE IF EXISTS `updateAppLogo`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `updateAppLogo` (IN `p_app_module_id` INT, IN `p_app_logo` VARCHAR(500), IN `p_last_log_by` INT)   BEGIN
+ 	DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    UPDATE app_module
+    SET app_logo = p_app_logo,
+        last_log_by = p_last_log_by
+    WHERE app_module_id = p_app_module_id;
 
     COMMIT;
 END$$
@@ -442,13 +493,11 @@ CREATE TABLE `app_module` (
 --
 
 INSERT INTO `app_module` (`app_module_id`, `app_module_name`, `app_module_description`, `app_logo`, `menu_item_id`, `menu_item_name`, `order_sequence`, `created_date`, `last_log_by`) VALUES
-(1, 'Settings', 'Centralized management hub for comprehensive organizational oversight and control', './apps/security/app-module/image/logo/1/setting.png', 1, 'App Module', 100, '2024-09-27 16:14:50', 1),
+(1, 'Settings', 'Centralized management hub for comprehensive organizational oversight and control.', './apps/security/app-module/image/logo/1/setting.png', 1, 'App Module', 100, '2024-09-27 16:14:50', 2),
 (2, 'Employees', 'Centralize employee information', './apps/security/app-module/image/logo/2/kwDc.png', 23, 'Inventory Overview', 1, '2024-09-27 16:14:50', 1),
 (3, 'Customer', 'Bring all your customer information into one easy-to-access location', './apps/security/app-module/image/logo/3/rL4r.png', 50, 'Customer', 3, '2024-09-27 16:14:50', 1),
 (4, 'Website Studio', 'Create and customize your website', './apps/security/app-module/image/logo/4/TnX0.png', 54, 'Websites', 1, '2024-09-27 16:14:50', 1),
-(5, 'CRM', 'Track leads and close opportunities', './apps/security/app-module/image/logo/5/CxLn.png', 73, 'My Bookings', 3, '2024-09-27 16:14:50', 1),
-(6, 'test2', 'test2', NULL, 5, 'Company', 23, '2024-10-01 13:52:51', 2),
-(7, 'test', 'test', NULL, 1, 'App Module', 2, '2024-10-01 14:00:35', 2);
+(5, 'CRM', 'Track leads and close opportunities', './apps/security/app-module/image/logo/5/CxLn.png', 73, 'My Bookings', 3, '2024-09-27 16:14:50', 1);
 
 --
 -- Triggers `app_module`
@@ -466,7 +515,7 @@ DELIMITER ;
 DROP TRIGGER IF EXISTS `app_module_trigger_update`;
 DELIMITER $$
 CREATE TRIGGER `app_module_trigger_update` AFTER UPDATE ON `app_module` FOR EACH ROW BEGIN
-    DECLARE audit_log TEXT DEFAULT 'App module changed. <br/>';
+    DECLARE audit_log TEXT DEFAULT 'App module changed.<br/><br/>';
 
     IF NEW.app_module_name <> OLD.app_module_name THEN
         SET audit_log = CONCAT(audit_log, "App Module Name: ", OLD.app_module_name, " -> ", NEW.app_module_name, "<br/>");
@@ -484,7 +533,7 @@ CREATE TRIGGER `app_module_trigger_update` AFTER UPDATE ON `app_module` FOR EACH
         SET audit_log = CONCAT(audit_log, "Order Sequence: ", OLD.order_sequence, " -> ", NEW.order_sequence, "<br/>");
     END IF;
     
-    IF LENGTH(audit_log) > 0 THEN
+    IF audit_log <> 'App module changed.<br/><br/>' THEN
         INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
         VALUES ('app_module', NEW.app_module_id, audit_log, NEW.last_log_by, NOW());
     END IF;
@@ -536,7 +585,40 @@ INSERT INTO `audit_log` (`audit_log_id`, `table_name`, `reference_id`, `log`, `c
 (20, 'user_account', 2, 'User account changed.<br/>Last Connection Date: 2024-09-30 09:42:08 -> 2024-10-01 10:01:50<br/>', 2, '2024-10-01 10:01:50', '2024-10-01 10:01:50'),
 (21, 'app_module', 6, 'App module created.', 2, '2024-10-01 13:52:51', '2024-10-01 13:52:51'),
 (22, 'app_module', 7, 'App module created.', 2, '2024-10-01 14:00:35', '2024-10-01 14:00:35'),
-(23, 'app_module', 6, 'App module changed. <br/>App Module Name: test -> test2<br/>App Module Description: test -> test2<br/>Menu Item: App Module -> Company<br/>Order Sequence: 2 -> 23<br/>', 2, '2024-10-01 17:08:37', '2024-10-01 17:08:37');
+(23, 'app_module', 6, 'App module changed. <br/>App Module Name: test -> test2<br/>App Module Description: test -> test2<br/>Menu Item: App Module -> Company<br/>Order Sequence: 2 -> 23<br/>', 2, '2024-10-01 17:08:37', '2024-10-01 17:08:37'),
+(24, 'user_account', 2, 'User account changed.<br/>', 2, '2024-10-02 08:45:57', '2024-10-02 08:45:57'),
+(25, 'user_account', 2, 'User account changed.<br/>', 2, '2024-10-02 08:45:57', '2024-10-02 08:45:57'),
+(26, 'user_account', 2, 'User account changed.<br/>', 2, '2024-10-02 08:56:00', '2024-10-02 08:56:00'),
+(27, 'user_account', 2, 'User account changed.<br/>Last Connection Date: 2024-10-01 10:01:50 -> 2024-10-02 08:56:13<br/>', 2, '2024-10-02 08:56:13', '2024-10-02 08:56:13'),
+(28, 'app_module', 7, 'App module changed. <br/>App Module Name: test -> test2<br/>App Module Description: test -> test2<br/>Menu Item: App Module -> General Settings<br/>Order Sequence: 2 -> 3<br/>', 2, '2024-10-02 09:54:53', '2024-10-02 09:54:53'),
+(29, 'app_module', 7, 'App module changed. <br/>', 2, '2024-10-02 10:37:59', '2024-10-02 10:37:59'),
+(30, 'app_module', 7, 'App module changed. <br/>', 2, '2024-10-02 10:42:02', '2024-10-02 10:42:02'),
+(31, 'app_module', 7, 'App module changed. <br/>', 2, '2024-10-02 11:05:24', '2024-10-02 11:05:24'),
+(32, 'app_module', 7, 'App module changed. <br/>', 2, '2024-10-02 11:06:36', '2024-10-02 11:06:36'),
+(33, 'app_module', 7, 'App module changed. <br/>', 2, '2024-10-02 11:10:12', '2024-10-02 11:10:12'),
+(34, 'app_module', 7, 'App module changed. <br/>', 2, '2024-10-02 11:11:51', '2024-10-02 11:11:51'),
+(35, 'app_module', 7, 'App module changed. <br/>', 2, '2024-10-02 11:12:10', '2024-10-02 11:12:10'),
+(36, 'app_module', 7, 'App module changed. <br/>', 2, '2024-10-02 11:12:26', '2024-10-02 11:12:26'),
+(37, 'app_module', 7, 'App module changed. <br/>', 2, '2024-10-02 11:12:35', '2024-10-02 11:12:35'),
+(38, 'app_module', 1, 'App module changed. <br/>App Module Description: Centralized management hub for comprehensive organizational oversight and control -> Centralized management hub for comprehensive organizational oversight and control.<br/>', 2, '2024-10-02 11:45:09', '2024-10-02 11:45:09'),
+(39, 'menu_group', 1, 'Menu group changed.', 2, '2024-10-02 11:45:09', '2024-10-02 11:45:09'),
+(40, 'menu_group', 2, 'Menu group changed.', 2, '2024-10-02 11:45:09', '2024-10-02 11:45:09'),
+(41, 'menu_item', 1, 'Menu item changed. <br/>', 2, '2024-10-02 11:45:09', '2024-10-02 11:45:09'),
+(42, 'menu_item', 2, 'Menu item changed. <br/>', 2, '2024-10-02 11:45:09', '2024-10-02 11:45:09'),
+(43, 'menu_item', 3, 'Menu item changed. <br/>', 2, '2024-10-02 11:45:09', '2024-10-02 11:45:09'),
+(44, 'menu_item', 4, 'Menu item changed. <br/>', 2, '2024-10-02 11:45:09', '2024-10-02 11:45:09'),
+(45, 'menu_item', 5, 'Menu item changed. <br/>', 2, '2024-10-02 11:45:09', '2024-10-02 11:45:09'),
+(46, 'menu_item', 6, 'Menu item changed. <br/>', 2, '2024-10-02 11:45:09', '2024-10-02 11:45:09'),
+(47, 'menu_item', 7, 'Menu item changed. <br/>', 2, '2024-10-02 11:45:09', '2024-10-02 11:45:09'),
+(48, 'menu_item', 8, 'Menu item changed. <br/>', 2, '2024-10-02 11:45:09', '2024-10-02 11:45:09'),
+(49, 'menu_item', 9, 'Menu item changed. <br/>', 2, '2024-10-02 11:45:09', '2024-10-02 11:45:09'),
+(50, 'menu_item', 10, 'Menu item changed. <br/>', 2, '2024-10-02 11:45:09', '2024-10-02 11:45:09'),
+(51, 'app_module', 8, 'App module created.', 2, '2024-10-02 12:08:08', '2024-10-02 12:08:08'),
+(52, 'app_module', 9, 'App module created.', 2, '2024-10-02 12:09:16', '2024-10-02 12:09:16'),
+(53, 'app_module', 10, 'App module created.', 2, '2024-10-02 12:10:01', '2024-10-02 12:10:01'),
+(54, 'app_module', 11, 'App module created.', 2, '2024-10-02 12:10:15', '2024-10-02 12:10:15'),
+(55, 'app_module', 12, 'App module created.', 2, '2024-10-02 12:10:42', '2024-10-02 12:10:42'),
+(56, 'app_module', 12, 'App module changed.<br/><br/>App Module Name: testing -> testingtest<br/>App Module Description: test -> testtest<br/>Menu Item: Company -> General Settings<br/>Order Sequence: 12 -> 31<br/>', 2, '2024-10-02 12:11:11', '2024-10-02 12:11:11');
 
 -- --------------------------------------------------------
 
@@ -1310,6 +1392,82 @@ DELIMITER ;
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `upload_setting`
+--
+
+DROP TABLE IF EXISTS `upload_setting`;
+CREATE TABLE `upload_setting` (
+  `upload_setting_id` int(10) UNSIGNED NOT NULL,
+  `upload_setting_name` varchar(100) NOT NULL,
+  `upload_setting_description` varchar(200) NOT NULL,
+  `max_file_size` double NOT NULL,
+  `created_date` datetime DEFAULT current_timestamp(),
+  `last_log_by` int(10) UNSIGNED DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `upload_setting`
+--
+
+INSERT INTO `upload_setting` (`upload_setting_id`, `upload_setting_name`, `upload_setting_description`, `max_file_size`, `created_date`, `last_log_by`) VALUES
+(1, 'App Logo', 'Sets the upload setting when uploading app logo.', 800, '2024-10-02 10:35:33', 1),
+(2, 'Internal Notes Attachment', 'Sets the upload setting when uploading internal notes attachement.', 800, '2024-10-02 10:35:33', 1),
+(3, 'Employee Image', 'Sets the upload setting when uploading employee image.', 800, '2024-10-02 10:35:33', 2),
+(4, 'Employee ID Record', 'Sets the upload setting when uploading employee ID record.', 800, '2024-10-02 10:35:33', 2),
+(5, 'Website Elements Images', 'Sets the upload setting when uploading website elements image.', 500, '2024-10-02 10:35:33', 2);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `upload_setting_file_extension`
+--
+
+DROP TABLE IF EXISTS `upload_setting_file_extension`;
+CREATE TABLE `upload_setting_file_extension` (
+  `upload_setting_file_extension_id` int(10) UNSIGNED NOT NULL,
+  `upload_setting_id` int(10) UNSIGNED NOT NULL,
+  `upload_setting_name` varchar(100) NOT NULL,
+  `file_extension_id` int(10) UNSIGNED NOT NULL,
+  `file_extension_name` varchar(100) NOT NULL,
+  `file_extension` varchar(10) NOT NULL,
+  `date_assigned` datetime DEFAULT current_timestamp(),
+  `created_date` datetime DEFAULT current_timestamp(),
+  `last_log_by` int(10) UNSIGNED DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `upload_setting_file_extension`
+--
+
+INSERT INTO `upload_setting_file_extension` (`upload_setting_file_extension_id`, `upload_setting_id`, `upload_setting_name`, `file_extension_id`, `file_extension_name`, `file_extension`, `date_assigned`, `created_date`, `last_log_by`) VALUES
+(1, 1, 'App Logo', 63, 'PNG', 'png', '2024-10-02 10:35:33', '2024-10-02 10:35:33', 1),
+(2, 1, 'App Logo', 61, 'JPG', 'jpg', '2024-10-02 10:35:33', '2024-10-02 10:35:33', 1),
+(3, 1, 'App Logo', 62, 'JPEG', 'jpeg', '2024-10-02 10:35:33', '2024-10-02 10:35:33', 1),
+(4, 2, 'Internal Notes Attachment', 63, 'PNG', 'png', '2024-10-02 10:35:33', '2024-10-02 10:35:33', 1),
+(5, 2, 'Internal Notes Attachment', 61, 'JPG', 'jpg', '2024-10-02 10:35:33', '2024-10-02 10:35:33', 1),
+(6, 2, 'Internal Notes Attachment', 62, 'JPEG', 'jpeg', '2024-10-02 10:35:33', '2024-10-02 10:35:33', 1),
+(7, 2, 'Internal Notes Attachment', 127, 'PDF', 'pdf', '2024-10-02 10:35:33', '2024-10-02 10:35:33', 1),
+(8, 2, 'Internal Notes Attachment', 125, 'DOC', 'doc', '2024-10-02 10:35:33', '2024-10-02 10:35:33', 1),
+(9, 2, 'Internal Notes Attachment', 125, 'DOCX', 'docx', '2024-10-02 10:35:33', '2024-10-02 10:35:33', 1),
+(10, 2, 'Internal Notes Attachment', 130, 'TXT', 'txt', '2024-10-02 10:35:33', '2024-10-02 10:35:33', 1),
+(11, 2, 'Internal Notes Attachment', 92, 'XLS', 'xls', '2024-10-02 10:35:33', '2024-10-02 10:35:33', 1),
+(12, 2, 'Internal Notes Attachment', 94, 'XLSX', 'xlsx', '2024-10-02 10:35:33', '2024-10-02 10:35:33', 1),
+(13, 2, 'Internal Notes Attachment', 89, 'PPT', 'ppt', '2024-10-02 10:35:33', '2024-10-02 10:35:33', 1),
+(14, 2, 'Internal Notes Attachment', 90, 'PPTX', 'pptx', '2024-10-02 10:35:33', '2024-10-02 10:35:33', 1),
+(15, 3, 'Employee Image', 62, 'JPEG', 'jpeg', '2024-10-02 10:35:33', '2024-10-02 10:35:33', 2),
+(16, 3, 'Employee Image', 61, 'JPG', 'jpg', '2024-10-02 10:35:33', '2024-10-02 10:35:33', 2),
+(17, 3, 'Employee Image', 63, 'PNG', 'png', '2024-10-02 10:35:33', '2024-10-02 10:35:33', 2),
+(19, 4, 'Employee ID Record', 62, 'JPEG', 'jpeg', '2024-10-02 10:35:33', '2024-10-02 10:35:33', 2),
+(20, 4, 'Employee ID Record', 61, 'JPG', 'jpg', '2024-10-02 10:35:33', '2024-10-02 10:35:33', 2),
+(21, 4, 'Employee ID Record', 63, 'PNG', 'png', '2024-10-02 10:35:33', '2024-10-02 10:35:33', 2),
+(22, 5, 'Website Elements Images', 62, 'JPEG', 'jpeg', '2024-10-02 10:35:33', '2024-10-02 10:35:33', 2),
+(23, 5, 'Website Elements Images', 61, 'JPG', 'jpg', '2024-10-02 10:35:33', '2024-10-02 10:35:33', 2),
+(24, 5, 'Website Elements Images', 63, 'PNG', 'png', '2024-10-02 10:35:33', '2024-10-02 10:35:33', 2),
+(25, 5, 'Website Elements Images', 66, 'SVG', 'svg', '2024-10-02 10:35:33', '2024-10-02 10:35:33', 2);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `user_account`
 --
 
@@ -1350,7 +1508,7 @@ CREATE TABLE `user_account` (
 
 INSERT INTO `user_account` (`user_account_id`, `file_as`, `email`, `username`, `password`, `profile_picture`, `locked`, `active`, `last_failed_login_attempt`, `failed_login_attempts`, `last_connection_date`, `password_expiry_date`, `reset_token`, `reset_token_expiry_date`, `receive_notification`, `two_factor_auth`, `otp`, `otp_expiry_date`, `failed_otp_attempts`, `last_password_change`, `account_lock_duration`, `last_password_reset`, `multiple_session`, `session_token`, `linked_id`, `created_date`, `last_log_by`) VALUES
 (1, 'Digify Bot', 'digifybot@gmail.com', 'digifybot', 'Lu%2Be%2BRZfTv%2F3T0GR%2Fwes8QPJvE3Etx1p7tmryi74LNk%3D', NULL, 'WkgqlkcpSeEd7eWC8gl3iPwksfGbJYGy3VcisSyDeQ0', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20', NULL, NULL, NULL, 'aUIRg2jhRcYVcr0%2BiRDl98xjv81aR4Ux63bP%2BF2hQbE%3D', NULL, NULL, 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'WkgqlkcpSeEd7eWC8gl3iPwksfGbJYGy3VcisSyDeQ0', NULL, NULL, NULL, NULL, NULL, NULL, 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', NULL, NULL, '2024-09-27 11:49:59', 1),
-(2, 'Administrator', 'lawrenceagulto.317@gmail.com', 'ldagulto', 'ZW2SGXn0B41ZvY7Nl92uFaBW1LRhTxwaem5sgn8clRE%3D', NULL, '9lZtEofygdjMs3EsZV1V38KQF%2FPjp7btRHLFnck7DpM%3D', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20', '0000-00-00 00:00:00', '', '2024-10-01 10:01:50', 'j3TPQ%2FkOvrVcj0dMsNNs%2BicQ3gQo7W812x4%2BN2Q72oM%3D', 'wWt3OtHh0FKAhB31glK%2FdLfDTWMQdhqvZ%2FtRgmWl8EU%3D', 'P4tR005eyn3kNWp4tUtAQ17HIhZPD2zHiMAUfRmlAiAM6qi4fe8MjMopfWWK3xk9', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'SpkVpKH%2BVQ8YXt8Wylw75V4YKYVUHSNe5PbXRy2tigU%3D', '%2B82TMvfduvLGbS%2FwFhVsHKRhzPcTpjSkdQESEb%2BU9KIxkD4HYnUAccUzz3619hoW', '', '2024-09-27 12:27:47', '', NULL, 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'tKe3w346uHaBt7MeQD3HnXCSsj50O1STgdVuDoHvJLU%3D', NULL, '2024-09-27 11:49:59', 2);
+(2, 'Administrator', 'lawrenceagulto.317@gmail.com', 'ldagulto', 'ZW2SGXn0B41ZvY7Nl92uFaBW1LRhTxwaem5sgn8clRE%3D', NULL, '9lZtEofygdjMs3EsZV1V38KQF%2FPjp7btRHLFnck7DpM%3D', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20', '0000-00-00 00:00:00', '', '2024-10-02 08:56:13', 'j3TPQ%2FkOvrVcj0dMsNNs%2BicQ3gQo7W812x4%2BN2Q72oM%3D', 'wWt3OtHh0FKAhB31glK%2FdLfDTWMQdhqvZ%2FtRgmWl8EU%3D', 'P4tR005eyn3kNWp4tUtAQ17HIhZPD2zHiMAUfRmlAiAM6qi4fe8MjMopfWWK3xk9', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'OniLLuVYbh19%2BCbjtqNjUAoMYeocsxUUGdbLPlfoK6s%3D', 'Sf43o%2F0BG5NhN5rE2Drfa5imxV4O3jFP7%2FeZ4jTyCFztSmPjHxot6v%2B3a7CpKz0l', '', '2024-09-27 12:27:47', '', NULL, 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'bcryqP9%2FMtdpEXQw5XnIEezkXAd5SU%2BiFKGwNhQ2xGM%3D', NULL, '2024-09-27 11:49:59', 2);
 
 --
 -- Triggers `user_account`
@@ -1573,6 +1731,24 @@ ALTER TABLE `system_action`
   ADD KEY `system_action_index_system_action_id` (`system_action_id`);
 
 --
+-- Indexes for table `upload_setting`
+--
+ALTER TABLE `upload_setting`
+  ADD PRIMARY KEY (`upload_setting_id`),
+  ADD KEY `last_log_by` (`last_log_by`),
+  ADD KEY `upload_setting_index_upload_setting_id` (`upload_setting_id`);
+
+--
+-- Indexes for table `upload_setting_file_extension`
+--
+ALTER TABLE `upload_setting_file_extension`
+  ADD PRIMARY KEY (`upload_setting_file_extension_id`),
+  ADD KEY `last_log_by` (`last_log_by`),
+  ADD KEY `upload_setting_file_ext_index_upload_setting_file_extension_id` (`upload_setting_file_extension_id`),
+  ADD KEY `upload_setting_file_ext_index_upload_setting_id` (`upload_setting_id`),
+  ADD KEY `upload_setting_file_ext_index_file_extension_id` (`file_extension_id`);
+
+--
 -- Indexes for table `user_account`
 --
 ALTER TABLE `user_account`
@@ -1589,13 +1765,13 @@ ALTER TABLE `user_account`
 -- AUTO_INCREMENT for table `app_module`
 --
 ALTER TABLE `app_module`
-  MODIFY `app_module_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `app_module_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `audit_log`
 --
 ALTER TABLE `audit_log`
-  MODIFY `audit_log_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+  MODIFY `audit_log_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=57;
 
 --
 -- AUTO_INCREMENT for table `email_setting`
@@ -1692,6 +1868,18 @@ ALTER TABLE `security_setting`
 --
 ALTER TABLE `system_action`
   MODIFY `system_action_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `upload_setting`
+--
+ALTER TABLE `upload_setting`
+  MODIFY `upload_setting_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT for table `upload_setting_file_extension`
+--
+ALTER TABLE `upload_setting_file_extension`
+  MODIFY `upload_setting_file_extension_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- AUTO_INCREMENT for table `user_account`
@@ -1823,6 +2011,18 @@ ALTER TABLE `security_setting`
 --
 ALTER TABLE `system_action`
   ADD CONSTRAINT `system_action_ibfk_1` FOREIGN KEY (`last_log_by`) REFERENCES `user_account` (`user_account_id`);
+
+--
+-- Constraints for table `upload_setting`
+--
+ALTER TABLE `upload_setting`
+  ADD CONSTRAINT `upload_setting_ibfk_1` FOREIGN KEY (`last_log_by`) REFERENCES `user_account` (`user_account_id`);
+
+--
+-- Constraints for table `upload_setting_file_extension`
+--
+ALTER TABLE `upload_setting_file_extension`
+  ADD CONSTRAINT `upload_setting_file_extension_ibfk_1` FOREIGN KEY (`last_log_by`) REFERENCES `user_account` (`user_account_id`);
 
 --
 -- Constraints for table `user_account`

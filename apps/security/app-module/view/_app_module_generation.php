@@ -32,7 +32,7 @@ if(isset($_POST['type']) && !empty($_POST['type'])){
                 $appModuleName = $row['app_module_name'];
                 $appModuleDescription = $row['app_module_description'];
                 $orderSequence = $row['order_sequence'];
-                $appLogo = $systemModel->checkImage($row['app_logo'], 'app module logo');
+                $appLogo = $systemModel->checkImage(str_replace('../', './apps/', $row['app_logo'])  ?? null, 'app module logo');
 
                 $appModuleIDEncrypted = $securityModel->encryptData($appModuleID);
 

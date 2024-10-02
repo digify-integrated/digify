@@ -9,16 +9,18 @@
     <div class="card-body">
         <form id="app-module-form" method="post" action="#">
             <div class="row">
-                <div class="col-lg-6">
+                <div class="col-md-12">
                     <div class="mb-3">
                         <label class="form-label" for="app_module_name">Display Name <span class="text-danger">*</span></label>
                         <input type="text" class="form-control maxlength" id="app_module_name" name="app_module_name" maxlength="100" autocomplete="off">
                     </div>
                 </div>
-                <div class="col-lg-6">
+            </div>
+            <div class="row">
+                <div class="col-md-12">
                     <div class="mb-3">
                         <label class="form-label" for="app_module_description">Description <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control maxlength" id="app_module_description" name="app_module_description" maxlength="100" autocomplete="off">
+                        <textarea class="form-control maxlength" id="app_module_description" name="app_module_description" maxlength="100" rows="3"></textarea>
                     </div>
                 </div>
             </div>
@@ -29,7 +31,7 @@
                         <select id="menu_item_id" name="menu_item_id" class="select2 form-control"></select>
                     </div>
                 </div>
-                <div class="col-lg-6">
+                <div class="col-md-6">
                     <div class="mb-3">
                         <label class="form-label" for="order_sequence">Order Sequence <span class="text-danger">*</span></label>
                         <input type="number" class="form-control" id="order_sequence" name="order_sequence" min="0">
