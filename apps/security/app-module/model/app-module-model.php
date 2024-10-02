@@ -89,22 +89,6 @@ class AppModuleModel {
         return $result;
     }
     # -------------------------------------------------------------
-
-    # -------------------------------------------------------------
-    #   Export methods
-    # -------------------------------------------------------------
-
-    # -------------------------------------------------------------
-    public function exportAppModule($p_app_module_columns, $p_app_module_ids) {
-        $stmt = $this->db->getConnection()->prepare('CALL exportAppModule(:p_app_module_columns, :p_app_module_ids)');
-        $stmt->bindValue(':p_app_module_columns', $p_app_module_columns, PDO::PARAM_STR);
-        $stmt->bindValue(':p_app_module_ids', $p_app_module_ids, PDO::PARAM_STR);
-        $stmt->execute();
-        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        $stmt->closeCursor();
-        return $result;
-    }
-    # -------------------------------------------------------------
     
 }
 ?>

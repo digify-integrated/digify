@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 02, 2024 at 11:34 AM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- Generation Time: Oct 02, 2024 at 04:36 PM
+-- Server version: 10.4.28-MariaDB
+-- PHP Version: 8.2.4
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -139,14 +139,16 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `deleteAppModule` (IN `p_app_module_
     COMMIT;
 END$$
 
-DROP PROCEDURE IF EXISTS `exportAppModule`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `exportAppModule` (IN `p_app_module_columns` TEXT, IN `p_app_module_ids` TEXT)   BEGIN
-	SET @sql = CONCAT('SELECT ', p_app_module_columns, ' FROM app_module WHERE app_module_id IN (', p_app_module_ids, ')');
-    
+DROP PROCEDURE IF EXISTS `exportData`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `exportData` (IN `p_table_name` VARCHAR(255), IN `p_columns` TEXT, IN `p_ids` TEXT)   BEGIN
+    SET @sql = CONCAT('SELECT ', p_columns, ' FROM ', p_table_name);
+
+    IF p_table_name = 'app_module' THEN
+        SET @sql = CONCAT(@sql, ' WHERE app_module_id IN (', p_ids, ')');
+    END IF;
+
     PREPARE stmt FROM @sql;
-    
     EXECUTE stmt;
-    
     DEALLOCATE PREPARE stmt;
 END$$
 
@@ -163,7 +165,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `generateExportOption` (IN `p_databa
     FROM information_schema.columns 
     WHERE table_schema = p_databasename 
     AND table_name = p_table_name
-    ORDER BY column_name;
+    ORDER BY ordinal_position;
 END$$
 
 DROP PROCEDURE IF EXISTS `generateInternalNotes`$$
@@ -495,7 +497,7 @@ CREATE TABLE `app_module` (
 INSERT INTO `app_module` (`app_module_id`, `app_module_name`, `app_module_description`, `app_logo`, `menu_item_id`, `menu_item_name`, `order_sequence`, `created_date`, `last_log_by`) VALUES
 (1, 'Settings', 'Centralized management hub for comprehensive organizational oversight and control.', './apps/security/app-module/image/logo/1/setting.png', 1, 'App Module', 100, '2024-09-27 16:14:50', 2),
 (2, 'Employees', 'Centralize employee information', './apps/security/app-module/image/logo/2/kwDc.png', 23, 'Inventory Overview', 1, '2024-09-27 16:14:50', 1),
-(3, 'Customer', 'Bring all your customer information into one easy-to-access location', './apps/security/app-module/image/logo/3/rL4r.png', 50, 'Customer', 3, '2024-09-27 16:14:50', 1),
+(3, 'Customer', 'Bring all your customer information into one easy-to-access location', './apps/security/app-module/image/logo/3/rL4r.png', 1, 'App Module', 3, '2024-09-27 16:14:50', 2),
 (4, 'Website Studio', 'Create and customize your website', './apps/security/app-module/image/logo/4/TnX0.png', 54, 'Websites', 1, '2024-09-27 16:14:50', 1),
 (5, 'CRM', 'Track leads and close opportunities', './apps/security/app-module/image/logo/5/CxLn.png', 73, 'My Bookings', 3, '2024-09-27 16:14:50', 1);
 
@@ -618,7 +620,11 @@ INSERT INTO `audit_log` (`audit_log_id`, `table_name`, `reference_id`, `log`, `c
 (53, 'app_module', 10, 'App module created.', 2, '2024-10-02 12:10:01', '2024-10-02 12:10:01'),
 (54, 'app_module', 11, 'App module created.', 2, '2024-10-02 12:10:15', '2024-10-02 12:10:15'),
 (55, 'app_module', 12, 'App module created.', 2, '2024-10-02 12:10:42', '2024-10-02 12:10:42'),
-(56, 'app_module', 12, 'App module changed.<br/><br/>App Module Name: testing -> testingtest<br/>App Module Description: test -> testtest<br/>Menu Item: Company -> General Settings<br/>Order Sequence: 12 -> 31<br/>', 2, '2024-10-02 12:11:11', '2024-10-02 12:11:11');
+(56, 'app_module', 12, 'App module changed.<br/><br/>App Module Name: testing -> testingtest<br/>App Module Description: test -> testtest<br/>Menu Item: Company -> General Settings<br/>Order Sequence: 12 -> 31<br/>', 2, '2024-10-02 12:11:11', '2024-10-02 12:11:11'),
+(57, 'user_account', 2, 'User account changed.<br/>', 2, '2024-10-02 20:49:59', '2024-10-02 20:49:59'),
+(58, 'user_account', 2, 'User account changed.<br/>', 2, '2024-10-02 20:49:59', '2024-10-02 20:49:59'),
+(59, 'user_account', 2, 'User account changed.<br/>Last Connection Date: 2024-10-02 08:56:13 -> 2024-10-02 20:50:25<br/>', 2, '2024-10-02 20:50:25', '2024-10-02 20:50:25'),
+(60, 'app_module', 3, 'App module changed.<br/><br/>Menu Item: Customer -> App Module<br/>', 2, '2024-10-02 22:33:36', '2024-10-02 22:33:36');
 
 -- --------------------------------------------------------
 
@@ -1508,7 +1514,7 @@ CREATE TABLE `user_account` (
 
 INSERT INTO `user_account` (`user_account_id`, `file_as`, `email`, `username`, `password`, `profile_picture`, `locked`, `active`, `last_failed_login_attempt`, `failed_login_attempts`, `last_connection_date`, `password_expiry_date`, `reset_token`, `reset_token_expiry_date`, `receive_notification`, `two_factor_auth`, `otp`, `otp_expiry_date`, `failed_otp_attempts`, `last_password_change`, `account_lock_duration`, `last_password_reset`, `multiple_session`, `session_token`, `linked_id`, `created_date`, `last_log_by`) VALUES
 (1, 'Digify Bot', 'digifybot@gmail.com', 'digifybot', 'Lu%2Be%2BRZfTv%2F3T0GR%2Fwes8QPJvE3Etx1p7tmryi74LNk%3D', NULL, 'WkgqlkcpSeEd7eWC8gl3iPwksfGbJYGy3VcisSyDeQ0', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20', NULL, NULL, NULL, 'aUIRg2jhRcYVcr0%2BiRDl98xjv81aR4Ux63bP%2BF2hQbE%3D', NULL, NULL, 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'WkgqlkcpSeEd7eWC8gl3iPwksfGbJYGy3VcisSyDeQ0', NULL, NULL, NULL, NULL, NULL, NULL, 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', NULL, NULL, '2024-09-27 11:49:59', 1),
-(2, 'Administrator', 'lawrenceagulto.317@gmail.com', 'ldagulto', 'ZW2SGXn0B41ZvY7Nl92uFaBW1LRhTxwaem5sgn8clRE%3D', NULL, '9lZtEofygdjMs3EsZV1V38KQF%2FPjp7btRHLFnck7DpM%3D', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20', '0000-00-00 00:00:00', '', '2024-10-02 08:56:13', 'j3TPQ%2FkOvrVcj0dMsNNs%2BicQ3gQo7W812x4%2BN2Q72oM%3D', 'wWt3OtHh0FKAhB31glK%2FdLfDTWMQdhqvZ%2FtRgmWl8EU%3D', 'P4tR005eyn3kNWp4tUtAQ17HIhZPD2zHiMAUfRmlAiAM6qi4fe8MjMopfWWK3xk9', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'OniLLuVYbh19%2BCbjtqNjUAoMYeocsxUUGdbLPlfoK6s%3D', 'Sf43o%2F0BG5NhN5rE2Drfa5imxV4O3jFP7%2FeZ4jTyCFztSmPjHxot6v%2B3a7CpKz0l', '', '2024-09-27 12:27:47', '', NULL, 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'bcryqP9%2FMtdpEXQw5XnIEezkXAd5SU%2BiFKGwNhQ2xGM%3D', NULL, '2024-09-27 11:49:59', 2);
+(2, 'Administrator', 'lawrenceagulto.317@gmail.com', 'ldagulto', 'ZW2SGXn0B41ZvY7Nl92uFaBW1LRhTxwaem5sgn8clRE%3D', NULL, '9lZtEofygdjMs3EsZV1V38KQF%2FPjp7btRHLFnck7DpM%3D', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20', '0000-00-00 00:00:00', '', '2024-10-02 20:50:25', 'j3TPQ%2FkOvrVcj0dMsNNs%2BicQ3gQo7W812x4%2BN2Q72oM%3D', 'wWt3OtHh0FKAhB31glK%2FdLfDTWMQdhqvZ%2FtRgmWl8EU%3D', 'P4tR005eyn3kNWp4tUtAQ17HIhZPD2zHiMAUfRmlAiAM6qi4fe8MjMopfWWK3xk9', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', '11ZKk3t5yoAGSwZn0DGC%2FnVktaorQCiGxBXSElwgb9Q%3D', 'TdBEPsyVPnkauNTuNOb8sltBiHd6h2n1HqqfQcFt2e6MCP8ijBl2pi4jsiG2ZZzT', '', '2024-09-27 12:27:47', '', NULL, 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'J0%2F5zQP8UmUJRWmQFpxRjGSPGdxil%2BuO%2FcCiwRJb78A%3D', NULL, '2024-09-27 11:49:59', 2);
 
 --
 -- Triggers `user_account`
@@ -1771,7 +1777,7 @@ ALTER TABLE `app_module`
 -- AUTO_INCREMENT for table `audit_log`
 --
 ALTER TABLE `audit_log`
-  MODIFY `audit_log_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=57;
+  MODIFY `audit_log_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=61;
 
 --
 -- AUTO_INCREMENT for table `email_setting`

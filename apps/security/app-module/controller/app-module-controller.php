@@ -11,7 +11,7 @@ require_once '../../security-setting/model/security-setting-model.php';
 require_once '../../menu-item/model/menu-item-model.php';
 require_once '../../upload-setting/model/upload-setting-model.php';
 
-require_once '../../../../assets/libs/PhpSpreadsheet/phpspreadsheet-autoload.php';
+require_once '../../../../assets/libs/PhpSpreadsheet/autoload.php';
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -547,21 +547,24 @@ class AppModuleController {
                 exit;
             }
             else {
+                ob_start();
                 $filename = "app_modules_export_" . date('Y-m-d_H-i-s') . ".xlsx";
 
-                // Create a new Spreadsheet object
                 $spreadsheet = new Spreadsheet();
                 $sheet = $spreadsheet->getActiveSheet();
 
-                // Set column headers
                 $colIndex = 'A';
                 foreach ($tableColumns as $column) {
                     $sheet->setCellValue($colIndex . '1', ucfirst(str_replace('_', ' ', $column)));
                     $colIndex++;
                 }
 
-                // Populate data rows
-                $rowNumber = 2; // Start at the second row
+                $columns = implode(", ", $tableColumns);
+                
+                $ids = implode(",", array_map('intval', $exportIDs));
+                $appModuleDetails = $this->appModuleModel->exportAppModule($columns, $ids);
+
+                $rowNumber = 2;
                 foreach ($appModuleDetails as $appModuleDetail) {
                     $colIndex = 'A';
                     foreach ($tableColumns as $column) {
@@ -571,11 +574,12 @@ class AppModuleController {
                     $rowNumber++;
                 }
 
-                // Set headers for the Excel file download
+                ob_end_clean();
+
                 header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
                 header('Content-Disposition: attachment; filename="' . $filename . '"');
+                header('Cache-Control: max-age=0');
 
-                // Write the file to output
                 $writer = new Xlsx($spreadsheet);
                 $writer->save('php://output');
                 exit;

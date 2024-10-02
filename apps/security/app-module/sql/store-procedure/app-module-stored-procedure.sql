@@ -128,25 +128,6 @@ END //
 
 /* ----------------------------------------------------------------------------------------------------------------------------- */
 
-/* Export Procedure */
-
-DROP PROCEDURE IF EXISTS exportAppModule//
-CREATE PROCEDURE exportAppModule(
-    IN p_app_module_columns TEXT,
-    IN p_app_module_ids TEXT
-)
-BEGIN
-	SET @sql = CONCAT('SELECT ', p_app_module_columns, ' FROM app_module WHERE app_module_id IN (', p_app_module_ids, ')');
-    
-    PREPARE stmt FROM @sql;
-    
-    EXECUTE stmt;
-    
-    DEALLOCATE PREPARE stmt;
-END //
-
-/* ----------------------------------------------------------------------------------------------------------------------------- */
-
 /* Generate Stored Procedure */
 
 DROP PROCEDURE IF EXISTS generateAppModuleTable//

@@ -26,5 +26,24 @@ BEGIN
     SELECT column_name 
     FROM information_schema.columns 
     WHERE table_schema = p_databasename 
-    AND table_name = p_table_name;
+    AND table_name = p_table_name
+    ORDER BY ordinal_position;
+END //
+
+DROP PROCEDURE IF EXISTS exportData//
+CREATE PROCEDURE exportData(
+    IN p_table_name VARCHAR(255),
+    IN p_columns TEXT,
+    IN p_ids TEXT
+)
+BEGIN
+    SET @sql = CONCAT('SELECT ', p_columns, ' FROM ', p_table_name);
+
+    IF p_table_name = 'app_module' THEN
+        SET @sql = CONCAT(@sql, ' WHERE app_module_id IN (', p_ids, ')');
+    END IF;
+
+    PREPARE stmt FROM @sql;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
 END //
