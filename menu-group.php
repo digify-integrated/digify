@@ -22,16 +22,16 @@
                         require_once('components/view/_breadcrumbs.php'); 
 
                         if($newRecord){
-                            require_once('apps/security/app-module/view/_app_module_new.php');
+                            require_once('apps/security/menu-group/view/_menu_group_new.php');
                         }
                         else if(!empty($detailID)){
-                            require_once('apps/security/app-module/view/_app_module_details.php');
+                            require_once('apps/security/menu-group/view/_menu_group_details.php');
                         }
                         else if(isset($_GET['import']) && !empty($_GET['import'])){
                             require_once('components/view/_import.php');
                         }
                         else{
-                            require_once('apps/security/app-module/view/_app_module.php');
+                            require_once('apps/security/menu-group/view/_menu_group.php');
                         }
                     ?>
                 </div>
@@ -55,16 +55,16 @@
         $version = rand();
 
         if ($newRecord) {
-            $scriptFile = './apps/security/app-module/js/app-module-new.js';
+            $scriptFile = './apps/security/menu-group/js/menu-group-new.js';
         } 
         elseif (!empty($detailID)) {
-            $scriptFile = './apps/security/app-module/js/app-module-details.js';
+            $scriptFile = './apps/security/menu-group/js/menu-group-details.js';
         } 
         elseif (isset($_GET['import']) && !empty($_GET['import'])) {
             $scriptFile = './components/js/import.js'; 
         } 
         else {
-            $scriptFile = './apps/security/app-module/js/app-module.js';
+            $scriptFile = './apps/security/menu-group/js/menu-group.js';
         }
 
         $scriptLink = '<script src="' . $scriptFile . '?v=' . $version . '"></script>';

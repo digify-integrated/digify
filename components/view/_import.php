@@ -29,7 +29,7 @@
     </div>
 </div>
 
-<div class="card card-body upload-file-preview">
+<div class="card card-body d-none upload-file-preview">
     <div class="row">
         <div class="col-md-12 mt-3 mt-md-0">
             <div class="table-responsive">

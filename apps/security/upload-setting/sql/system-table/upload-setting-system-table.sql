@@ -16,9 +16,7 @@ CREATE INDEX upload_setting_index_upload_setting_id ON upload_setting(upload_set
 INSERT INTO upload_setting (upload_setting_id, upload_setting_name, upload_setting_description, max_file_size, last_log_by) VALUES
 (1, 'App Logo', 'Sets the upload setting when uploading app logo.', 800, 1),
 (2, 'Internal Notes Attachment', 'Sets the upload setting when uploading internal notes attachement.', 800, 1),
-(3, 'Employee Image', 'Sets the upload setting when uploading employee image.', 800, 2),
-(4, 'Employee ID Record', 'Sets the upload setting when uploading employee ID record.', 800, 2),
-(5, 'Website Elements Images', 'Sets the upload setting when uploading website elements image.', 500, 2);
+(3, 'Import File', 'Sets the upload setting when importing data.', 800, 2);
 
 
 /* ----------------------------------------------------------------------------------------------------------------------------- */
@@ -58,15 +56,6 @@ INSERT INTO upload_setting_file_extension (upload_setting_file_extension_id, upl
 (12, 2, 'Internal Notes Attachment', 94, 'XLSX', 'xlsx', 1),
 (13, 2, 'Internal Notes Attachment', 89, 'PPT', 'ppt', 1),
 (14, 2, 'Internal Notes Attachment', 90, 'PPTX', 'pptx', 1),
-(15, 3, 'Employee Image', 62, 'JPEG', 'jpeg', 2),
-(16, 3, 'Employee Image', 61, 'JPG', 'jpg', 2),
-(17, 3, 'Employee Image', 63, 'PNG', 'png', 2),
-(19, 4, 'Employee ID Record', 62, 'JPEG', 'jpeg', 2),
-(20, 4, 'Employee ID Record', 61, 'JPG', 'jpg', 2),
-(21, 4, 'Employee ID Record', 63, 'PNG', 'png', 2),
-(22, 5, 'Website Elements Images', 62, 'JPEG', 'jpeg', 2),
-(23, 5, 'Website Elements Images', 61, 'JPG', 'jpg', 2),
-(24, 5, 'Website Elements Images', 63, 'PNG', 'png', 2),
-(25, 5, 'Website Elements Images', 66, 'SVG', 'svg', 2);
+(15, 3, 'Import File', 25, 'CSV', 'csv', 1);
 
 /* ----------------------------------------------------------------------------------------------------------------------------- */

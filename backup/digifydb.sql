@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 03, 2024 at 11:35 AM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- Generation Time: Oct 03, 2024 at 03:42 PM
+-- Server version: 10.4.28-MariaDB
+-- PHP Version: 8.2.4
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -651,7 +651,13 @@ INSERT INTO `audit_log` (`audit_log_id`, `table_name`, `reference_id`, `log`, `c
 (72, 'app_module', 2, 'App module created.', 1, '2024-10-03 17:09:42', '2024-10-03 17:09:42'),
 (73, 'app_module', 3, 'App module created.', 2, '2024-10-03 17:09:42', '2024-10-03 17:09:42'),
 (74, 'app_module', 5, 'App module created.', 1, '2024-10-03 17:09:42', '2024-10-03 17:09:42'),
-(75, 'app_module', 5, 'App module changed.<br/><br/>App Module Name: CRM -> CRMS<br/>', 1, '2024-10-03 17:34:28', '2024-10-03 17:34:28');
+(75, 'app_module', 5, 'App module changed.<br/><br/>App Module Name: CRM -> CRMS<br/>', 1, '2024-10-03 17:34:28', '2024-10-03 17:34:28'),
+(76, 'user_account', 2, 'User account changed.<br/>', 2, '2024-10-03 19:43:33', '2024-10-03 19:43:33'),
+(77, 'user_account', 2, 'User account changed.<br/>', 2, '2024-10-03 19:43:33', '2024-10-03 19:43:33'),
+(78, 'user_account', 2, 'User account changed.<br/>Last Connection Date: 2024-10-02 20:50:25 -> 2024-10-03 19:44:00<br/>', 2, '2024-10-03 19:44:00', '2024-10-03 19:44:00'),
+(79, 'app_module', 23, 'App module created.', 2, '2024-10-03 19:50:29', '2024-10-03 19:50:29'),
+(80, 'app_module', 23, 'App module changed.<br/><br/>App Module Name: Test -> Testt<br/>App Module Description: Test -> Testt<br/>Menu Item: App Module -> General Settings<br/>', 2, '2024-10-03 19:51:56', '2024-10-03 19:51:56'),
+(81, 'app_module', 23, 'App module changed.<br/><br/>Order Sequence: 3 -> 5<br/>', 2, '2024-10-03 19:52:22', '2024-10-03 19:52:22');
 
 -- --------------------------------------------------------
 
@@ -1443,11 +1449,47 @@ CREATE TABLE `upload_setting` (
 --
 
 INSERT INTO `upload_setting` (`upload_setting_id`, `upload_setting_name`, `upload_setting_description`, `max_file_size`, `created_date`, `last_log_by`) VALUES
-(1, 'App Logo', 'Sets the upload setting when uploading app logo.', 800, '2024-10-02 10:35:33', 1),
-(2, 'Internal Notes Attachment', 'Sets the upload setting when uploading internal notes attachement.', 800, '2024-10-02 10:35:33', 1),
-(3, 'Employee Image', 'Sets the upload setting when uploading employee image.', 800, '2024-10-02 10:35:33', 2),
-(4, 'Employee ID Record', 'Sets the upload setting when uploading employee ID record.', 800, '2024-10-02 10:35:33', 2),
-(5, 'Website Elements Images', 'Sets the upload setting when uploading website elements image.', 500, '2024-10-02 10:35:33', 2);
+(1, 'App Logo', 'Sets the upload setting when uploading app logo.', 800, '2024-10-03 21:14:53', 1),
+(2, 'Internal Notes Attachment', 'Sets the upload setting when uploading internal notes attachement.', 800, '2024-10-03 21:14:53', 1),
+(3, 'Import File', 'Sets the upload setting when importing data.', 800, '2024-10-03 21:14:53', 2);
+
+--
+-- Triggers `upload_setting`
+--
+DROP TRIGGER IF EXISTS `upload_setting_trigger_insert`;
+DELIMITER $$
+CREATE TRIGGER `upload_setting_trigger_insert` AFTER INSERT ON `upload_setting` FOR EACH ROW BEGIN
+    DECLARE audit_log TEXT DEFAULT 'Upload Setting created.';
+
+    INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
+    VALUES ('upload_setting', NEW.upload_setting_id, audit_log, NEW.last_log_by, NOW());
+END
+$$
+DELIMITER ;
+DROP TRIGGER IF EXISTS `upload_setting_trigger_update`;
+DELIMITER $$
+CREATE TRIGGER `upload_setting_trigger_update` AFTER UPDATE ON `upload_setting` FOR EACH ROW BEGIN
+    DECLARE audit_log TEXT DEFAULT 'Upload setting changed.<br/><br/>';
+
+    IF NEW.upload_setting_name <> OLD.upload_setting_name THEN
+        SET audit_log = CONCAT(audit_log, "Upload Setting Name: ", OLD.upload_setting_name, " -> ", NEW.upload_setting_name, "<br/>");
+    END IF;
+
+    IF NEW.upload_setting_description <> OLD.upload_setting_description THEN
+        SET audit_log = CONCAT(audit_log, "Upload Setting Description: ", OLD.upload_setting_description, " -> ", NEW.upload_setting_description, "<br/>");
+    END IF;
+
+    IF NEW.max_file_size <> OLD.max_file_size THEN
+        SET audit_log = CONCAT(audit_log, "Max File Size: ", OLD.max_file_size, " -> ", NEW.max_file_size, "<br/>");
+    END IF;
+    
+    IF audit_log <> 'Upload setting changed.<br/><br/>' THEN
+        INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
+        VALUES ('upload_setting', NEW.upload_setting_id, audit_log, NEW.last_log_by, NOW());
+    END IF;
+END
+$$
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -1473,30 +1515,35 @@ CREATE TABLE `upload_setting_file_extension` (
 --
 
 INSERT INTO `upload_setting_file_extension` (`upload_setting_file_extension_id`, `upload_setting_id`, `upload_setting_name`, `file_extension_id`, `file_extension_name`, `file_extension`, `date_assigned`, `created_date`, `last_log_by`) VALUES
-(1, 1, 'App Logo', 63, 'PNG', 'png', '2024-10-02 10:35:33', '2024-10-02 10:35:33', 1),
-(2, 1, 'App Logo', 61, 'JPG', 'jpg', '2024-10-02 10:35:33', '2024-10-02 10:35:33', 1),
-(3, 1, 'App Logo', 62, 'JPEG', 'jpeg', '2024-10-02 10:35:33', '2024-10-02 10:35:33', 1),
-(4, 2, 'Internal Notes Attachment', 63, 'PNG', 'png', '2024-10-02 10:35:33', '2024-10-02 10:35:33', 1),
-(5, 2, 'Internal Notes Attachment', 61, 'JPG', 'jpg', '2024-10-02 10:35:33', '2024-10-02 10:35:33', 1),
-(6, 2, 'Internal Notes Attachment', 62, 'JPEG', 'jpeg', '2024-10-02 10:35:33', '2024-10-02 10:35:33', 1),
-(7, 2, 'Internal Notes Attachment', 127, 'PDF', 'pdf', '2024-10-02 10:35:33', '2024-10-02 10:35:33', 1),
-(8, 2, 'Internal Notes Attachment', 125, 'DOC', 'doc', '2024-10-02 10:35:33', '2024-10-02 10:35:33', 1),
-(9, 2, 'Internal Notes Attachment', 125, 'DOCX', 'docx', '2024-10-02 10:35:33', '2024-10-02 10:35:33', 1),
-(10, 2, 'Internal Notes Attachment', 130, 'TXT', 'txt', '2024-10-02 10:35:33', '2024-10-02 10:35:33', 1),
-(11, 2, 'Internal Notes Attachment', 92, 'XLS', 'xls', '2024-10-02 10:35:33', '2024-10-02 10:35:33', 1),
-(12, 2, 'Internal Notes Attachment', 94, 'XLSX', 'xlsx', '2024-10-02 10:35:33', '2024-10-02 10:35:33', 1),
-(13, 2, 'Internal Notes Attachment', 89, 'PPT', 'ppt', '2024-10-02 10:35:33', '2024-10-02 10:35:33', 1),
-(14, 2, 'Internal Notes Attachment', 90, 'PPTX', 'pptx', '2024-10-02 10:35:33', '2024-10-02 10:35:33', 1),
-(15, 3, 'Employee Image', 62, 'JPEG', 'jpeg', '2024-10-02 10:35:33', '2024-10-02 10:35:33', 2),
-(16, 3, 'Employee Image', 61, 'JPG', 'jpg', '2024-10-02 10:35:33', '2024-10-02 10:35:33', 2),
-(17, 3, 'Employee Image', 63, 'PNG', 'png', '2024-10-02 10:35:33', '2024-10-02 10:35:33', 2),
-(19, 4, 'Employee ID Record', 62, 'JPEG', 'jpeg', '2024-10-02 10:35:33', '2024-10-02 10:35:33', 2),
-(20, 4, 'Employee ID Record', 61, 'JPG', 'jpg', '2024-10-02 10:35:33', '2024-10-02 10:35:33', 2),
-(21, 4, 'Employee ID Record', 63, 'PNG', 'png', '2024-10-02 10:35:33', '2024-10-02 10:35:33', 2),
-(22, 5, 'Website Elements Images', 62, 'JPEG', 'jpeg', '2024-10-02 10:35:33', '2024-10-02 10:35:33', 2),
-(23, 5, 'Website Elements Images', 61, 'JPG', 'jpg', '2024-10-02 10:35:33', '2024-10-02 10:35:33', 2),
-(24, 5, 'Website Elements Images', 63, 'PNG', 'png', '2024-10-02 10:35:33', '2024-10-02 10:35:33', 2),
-(25, 5, 'Website Elements Images', 66, 'SVG', 'svg', '2024-10-02 10:35:33', '2024-10-02 10:35:33', 2);
+(1, 1, 'App Logo', 63, 'PNG', 'png', '2024-10-03 21:14:53', '2024-10-03 21:14:53', 1),
+(2, 1, 'App Logo', 61, 'JPG', 'jpg', '2024-10-03 21:14:53', '2024-10-03 21:14:53', 1),
+(3, 1, 'App Logo', 62, 'JPEG', 'jpeg', '2024-10-03 21:14:53', '2024-10-03 21:14:53', 1),
+(4, 2, 'Internal Notes Attachment', 63, 'PNG', 'png', '2024-10-03 21:14:53', '2024-10-03 21:14:53', 1),
+(5, 2, 'Internal Notes Attachment', 61, 'JPG', 'jpg', '2024-10-03 21:14:53', '2024-10-03 21:14:53', 1),
+(6, 2, 'Internal Notes Attachment', 62, 'JPEG', 'jpeg', '2024-10-03 21:14:53', '2024-10-03 21:14:53', 1),
+(7, 2, 'Internal Notes Attachment', 127, 'PDF', 'pdf', '2024-10-03 21:14:53', '2024-10-03 21:14:53', 1),
+(8, 2, 'Internal Notes Attachment', 125, 'DOC', 'doc', '2024-10-03 21:14:53', '2024-10-03 21:14:53', 1),
+(9, 2, 'Internal Notes Attachment', 125, 'DOCX', 'docx', '2024-10-03 21:14:53', '2024-10-03 21:14:53', 1),
+(10, 2, 'Internal Notes Attachment', 130, 'TXT', 'txt', '2024-10-03 21:14:53', '2024-10-03 21:14:53', 1),
+(11, 2, 'Internal Notes Attachment', 92, 'XLS', 'xls', '2024-10-03 21:14:53', '2024-10-03 21:14:53', 1),
+(12, 2, 'Internal Notes Attachment', 94, 'XLSX', 'xlsx', '2024-10-03 21:14:53', '2024-10-03 21:14:53', 1),
+(13, 2, 'Internal Notes Attachment', 89, 'PPT', 'ppt', '2024-10-03 21:14:53', '2024-10-03 21:14:53', 1),
+(14, 2, 'Internal Notes Attachment', 90, 'PPTX', 'pptx', '2024-10-03 21:14:53', '2024-10-03 21:14:53', 1),
+(15, 3, 'Import File', 25, 'CSV', 'csv', '2024-10-03 21:14:53', '2024-10-03 21:14:53', 1);
+
+--
+-- Triggers `upload_setting_file_extension`
+--
+DROP TRIGGER IF EXISTS `upload_setting_file_extension_trigger_insert`;
+DELIMITER $$
+CREATE TRIGGER `upload_setting_file_extension_trigger_insert` AFTER INSERT ON `upload_setting_file_extension` FOR EACH ROW BEGIN
+    DECLARE audit_log TEXT DEFAULT 'Upload Setting File Extension created.';
+
+    INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
+    VALUES ('upload_setting_file_extension', NEW.upload_setting_file_extension_id, audit_log, NEW.last_log_by, NOW());
+END
+$$
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -1541,7 +1588,7 @@ CREATE TABLE `user_account` (
 
 INSERT INTO `user_account` (`user_account_id`, `file_as`, `email`, `username`, `password`, `profile_picture`, `locked`, `active`, `last_failed_login_attempt`, `failed_login_attempts`, `last_connection_date`, `password_expiry_date`, `reset_token`, `reset_token_expiry_date`, `receive_notification`, `two_factor_auth`, `otp`, `otp_expiry_date`, `failed_otp_attempts`, `last_password_change`, `account_lock_duration`, `last_password_reset`, `multiple_session`, `session_token`, `linked_id`, `created_date`, `last_log_by`) VALUES
 (1, 'Digify Bot', 'digifybot@gmail.com', 'digifybot', 'Lu%2Be%2BRZfTv%2F3T0GR%2Fwes8QPJvE3Etx1p7tmryi74LNk%3D', NULL, 'WkgqlkcpSeEd7eWC8gl3iPwksfGbJYGy3VcisSyDeQ0', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20', NULL, NULL, NULL, 'aUIRg2jhRcYVcr0%2BiRDl98xjv81aR4Ux63bP%2BF2hQbE%3D', NULL, NULL, 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'WkgqlkcpSeEd7eWC8gl3iPwksfGbJYGy3VcisSyDeQ0', NULL, NULL, NULL, NULL, NULL, NULL, 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', NULL, NULL, '2024-09-27 11:49:59', 1),
-(2, 'Administrator', 'lawrenceagulto.317@gmail.com', 'ldagulto', 'ZW2SGXn0B41ZvY7Nl92uFaBW1LRhTxwaem5sgn8clRE%3D', NULL, '9lZtEofygdjMs3EsZV1V38KQF%2FPjp7btRHLFnck7DpM%3D', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20', '0000-00-00 00:00:00', '', '2024-10-02 20:50:25', 'j3TPQ%2FkOvrVcj0dMsNNs%2BicQ3gQo7W812x4%2BN2Q72oM%3D', 'wWt3OtHh0FKAhB31glK%2FdLfDTWMQdhqvZ%2FtRgmWl8EU%3D', 'P4tR005eyn3kNWp4tUtAQ17HIhZPD2zHiMAUfRmlAiAM6qi4fe8MjMopfWWK3xk9', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', '11ZKk3t5yoAGSwZn0DGC%2FnVktaorQCiGxBXSElwgb9Q%3D', 'TdBEPsyVPnkauNTuNOb8sltBiHd6h2n1HqqfQcFt2e6MCP8ijBl2pi4jsiG2ZZzT', '', '2024-09-27 12:27:47', '', NULL, 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'J0%2F5zQP8UmUJRWmQFpxRjGSPGdxil%2BuO%2FcCiwRJb78A%3D', NULL, '2024-09-27 11:49:59', 2);
+(2, 'Administrator', 'lawrenceagulto.317@gmail.com', 'ldagulto', 'ZW2SGXn0B41ZvY7Nl92uFaBW1LRhTxwaem5sgn8clRE%3D', NULL, '9lZtEofygdjMs3EsZV1V38KQF%2FPjp7btRHLFnck7DpM%3D', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20', '0000-00-00 00:00:00', '', '2024-10-03 19:44:00', 'j3TPQ%2FkOvrVcj0dMsNNs%2BicQ3gQo7W812x4%2BN2Q72oM%3D', 'wWt3OtHh0FKAhB31glK%2FdLfDTWMQdhqvZ%2FtRgmWl8EU%3D', 'P4tR005eyn3kNWp4tUtAQ17HIhZPD2zHiMAUfRmlAiAM6qi4fe8MjMopfWWK3xk9', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', '9BnsNo9%2BhLL19KW04Mu5j0Cu2eD8VLSRDsyxbhNi4c8%3D', 'ZT7lRPifz80Ghy%2BqYTW1yYS0o%2BjA%2BV0%2Blil7yCGAAyvoakf1RD4RQoigJ4SXwzLC', '', '2024-09-27 12:27:47', '', NULL, 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'PhtrymNd7dd4peJML0axMuv7ovuIJYrQYOCYTGRFrPc%3D', NULL, '2024-09-27 11:49:59', 2);
 
 --
 -- Triggers `user_account`
@@ -1798,13 +1845,13 @@ ALTER TABLE `user_account`
 -- AUTO_INCREMENT for table `app_module`
 --
 ALTER TABLE `app_module`
-  MODIFY `app_module_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `app_module_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT for table `audit_log`
 --
 ALTER TABLE `audit_log`
-  MODIFY `audit_log_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=76;
+  MODIFY `audit_log_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=82;
 
 --
 -- AUTO_INCREMENT for table `email_setting`
@@ -1906,13 +1953,13 @@ ALTER TABLE `system_action`
 -- AUTO_INCREMENT for table `upload_setting`
 --
 ALTER TABLE `upload_setting`
-  MODIFY `upload_setting_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `upload_setting_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `upload_setting_file_extension`
 --
 ALTER TABLE `upload_setting_file_extension`
-  MODIFY `upload_setting_file_extension_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+  MODIFY `upload_setting_file_extension_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `user_account`

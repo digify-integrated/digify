@@ -7,21 +7,24 @@ require_once '../../components/model/security-model.php';
 require_once '../../components/model/system-model.php';
 require_once '../../components/model/import-model.php';
 require_once '../../apps/security/authentication/model/authentication-model.php';
+require_once '../../apps/security/upload-setting/model/upload-setting-model.php';
 
-$controller = new ImportController(new ImportModel(new DatabaseModel), new AuthenticationModel(new DatabaseModel, new SecurityModel), new SecurityModel(), new SystemModel());
+$controller = new ImportController(new ImportModel(new DatabaseModel), new AuthenticationModel(new DatabaseModel, new SecurityModel), new UploadSettingModel(new DatabaseModel), new SecurityModel(), new SystemModel());
 $controller->handleRequest();
 
 # -------------------------------------------------------------
 class ImportController {
     private $importModel;
     private $authenticationModel;
+    private $uploadSettingModel;
     private $securityModel;
     private $systemModel;
 
     # -------------------------------------------------------------
-    public function __construct(ImportModel $importModel, AuthenticationModel $authenticationModel, SecurityModel $securityModel, SystemModel $systemModel) {
+    public function __construct(ImportModel $importModel, AuthenticationModel $authenticationModel, UploadSettingModel $uploadSettingModel, SecurityModel $securityModel, SystemModel $systemModel) {
         $this->importModel = $importModel;
         $this->authenticationModel = $authenticationModel;
+        $this->uploadSettingModel = $uploadSettingModel;
         $this->securityModel = $securityModel;
         $this->systemModel = $systemModel;
     }
@@ -129,14 +132,48 @@ class ImportController {
         }
     
         if (isset($_FILES['import_file']) && $_FILES['import_file']['error'] === 0) {
-            $fileExtension = pathinfo($_FILES['import_file']['name'], PATHINFO_EXTENSION);
-    
-            if (strtolower($fileExtension) !== 'csv') {
-                echo json_encode(['error' => 'Please upload a valid CSV file.']);
-                return;
+            $importFileName = $_FILES['import_file']['name'];
+            $importFileSize = $_FILES['import_file']['size'];
+            $importFileError = $_FILES['import_file']['error'];
+            $importTempName = $_FILES['import_file']['tmp_name'];
+            $importFileExtension = explode('.', $importFileName);
+            $importActualFileExtension = strtolower(end($importFileExtension));
+
+            $uploadSetting = $this->uploadSettingModel->getUploadSetting(3);
+            $maxFileSize = $uploadSetting['max_file_size'];
+
+            $uploadSettingFileExtension = $this->uploadSettingModel->getUploadSettingFileExtension(3);
+            $allowedFileExtensions = [];
+
+            foreach ($uploadSettingFileExtension as $row) {
+                $allowedFileExtensions[] = $row['file_extension'];
+            }
+
+            if (!in_array($importActualFileExtension, $allowedFileExtensions)) {
+                $response = [
+                    'success' => false,
+                    'title' => 'Upload File',
+                    'message' => 'The file uploaded is not supported.',
+                    'messageType' => 'error'
+                ];
+                    
+                echo json_encode($response);
+                exit;
+            }
+
+            if($importFileSize > ($maxFileSize * 1024)){
+                $response = [
+                    'success' => false,
+                    'title' => 'Upload File',
+                    'message' => 'The file exceeds the maximum allowed size of ' . number_format($maxFileSize) . ' kb.',
+                    'messageType' => 'error'
+                ];
+                    
+                echo json_encode($response);
+                exit;
             }
     
-            $file = fopen($_FILES['import_file']['tmp_name'], 'r');
+            $file = fopen($importTempName, 'r');
     
             if ($file !== false) {
                 $headers = fgetcsv($file);
@@ -203,14 +240,49 @@ class ImportController {
     
         if (isset($_FILES['import_file']) && $_FILES['import_file']['error'] === 0) {
             $importTableName = filter_input(INPUT_POST, 'import_table_name', FILTER_SANITIZE_STRING);
-            $fileExtension = pathinfo($_FILES['import_file']['name'], PATHINFO_EXTENSION);
-    
-            if (strtolower($fileExtension) !== 'csv') {
-                echo json_encode(['error' => 'Please upload a valid CSV file.']);
-                return;
+           
+            $importFileName = $_FILES['import_file']['name'];
+            $importFileSize = $_FILES['import_file']['size'];
+            $importFileError = $_FILES['import_file']['error'];
+            $importTempName = $_FILES['import_file']['tmp_name'];
+            $importFileExtension = explode('.', $importFileName);
+            $importActualFileExtension = strtolower(end($importFileExtension));
+
+            $uploadSetting = $this->uploadSettingModel->getUploadSetting(3);
+            $maxFileSize = $uploadSetting['max_file_size'];
+
+            $uploadSettingFileExtension = $this->uploadSettingModel->getUploadSettingFileExtension(3);
+            $allowedFileExtensions = [];
+
+            foreach ($uploadSettingFileExtension as $row) {
+                $allowedFileExtensions[] = $row['file_extension'];
+            }
+
+            if (!in_array($importActualFileExtension, $allowedFileExtensions)) {
+                $response = [
+                    'success' => false,
+                    'title' => 'Import Data',
+                    'message' => 'The file uploaded is not supported.',
+                    'messageType' => 'error'
+                ];
+                    
+                echo json_encode($response);
+                exit;
+            }
+
+            if($importFileSize > ($maxFileSize * 1024)){
+                $response = [
+                    'success' => false,
+                    'title' => 'Import Data',
+                    'message' => 'The file exceeds the maximum allowed size of ' . number_format($maxFileSize) . ' kb.',
+                    'messageType' => 'error'
+                ];
+                    
+                echo json_encode($response);
+                exit;
             }
     
-            $file = fopen($_FILES['import_file']['tmp_name'], 'r');
+            $file = fopen($importTempName, 'r');
     
             if ($file !== false) {
                 $headers = fgetcsv($file);
