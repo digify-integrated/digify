@@ -47,3 +47,23 @@ BEGIN
     EXECUTE stmt;
     DEALLOCATE PREPARE stmt;
 END //
+
+DROP PROCEDURE IF EXISTS saveImport //
+CREATE PROCEDURE saveImport(
+    IN p_table_name VARCHAR(255),
+    IN p_columns TEXT,
+    IN p_placeholders TEXT,
+    IN p_updateFields TEXT,
+    IN p_values TEXT
+)
+BEGIN
+    SET @sql = CONCAT(
+        'INSERT INTO ', p_table_name, ' (', p_columns, ') ',
+        'VALUES ', p_values, ' ',
+        'ON DUPLICATE KEY UPDATE ', p_updateFields
+    );
+
+    PREPARE stmt FROM @sql;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+END //

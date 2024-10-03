@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 02, 2024 at 04:36 PM
--- Server version: 10.4.28-MariaDB
--- PHP Version: 8.2.4
+-- Generation Time: Oct 03, 2024 at 11:35 AM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -302,6 +302,19 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `saveAppModule` (IN `p_app_module_id
     COMMIT;
 END$$
 
+DROP PROCEDURE IF EXISTS `saveImport`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `saveImport` (IN `p_table_name` VARCHAR(255), IN `p_columns` TEXT, IN `p_placeholders` TEXT, IN `p_updateFields` TEXT, IN `p_values` TEXT)   BEGIN
+    SET @sql = CONCAT(
+        'INSERT INTO ', p_table_name, ' (', p_columns, ') ',
+        'VALUES ', p_values, ' ',
+        'ON DUPLICATE KEY UPDATE ', p_updateFields
+    );
+
+    PREPARE stmt FROM @sql;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+END$$
+
 DROP PROCEDURE IF EXISTS `updateAccountLock`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `updateAccountLock` (IN `p_user_account_id` INT, IN `p_locked` VARCHAR(255), IN `p_account_lock_duration` VARCHAR(255))   BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
@@ -495,11 +508,10 @@ CREATE TABLE `app_module` (
 --
 
 INSERT INTO `app_module` (`app_module_id`, `app_module_name`, `app_module_description`, `app_logo`, `menu_item_id`, `menu_item_name`, `order_sequence`, `created_date`, `last_log_by`) VALUES
-(1, 'Settings', 'Centralized management hub for comprehensive organizational oversight and control.', './apps/security/app-module/image/logo/1/setting.png', 1, 'App Module', 100, '2024-09-27 16:14:50', 2),
-(2, 'Employees', 'Centralize employee information', './apps/security/app-module/image/logo/2/kwDc.png', 23, 'Inventory Overview', 1, '2024-09-27 16:14:50', 1),
-(3, 'Customer', 'Bring all your customer information into one easy-to-access location', './apps/security/app-module/image/logo/3/rL4r.png', 1, 'App Module', 3, '2024-09-27 16:14:50', 2),
-(4, 'Website Studio', 'Create and customize your website', './apps/security/app-module/image/logo/4/TnX0.png', 54, 'Websites', 1, '2024-09-27 16:14:50', 1),
-(5, 'CRM', 'Track leads and close opportunities', './apps/security/app-module/image/logo/5/CxLn.png', 73, 'My Bookings', 3, '2024-09-27 16:14:50', 1);
+(1, 'Settings', 'Centralized management hub for comprehensive organizational oversight and control.', './apps/security/app-module/image/logo/1/setting.png', 1, 'App Module', 100, '0000-00-00 00:00:00', 2),
+(2, 'Employees', 'Centralize employee information', './apps/security/app-module/image/logo/2/kwDc.png', 23, 'Inventory Overview', 1, '0000-00-00 00:00:00', 1),
+(3, 'Customer', 'Bring all your customer information into one easy-to-access location', './apps/security/app-module/image/logo/3/rL4r.png', 1, 'App Module', 3, '0000-00-00 00:00:00', 2),
+(5, 'CRMS', 'Track leads and close opportunities', './apps/security/app-module/image/logo/5/CxLn.png', 73, 'My Bookings', 3, '0000-00-00 00:00:00', 1);
 
 --
 -- Triggers `app_module`
@@ -624,7 +636,22 @@ INSERT INTO `audit_log` (`audit_log_id`, `table_name`, `reference_id`, `log`, `c
 (57, 'user_account', 2, 'User account changed.<br/>', 2, '2024-10-02 20:49:59', '2024-10-02 20:49:59'),
 (58, 'user_account', 2, 'User account changed.<br/>', 2, '2024-10-02 20:49:59', '2024-10-02 20:49:59'),
 (59, 'user_account', 2, 'User account changed.<br/>Last Connection Date: 2024-10-02 08:56:13 -> 2024-10-02 20:50:25<br/>', 2, '2024-10-02 20:50:25', '2024-10-02 20:50:25'),
-(60, 'app_module', 3, 'App module changed.<br/><br/>Menu Item: Customer -> App Module<br/>', 2, '2024-10-02 22:33:36', '2024-10-02 22:33:36');
+(60, 'app_module', 3, 'App module changed.<br/><br/>Menu Item: Customer -> App Module<br/>', 2, '2024-10-02 22:33:36', '2024-10-02 22:33:36'),
+(61, 'app_module', 13, 'App module created.', 1, '2024-10-03 16:59:47', '2024-10-03 16:59:47'),
+(62, 'app_module', 14, 'App module created.', 1, '2024-10-03 16:59:47', '2024-10-03 16:59:47'),
+(63, 'app_module', 15, 'App module created.', 1, '2024-10-03 16:59:47', '2024-10-03 16:59:47'),
+(64, 'app_module', 16, 'App module created.', 1, '2024-10-03 16:59:47', '2024-10-03 16:59:47'),
+(65, 'app_module', 17, 'App module created.', 1, '2024-10-03 16:59:47', '2024-10-03 16:59:47'),
+(66, 'app_module', 18, 'App module created.', 1, '2024-10-03 16:59:54', '2024-10-03 16:59:54'),
+(67, 'app_module', 19, 'App module created.', 1, '2024-10-03 16:59:54', '2024-10-03 16:59:54'),
+(68, 'app_module', 20, 'App module created.', 1, '2024-10-03 16:59:54', '2024-10-03 16:59:54'),
+(69, 'app_module', 21, 'App module created.', 1, '2024-10-03 16:59:54', '2024-10-03 16:59:54'),
+(70, 'app_module', 22, 'App module created.', 1, '2024-10-03 16:59:54', '2024-10-03 16:59:54'),
+(71, 'app_module', 1, 'App module created.', 2, '2024-10-03 17:09:42', '2024-10-03 17:09:42'),
+(72, 'app_module', 2, 'App module created.', 1, '2024-10-03 17:09:42', '2024-10-03 17:09:42'),
+(73, 'app_module', 3, 'App module created.', 2, '2024-10-03 17:09:42', '2024-10-03 17:09:42'),
+(74, 'app_module', 5, 'App module created.', 1, '2024-10-03 17:09:42', '2024-10-03 17:09:42'),
+(75, 'app_module', 5, 'App module changed.<br/><br/>App Module Name: CRM -> CRMS<br/>', 1, '2024-10-03 17:34:28', '2024-10-03 17:34:28');
 
 -- --------------------------------------------------------
 
@@ -1771,13 +1798,13 @@ ALTER TABLE `user_account`
 -- AUTO_INCREMENT for table `app_module`
 --
 ALTER TABLE `app_module`
-  MODIFY `app_module_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `app_module_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT for table `audit_log`
 --
 ALTER TABLE `audit_log`
-  MODIFY `audit_log_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=61;
+  MODIFY `audit_log_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=76;
 
 --
 -- AUTO_INCREMENT for table `email_setting`

@@ -35,8 +35,12 @@
         $detailID = null;
     }
 
+    $importTableName = '';
     if(isset($_GET['import']) && empty($_GET['import'])){
         header('location:' . $pageLink);
+    }
+    else if(isset($_GET['import']) && !empty($_GET['import'])){
+        $importTableName = $securityModel->decryptData($_GET['import']);
     }
     
     $newRecord = isset($_GET['new']);

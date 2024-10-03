@@ -213,4 +213,3 @@ function appModuleTable(datatable_name) {
     destroyDatatable(datatable_name);
     $(datatable_name).dataTable(settings);
 }
-
