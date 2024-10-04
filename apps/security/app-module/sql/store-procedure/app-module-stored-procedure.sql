@@ -138,4 +138,12 @@ BEGIN
     ORDER BY app_module_id;
 END //
 
+DROP PROCEDURE IF EXISTS generateAppModuleOptions//
+CREATE PROCEDURE generateAppModuleOptions()
+BEGIN
+	SELECT app_module_id, app_module_name 
+    FROM app_module 
+    ORDER BY app_module_name;
+END //
+
 /* ----------------------------------------------------------------------------------------------------------------------------- */

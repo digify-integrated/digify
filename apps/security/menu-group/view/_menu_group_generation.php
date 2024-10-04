@@ -5,6 +5,7 @@ require('../../../../components/model/database-model.php');
 require('../../../../components/model/system-model.php');
 require('../../../../components/model/security-model.php');
 require('../../../../apps/security/authentication/model/authentication-model.php');
+require('../../../../apps/security/app-module/model/app-module-model.php');
 
 $databaseModel = new DatabaseModel();
 $systemModel = new SystemModel();
@@ -19,42 +20,31 @@ if(isset($_POST['type']) && !empty($_POST['type'])){
     
     switch ($type) {
         # -------------------------------------------------------------
-        case 'app module table':
-            $sql = $databaseModel->getConnection()->prepare('CALL generateAppModuleTable()');
+        case 'menu group table':
+            $filterAppModule = isset($_POST['app_module_filter']) && is_array($_POST['app_module_filter']) 
+            ? "'" . implode("','", array_map('trim', $_POST['app_module_filter'])) . "'" 
+            : null;
+
+            $sql = $databaseModel->getConnection()->prepare('CALL generateMenuGroupTable(:filterAppModule)');
+            $sql->bindValue(':filterAppModule', $filterAppModule, PDO::PARAM_STR);
             $sql->execute();
             $options = $sql->fetchAll(PDO::FETCH_ASSOC);
             $sql->closeCursor();
 
-            $appModuleDeleteAccess = $authenticationModel->checkAccessRights($userID, $pageID, 'delete');
-
             foreach ($options as $row) {
-                $appModuleID = $row['menu_group_id'];
-                $appModuleName = $row['menu_group_name'];
-                $appModuleDescription = $row['menu_group_description'];
+                $menuGroupID = $row['menu_group_id'];
+                $menuGroupName = $row['menu_group_name'];
+                $appModuleName = $row['app_module_name'];
                 $orderSequence = $row['order_sequence'];
-                $appLogo = $systemModel->checkImage(str_replace('../', './apps/', $row['app_logo'])  ?? null, 'app module logo');
 
-                $appModuleIDEncrypted = $securityModel->encryptData($appModuleID);
-
-                $deleteButton = '';
-                if($appModuleDeleteAccess['total'] > 0){
-                    $deleteButton = '<a href="javascript:void(0);" class="text-danger ms-3 delete-menu-group" data-menu-group-id="' . $appModuleID . '" title="Delete Menu Group">
-                                    <i class="ti ti-trash fs-5"></i>
-                                </a>';
-                }
+                $menuGroupIDEncrypted = $securityModel->encryptData($menuGroupID);
 
                 $response[] = [
-                    'CHECK_BOX' => '<input class="form-check-input datatable-checkbox-children" type="checkbox" value="'. $appModuleID .'">',
-                    'APP_MODULE_NAME' => '<div class="d-flex align-items-center">
-                                            <img src="'. $appLogo .'" alt="app-logo" width="45" />
-                                            <div class="ms-3">
-                                                <div class="user-meta-info">
-                                                    <h6 class="mb-0">'. $appModuleName .'</h6>
-                                                    <small class="text-wrap">'. $appModuleDescription .'</small>
-                                                </div>
-                                            </div>
-                                        </div>',
-                    'LINK' => $pageLink .'&id='. $appModuleIDEncrypted
+                    'CHECK_BOX' => '<input class="form-check-input datatable-checkbox-children" type="checkbox" value="'. $menuGroupID .'">',
+                    'MENU_GROUP_NAME' => $menuGroupName,
+                    'APP_MODULE_NAME' => $appModuleName,
+                    'ORDER_SEQUENCE' => $orderSequence,
+                    'LINK' => $pageLink .'&id='. $menuGroupIDEncrypted
                 ];
             }
 
@@ -63,16 +53,20 @@ if(isset($_POST['type']) && !empty($_POST['type'])){
         # -------------------------------------------------------------
 
         # -------------------------------------------------------------
-        case 'app module options':
-            $sql = $databaseModel->getConnection()->prepare('CALL generateAppModuleOptions()');
+        case 'menu group options':
+            $multiple = (isset($_POST['multiple'])) ? filter_input(INPUT_POST, 'multiple', FILTER_VALIDATE_INT) : false;
+
+            $sql = $databaseModel->getConnection()->prepare('CALL generateMenuGroupOptions()');
             $sql->execute();
             $options = $sql->fetchAll(PDO::FETCH_ASSOC);
             $sql->closeCursor();
 
-            $response[] = [
-                'id' => '',
-                'text' => '--'
-            ];
+            if(!$multiple){
+                $response[] = [
+                    'id' => '',
+                    'text' => '--'
+                ];
+            }
 
             foreach ($options as $row) {
                 $response[] = [
@@ -80,36 +74,6 @@ if(isset($_POST['type']) && !empty($_POST['type'])){
                     'text' => $row['menu_group_name']
                 ];
             }
-
-            echo json_encode($response);
-        break;
-        # -------------------------------------------------------------
-
-        # -------------------------------------------------------------
-        case 'app module radio filter':
-            $sql = $databaseModel->getConnection()->prepare('CALL generateAppModuleOptions()');
-            $sql->execute();
-            $options = $sql->fetchAll(PDO::FETCH_ASSOC);
-            $sql->closeCursor();
-
-            $filterOptions = '<div class="form-check py-2 mb-0">
-                            <input class="form-check-input p-2" type="radio" name="filter-menu-group" id="filter-menu-group-all" value="" checked>
-                            <label class="form-check-label d-flex align-items-center ps-2" for="filter-menu-group-all">All</label>
-                        </div>';
-
-            foreach ($options as $row) {
-                $appModuleID = $row['menu_group_id'];
-                $appModuleName = $row['menu_group_name'];
-
-                $filterOptions .= '<div class="form-check py-2 mb-0">
-                                <input class="form-check-input p-2" type="radio" name="filter-menu-group" id="filter-menu-group-'. $appModuleID .'" value="'. $appModuleID .'">
-                                <label class="form-check-label d-flex align-items-center ps-2" for="filter-menu-group-'. $appModuleID .'">'. $appModuleName .'</label>
-                            </div>';
-            }
-
-            $response[] = [
-                'filterOptions' => $filterOptions
-            ];
 
             echo json_encode($response);
         break;

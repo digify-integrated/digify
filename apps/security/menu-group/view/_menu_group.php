@@ -73,7 +73,7 @@
         <div class="border-bottom rounded-0">
             <h6 class="mt-4 mb-3 mx-4 fw-semibold">By App Module</h6>
             <div class="pb-4 px-4 text-dark" id="app-module-filter">
-                <select id="app_module_filter" name="app_module_filter" multiple="multiple" class="select2 form-control"></select>
+                <select id="app_module_filter" name="app_module_filter" multiple="multiple" class="form-control"></select>
             </div>
         </div>
         <div class="p-4">

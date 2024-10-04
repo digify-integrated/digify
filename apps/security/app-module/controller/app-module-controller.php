@@ -13,12 +13,6 @@ require_once '../../upload-setting/model/upload-setting-model.php';
 
 require_once '../../../../assets/libs/PhpSpreadsheet/autoload.php';
 
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use PhpOffice\PhpSpreadsheet\Shared\Date;
-use PhpOffice\PhpSpreadsheet\Calculation\Calculation;
-use PhpOffice\PhpSpreadsheet\Calculation\Category;
-
 $controller = new AppModuleController(new AppModuleModel(new DatabaseModel), new AuthenticationModel(new DatabaseModel, new SecurityModel), new MenuItemModel(new DatabaseModel), new UploadSettingModel(new DatabaseModel), new SecurityModel(), new SystemModel());
 $controller->handleRequest();
 
@@ -522,10 +516,9 @@ class AppModuleController {
             $exportTo = $_POST['export_to'];
             $exportIDs = $_POST['export_id']; 
             $tableColumns = $_POST['table_column'];
-            $tableName = 'app_module';
             
             if ($exportTo == 'csv') {
-                $filename = "app_modules_export_" . date('Y-m-d_H-i-s') . ".csv";
+                $filename = "app_module_export_" . date('Y-m-d_H-i-s') . ".csv";
             
                 header('Content-Type: text/csv');
                 header('Content-Disposition: attachment; filename="' . $filename . '"');
@@ -548,7 +541,7 @@ class AppModuleController {
             }
             else {
                 ob_start();
-                $filename = "app_modules_export_" . date('Y-m-d_H-i-s') . ".xlsx";
+                $filename = "app_module_export_" . date('Y-m-d_H-i-s') . ".xlsx";
 
                 $spreadsheet = new Spreadsheet();
                 $sheet = $spreadsheet->getActiveSheet();

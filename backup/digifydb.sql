@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 03, 2024 at 03:42 PM
--- Server version: 10.4.28-MariaDB
--- PHP Version: 8.2.4
+-- Generation Time: Oct 04, 2024 at 11:35 AM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -125,6 +125,13 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `checkLoginCredentialsExist` (IN `p_
        OR email = BINARY p_credentials;
 END$$
 
+DROP PROCEDURE IF EXISTS `checkMenuGroupExist`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `checkMenuGroupExist` (IN `p_menu_group_id` INT)   BEGIN
+	SELECT COUNT(*) AS total
+    FROM menu_group
+    WHERE menu_group_id = p_menu_group_id;
+END$$
+
 DROP PROCEDURE IF EXISTS `deleteAppModule`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `deleteAppModule` (IN `p_app_module_id` INT)   BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
@@ -135,6 +142,20 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `deleteAppModule` (IN `p_app_module_
     START TRANSACTION;
 
     DELETE FROM app_module WHERE app_module_id = p_app_module_id;
+
+    COMMIT;
+END$$
+
+DROP PROCEDURE IF EXISTS `deleteMenuGroup`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `deleteMenuGroup` (IN `p_menu_group_id` INT)   BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    DELETE FROM menu_group WHERE menu_group_id = p_menu_group_id;
 
     COMMIT;
 END$$
@@ -150,6 +171,13 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `exportData` (IN `p_table_name` VARC
     PREPARE stmt FROM @sql;
     EXECUTE stmt;
     DEALLOCATE PREPARE stmt;
+END$$
+
+DROP PROCEDURE IF EXISTS `generateAppModuleOptions`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `generateAppModuleOptions` ()   BEGIN
+	SELECT app_module_id, app_module_name 
+    FROM app_module 
+    ORDER BY app_module_name;
 END$$
 
 DROP PROCEDURE IF EXISTS `generateAppModuleTable`$$
@@ -182,6 +210,30 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `generateLogNotes` (IN `p_table_name
     FROM audit_log
     WHERE table_name = p_table_name AND reference_id  = p_reference_id
     ORDER BY changed_at DESC;
+END$$
+
+DROP PROCEDURE IF EXISTS `generateMenuGroupOptions`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `generateMenuGroupOptions` ()   BEGIN
+	SELECT menu_group_id, menu_group_name 
+    FROM menu_group 
+    ORDER BY menu_group_name;
+END$$
+
+DROP PROCEDURE IF EXISTS `generateMenuGroupTable`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `generateMenuGroupTable` (IN `p_filter_by_app_module` TEXT)   BEGIN
+    DECLARE query TEXT;
+
+    SET query = 'SELECT menu_group_id, menu_group_name, app_module_name, order_sequence FROM menu_group';
+
+    IF p_filter_by_app_module IS NOT NULL AND p_filter_by_app_module <> '' THEN
+        SET query = CONCAT(query, ' WHERE app_module_id IN (', p_filter_by_app_module, ')');
+    END IF;
+
+    SET query = CONCAT(query, ' ORDER BY menu_group_name');
+
+    PREPARE stmt FROM query;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
 END$$
 
 DROP PROCEDURE IF EXISTS `generateMenuItemOptions`$$
@@ -223,6 +275,12 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getLoginCredentials` (IN `p_user_ac
     WHERE user_account_id = p_user_account_id
        OR username = BINARY p_credentials
        OR email = BINARY p_credentials;
+END$$
+
+DROP PROCEDURE IF EXISTS `getMenuGroup`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getMenuGroup` (IN `p_menu_group_id` INT)   BEGIN
+	SELECT * FROM menu_group
+	WHERE menu_group_id = p_menu_group_id;
 END$$
 
 DROP PROCEDURE IF EXISTS `getMenuItem`$$
@@ -313,6 +371,42 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `saveImport` (IN `p_table_name` VARC
     PREPARE stmt FROM @sql;
     EXECUTE stmt;
     DEALLOCATE PREPARE stmt;
+END$$
+
+DROP PROCEDURE IF EXISTS `saveMenuGroup`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `saveMenuGroup` (IN `p_menu_group_id` INT, IN `p_menu_group_name` VARCHAR(100), IN `p_app_module_id` INT, IN `p_app_module_name` VARCHAR(100), IN `p_order_sequence` TINYINT(10), IN `p_last_log_by` INT, OUT `p_new_menu_group_id` INT)   BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    IF p_menu_group_id IS NULL OR NOT EXISTS (SELECT 1 FROM menu_group WHERE menu_group_id = p_menu_group_id) THEN
+        INSERT INTO menu_group (menu_group_name, app_module_id, app_module_name, order_sequence, last_log_by) 
+        VALUES(p_menu_group_name, p_app_module_id, p_app_module_name, p_order_sequence, p_last_log_by);
+        
+        SET p_new_menu_group_id = LAST_INSERT_ID();
+    ELSE
+        UPDATE menu_group
+        SET menu_group_name = p_menu_group_name,
+            app_module_id = p_app_module_id,
+            app_module_name = p_app_module_name,
+            order_sequence = p_order_sequence,
+            last_log_by = p_last_log_by
+        WHERE menu_group_id = p_menu_group_id;
+        
+        UPDATE menu_item
+        SET menu_group_name = p_menu_group_name,
+            app_module_id = p_app_module_id,
+            app_module_name = p_app_module_name,
+            last_log_by = p_last_log_by
+        WHERE menu_group_id = p_menu_group_id;
+
+        SET p_new_menu_group_id = p_menu_group_id;
+    END IF;
+
+    COMMIT;
 END$$
 
 DROP PROCEDURE IF EXISTS `updateAccountLock`$$
@@ -657,7 +751,16 @@ INSERT INTO `audit_log` (`audit_log_id`, `table_name`, `reference_id`, `log`, `c
 (78, 'user_account', 2, 'User account changed.<br/>Last Connection Date: 2024-10-02 20:50:25 -> 2024-10-03 19:44:00<br/>', 2, '2024-10-03 19:44:00', '2024-10-03 19:44:00'),
 (79, 'app_module', 23, 'App module created.', 2, '2024-10-03 19:50:29', '2024-10-03 19:50:29'),
 (80, 'app_module', 23, 'App module changed.<br/><br/>App Module Name: Test -> Testt<br/>App Module Description: Test -> Testt<br/>Menu Item: App Module -> General Settings<br/>', 2, '2024-10-03 19:51:56', '2024-10-03 19:51:56'),
-(81, 'app_module', 23, 'App module changed.<br/><br/>Order Sequence: 3 -> 5<br/>', 2, '2024-10-03 19:52:22', '2024-10-03 19:52:22');
+(81, 'app_module', 23, 'App module changed.<br/><br/>Order Sequence: 3 -> 5<br/>', 2, '2024-10-03 19:52:22', '2024-10-03 19:52:22'),
+(82, 'user_account', 2, 'User account changed.<br/>', 2, '2024-10-04 09:26:14', '2024-10-04 09:26:14'),
+(83, 'user_account', 2, 'User account changed.<br/>', 2, '2024-10-04 09:26:14', '2024-10-04 09:26:14'),
+(84, 'user_account', 2, 'User account changed.<br/>Last Connection Date: 2024-10-03 19:44:00 -> 2024-10-04 09:27:05<br/>', 2, '2024-10-04 09:27:05', '2024-10-04 09:27:05'),
+(85, 'menu_group', 1, 'Menu group changed.Menu Group Name: Technical -> Technicals<br/>', 2, '2024-10-04 11:55:22', '2024-10-04 11:55:22'),
+(86, 'menu_group', 1, 'Menu group changed.<br/><br/>Menu Group Name: Technicals -> Technical<br/>', 2, '2024-10-04 11:56:10', '2024-10-04 11:56:10'),
+(87, 'menu_group', 3, 'Menu group created.', 2, '2024-10-04 12:27:08', '2024-10-04 12:27:08'),
+(88, 'menu_group', 3, 'Menu group changed.<br/><br/>Menu Group Name: test -> <br/>App Module: Customer -> CRMS<br/>', 2, '2024-10-04 12:30:14', '2024-10-04 12:30:14'),
+(89, 'menu_group', 3, 'Menu group changed.<br/><br/>Menu Group Name:  -> test<br/>', 2, '2024-10-04 13:19:36', '2024-10-04 13:19:36'),
+(90, 'menu_group', 4, 'Menu group created.', 2, '2024-10-04 13:31:18', '2024-10-04 13:31:18');
 
 -- --------------------------------------------------------
 
@@ -812,7 +915,8 @@ CREATE TABLE `menu_group` (
 
 INSERT INTO `menu_group` (`menu_group_id`, `menu_group_name`, `app_module_id`, `app_module_name`, `order_sequence`, `created_date`, `last_log_by`) VALUES
 (1, 'Technical', 1, 'Settings', 100, '2024-09-27 16:25:41', 2),
-(2, 'Administration', 1, 'Settings', 5, '2024-09-27 16:25:41', 2);
+(2, 'Administration', 1, 'Settings', 5, '2024-09-27 16:25:41', 2),
+(3, 'test', 5, 'CRMS', 3, '2024-10-04 12:27:08', 2);
 
 --
 -- Triggers `menu_group`
@@ -830,7 +934,7 @@ DELIMITER ;
 DROP TRIGGER IF EXISTS `menu_group_trigger_update`;
 DELIMITER $$
 CREATE TRIGGER `menu_group_trigger_update` AFTER UPDATE ON `menu_group` FOR EACH ROW BEGIN
-    DECLARE audit_log TEXT DEFAULT 'Menu group changed.';
+    DECLARE audit_log TEXT DEFAULT 'Menu group changed.<br/><br/>';
 
     IF NEW.menu_group_name <> OLD.menu_group_name THEN
         SET audit_log = CONCAT(audit_log, "Menu Group Name: ", OLD.menu_group_name, " -> ", NEW.menu_group_name, "<br/>");
@@ -844,7 +948,7 @@ CREATE TRIGGER `menu_group_trigger_update` AFTER UPDATE ON `menu_group` FOR EACH
         SET audit_log = CONCAT(audit_log, "Order Sequence: ", OLD.order_sequence, " -> ", NEW.order_sequence, "<br/>");
     END IF;
     
-    IF LENGTH(audit_log) > 0 THEN
+    IF audit_log <> 'Menu group changed.<br/><br/>' THEN
         INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
         VALUES ('menu_group', NEW.menu_group_id, audit_log, NEW.last_log_by, NOW());
     END IF;
@@ -1588,7 +1692,7 @@ CREATE TABLE `user_account` (
 
 INSERT INTO `user_account` (`user_account_id`, `file_as`, `email`, `username`, `password`, `profile_picture`, `locked`, `active`, `last_failed_login_attempt`, `failed_login_attempts`, `last_connection_date`, `password_expiry_date`, `reset_token`, `reset_token_expiry_date`, `receive_notification`, `two_factor_auth`, `otp`, `otp_expiry_date`, `failed_otp_attempts`, `last_password_change`, `account_lock_duration`, `last_password_reset`, `multiple_session`, `session_token`, `linked_id`, `created_date`, `last_log_by`) VALUES
 (1, 'Digify Bot', 'digifybot@gmail.com', 'digifybot', 'Lu%2Be%2BRZfTv%2F3T0GR%2Fwes8QPJvE3Etx1p7tmryi74LNk%3D', NULL, 'WkgqlkcpSeEd7eWC8gl3iPwksfGbJYGy3VcisSyDeQ0', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20', NULL, NULL, NULL, 'aUIRg2jhRcYVcr0%2BiRDl98xjv81aR4Ux63bP%2BF2hQbE%3D', NULL, NULL, 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'WkgqlkcpSeEd7eWC8gl3iPwksfGbJYGy3VcisSyDeQ0', NULL, NULL, NULL, NULL, NULL, NULL, 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', NULL, NULL, '2024-09-27 11:49:59', 1),
-(2, 'Administrator', 'lawrenceagulto.317@gmail.com', 'ldagulto', 'ZW2SGXn0B41ZvY7Nl92uFaBW1LRhTxwaem5sgn8clRE%3D', NULL, '9lZtEofygdjMs3EsZV1V38KQF%2FPjp7btRHLFnck7DpM%3D', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20', '0000-00-00 00:00:00', '', '2024-10-03 19:44:00', 'j3TPQ%2FkOvrVcj0dMsNNs%2BicQ3gQo7W812x4%2BN2Q72oM%3D', 'wWt3OtHh0FKAhB31glK%2FdLfDTWMQdhqvZ%2FtRgmWl8EU%3D', 'P4tR005eyn3kNWp4tUtAQ17HIhZPD2zHiMAUfRmlAiAM6qi4fe8MjMopfWWK3xk9', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', '9BnsNo9%2BhLL19KW04Mu5j0Cu2eD8VLSRDsyxbhNi4c8%3D', 'ZT7lRPifz80Ghy%2BqYTW1yYS0o%2BjA%2BV0%2Blil7yCGAAyvoakf1RD4RQoigJ4SXwzLC', '', '2024-09-27 12:27:47', '', NULL, 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'PhtrymNd7dd4peJML0axMuv7ovuIJYrQYOCYTGRFrPc%3D', NULL, '2024-09-27 11:49:59', 2);
+(2, 'Administrator', 'lawrenceagulto.317@gmail.com', 'ldagulto', 'ZW2SGXn0B41ZvY7Nl92uFaBW1LRhTxwaem5sgn8clRE%3D', NULL, '9lZtEofygdjMs3EsZV1V38KQF%2FPjp7btRHLFnck7DpM%3D', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20', '0000-00-00 00:00:00', '', '2024-10-04 09:27:05', 'j3TPQ%2FkOvrVcj0dMsNNs%2BicQ3gQo7W812x4%2BN2Q72oM%3D', 'wWt3OtHh0FKAhB31glK%2FdLfDTWMQdhqvZ%2FtRgmWl8EU%3D', 'P4tR005eyn3kNWp4tUtAQ17HIhZPD2zHiMAUfRmlAiAM6qi4fe8MjMopfWWK3xk9', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'FCzd6CoviUxjBRefZGkS2tHm%2F9SzI6xStg0vbRb8bI0%3D', 'ksA0jn4sGmBX0B7J31bR7K6nTOQgX%2BohGLYGQ45lpVF28AJpQL5Vg42oaKR0n3Ix', '', '2024-09-27 12:27:47', '', NULL, 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'j4Z9AE49seQWELGEAuaZ%2BldS1CSwTdpGnyhaqu9NHJI%3D', NULL, '2024-09-27 11:49:59', 2);
 
 --
 -- Triggers `user_account`
@@ -1851,7 +1955,7 @@ ALTER TABLE `app_module`
 -- AUTO_INCREMENT for table `audit_log`
 --
 ALTER TABLE `audit_log`
-  MODIFY `audit_log_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=82;
+  MODIFY `audit_log_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=91;
 
 --
 -- AUTO_INCREMENT for table `email_setting`
@@ -1875,7 +1979,7 @@ ALTER TABLE `internal_notes_attachment`
 -- AUTO_INCREMENT for table `menu_group`
 --
 ALTER TABLE `menu_group`
-  MODIFY `menu_group_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `menu_group_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `menu_item`

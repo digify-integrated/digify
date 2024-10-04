@@ -25,8 +25,6 @@ if(isset($_POST['type']) && !empty($_POST['type'])){
             $options = $sql->fetchAll(PDO::FETCH_ASSOC);
             $sql->closeCursor();
 
-            $appModuleDeleteAccess = $authenticationModel->checkAccessRights($userID, $pageID, 'delete');
-
             foreach ($options as $row) {
                 $appModuleID = $row['app_module_id'];
                 $appModuleName = $row['app_module_name'];
@@ -35,13 +33,6 @@ if(isset($_POST['type']) && !empty($_POST['type'])){
                 $appLogo = $systemModel->checkImage(str_replace('../', './apps/', $row['app_logo'])  ?? null, 'app module logo');
 
                 $appModuleIDEncrypted = $securityModel->encryptData($appModuleID);
-
-                $deleteButton = '';
-                if($appModuleDeleteAccess['total'] > 0){
-                    $deleteButton = '<a href="javascript:void(0);" class="text-danger ms-3 delete-app-module" data-app-module-id="' . $appModuleID . '" title="Delete App Module">
-                                    <i class="ti ti-trash fs-5"></i>
-                                </a>';
-                }
 
                 $response[] = [
                     'CHECK_BOX' => '<input class="form-check-input datatable-checkbox-children" type="checkbox" value="'. $appModuleID .'">',
@@ -64,15 +55,19 @@ if(isset($_POST['type']) && !empty($_POST['type'])){
 
         # -------------------------------------------------------------
         case 'app module options':
+            $multiple = (isset($_POST['multiple'])) ? filter_input(INPUT_POST, 'multiple', FILTER_VALIDATE_INT) : false;
+
             $sql = $databaseModel->getConnection()->prepare('CALL generateAppModuleOptions()');
             $sql->execute();
             $options = $sql->fetchAll(PDO::FETCH_ASSOC);
             $sql->closeCursor();
 
-            $response[] = [
-                'id' => '',
-                'text' => '--'
-            ];
+            if(!$multiple){
+                $response[] = [
+                    'id' => '',
+                    'text' => '--'
+                ];
+            }            
 
             foreach ($options as $row) {
                 $response[] = [
@@ -80,36 +75,6 @@ if(isset($_POST['type']) && !empty($_POST['type'])){
                     'text' => $row['app_module_name']
                 ];
             }
-
-            echo json_encode($response);
-        break;
-        # -------------------------------------------------------------
-
-        # -------------------------------------------------------------
-        case 'app module radio filter':
-            $sql = $databaseModel->getConnection()->prepare('CALL generateAppModuleOptions()');
-            $sql->execute();
-            $options = $sql->fetchAll(PDO::FETCH_ASSOC);
-            $sql->closeCursor();
-
-            $filterOptions = '<div class="form-check py-2 mb-0">
-                            <input class="form-check-input p-2" type="radio" name="filter-app-module" id="filter-app-module-all" value="" checked>
-                            <label class="form-check-label d-flex align-items-center ps-2" for="filter-app-module-all">All</label>
-                        </div>';
-
-            foreach ($options as $row) {
-                $appModuleID = $row['app_module_id'];
-                $appModuleName = $row['app_module_name'];
-
-                $filterOptions .= '<div class="form-check py-2 mb-0">
-                                <input class="form-check-input p-2" type="radio" name="filter-app-module" id="filter-app-module-'. $appModuleID .'" value="'. $appModuleID .'">
-                                <label class="form-check-label d-flex align-items-center ps-2" for="filter-app-module-'. $appModuleID .'">'. $appModuleName .'</label>
-                            </div>';
-            }
-
-            $response[] = [
-                'filterOptions' => $filterOptions
-            ];
 
             echo json_encode($response);
         break;

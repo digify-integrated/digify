@@ -20,25 +20,19 @@
             </div>
             <div class="card-body">
                 <div class="row">
-                    <div class="col-lg-12 mb-3">
-                        <p class="mb-1 fs-2">Display Name</p>
-                        <h6 class="fw-semibold fs-3 mb-0" id="menu_group_name_summary">--</h6>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-lg-12 mb-3">
-                        <p class="mb-1 fs-2">Description</p>
-                        <h6 class="fw-semibold fs-3 mb-0" id="menu_group_description_summary">--</h6>
-                    </div>
-                </div>
-                <div class="row">
                     <div class="col-lg-6 mb-3">
-                        <p class="mb-1 fs-2">Default Page</p>
-                        <h6 class="fw-semibold fs-3 mb-0" id="menu_item_summary">--</h6>
+                        <p class="mb-1 fs-2">Display Name</p>
+                        <h6 class="fw-semibold mb-0" id="menu_group_name_summary">--</h6>
                     </div>
-                    <div class="col-lg-6 mb-0">
+                    <div class="col-lg-6 mb-3">
+                        <p class="mb-1 fs-2">App Module</p>
+                        <h6 class="fw-semibold mb-0" id="app_module_name_summary">--</h6>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12 mb-0">
                         <p class="mb-1 fs-2">Order Sequence</p>
-                        <h6 class="fw-semibold fs-3 mb-0" id="order_sequence_summary">--</h6>
+                        <h6 class="fw-semibold mb-0" id="order_sequence_summary">--</h6>
                     </div>
                 </div>
             </div>
@@ -56,20 +50,20 @@
             <div class="modal-body">
                 <form id="menu-group-form" method="post" action="#">
                     <div class="row">
-                        <div class="col-lg-6">
+                        <div class="col-lg-12">
                             <div class="mb-3">
-                                <label class="col-sm-4 form-label" for="menu_group_name">Display Name <span class="text-danger">*</span></label>
+                                <label class="form-label" for="menu_group_name">Display Name <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control maxlength" id="menu_group_name" name="menu_group_name" maxlength="100" autocomplete="off">
                             </div>
                         </div>
+                    </div>
+                    <div class="row">
                         <div class="col-md-6">
                             <label class="form-label" for="app_module_id">App Module <span class="text-danger">*</span></label>
                             <div class="mb-3">
                                 <select id="app_module_id" name="app_module_id" class="select2 form-control"></select>
                             </div>
                         </div>
-                    </div>
-                    <div class="row">
                         <div class="col-lg-6">
                             <div class="mb-3">
                                 <label class="form-label" for="order_sequence">Order Sequence <span class="text-danger">*</span></label>

@@ -16,4 +16,10 @@ function autoloadPhpSpreadsheet($className) {
 
 // Register the autoload function
 spl_autoload_register('autoloadPhpSpreadsheet');
+
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Shared\Date;
+use PhpOffice\PhpSpreadsheet\Calculation\Calculation;
+use PhpOffice\PhpSpreadsheet\Calculation\Category;
 ?>

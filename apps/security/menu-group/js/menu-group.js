@@ -2,17 +2,19 @@
     'use strict';
 
     $(function() {
-        if($('#app-module-table').length){
-            appModuleTable('#app-module-table');
+        generateDropdownOptions('app module options');
+
+        if($('#menu-group-table').length){
+            menuGroupTable('#menu-group-table');
         }
 
-        $(document).on('click','.delete-app-module',function() {
-            const app_module_id = $(this).data('app-module-id');
-            const transaction = 'delete app module';
+        $(document).on('click','.delete-menu-group',function() {
+            const menu_group_id = $(this).data('menu-group-id');
+            const transaction = 'delete menu group';
     
             Swal.fire({
-                title: 'Confirm App Module Deletion',
-                text: 'Are you sure you want to delete this app module?',
+                title: 'Confirm Menu Group Deletion',
+                text: 'Are you sure you want to delete this menu group?',
                 icon: 'warning',
                 showCancelButton: !0,
                 confirmButtonText: 'Delete',
@@ -26,16 +28,16 @@
                 if (result.value) {
                     $.ajax({
                         type: 'POST',
-                        url: 'components/app-module/controller/app-module-controller.php',
+                        url: 'components/menu-group/controller/menu-group-controller.php',
                         dataType: 'json',
                         data: {
-                            app_module_id : app_module_id, 
+                            menu_group_id : menu_group_id, 
                             transaction : transaction
                         },
                         success: function (response) {
                             if (response.success) {
                                 showNotification(response.title, response.message, response.messageType);
-                                reloadDatatable('#app-module-table');
+                                reloadDatatable('#menu-group-table');
                             }
                             else {
                                 if (response.isInactive || response.userNotExist || response.userInactive || response.userLocked || response.sessionExpired) {
@@ -44,7 +46,7 @@
                                 }
                                 else if (response.notExist) {
                                     setNotification(response.title, response.message, response.messageType);
-                                    reloadDatatable('#app-module-table');
+                                    reloadDatatable('#menu-group-table');
                                 }
                                 else {
                                     showNotification(response.title, response.message, response.messageType);
@@ -64,20 +66,20 @@
             });
         });
 
-        $(document).on('click','#delete-app-module',function() {
-            let app_module_id = [];
-            const transaction = 'delete multiple app module';
+        $(document).on('click','#delete-menu-group',function() {
+            let menu_group_id = [];
+            const transaction = 'delete multiple menu group';
 
             $('.datatable-checkbox-children').each((index, element) => {
                 if ($(element).is(':checked')) {
-                    app_module_id.push(element.value);
+                    menu_group_id.push(element.value);
                 }
             });
     
-            if(app_module_id.length > 0){
+            if(menu_group_id.length > 0){
                 Swal.fire({
-                    title: 'Confirm Multiple App Modules Deletion',
-                    text: 'Are you sure you want to delete these app modules?',
+                    title: 'Confirm Multiple Menu Groups Deletion',
+                    text: 'Are you sure you want to delete these menu groups?',
                     icon: 'warning',
                     showCancelButton: !0,
                     confirmButtonText: 'Delete',
@@ -91,16 +93,16 @@
                     if (result.value) {
                         $.ajax({
                             type: 'POST',
-                            url: 'apps/security/app-module/controller/app-module-controller.php',
+                            url: 'apps/security/menu-group/controller/menu-group-controller.php',
                             dataType: 'json',
                             data: {
-                                app_module_id: app_module_id,
+                                menu_group_id: menu_group_id,
                                 transaction : transaction
                             },
                             success: function (response) {
                                 if (response.success) {
                                     showNotification(response.title, response.message, response.messageType);
-                                    reloadDatatable('#app-module-table');
+                                    reloadDatatable('#menu-group-table');
                                 }
                                 else {
                                     if (response.isInactive || response.userNotExist || response.userInactive || response.userLocked || response.sessionExpired) {
@@ -125,59 +127,70 @@
                 });
             }
             else{
-                showNotification('Deletion Multiple App Module Error', 'Please select the app modules you wish to delete.', 'danger');
+                showNotification('Deletion Multiple Menu Group Error', 'Please select the menu groups you wish to delete.', 'danger');
             }
         });
 
         $(document).on('click','#export-data',function() {
-            generateExportColumns('app_module');
+            generateExportColumns('menu_group');
         });
 
         $(document).on('click','#submit-export',function() {
-            exportData('app_module');
+            exportData('menu_group');
         });
 
         $('#datatable-search').on('keyup', function () {
-            var table = $('#app-module-table').DataTable();
+            var table = $('#menu-group-table').DataTable();
             table.search(this.value).draw();
         });
 
         $('#datatable-length').on('change', function() {
-            var table = $('#app-module-table').DataTable();
+            var table = $('#menu-group-table').DataTable();
             var length = $(this).val(); 
             table.page.len(length).draw();
+        });
+
+        $(document).on('click','#apply-filter',function() {
+            menuGroupTable('#menu-group-table');
+            $('#filter-offcanvas').offcanvas('hide');
         });
     });
 })(jQuery);
 
-function appModuleTable(datatable_name) {
+function menuGroupTable(datatable_name) {
     toggleHideActionDropdown();
 
-    const type = 'app module table';
+    const type = 'menu group table';
     const page_id = $('#page-id').val();
     const page_link = document.getElementById('page-link').getAttribute('href');
+    const app_module_filter = $('#app_module_filter').val();
 
     const columns = [ 
         { data: 'CHECK_BOX' },
-        { data: 'APP_MODULE_NAME' }
+        { data: 'MENU_GROUP_NAME' },
+        { data: 'APP_MODULE_NAME' },
+        { data: 'ORDER_SEQUENCE' }
     ];
 
     const columnDefs = [
         { width: '1%', bSortable: false, targets: 0 },
-        { width: 'auto', targets: 1 }
+        { width: 'auto', targets: 1 },
+        { width: 'auto', targets: 2 },
+        { width: 'auto', targets: 3 }
     ];
 
     const lengthMenu = [[10, 5, 25, 50, 100, -1], [10, 5, 25, 50, 100, 'All']];
 
     const settings = {
         ajax: { 
-            url: 'apps/security/app-module/view/_app_module_generation.php',
+            url: 'apps/security/menu-group/view/_menu_group_generation.php',
             method: 'POST',
             dataType: 'json',
             data: {
                 type: type,
                 page_id: page_id,
-                page_link: page_link
+                page_link: page_link,
+                app_module_filter: app_module_filter
             },
             dataSrc: '',
             error: function(xhr, status, error) {
@@ -207,7 +220,37 @@ function appModuleTable(datatable_name) {
             });
         }
     };
-
+    
     destroyDatatable(datatable_name);
     $(datatable_name).dataTable(settings);
+}
+
+function generateDropdownOptions(type){
+    switch (type) {
+        case 'app module options':
+            
+            $.ajax({
+                url: 'apps/security/app-module/view/_app_module_generation.php',
+                method: 'POST',
+                dataType: 'json',
+                data: {
+                    type : type,
+                    multiple : 1
+                },
+                success: function(response) {
+                    $('#app_module_filter').select2({
+                        dropdownParent: $('#filter-offcanvas'),
+                        data: response
+                    });
+                },
+                error: function(xhr, status, error) {
+                    var fullErrorMessage = `XHR status: ${status}, Error: ${error}`;
+                    if (xhr.responseText) {
+                        fullErrorMessage += `, Response: ${xhr.responseText}`;
+                    }
+                    showErrorDialog(fullErrorMessage);
+                }
+            });
+            break;
+    }
 }

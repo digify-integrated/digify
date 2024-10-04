@@ -64,7 +64,7 @@ function passwordAddOn(){
             }
         });
 
-        $('.password-addon').attr('tabindex', -1); // Set tabIndex in one go
+        $('.password-addon').attr('tabindex', -1);
     }
 }
 
@@ -103,17 +103,22 @@ function resetModalForm(form_id) {
     form.reset();
 }
 
-function reloadDatatable(datatable) {
+function reloadDatatable(datatable_name) {
     toggleHideActionDropdown();
-    $(datatable).DataTable().ajax.reload(null, false);
+
+    if ($.fn.DataTable.isDataTable(datatable_name)) {
+        $(datatable_name).DataTable().ajax.reload(null, false);
+    }
 }
 
-function destroyDatatable(datatable) {
-    $(datatable).DataTable().clear().destroy();
+function destroyDatatable(datatable_name) {
+    if ($.fn.DataTable.isDataTable(datatable_name)) {
+        $(datatable_name).DataTable().clear().destroy();
+    }
 }
 
-function clearDatatable(datatable) {
-    $(datatable).DataTable().clear().draw();
+function clearDatatable(datatable_name) {
+    $(datatable_name).DataTable().clear().draw();
 }
 
 function readjustDatatableColumn() {
