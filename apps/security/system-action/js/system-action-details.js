@@ -2,27 +2,24 @@
     'use strict';
 
     $(function() {
-        generateDropdownOptions('menu group options');
-        generateDropdownOptions('menu item options');
+        displayDetails('get system action details');
 
-        displayDetails('get menu item details');
-
-        if($('#menu-item-form').length){
-            menuItemForm();
+        if($('#system-action-form').length){
+            systemActionForm();
         }
 
         $(document).on('click','#edit-details',function() {
-            displayDetails('get menu item details');
+            displayDetails('get system action details');
         });
 
-        $(document).on('click','#delete-menu-item',function() {
-            const menu_item_id = $('#details-id').text();
+        $(document).on('click','#delete-system-action',function() {
+            const system_action_id = $('#details-id').text();
             const page_link = document.getElementById('page-link').getAttribute('href'); 
-            const transaction = 'delete menu item';
+            const transaction = 'delete system action';
     
             Swal.fire({
-                title: 'Confirm Menu Item Deletion',
-                text: 'Are you sure you want to delete this menu item?',
+                title: 'Confirm System Action Deletion',
+                text: 'Are you sure you want to delete this system action?',
                 icon: 'warning',
                 showCancelButton: !0,
                 confirmButtonText: 'Delete',
@@ -36,10 +33,10 @@
                 if (result.value) {
                     $.ajax({
                         type: 'POST',
-                        url: 'apps/security/menu-item/controller/menu-item-controller.php',
+                        url: 'apps/security/system-action/controller/system-action-controller.php',
                         dataType: 'json',
                         data: {
-                            menu_item_id : menu_item_id, 
+                            system_action_id : system_action_id, 
                             transaction : transaction
                         },
                         success: function (response) {
@@ -71,29 +68,29 @@
         });
 
         if($('#log-notes-main').length){
-            const menu_item_id = $('#details-id').text();
+            const system_action_id = $('#details-id').text();
 
-            logNotesMain('menu_item', menu_item_id);
+            logNotesMain('system_action', system_action_id);
         }
 
         if($('#internal-notes').length){
-            const menu_item_id = $('#details-id').text();
+            const system_action_id = $('#details-id').text();
 
-            internalNotes('menu_item', menu_item_id);
+            internalNotes('system_action', system_action_id);
         }
 
         if($('#internal-notes-form').length){
-            const menu_item_id = $('#details-id').text();
+            const system_action_id = $('#details-id').text();
 
-            internalNotesForm('menu_item', menu_item_id);
+            internalNotesForm('system_action', system_action_id);
         }
     });
 })(jQuery);
 
-function menuItemForm(){
-    $('#menu-item-form').validate({
+function systemActionForm(){
+    $('#system-action-form').validate({
         rules: {
-            menu_item_name: {
+            system_action_name: {
                 required: true
             },
             menu_group_id: {
@@ -104,8 +101,8 @@ function menuItemForm(){
             }
         },
         messages: {
-            menu_item_name: {
-                required: 'Enter the display name'
+            system_action_name: {
+                required: 'Enter display name'
             },
             menu_group_id: {
                 required: 'Choose the menu group'
@@ -128,14 +125,14 @@ function menuItemForm(){
             $target.removeClass('is-invalid');
         },
         submitHandler: function(form) {
-            const menu_item_id = $('#details-id').text();
+            const system_action_id = $('#details-id').text();
             const page_link = document.getElementById('page-link').getAttribute('href'); 
-            const transaction = 'update menu item';
+            const transaction = 'update system action';
           
             $.ajax({
                 type: 'POST',
-                url: 'apps/security/menu-item/controller/menu-item-controller.php',
-                data: $(form).serialize() + '&transaction=' + transaction + '&menu_item_id=' + encodeURIComponent(menu_item_id),
+                url: 'apps/security/system-action/controller/system-action-controller.php',
+                data: $(form).serialize() + '&transaction=' + transaction + '&system_action_id=' + encodeURIComponent(system_action_id),
                 dataType: 'json',
                 beforeSend: function() {
                     disableFormSubmitButton('submit-data');
@@ -143,8 +140,8 @@ function menuItemForm(){
                 success: function (response) {
                     if (response.success) {
                         showNotification(response.title, response.message, response.messageType);
-                        displayDetails('get menu item details');
-                        $('#menu-item-modal').modal('hide');
+                        displayDetails('get system action details');
+                        $('#system-action-modal').modal('hide');
                     }
                     else {
                         if (response.isInactive || response.userNotExist || response.userInactive || response.userLocked || response.sessionExpired) {
@@ -165,7 +162,7 @@ function menuItemForm(){
                 },
                 complete: function() {
                     enableFormSubmitButton('submit-data');
-                    logNotesMain('menu_item', menu_item_id);
+                    logNotesMain('system_action', system_action_id);
                 }
             });
         
@@ -176,37 +173,28 @@ function menuItemForm(){
 
 function displayDetails(transaction){
     switch (transaction) {
-        case 'get menu item details':
-            var menu_item_id = $('#details-id').text();
+        case 'get system action details':
+            var system_action_id = $('#details-id').text();
             const page_link = document.getElementById('page-link').getAttribute('href'); 
             
             $.ajax({
-                url: 'apps/security/menu-item/controller/menu-item-controller.php',
+                url: 'apps/security/system-action/controller/system-action-controller.php',
                 method: 'POST',
                 dataType: 'json',
                 data: {
-                    menu_item_id : menu_item_id, 
+                    system_action_id : system_action_id, 
                     transaction : transaction
                 },
                 beforeSend: function(){
-                    resetModalForm('menu-item-form');
+                    resetModalForm('system-action-form');
                 },
                 success: function(response) {
                     if (response.success) {
-                        $('#menu_item_name').val(response.menuItemName);
-                        $('#menu_item_icon').val(response.menuItemIcon);
-                        $('#menu_item_url').val(response.menuItemURL);
-                        $('#order_sequence').val(response.orderSequence);
-
-                        $('#menu_group_id').val(response.menuGroupID).trigger('change');
-                        $('#parent_id').val(response.parentID).trigger('change');
+                        $('#system_action_name').val(response.systemActionName);
+                        $('#system_action_description').val(response.systemActionIcon);
                         
-                        $('#menu_item_name_summary').text(response.menuItemName);
-                        $('#menu_group_name_summary').text(response.menuGroupName);
-                        $('#parent_menu_item_summary').text(response.parentName);
-                        $('#menu_item_icon_summary').text(response.menuItemIcon);
-                        $('#menu_item_url_summary').text(response.menuItemURL);
-                        $('#order_sequence_summary').text(response.orderSequence);
+                        $('#system_action_name_summary').text(response.systemActionName);
+                        $('#system_action_description_summary').text(response.menuGroupName);
                     } 
                     else {
                         if (response.isInactive || response.userNotExist || response.userInactive || response.userLocked || response.sessionExpired) {
@@ -221,57 +209,6 @@ function displayDetails(transaction){
                             showNotification(response.title, response.message, response.messageType);
                         }
                     }
-                },
-                error: function(xhr, status, error) {
-                    handleSystemError(xhr, status, error);
-                }
-            });
-            break;
-    }
-}
-
-function generateDropdownOptions(type){
-    switch (type) {
-        case 'menu group options':
-
-            $.ajax({
-                url: 'apps/security/menu-group/view/_menu_group_generation.php',
-                method: 'POST',
-                dataType: 'json',
-                data: {
-                    type : type
-                },
-                success: function(response) {
-                    $('#menu_group_id').select2({
-                        data: response,
-                        dropdownParent: $('#menu-item-modal').closest('.modal')
-                    }).on('change', function (e) {
-                        $(e.target).valid()
-                    });
-                },
-                error: function(xhr, status, error) {
-                    handleSystemError(xhr, status, error);
-                }
-            });
-            break;
-        case 'menu item options':
-            var menu_item_id = $('#details-id').text();    
-
-            $.ajax({
-                url: 'apps/security/menu-item/view/_menu_item_generation.php',
-                method: 'POST',
-                dataType: 'json',
-                data: {
-                    type : type,
-                    menu_item_id : menu_item_id
-                },
-                success: function(response) {
-                    $('#parent_id').select2({
-                        data: response,
-                        dropdownParent: $('#menu-item-modal').closest('.modal')
-                    }).on('change', function (e) {
-                        $(e.target).valid()
-                    });
                 },
                 error: function(xhr, status, error) {
                     handleSystemError(xhr, status, error);

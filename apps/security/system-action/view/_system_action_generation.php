@@ -19,31 +19,28 @@ if(isset($_POST['type']) && !empty($_POST['type'])){
     
     switch ($type) {
         # -------------------------------------------------------------
-        case 'menu group table':
-            $filterAppModule = isset($_POST['app_module_filter']) && is_array($_POST['app_module_filter']) 
-            ? "'" . implode("','", array_map('trim', $_POST['app_module_filter'])) . "'" 
-            : null;
-
-            $sql = $databaseModel->getConnection()->prepare('CALL generateMenuGroupTable(:filterAppModule)');
-            $sql->bindValue(':filterAppModule', $filterAppModule, PDO::PARAM_STR);
+        case 'system action table':
+            $sql = $databaseModel->getConnection()->prepare('CALL generateSystemActionTable()');
             $sql->execute();
             $options = $sql->fetchAll(PDO::FETCH_ASSOC);
             $sql->closeCursor();
 
             foreach ($options as $row) {
-                $menuGroupID = $row['menu_group_id'];
-                $menuGroupName = $row['menu_group_name'];
-                $appModuleName = $row['app_module_name'];
-                $orderSequence = $row['order_sequence'];
+                $systemActionID = $row['system_action_id'];
+                $systemActionName = $row['system_action_name'];
+                $systemActionDescription = $row['system_action_description'];
 
-                $menuGroupIDEncrypted = $securityModel->encryptData($menuGroupID);
+                $systemActionIDEncrypted = $securityModel->encryptData($systemActionID);
 
                 $response[] = [
-                    'CHECK_BOX' => '<input class="form-check-input datatable-checkbox-children" type="checkbox" value="'. $menuGroupID .'">',
-                    'MENU_GROUP_NAME' => $menuGroupName,
-                    'APP_MODULE_NAME' => $appModuleName,
-                    'ORDER_SEQUENCE' => $orderSequence,
-                    'LINK' => $pageLink .'&id='. $menuGroupIDEncrypted
+                    'CHECK_BOX' => '<input class="form-check-input datatable-checkbox-children" type="checkbox" value="'. $systemActionID .'">',
+                    'SYSTEM_ACTION_NAME' => '<div class="ms-3">
+                                                <div class="user-meta-info">
+                                                    <h6 class="user-name mb-0">'. $systemActionName .'</h6>
+                                                    <small>'. $systemActionDescription .'</small>
+                                                </div>
+                                            </div>',
+                    'LINK' => $pageLink .'&id='. $systemActionIDEncrypted
                 ];
             }
 
@@ -52,10 +49,10 @@ if(isset($_POST['type']) && !empty($_POST['type'])){
         # -------------------------------------------------------------
 
         # -------------------------------------------------------------
-        case 'menu group options':
+        case 'system action options':
             $multiple = (isset($_POST['multiple'])) ? filter_input(INPUT_POST, 'multiple', FILTER_VALIDATE_INT) : false;
 
-            $sql = $databaseModel->getConnection()->prepare('CALL generateMenuGroupOptions()');
+            $sql = $databaseModel->getConnection()->prepare('CALL generateSystemActionOptions()');
             $sql->execute();
             $options = $sql->fetchAll(PDO::FETCH_ASSOC);
             $sql->closeCursor();
@@ -69,8 +66,8 @@ if(isset($_POST['type']) && !empty($_POST['type'])){
 
             foreach ($options as $row) {
                 $response[] = [
-                    'id' => $row['menu_group_id'],
-                    'text' => $row['menu_group_name']
+                    'id' => $row['system_action_id'],
+                    'text' => $row['system_action_name']
                 ];
             }
 

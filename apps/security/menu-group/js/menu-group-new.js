@@ -25,7 +25,7 @@ function menuGroupForm(){
         },
         messages: {
             menu_group_name: {
-                required: 'Enter display name'
+                required: 'Enter the display name'
             },
             app_module_id: {
                 required: 'Choose the app module'

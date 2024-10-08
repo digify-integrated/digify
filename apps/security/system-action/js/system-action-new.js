@@ -2,22 +2,19 @@
     'use strict';
 
     $(function() {
-        generateDropdownOptions('menu group options');
-        generateDropdownOptions('menu item options');
-
-        if($('#menu-item-form').length){
-            menuItemForm();
+        if($('#system-action-form').length){
+            systemActionForm();
         }
     });
 })(jQuery);
 
-function menuItemForm(){
-    $('#menu-item-form').validate({
+function systemActionForm(){
+    $('#system-action-form').validate({
         rules: {
-            menu_item_name: {
+            system_action_name: {
                 required: true
             },
-            menu_group_id: {
+            system_action_description: {
                 required: true
             },
             order_sequence: {
@@ -25,11 +22,11 @@ function menuItemForm(){
             }
         },
         messages: {
-            menu_item_name: {
+            system_action_name: {
                 required: 'Enter the display name'
             },
-            menu_group_id: {
-                required: 'Choose the menu group'
+            system_action_description: {
+                required: 'Ether the description'
             },
             order_sequence: {
                 required: 'Enter the order sequence'
@@ -49,12 +46,12 @@ function menuItemForm(){
             $target.removeClass('is-invalid');
         },
         submitHandler: function(form) {
-            const transaction = 'add menu item';
+            const transaction = 'add system action';
             const page_link = document.getElementById('page-link').getAttribute('href');
           
             $.ajax({
                 type: 'POST',
-                url: 'apps/security/menu-item/controller/menu-item-controller.php',
+                url: 'apps/security/system-action/controller/system-action-controller.php',
                 data: $(form).serialize() + '&transaction=' + transaction,
                 dataType: 'json',
                 beforeSend: function() {
@@ -63,7 +60,7 @@ function menuItemForm(){
                 success: function (response) {
                     if (response.success) {
                         setNotification(response.title, response.message, response.messageType);
-                        window.location = page_link + '&id=' + response.menuItemID;
+                        window.location = page_link + '&id=' + response.systemActionID;
                     }
                     else {
                         if (response.isInactive || response.notExist || response.userInactive || response.userLocked || response.sessionExpired) {
@@ -86,51 +83,4 @@ function menuItemForm(){
             return false;
         }
     });
-}
-
-function generateDropdownOptions(type){
-    switch (type) {
-        case 'menu group options':
-            
-            $.ajax({
-                url: 'apps/security/menu-group/view/_menu_group_generation.php',
-                method: 'POST',
-                dataType: 'json',
-                data: {
-                    type : type
-                },
-                success: function(response) {
-                    $('#menu_group_id').select2({
-                        data: response
-                    }).on('change', function (e) {
-                        $(this).valid()
-                    });
-                },
-                error: function(xhr, status, error) {
-                    handleSystemError(xhr, status, error);
-                }
-            });
-            break;
-        case 'menu item options':
-            
-            $.ajax({
-                url: 'apps/security/menu-item/view/_menu_item_generation.php',
-                method: 'POST',
-                dataType: 'json',
-                data: {
-                    type : type
-                },
-                success: function(response) {
-                    $('#parent_id').select2({
-                        data: response
-                    }).on('change', function (e) {
-                        $(this).valid()
-                    });
-                },
-                error: function(xhr, status, error) {
-                    handleSystemError(xhr, status, error);
-                }
-            });
-            break;
-    }
 }

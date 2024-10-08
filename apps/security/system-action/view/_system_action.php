@@ -19,7 +19,7 @@
                     
                         if ($deleteAccess['total'] > 0) {
                             $action .= '
-                            <li><button class="dropdown-item" type="button" id="delete-menu-item">Delete</button></li>';
+                            <li><button class="dropdown-item" type="button" id="delete-system-action">Delete</button></li>';
                         }
                     
                         $action .= '</ul>';
@@ -27,10 +27,9 @@
                         echo $action;
                     }
 
-                    echo $importAccess['total'] > 0 ? '<a href="' . $pageLink . '&import='. $securityModel->encryptData('menu_item') .'" class="btn btn-secondary d-flex align-items-center mb-0">Import</a>' : '';
+                    echo $importAccess['total'] > 0 ? '<a href="' . $pageLink . '&import='. $securityModel->encryptData('system_action') .'" class="btn btn-secondary d-flex align-items-center mb-0">Import</a>' : '';
                     echo $createAccess['total'] > 0 ? '<a href="' . $pageLink . '&new" class="btn btn-success d-flex align-items-center mb-0">Create</a>' : '';
                 ?>
-                <button type="button" class="btn btn-warning mb-0 px-4" data-bs-toggle="offcanvas" data-bs-target="#filter-offcanvas" aria-controls="filter-offcanvas">Filter</a>
             </div>
         </div>
     </div>
@@ -42,7 +41,7 @@
             <div class="card mb-0">
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table id="menu-item-table" class="table w-100 table-hover display text-nowrap dataTable">
+                        <table id="system-action-table" class="table w-100 table-hover display text-nowrap dataTable">
                             <thead class="text-dark">
                                 <tr>
                                     <th class="all">
@@ -50,11 +49,7 @@
                                             <input class="form-check-input" id="datatable-checkbox" type="checkbox">
                                         </div>
                                     </th>
-                                    <th>Menu Item</th>
-                                    <th>Menu Group</th>
-                                    <th>App Module</th>
-                                    <th>Parent Menu Item</th>
-                                    <th>Order Sequence</th>
+                                    <th>System Action</th>
                                 </tr>
                             </thead>
                             <tbody></tbody>
@@ -62,36 +57,6 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
-
-<div class="offcanvas offcanvas-start" tabindex="-1" id="filter-offcanvas" aria-labelledby="filter-offcanvas-label">
-    <div class="offcanvas-header">
-        <h5 class="offcanvas-title" id="filter-offcanvas-label">Filter</h5>
-        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-    </div>
-    <div class="offcanvas-body p-0">
-        <div class="border-bottom rounded-0">
-            <h6 class="mt-4 mb-3 mx-4 fw-semibold">By App Module</h6>
-            <div class="pb-4 px-4 text-dark" id="app-module-filter">
-                <select id="app_module_filter" name="app_module_filter" multiple="multiple" class="form-control"></select>
-            </div>
-        </div>
-        <div class="border-bottom rounded-0">
-            <h6 class="mt-4 mb-3 mx-4 fw-semibold">By Menu Group</h6>
-            <div class="pb-4 px-4 text-dark" id="menu-group-filter">
-                <select id="menu_group_filter" name="menu_group_filter" multiple="multiple" class="form-control"></select>
-            </div>
-        </div>
-        <div class="border-bottom rounded-0">
-            <h6 class="mt-4 mb-3 mx-4 fw-semibold">By Parent Menu</h6>
-            <div class="pb-4 px-4 text-dark" id="parent-id-filter">
-                <select id="parent_id_filter" name="parent_id_filter" multiple="multiple" class="form-control"></select>
-            </div>
-        </div>
-        <div class="p-4">
-            <button type="button" class="btn btn-warning w-100" id="apply-filter">Apply Filter</button>
         </div>
     </div>
 </div>

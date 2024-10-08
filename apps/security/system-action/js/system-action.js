@@ -2,21 +2,17 @@
     'use strict';
 
     $(function() {
-        generateDropdownOptions('app module options');
-        generateDropdownOptions('menu group options');
-        generateDropdownOptions('menu item options');
-
-        if($('#menu-item-table').length){
-            menuItemTable('#menu-item-table');
+        if($('#system-action-table').length){
+            systemActionTable('#system-action-table');
         }
 
-        $(document).on('click','.delete-menu-item',function() {
-            const menu_item_id = $(this).data('menu-item-id');
-            const transaction = 'delete menu item';
+        $(document).on('click','.delete-system-action',function() {
+            const system_action_id = $(this).data('system-action-id');
+            const transaction = 'delete system action';
     
             Swal.fire({
-                title: 'Confirm Menu Item Deletion',
-                text: 'Are you sure you want to delete this menu item?',
+                title: 'Confirm System Action Deletion',
+                text: 'Are you sure you want to delete this system action?',
                 icon: 'warning',
                 showCancelButton: !0,
                 confirmButtonText: 'Delete',
@@ -30,16 +26,16 @@
                 if (result.value) {
                     $.ajax({
                         type: 'POST',
-                        url: 'components/menu-item/controller/menu-item-controller.php',
+                        url: 'components/system-action/controller/system-action-controller.php',
                         dataType: 'json',
                         data: {
-                            menu_item_id : menu_item_id, 
+                            system_action_id : system_action_id, 
                             transaction : transaction
                         },
                         success: function (response) {
                             if (response.success) {
                                 showNotification(response.title, response.message, response.messageType);
-                                reloadDatatable('#menu-item-table');
+                                reloadDatatable('#system-action-table');
                             }
                             else {
                                 if (response.isInactive || response.userNotExist || response.userInactive || response.userLocked || response.sessionExpired) {
@@ -48,7 +44,7 @@
                                 }
                                 else if (response.notExist) {
                                     setNotification(response.title, response.message, response.messageType);
-                                    reloadDatatable('#menu-item-table');
+                                    reloadDatatable('#system-action-table');
                                 }
                                 else {
                                     showNotification(response.title, response.message, response.messageType);
@@ -68,20 +64,20 @@
             });
         });
 
-        $(document).on('click','#delete-menu-item',function() {
-            let menu_item_id = [];
-            const transaction = 'delete multiple menu item';
+        $(document).on('click','#delete-system-action',function() {
+            let system_action_id = [];
+            const transaction = 'delete multiple system action';
 
             $('.datatable-checkbox-children').each((index, element) => {
                 if ($(element).is(':checked')) {
-                    menu_item_id.push(element.value);
+                    system_action_id.push(element.value);
                 }
             });
     
-            if(menu_item_id.length > 0){
+            if(system_action_id.length > 0){
                 Swal.fire({
-                    title: 'Confirm Multiple Menu Items Deletion',
-                    text: 'Are you sure you want to delete these menu items?',
+                    title: 'Confirm Multiple System Actions Deletion',
+                    text: 'Are you sure you want to delete these system actions?',
                     icon: 'warning',
                     showCancelButton: !0,
                     confirmButtonText: 'Delete',
@@ -95,16 +91,16 @@
                     if (result.value) {
                         $.ajax({
                             type: 'POST',
-                            url: 'apps/security/menu-item/controller/menu-item-controller.php',
+                            url: 'apps/security/system-action/controller/system-action-controller.php',
                             dataType: 'json',
                             data: {
-                                menu_item_id: menu_item_id,
+                                system_action_id: system_action_id,
                                 transaction : transaction
                             },
                             success: function (response) {
                                 if (response.success) {
                                     showNotification(response.title, response.message, response.messageType);
-                                    reloadDatatable('#menu-item-table');
+                                    reloadDatatable('#system-action-table');
                                 }
                                 else {
                                     if (response.isInactive || response.userNotExist || response.userInactive || response.userLocked || response.sessionExpired) {
@@ -129,78 +125,64 @@
                 });
             }
             else{
-                showNotification('Deletion Multiple Menu Item Error', 'Please select the menu items you wish to delete.', 'danger');
+                showNotification('Deletion Multiple System Action Error', 'Please select the system actions you wish to delete.', 'danger');
             }
         });
 
         $(document).on('click','#export-data',function() {
-            generateExportColumns('menu_item');
+            generateExportColumns('system_action');
         });
 
         $(document).on('click','#submit-export',function() {
-            exportData('menu_item');
+            exportData('system_action');
         });
 
         $('#datatable-search').on('keyup', function () {
-            var table = $('#menu-item-table').DataTable();
+            var table = $('#system-action-table').DataTable();
             table.search(this.value).draw();
         });
 
         $('#datatable-length').on('change', function() {
-            var table = $('#menu-item-table').DataTable();
+            var table = $('#system-action-table').DataTable();
             var length = $(this).val(); 
             table.page.len(length).draw();
         });
 
         $(document).on('click','#apply-filter',function() {
-            menuItemTable('#menu-item-table');
+            systemActionTable('#system-action-table');
             $('#filter-offcanvas').offcanvas('hide');
         });
     });
 })(jQuery);
 
-function menuItemTable(datatable_name) {
+function systemActionTable(datatable_name) {
     toggleHideActionDropdown();
 
-    const type = 'menu item table';
+    const type = 'system action table';
     const page_id = $('#page-id').val();
     const page_link = document.getElementById('page-link').getAttribute('href');
-    const app_module_filter = $('#app_module_filter').val();
-    const menu_group_filter = $('#menu_group_filter').val();
-    const parent_id_filter = $('#parent_id_filter').val();
 
     const columns = [ 
         { data: 'CHECK_BOX' },
-        { data: 'MENU_ITEM_NAME' },
-        { data: 'MENU_GROUP_NAME' },
-        { data: 'APP_MODULE_NAME' },
-        { data: 'PARENT_NAME' },
-        { data: 'ORDER_SEQUENCE' }
+        { data: 'SYSTEM_ACTION_NAME' }
     ];
 
     const columnDefs = [
         { width: '1%', bSortable: false, targets: 0 },
-        { width: 'auto', targets: 1 },
-        { width: 'auto', targets: 2 },
-        { width: 'auto', targets: 3 },
-        { width: 'auto', targets: 4 },
-        { width: 'auto', targets: 5 }
+        { width: 'auto', targets: 1 }
     ];
 
     const lengthMenu = [[10, 5, 25, 50, 100, -1], [10, 5, 25, 50, 100, 'All']];
 
     const settings = {
         ajax: { 
-            url: 'apps/security/menu-item/view/_menu_item_generation.php',
+            url: 'apps/security/system-action/view/_system_action_generation.php',
             method: 'POST',
             dataType: 'json',
             data: {
                 type: type,
                 page_id: page_id,
-                page_link: page_link,
-                app_module_filter: app_module_filter,
-                menu_group_filter: menu_group_filter,
-                parent_id_filter: parent_id_filter
+                page_link: page_link
             },
             dataSrc: '',
             error: function(xhr, status, error) {
@@ -233,72 +215,4 @@ function menuItemTable(datatable_name) {
     
     destroyDatatable(datatable_name);
     $(datatable_name).dataTable(settings);
-}
-
-function generateDropdownOptions(type){
-    switch (type) {
-        case 'app module options':
-            
-            $.ajax({
-                url: 'apps/security/app-module/view/_app_module_generation.php',
-                method: 'POST',
-                dataType: 'json',
-                data: {
-                    type : type,
-                    multiple : 1
-                },
-                success: function(response) {
-                    $('#app_module_filter').select2({
-                        dropdownParent: $('#filter-offcanvas'),
-                        data: response
-                    });
-                },
-                error: function(xhr, status, error) {
-                    handleSystemError(xhr, status, error);
-                }
-            });
-            break;
-        case 'menu group options':
-            
-            $.ajax({
-                url: 'apps/security/menu-group/view/_menu_group_generation.php',
-                method: 'POST',
-                dataType: 'json',
-                data: {
-                    type : type,
-                    multiple : 1
-                },
-                success: function(response) {
-                    $('#menu_group_filter').select2({
-                        dropdownParent: $('#filter-offcanvas'),
-                        data: response
-                    });
-                },
-                error: function(xhr, status, error) {
-                    handleSystemError(xhr, status, error);
-                }
-            });
-            break;
-        case 'menu item options':
-            
-            $.ajax({
-                url: 'apps/security/menu-item/view/_menu_item_generation.php',
-                method: 'POST',
-                dataType: 'json',
-                data: {
-                    type : type,
-                    multiple : 1
-                },
-                success: function(response) {
-                    $('#parent_id_filter').select2({
-                        dropdownParent: $('#filter-offcanvas'),
-                        data: response
-                    });
-                },
-                error: function(xhr, status, error) {
-                    handleSystemError(xhr, status, error);
-                }
-            });
-            break;
-    }
 }

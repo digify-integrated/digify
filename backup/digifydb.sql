@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 04, 2024 at 11:35 AM
+-- Generation Time: Oct 08, 2024 at 11:35 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -132,6 +132,20 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `checkMenuGroupExist` (IN `p_menu_gr
     WHERE menu_group_id = p_menu_group_id;
 END$$
 
+DROP PROCEDURE IF EXISTS `checkMenuItemExist`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `checkMenuItemExist` (IN `p_menu_item_id` INT)   BEGIN
+	SELECT COUNT(*) AS total
+    FROM menu_item
+    WHERE menu_item_id = p_menu_item_id;
+END$$
+
+DROP PROCEDURE IF EXISTS `checkSystemActionExist`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `checkSystemActionExist` (IN `p_system_action_id` INT)   BEGIN
+	SELECT COUNT(*) AS total
+    FROM system_action
+    WHERE system_action_id = p_system_action_id;
+END$$
+
 DROP PROCEDURE IF EXISTS `deleteAppModule`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `deleteAppModule` (IN `p_app_module_id` INT)   BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
@@ -156,6 +170,36 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `deleteMenuGroup` (IN `p_menu_group_
     START TRANSACTION;
 
     DELETE FROM menu_group WHERE menu_group_id = p_menu_group_id;
+
+    COMMIT;
+END$$
+
+DROP PROCEDURE IF EXISTS `deleteMenuItem`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `deleteMenuItem` (IN `p_menu_item_id` INT)   BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    DELETE FROM role_permission WHERE menu_item_id = p_menu_item_id;
+    DELETE FROM menu_item WHERE menu_item_id = p_menu_item_id;
+
+    COMMIT;
+END$$
+
+DROP PROCEDURE IF EXISTS `deleteSystemAction`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `deleteSystemAction` (IN `p_system_action_id` INT)   BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    DELETE FROM role_system_action_permission WHERE system_action_id = p_system_action_id;
+    DELETE FROM system_action WHERE system_action_id = p_system_action_id;
 
     COMMIT;
 END$$
@@ -250,6 +294,64 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `generateMenuItemOptions` (IN `p_men
     END IF;
 END$$
 
+DROP PROCEDURE IF EXISTS `generateMenuItemTable`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `generateMenuItemTable` (IN `p_filter_by_app_module` TEXT, IN `p_filter_by_menu_group` TEXT, IN `p_filter_by_parent_id` TEXT)   BEGIN
+    DECLARE query TEXT;
+    DECLARE filter_conditions TEXT DEFAULT '';
+
+    SET query = 'SELECT menu_item_id, menu_item_name, menu_group_name, app_module_name, parent_name, order_sequence 
+                FROM menu_item ';
+
+    IF p_filter_by_app_module IS NOT NULL AND p_filter_by_app_module <> '' THEN
+        SET filter_conditions = CONCAT(filter_conditions, ' app_module_id IN (', p_filter_by_app_module, ')');
+    END IF;
+
+    IF p_filter_by_menu_group IS NOT NULL AND p_filter_by_menu_group <> '' THEN
+        IF filter_conditions <> '' THEN
+            SET filter_conditions = CONCAT(filter_conditions, ' AND ');
+        END IF;
+        SET filter_conditions = CONCAT(filter_conditions, ' menu_group_id IN (', p_filter_by_menu_group, ')');
+    END IF;
+
+    IF p_filter_by_menu_group IS NOT NULL AND p_filter_by_menu_group <> '' THEN
+        IF filter_conditions <> '' THEN
+            SET filter_conditions = CONCAT(filter_conditions, ' AND ');
+        END IF;
+        SET filter_conditions = CONCAT(filter_conditions, ' menu_group_id IN (', p_filter_by_menu_group, ')');
+    END IF;
+
+    IF p_filter_by_parent_id IS NOT NULL AND p_filter_by_parent_id <> '' THEN
+        IF filter_conditions <> '' THEN
+            SET filter_conditions = CONCAT(filter_conditions, ' AND ');
+        END IF;
+        SET filter_conditions = CONCAT(filter_conditions, ' parent_id IN (', p_filter_by_parent_id, ')');
+    END IF;
+
+    IF filter_conditions <> '' THEN
+        SET query = CONCAT(query, ' WHERE ', filter_conditions);
+    END IF;
+
+    SET query = CONCAT(query, ' ORDER BY menu_item_name');
+
+    PREPARE stmt FROM query;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+END$$
+
+DROP PROCEDURE IF EXISTS `generateSystemActionOptions`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `generateSystemActionOptions` ()   BEGIN
+    SELECT system_action_id, system_action_name 
+    FROM system_action 
+    ORDER BY system_action_name;
+END$$
+
+DROP PROCEDURE IF EXISTS `generateSystemActionTable`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `generateSystemActionTable` ()   BEGIN
+    SELECT system_action_id, system_action_name, system_action_description 
+    FROM system_action
+    ORDER BY system_action_id;
+END$$
+
 DROP PROCEDURE IF EXISTS `getAppModule`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getAppModule` (IN `p_app_module_id` INT)   BEGIN
 	SELECT * FROM app_module
@@ -302,6 +404,12 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getSecuritySetting` (IN `p_security
 	WHERE security_setting_id = p_security_setting_id;
 END$$
 
+DROP PROCEDURE IF EXISTS `getSystemAction`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getSystemAction` (IN `p_system_action_id` INT)   BEGIN
+	SELECT * FROM system_action
+	WHERE system_action_id = p_system_action_id;
+END$$
+
 DROP PROCEDURE IF EXISTS `getUploadSetting`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getUploadSetting` (IN `p_upload_setting_id` INT)   BEGIN
 	SELECT * FROM upload_setting
@@ -318,6 +426,14 @@ DROP PROCEDURE IF EXISTS `insertPasswordHistory`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `insertPasswordHistory` (IN `p_user_account_id` INT, IN `p_password` VARCHAR(255))   BEGIN
     INSERT INTO password_history (user_account_id, password) 
     VALUES (p_user_account_id, p_password);
+END$$
+
+DROP PROCEDURE IF EXISTS `insertProduct`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `insertProduct` (IN `p_product_category_id` INT, IN `p_product_subcategory_id` INT, IN `p_company_id` INT, IN `p_stock_number` VARCHAR(100), IN `p_engine_number` VARCHAR(100), IN `p_chassis_number` VARCHAR(100), IN `p_plate_number` VARCHAR(100), IN `p_description` VARCHAR(1000), IN `p_warehouse_id` INT, IN `p_body_type_id` INT, IN `p_length` DOUBLE, IN `p_length_unit` INT, IN `p_running_hours` DOUBLE, IN `p_mileage` DOUBLE, IN `p_color_id` INT, IN `p_product_cost` DOUBLE, IN `p_product_price` DOUBLE, IN `p_remarks` VARCHAR(1000), IN `p_orcr_no` VARCHAR(200), IN `p_orcr_date` DATE, IN `p_orcr_expiry_date` DATE, IN `p_received_from` VARCHAR(500), IN `p_received_from_address` VARCHAR(1000), IN `p_received_from_id_type` INT, IN `p_received_from_id_number` VARCHAR(200), IN `p_unit_description` VARCHAR(1000), IN `p_rr_date` DATE, IN `p_rr_no` VARCHAR(100), IN `p_supplier_id` INT, IN `p_ref_no` VARCHAR(200), IN `p_brand_id` INT, IN `p_cabin_id` INT, IN `p_model_id` INT, IN `p_make_id` INT, IN `p_class_id` INT, IN `p_mode_of_acquisition_id` INT, IN `p_broker` VARCHAR(200), IN `p_registered_owner` VARCHAR(300), IN `p_mode_of_registration` VARCHAR(300), IN `p_year_model` VARCHAR(10), IN `p_arrival_date` DATE, IN `p_checklist_date` DATE, IN `p_fx_rate` DATE, IN `p_unit_cost` DOUBLE, IN `p_package_deal` DOUBLE, IN `p_taxes_duties` DOUBLE, IN `p_freight` DOUBLE, IN `p_lto_registration` DOUBLE, IN `p_royalties` DOUBLE, IN `p_conversion` DOUBLE, IN `p_arrastre` DOUBLE, IN `p_wharrfage` DOUBLE, IN `p_insurance` DOUBLE, IN `p_aircon` DOUBLE, IN `p_import_permit` DOUBLE, IN `p_others` DOUBLE, IN `p_sub_total` DOUBLE, IN `p_total_landed_cost` DOUBLE, IN `p_with_cr` VARCHAR(5), IN `p_with_plate` VARCHAR(5), IN `p_returned_to_supplier` VARCHAR(500), IN `p_last_log_by` INT, OUT `p_product_id` INT)   BEGIN
+    INSERT INTO product (product_category_id, product_subcategory_id, company_id, stock_number, engine_number, chassis_number, plate_number, description, warehouse_id, body_type_id, length, length_unit, running_hours, mileage, color_id, product_cost, product_price, remarks, orcr_no, orcr_date, orcr_expiry_date, received_from, received_from_address, received_from_id_type, received_from_id_number, unit_description, rr_date, rr_no, supplier_id, ref_no, brand_id, cabin_id, model_id, make_id, class_id, mode_of_acquisition_id, broker, registered_owner, mode_of_registration, year_model, arrival_date, checklist_date, fx_rate, unit_cost, package_deal, taxes_duties, freight, lto_registration, royalties, conversion, arrastre, wharrfage, insurance, aircon, import_permit, others, sub_total, total_landed_cost, with_cr, with_plate, returned_to_supplier, last_log_by) 
+	VALUES(p_product_category_id, p_product_subcategory_id, p_company_id, p_stock_number, p_engine_number, p_chassis_number, p_plate_number, p_description, p_warehouse_id, p_body_type_id, p_length, p_length_unit, p_running_hours, p_mileage, p_color_id, p_product_cost, p_product_price, p_remarks, p_orcr_no, p_orcr_date, p_orcr_expiry_date, p_received_from, p_received_from_address, p_received_from_id_type, p_received_from_id_number, p_unit_description, p_rr_date, p_rr_no, p_supplier_id, p_ref_no, p_brand_id, p_cabin_id, p_model_id, p_make_id, p_class_id, p_mode_of_acquisition_id, p_broker, p_registered_owner, p_mode_of_registration, p_year_model, p_arrival_date, p_checklist_date, p_fx_rate, p_unit_cost, p_package_deal, p_taxes_duties, p_freight, p_lto_registration, p_royalties, p_conversion, p_arrastre, p_wharrfage, p_insurance, p_aircon, p_import_permit, p_others, p_sub_total, p_total_landed_cost, p_with_cr, p_with_plate, p_returned_to_supplier, p_last_log_by);
+	
+    SET p_product_id = LAST_INSERT_ID();
 END$$
 
 DROP PROCEDURE IF EXISTS `saveAppModule`$$
@@ -404,6 +520,83 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `saveMenuGroup` (IN `p_menu_group_id
         WHERE menu_group_id = p_menu_group_id;
 
         SET p_new_menu_group_id = p_menu_group_id;
+    END IF;
+
+    COMMIT;
+END$$
+
+DROP PROCEDURE IF EXISTS `saveMenuItem`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `saveMenuItem` (IN `p_menu_item_id` INT, IN `p_menu_item_name` VARCHAR(100), IN `p_menu_item_url` VARCHAR(50), IN `p_menu_item_icon` VARCHAR(50), IN `p_menu_group_id` INT, IN `p_menu_group_name` VARCHAR(100), IN `p_app_module_id` INT, IN `p_app_module_name` VARCHAR(100), IN `p_parent_id` INT, IN `p_parent_name` VARCHAR(100), IN `p_order_sequence` TINYINT(10), IN `p_last_log_by` INT, OUT `p_new_menu_item_id` INT)   BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    IF p_menu_item_id IS NULL OR NOT EXISTS (SELECT 1 FROM menu_item WHERE menu_item_id = p_menu_item_id) THEN
+        INSERT INTO menu_item (menu_item_name, menu_item_url, menu_item_icon, menu_group_id, menu_group_name, app_module_id, app_module_name, parent_id, parent_name, order_sequence, last_log_by) 
+        VALUES(p_menu_item_name, p_menu_item_url, p_menu_item_icon, p_menu_group_id, p_menu_group_name, p_app_module_id, p_app_module_name, p_parent_id, p_parent_name, p_order_sequence, p_last_log_by);
+        
+        SET p_new_menu_item_id = LAST_INSERT_ID();
+    ELSE
+        UPDATE role_permission
+        SET menu_item_name = p_menu_item_name,
+            last_log_by = p_last_log_by
+        WHERE menu_item_id = p_menu_item_id;
+        
+        UPDATE menu_item
+        SET parent_name = p_menu_item_name,
+            last_log_by = p_last_log_by
+        WHERE parent_id = p_menu_item_id;
+        
+        UPDATE menu_item
+        SET menu_item_name = p_menu_item_name,
+            menu_item_url = p_menu_item_url,
+            menu_item_icon = p_menu_item_icon,
+            menu_group_id = p_menu_group_id,
+            menu_group_name = p_menu_group_name,
+            app_module_id = p_app_module_id,
+            app_module_name = p_app_module_name,
+            parent_id = p_parent_id,
+            parent_name = p_parent_name,
+            order_sequence = p_order_sequence,
+            last_log_by = p_last_log_by
+        WHERE menu_item_id = p_menu_item_id;
+
+        SET p_new_menu_item_id = p_menu_item_id;
+    END IF;
+
+    COMMIT;
+END$$
+
+DROP PROCEDURE IF EXISTS `saveSystemAction`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `saveSystemAction` (IN `p_system_action_id` INT, IN `p_system_action_name` VARCHAR(100), IN `p_system_action_description` VARCHAR(200), IN `p_last_log_by` INT, OUT `p_new_system_action_id` INT)   BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    IF p_system_action_id IS NULL OR NOT EXISTS (SELECT 1 FROM system_action WHERE system_action_id = p_system_action_id) THEN
+        INSERT INTO system_action (system_action_name, system_action_description, last_log_by) 
+        VALUES(p_system_action_name, p_system_action_description, p_last_log_by);
+        
+        SET p_new_system_action_id = LAST_INSERT_ID();
+    ELSE
+        UPDATE role_system_action_permission
+        SET system_action_name = p_system_action_name,
+            last_log_by = p_last_log_by
+        WHERE system_action_id = p_system_action_id;
+        
+        UPDATE system_action
+        SET system_action_name = p_system_action_name,
+            system_action_description = p_system_action_description,
+            last_log_by = p_last_log_by
+        WHERE system_action_id = p_system_action_id;
+
+        SET p_new_system_action_id = p_system_action_id;
     END IF;
 
     COMMIT;
@@ -760,7 +953,12 @@ INSERT INTO `audit_log` (`audit_log_id`, `table_name`, `reference_id`, `log`, `c
 (87, 'menu_group', 3, 'Menu group created.', 2, '2024-10-04 12:27:08', '2024-10-04 12:27:08'),
 (88, 'menu_group', 3, 'Menu group changed.<br/><br/>Menu Group Name: test -> <br/>App Module: Customer -> CRMS<br/>', 2, '2024-10-04 12:30:14', '2024-10-04 12:30:14'),
 (89, 'menu_group', 3, 'Menu group changed.<br/><br/>Menu Group Name:  -> test<br/>', 2, '2024-10-04 13:19:36', '2024-10-04 13:19:36'),
-(90, 'menu_group', 4, 'Menu group created.', 2, '2024-10-04 13:31:18', '2024-10-04 13:31:18');
+(90, 'menu_group', 4, 'Menu group created.', 2, '2024-10-04 13:31:18', '2024-10-04 13:31:18'),
+(91, 'user_account', 2, 'User account changed.<br/>', 2, '2024-10-08 14:45:27', '2024-10-08 14:45:27'),
+(92, 'user_account', 2, 'User account changed.<br/>', 2, '2024-10-08 14:45:27', '2024-10-08 14:45:27'),
+(93, 'user_account', 2, 'User account changed.<br/>Last Connection Date: 2024-10-04 09:27:05 -> 2024-10-08 14:45:44<br/>', 2, '2024-10-08 14:45:44', '2024-10-08 14:45:44'),
+(94, 'menu_item', 11, 'Menu item created.', 2, '2024-10-08 17:05:19', '2024-10-08 17:05:19'),
+(95, 'menu_item', 11, 'Menu item changed. <br/>Menu Item Name: test -> asdasdasd<br/>Menu Item URL: asd -> asdasdasdasd<br/>Menu Item Icon: asd -> asdasdasd<br/>Menu Group: Administration -> Technical<br/>Parent: App Module -> General Settings<br/>Order Sequence: 12 -> 127<br/>', 2, '2024-10-08 17:05:38', '2024-10-08 17:05:38');
 
 -- --------------------------------------------------------
 
@@ -1692,7 +1890,7 @@ CREATE TABLE `user_account` (
 
 INSERT INTO `user_account` (`user_account_id`, `file_as`, `email`, `username`, `password`, `profile_picture`, `locked`, `active`, `last_failed_login_attempt`, `failed_login_attempts`, `last_connection_date`, `password_expiry_date`, `reset_token`, `reset_token_expiry_date`, `receive_notification`, `two_factor_auth`, `otp`, `otp_expiry_date`, `failed_otp_attempts`, `last_password_change`, `account_lock_duration`, `last_password_reset`, `multiple_session`, `session_token`, `linked_id`, `created_date`, `last_log_by`) VALUES
 (1, 'Digify Bot', 'digifybot@gmail.com', 'digifybot', 'Lu%2Be%2BRZfTv%2F3T0GR%2Fwes8QPJvE3Etx1p7tmryi74LNk%3D', NULL, 'WkgqlkcpSeEd7eWC8gl3iPwksfGbJYGy3VcisSyDeQ0', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20', NULL, NULL, NULL, 'aUIRg2jhRcYVcr0%2BiRDl98xjv81aR4Ux63bP%2BF2hQbE%3D', NULL, NULL, 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'WkgqlkcpSeEd7eWC8gl3iPwksfGbJYGy3VcisSyDeQ0', NULL, NULL, NULL, NULL, NULL, NULL, 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', NULL, NULL, '2024-09-27 11:49:59', 1),
-(2, 'Administrator', 'lawrenceagulto.317@gmail.com', 'ldagulto', 'ZW2SGXn0B41ZvY7Nl92uFaBW1LRhTxwaem5sgn8clRE%3D', NULL, '9lZtEofygdjMs3EsZV1V38KQF%2FPjp7btRHLFnck7DpM%3D', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20', '0000-00-00 00:00:00', '', '2024-10-04 09:27:05', 'j3TPQ%2FkOvrVcj0dMsNNs%2BicQ3gQo7W812x4%2BN2Q72oM%3D', 'wWt3OtHh0FKAhB31glK%2FdLfDTWMQdhqvZ%2FtRgmWl8EU%3D', 'P4tR005eyn3kNWp4tUtAQ17HIhZPD2zHiMAUfRmlAiAM6qi4fe8MjMopfWWK3xk9', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'FCzd6CoviUxjBRefZGkS2tHm%2F9SzI6xStg0vbRb8bI0%3D', 'ksA0jn4sGmBX0B7J31bR7K6nTOQgX%2BohGLYGQ45lpVF28AJpQL5Vg42oaKR0n3Ix', '', '2024-09-27 12:27:47', '', NULL, 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'j4Z9AE49seQWELGEAuaZ%2BldS1CSwTdpGnyhaqu9NHJI%3D', NULL, '2024-09-27 11:49:59', 2);
+(2, 'Administrator', 'lawrenceagulto.317@gmail.com', 'ldagulto', 'ZW2SGXn0B41ZvY7Nl92uFaBW1LRhTxwaem5sgn8clRE%3D', NULL, '9lZtEofygdjMs3EsZV1V38KQF%2FPjp7btRHLFnck7DpM%3D', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20', '0000-00-00 00:00:00', '', '2024-10-08 14:45:44', 'j3TPQ%2FkOvrVcj0dMsNNs%2BicQ3gQo7W812x4%2BN2Q72oM%3D', 'wWt3OtHh0FKAhB31glK%2FdLfDTWMQdhqvZ%2FtRgmWl8EU%3D', 'P4tR005eyn3kNWp4tUtAQ17HIhZPD2zHiMAUfRmlAiAM6qi4fe8MjMopfWWK3xk9', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'B7W81khRcWNXQ7yShVS6g2fWjaCI6wLnNGfl1%2FPsKDA%3D', 'smKdCPWyVhWkn%2Frk9GApld5fmK1H8y%2Bpfyu0N3rBsWT3ScbEqd3D5wA52QO%2FSXVc', '', '2024-09-27 12:27:47', '', NULL, 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'R3B20nEbsftFyerjO16JAehS18VA23EFt%2BNRVWOCVOM%3D', NULL, '2024-09-27 11:49:59', 2);
 
 --
 -- Triggers `user_account`
@@ -1955,7 +2153,7 @@ ALTER TABLE `app_module`
 -- AUTO_INCREMENT for table `audit_log`
 --
 ALTER TABLE `audit_log`
-  MODIFY `audit_log_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=91;
+  MODIFY `audit_log_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=96;
 
 --
 -- AUTO_INCREMENT for table `email_setting`
@@ -1985,7 +2183,7 @@ ALTER TABLE `menu_group`
 -- AUTO_INCREMENT for table `menu_item`
 --
 ALTER TABLE `menu_item`
-  MODIFY `menu_item_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `menu_item_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `notification_setting`

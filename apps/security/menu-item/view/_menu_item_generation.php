@@ -5,7 +5,6 @@ require('../../../../components/model/database-model.php');
 require('../../../../components/model/system-model.php');
 require('../../../../components/model/security-model.php');
 require('../../../../apps/security/authentication/model/authentication-model.php');
-require('../../../../apps/security/app-module/model/app-module-model.php');
 
 $databaseModel = new DatabaseModel();
 $systemModel = new SystemModel();
@@ -20,17 +19,21 @@ if(isset($_POST['type']) && !empty($_POST['type'])){
     
     switch ($type) {
         # -------------------------------------------------------------
-        case 'menu group table':
+        case 'menu item table':
             $filterAppModule = isset($_POST['app_module_filter']) && is_array($_POST['app_module_filter']) 
             ? "'" . implode("','", array_map('trim', $_POST['app_module_filter'])) . "'" 
             : null;
             $filterMenuGroup = isset($_POST['menu_group_filter']) && is_array($_POST['menu_group_filter']) 
             ? "'" . implode("','", array_map('trim', $_POST['menu_group_filter'])) . "'" 
             : null;
+            $filterParentID = isset($_POST['parent_id_filter']) && is_array($_POST['parent_id_filter']) 
+            ? "'" . implode("','", array_map('trim', $_POST['parent_id_filter'])) . "'" 
+            : null;
 
-            $sql = $databaseModel->getConnection()->prepare('CALL generateMenuItemTable(:filterAppModule, :filterMenuGroup)');
+            $sql = $databaseModel->getConnection()->prepare('CALL generateMenuItemTable(:filterAppModule, :filterMenuGroup, :filterParentID)');
             $sql->bindValue(':filterAppModule', $filterAppModule, PDO::PARAM_STR);
             $sql->bindValue(':filterMenuGroup', $filterMenuGroup, PDO::PARAM_STR);
+            $sql->bindValue(':filterParentID', $filterParentID, PDO::PARAM_STR);
             $sql->execute();
             $options = $sql->fetchAll(PDO::FETCH_ASSOC);
             $sql->closeCursor();
@@ -40,6 +43,7 @@ if(isset($_POST['type']) && !empty($_POST['type'])){
                 $menuItemName = $row['menu_item_name'];
                 $menuGroupName = $row['menu_group_name'];
                 $appModuleName = $row['app_module_name'];
+                $parentName = $row['parent_name'];
                 $orderSequence = $row['order_sequence'];
 
                 $menuItemIDEncrypted = $securityModel->encryptData($menuItemID);
@@ -49,6 +53,7 @@ if(isset($_POST['type']) && !empty($_POST['type'])){
                     'MENU_ITEM_NAME' => $menuItemName,
                     'MENU_GROUP_NAME' => $menuGroupName,
                     'APP_MODULE_NAME' => $appModuleName,
+                    'PARENT_NAME' => $parentName,
                     'ORDER_SEQUENCE' => $orderSequence,
                     'LINK' => $pageLink .'&id='. $menuItemIDEncrypted
                 ];
@@ -59,10 +64,12 @@ if(isset($_POST['type']) && !empty($_POST['type'])){
         # -------------------------------------------------------------
 
         # -------------------------------------------------------------
-        case 'menu group options':
+        case 'menu item options':
             $multiple = (isset($_POST['multiple'])) ? filter_input(INPUT_POST, 'multiple', FILTER_VALIDATE_INT) : false;
+            $menuItemID = isset($_POST['menu_item_id']) ? filter_input(INPUT_POST, 'menu_item_id', FILTER_VALIDATE_INT) : null;
 
-            $sql = $databaseModel->getConnection()->prepare('CALL generateMenuItemOptions()');
+            $sql = $databaseModel->getConnection()->prepare('CALL generateMenuItemOptions(:menuItemID)');
+            $sql->bindValue(':menuItemID', $menuItemID, PDO::PARAM_INT);
             $sql->execute();
             $options = $sql->fetchAll(PDO::FETCH_ASSOC);
             $sql->closeCursor();

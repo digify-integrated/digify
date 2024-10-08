@@ -20,7 +20,7 @@
                 <div class="col-md-12">
                     <div class="mb-3">
                         <label class="form-label" for="app_module_description">Description <span class="text-danger">*</span></label>
-                        <textarea class="form-control maxlength" id="app_module_description" name="app_module_description" maxlength="100" rows="3"></textarea>
+                        <textarea class="form-control maxlength" id="app_module_description" name="app_module_description" maxlength="500" rows="3"></textarea>
                     </div>
                 </div>
             </div>

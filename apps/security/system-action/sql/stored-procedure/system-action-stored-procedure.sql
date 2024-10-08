@@ -2,7 +2,10 @@ DELIMITER //
 
 /* Check Stored Procedure */
 
-CREATE PROCEDURE checkSystemActionExist (IN p_system_action_id INT)
+DROP PROCEDURE IF EXISTS checkSystemActionExist//
+CREATE PROCEDURE checkSystemActionExist(
+    IN p_system_action_id INT
+)
 BEGIN
 	SELECT COUNT(*) AS total
     FROM system_action
@@ -11,21 +14,29 @@ END //
 
 /* ----------------------------------------------------------------------------------------------------------------------------- */
 
-/* Insert Stored Procedure */
+/* Get Stored Procedure */
 
-CREATE PROCEDURE insertSystemAction(IN p_system_action_name VARCHAR(100), IN p_system_action_description VARCHAR(200), IN p_last_log_by INT, OUT p_system_action_id INT)
+DROP PROCEDURE IF EXISTS getSystemAction//
+CREATE PROCEDURE getSystemAction(
+    IN p_system_action_id INT
+)
 BEGIN
-    INSERT INTO system_action (system_action_name, system_action_description, last_log_by) 
-	VALUES(p_system_action_name, p_system_action_description, p_last_log_by);
-	
-    SET p_system_action_id = LAST_INSERT_ID();
+	SELECT * FROM system_action
+	WHERE system_action_id = p_system_action_id;
 END //
 
 /* ----------------------------------------------------------------------------------------------------------------------------- */
 
-/* Update Stored Procedure */
+/* Save Stored Procedure */
 
-CREATE PROCEDURE updateSystemAction(IN p_system_action_id INT, IN p_system_action_name VARCHAR(100), IN p_system_action_description VARCHAR(200), IN p_last_log_by INT)
+DROP PROCEDURE IF EXISTS saveSystemAction//
+CREATE PROCEDURE saveSystemAction(
+    IN p_system_action_id INT, 
+    IN p_system_action_name VARCHAR(100), 
+    IN p_system_action_description VARCHAR(200),
+    IN p_last_log_by INT, 
+    OUT p_new_system_action_id INT
+)
 BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
@@ -34,25 +45,37 @@ BEGIN
 
     START TRANSACTION;
 
-    UPDATE role_system_action_permission
-    SET system_action_name = p_system_action_name,
-        last_log_by = p_last_log_by
-    WHERE system_action_id = p_system_action_id;
+    IF p_system_action_id IS NULL OR NOT EXISTS (SELECT 1 FROM system_action WHERE system_action_id = p_system_action_id) THEN
+        INSERT INTO system_action (system_action_name, system_action_description, last_log_by) 
+        VALUES(p_system_action_name, p_system_action_description, p_last_log_by);
+        
+        SET p_new_system_action_id = LAST_INSERT_ID();
+    ELSE
+        UPDATE role_system_action_permission
+        SET system_action_name = p_system_action_name,
+            last_log_by = p_last_log_by
+        WHERE system_action_id = p_system_action_id;
+        
+        UPDATE system_action
+        SET system_action_name = p_system_action_name,
+            system_action_description = p_system_action_description,
+            last_log_by = p_last_log_by
+        WHERE system_action_id = p_system_action_id;
 
-	UPDATE system_action
-    SET system_action_name = p_system_action_name,
-        system_action_description = p_system_action_description,
-        last_log_by = p_last_log_by
-    WHERE system_action_id = p_system_action_id;
+        SET p_new_system_action_id = p_system_action_id;
+    END IF;
 
     COMMIT;
 END //
 
 /* ----------------------------------------------------------------------------------------------------------------------------- */
 
-/* Delete Stored Procedures */
+/* Delete Stored Procedure */
 
-CREATE PROCEDURE deleteSystemAction(IN p_system_action_id INT)
+DROP PROCEDURE IF EXISTS deleteSystemAction//
+CREATE PROCEDURE deleteSystemAction(
+    IN p_system_action_id INT
+)
 BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
@@ -69,30 +92,21 @@ END //
 
 /* ----------------------------------------------------------------------------------------------------------------------------- */
 
-/* Get Stored Procedures */
-
-CREATE PROCEDURE getSystemAction(IN p_system_action_id INT)
-BEGIN
-	SELECT * FROM system_action
-    WHERE system_action_id = p_system_action_id;
-END //
-
-/* ----------------------------------------------------------------------------------------------------------------------------- */
-
 /* Generate Stored Procedure */
 
+DROP PROCEDURE IF EXISTS generateSystemActionTable//
 CREATE PROCEDURE generateSystemActionTable()
 BEGIN
-	SELECT system_action_id, system_action_name, system_action_description
-    FROM system_action 
+    SELECT system_action_id, system_action_name, system_action_description 
+    FROM system_action
     ORDER BY system_action_id;
 END //
 
-CREATE PROCEDURE generateRoleSystemActionDualListBoxOptions(IN p_role_id INT)
+DROP PROCEDURE IF EXISTS generateSystemActionOptions//
+CREATE PROCEDURE generateSystemActionOptions()
 BEGIN
-	SELECT system_action_id, system_action_name
+    SELECT system_action_id, system_action_name 
     FROM system_action 
-    WHERE system_action_id NOT IN (SELECT system_action_id FROM role_system_action_permission WHERE role_id = p_role_id)
     ORDER BY system_action_name;
 END //
 
