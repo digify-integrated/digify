@@ -7,6 +7,7 @@ require_once '../../../../components/model/security-model.php';
 require_once '../../../../components/model/system-model.php';
 require_once '../../authentication/model/authentication-model.php';
 require_once '../../security-setting/model/security-setting-model.php';
+require_once '../../system-action/model/system-action-model.php';
 
 require_once '../../../../assets/libs/PhpSpreadsheet/autoload.php';
 

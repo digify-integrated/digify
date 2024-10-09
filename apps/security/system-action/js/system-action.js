@@ -169,7 +169,7 @@ function systemActionTable(datatable_name) {
 
     const columnDefs = [
         { width: '1%', bSortable: false, targets: 0 },
-        { width: 'auto', targets: 1 }
+        { width: '99%', targets: 1 }
     ];
 
     const lengthMenu = [[10, 5, 25, 50, 100, -1], [10, 5, 25, 50, 100, 'All']];

@@ -54,6 +54,51 @@
     </div>
 </div>
 
+<div class="card card-body">
+    <div class="row">
+        <div class="col-md-3 text-left mt-2">
+            <div class="card-actions ms-auto d-flex button-group">
+                <h5 class="card-title mb-0">Role Permission</h5>
+            </div>
+        </div>
+        <?php require_once('components/view/_datatable_search.php'); ?>
+        <div class="col-md-3 text-end d-flex justify-content-md-end justify-content-center mt-3 mt-md-0">
+            <div class="card-actions cursor-pointer ms-auto d-flex button-group">
+                <button type="button" class="btn btn-success mb-0 px-4" data-bs-toggle="offcanvas" data-bs-target="#filter-offcanvas" aria-controls="filter-offcanvas">Assign</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="datatables">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table id="role-permission-table" class="table w-100 table-hover display text-nowrap dataTable">
+                            <thead class="text-dark">
+                                <tr>
+                                    <th>Role</th>
+                                    <th>Read</th>
+                                    <th>Create</th>
+                                    <th>Write</th>
+                                    <th>Delete</th>
+                                    <th>Import</th>
+                                    <th>Export</th>
+                                    <th>Log Notes</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="modal fade" id="menu-item-modal" tabindex="-1" aria-labelledby="menu-item-modal" aria-hidden="true">
     <div class="modal-dialog modal-dialog-scrollable modal-r">
         <div class="modal-content">
@@ -115,4 +160,5 @@
     </div>
 </div>
 
+<?php $logNotesAccess['total'] > 0 ? require_once('components/view/_log_notes_modal.php') : ''; ?>
 <?php require_once('components/view/_internal_log_notes.php'); ?>

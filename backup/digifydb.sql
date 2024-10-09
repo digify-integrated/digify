@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 08, 2024 at 11:35 AM
+-- Generation Time: Oct 09, 2024 at 11:33 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -137,6 +137,13 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `checkMenuItemExist` (IN `p_menu_ite
 	SELECT COUNT(*) AS total
     FROM menu_item
     WHERE menu_item_id = p_menu_item_id;
+END$$
+
+DROP PROCEDURE IF EXISTS `checkRolePermissionExist`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `checkRolePermissionExist` (IN `p_role_permission_id` INT)   BEGIN
+	SELECT COUNT(*) AS total
+    FROM role_permission
+    WHERE role_permission_id = p_role_permission_id;
 END$$
 
 DROP PROCEDURE IF EXISTS `checkSystemActionExist`$$
@@ -278,6 +285,13 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `generateMenuGroupTable` (IN `p_filt
     PREPARE stmt FROM query;
     EXECUTE stmt;
     DEALLOCATE PREPARE stmt;
+END$$
+
+DROP PROCEDURE IF EXISTS `generateMenuItemAssignedRoleTable`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `generateMenuItemAssignedRoleTable` (IN `p_menu_item_id` INT)   BEGIN
+    SELECT role_permission_id, role_name, read_access, write_access, create_access, delete_access, import_access, export_access, log_notes_access 
+    FROM role_permission
+    WHERE menu_item_id = p_menu_item_id;
 END$$
 
 DROP PROCEDURE IF EXISTS `generateMenuItemOptions`$$
@@ -744,6 +758,55 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `updateResetTokenAsExpired` (IN `p_u
     WHERE user_account_id = p_user_account_id;
 END$$
 
+DROP PROCEDURE IF EXISTS `updateRolePermission`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `updateRolePermission` (IN `p_role_permission_id` INT, IN `p_access_type` VARCHAR(10), IN `p_access` TINYINT(1), IN `p_last_log_by` INT)   BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    IF p_access_type = 'read' THEN
+        UPDATE role_permission
+        SET read_access = p_access,
+            last_log_by = p_last_log_by
+        WHERE role_permission_id = p_role_permission_id;
+    ELSEIF p_access_type = 'write' THEN
+        UPDATE role_permission
+        SET write_access = p_access,
+            last_log_by = p_last_log_by
+        WHERE role_permission_id = p_role_permission_id;
+    ELSEIF p_access_type = 'create' THEN
+        UPDATE role_permission
+        SET create_access = p_access,
+            last_log_by = p_last_log_by
+        WHERE role_permission_id = p_role_permission_id;
+    ELSEIF p_access_type = 'delete' THEN
+        UPDATE role_permission
+        SET delete_access = p_access,
+            last_log_by = p_last_log_by
+        WHERE role_permission_id = p_role_permission_id;
+    ELSEIF p_access_type = 'import' THEN
+        UPDATE role_permission
+        SET import_access = p_access,
+            last_log_by = p_last_log_by
+        WHERE role_permission_id = p_role_permission_id;
+    ELSEIF p_access_type = 'export' THEN
+        UPDATE role_permission
+        SET export_access = p_access,
+            last_log_by = p_last_log_by
+        WHERE role_permission_id = p_role_permission_id;
+    ELSE
+        UPDATE role_permission
+        SET log_notes_access = p_access,
+            last_log_by = p_last_log_by
+        WHERE role_permission_id = p_role_permission_id;
+    END IF;
+
+    COMMIT;
+END$$
+
 DROP PROCEDURE IF EXISTS `updateUserPassword`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `updateUserPassword` (IN `p_user_account_id` INT, IN `p_password` VARCHAR(255), IN `p_password_expiry_date` VARCHAR(255), IN `p_locked` VARCHAR(255), IN `p_failed_login_attempts` VARCHAR(255), IN `p_account_lock_duration` VARCHAR(255))   BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
@@ -958,7 +1021,12 @@ INSERT INTO `audit_log` (`audit_log_id`, `table_name`, `reference_id`, `log`, `c
 (92, 'user_account', 2, 'User account changed.<br/>', 2, '2024-10-08 14:45:27', '2024-10-08 14:45:27'),
 (93, 'user_account', 2, 'User account changed.<br/>Last Connection Date: 2024-10-04 09:27:05 -> 2024-10-08 14:45:44<br/>', 2, '2024-10-08 14:45:44', '2024-10-08 14:45:44'),
 (94, 'menu_item', 11, 'Menu item created.', 2, '2024-10-08 17:05:19', '2024-10-08 17:05:19'),
-(95, 'menu_item', 11, 'Menu item changed. <br/>Menu Item Name: test -> asdasdasd<br/>Menu Item URL: asd -> asdasdasdasd<br/>Menu Item Icon: asd -> asdasdasd<br/>Menu Group: Administration -> Technical<br/>Parent: App Module -> General Settings<br/>Order Sequence: 12 -> 127<br/>', 2, '2024-10-08 17:05:38', '2024-10-08 17:05:38');
+(95, 'menu_item', 11, 'Menu item changed. <br/>Menu Item Name: test -> asdasdasd<br/>Menu Item URL: asd -> asdasdasdasd<br/>Menu Item Icon: asd -> asdasdasd<br/>Menu Group: Administration -> Technical<br/>Parent: App Module -> General Settings<br/>Order Sequence: 12 -> 127<br/>', 2, '2024-10-08 17:05:38', '2024-10-08 17:05:38'),
+(96, 'user_account', 2, 'User account changed.<br/>', 2, '2024-10-09 11:54:25', '2024-10-09 11:54:25'),
+(97, 'user_account', 2, 'User account changed.<br/>', 2, '2024-10-09 11:54:25', '2024-10-09 11:54:25'),
+(98, 'user_account', 2, 'User account changed.<br/>Last Connection Date: 2024-10-08 14:45:44 -> 2024-10-09 11:54:50<br/>', 2, '2024-10-09 11:54:50', '2024-10-09 11:54:50'),
+(99, 'system_action', 1, 'System action created.', 2, '2024-10-09 12:15:52', '2024-10-09 12:15:52'),
+(100, 'system_action', 1, 'System action changed. <br/>System Action Name: asd -> asdasd<br/>System Action Description: asd -> asdasd<br/>', 2, '2024-10-09 12:16:19', '2024-10-09 12:16:19');
 
 -- --------------------------------------------------------
 
@@ -1557,7 +1625,7 @@ CREATE TABLE `role_permission` (
 INSERT INTO `role_permission` (`role_permission_id`, `role_id`, `role_name`, `menu_item_id`, `menu_item_name`, `read_access`, `write_access`, `create_access`, `delete_access`, `import_access`, `export_access`, `log_notes_access`, `date_assigned`, `created_date`, `last_log_by`) VALUES
 (1, 1, 'Administrator', 1, 'App Module', 1, 1, 1, 1, 1, 1, 1, '2024-09-27 16:45:02', '2024-09-27 16:45:02', 1),
 (2, 1, 'Administrator', 2, 'General Settings', 1, 1, 1, 1, 1, 1, 1, '2024-09-27 16:45:02', '2024-09-27 16:45:02', 1),
-(3, 1, 'Administrator', 3, 'Users & Companies', 1, 0, 0, 0, 0, 0, 0, '2024-09-27 16:45:02', '2024-09-27 16:45:02', 1),
+(3, 1, 'Administrator', 3, 'Users & Companies', 1, 0, 0, 0, 0, 0, 0, '2024-09-27 16:45:02', '2024-09-27 16:45:02', 2),
 (4, 1, 'Administrator', 4, 'User Account', 1, 1, 1, 1, 1, 1, 1, '2024-09-27 16:45:02', '2024-09-27 16:45:02', 1),
 (5, 1, 'Administrator', 5, 'Company', 1, 1, 1, 1, 1, 1, 1, '2024-09-27 16:45:02', '2024-09-27 16:45:02', 1),
 (6, 1, 'Administrator', 6, 'Role', 1, 1, 1, 1, 1, 1, 1, '2024-09-27 16:45:02', '2024-09-27 16:45:02', 1),
@@ -1890,7 +1958,7 @@ CREATE TABLE `user_account` (
 
 INSERT INTO `user_account` (`user_account_id`, `file_as`, `email`, `username`, `password`, `profile_picture`, `locked`, `active`, `last_failed_login_attempt`, `failed_login_attempts`, `last_connection_date`, `password_expiry_date`, `reset_token`, `reset_token_expiry_date`, `receive_notification`, `two_factor_auth`, `otp`, `otp_expiry_date`, `failed_otp_attempts`, `last_password_change`, `account_lock_duration`, `last_password_reset`, `multiple_session`, `session_token`, `linked_id`, `created_date`, `last_log_by`) VALUES
 (1, 'Digify Bot', 'digifybot@gmail.com', 'digifybot', 'Lu%2Be%2BRZfTv%2F3T0GR%2Fwes8QPJvE3Etx1p7tmryi74LNk%3D', NULL, 'WkgqlkcpSeEd7eWC8gl3iPwksfGbJYGy3VcisSyDeQ0', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20', NULL, NULL, NULL, 'aUIRg2jhRcYVcr0%2BiRDl98xjv81aR4Ux63bP%2BF2hQbE%3D', NULL, NULL, 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'WkgqlkcpSeEd7eWC8gl3iPwksfGbJYGy3VcisSyDeQ0', NULL, NULL, NULL, NULL, NULL, NULL, 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', NULL, NULL, '2024-09-27 11:49:59', 1),
-(2, 'Administrator', 'lawrenceagulto.317@gmail.com', 'ldagulto', 'ZW2SGXn0B41ZvY7Nl92uFaBW1LRhTxwaem5sgn8clRE%3D', NULL, '9lZtEofygdjMs3EsZV1V38KQF%2FPjp7btRHLFnck7DpM%3D', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20', '0000-00-00 00:00:00', '', '2024-10-08 14:45:44', 'j3TPQ%2FkOvrVcj0dMsNNs%2BicQ3gQo7W812x4%2BN2Q72oM%3D', 'wWt3OtHh0FKAhB31glK%2FdLfDTWMQdhqvZ%2FtRgmWl8EU%3D', 'P4tR005eyn3kNWp4tUtAQ17HIhZPD2zHiMAUfRmlAiAM6qi4fe8MjMopfWWK3xk9', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'B7W81khRcWNXQ7yShVS6g2fWjaCI6wLnNGfl1%2FPsKDA%3D', 'smKdCPWyVhWkn%2Frk9GApld5fmK1H8y%2Bpfyu0N3rBsWT3ScbEqd3D5wA52QO%2FSXVc', '', '2024-09-27 12:27:47', '', NULL, 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'R3B20nEbsftFyerjO16JAehS18VA23EFt%2BNRVWOCVOM%3D', NULL, '2024-09-27 11:49:59', 2);
+(2, 'Administrator', 'lawrenceagulto.317@gmail.com', 'ldagulto', 'ZW2SGXn0B41ZvY7Nl92uFaBW1LRhTxwaem5sgn8clRE%3D', NULL, '9lZtEofygdjMs3EsZV1V38KQF%2FPjp7btRHLFnck7DpM%3D', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20', '0000-00-00 00:00:00', '', '2024-10-09 11:54:50', 'j3TPQ%2FkOvrVcj0dMsNNs%2BicQ3gQo7W812x4%2BN2Q72oM%3D', 'wWt3OtHh0FKAhB31glK%2FdLfDTWMQdhqvZ%2FtRgmWl8EU%3D', 'P4tR005eyn3kNWp4tUtAQ17HIhZPD2zHiMAUfRmlAiAM6qi4fe8MjMopfWWK3xk9', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'C5lE%2BSaPOkNz3m%2B627Q248figN7I0qExBdDjiOb2H6k%3D', 'ZGcB4c0ilbqAXtUA70A3BWeXY2S1fx1WLZx0KQOfyZ8SsCclRc4dqumEHTinVPGn', '', '2024-09-27 12:27:47', '', NULL, 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', '%2FlIJ2gfKc6KtY5YhYbCfZKf4AoSmkN1yGa4Nej%2BkubM%3D', NULL, '2024-09-27 11:49:59', 2);
 
 --
 -- Triggers `user_account`
@@ -2153,7 +2221,7 @@ ALTER TABLE `app_module`
 -- AUTO_INCREMENT for table `audit_log`
 --
 ALTER TABLE `audit_log`
-  MODIFY `audit_log_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=96;
+  MODIFY `audit_log_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=101;
 
 --
 -- AUTO_INCREMENT for table `email_setting`
@@ -2249,7 +2317,7 @@ ALTER TABLE `security_setting`
 -- AUTO_INCREMENT for table `system_action`
 --
 ALTER TABLE `system_action`
-  MODIFY `system_action_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `system_action_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `upload_setting`

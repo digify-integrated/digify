@@ -9,7 +9,10 @@ BEGIN
     WHERE role_id = p_role_id;
 END //
 
-CREATE PROCEDURE checkRolePermissionExist(IN p_role_permission_id INT)
+DROP PROCEDURE IF EXISTS checkRolePermissionExist//
+CREATE PROCEDURE checkRolePermissionExist(
+    IN p_role_permission_id INT
+)
 BEGIN
 	SELECT COUNT(*) AS total
     FROM role_permission
@@ -98,8 +101,21 @@ BEGIN
     COMMIT;
 END //
 
-CREATE PROCEDURE updateRolePermission(IN p_role_permission_id INT, IN p_access_type VARCHAR(10), IN p_access TINYINT(1), IN p_last_log_by INT)
+DROP PROCEDURE IF EXISTS updateRolePermission//
+CREATE PROCEDURE updateRolePermission(
+    IN p_role_permission_id INT,
+    IN p_access_type VARCHAR(10),
+    IN p_access TINYINT(1),
+    IN p_last_log_by INT
+)
 BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
     IF p_access_type = 'read' THEN
         UPDATE role_permission
         SET read_access = p_access,
@@ -115,12 +131,29 @@ BEGIN
         SET create_access = p_access,
             last_log_by = p_last_log_by
         WHERE role_permission_id = p_role_permission_id;
-    ELSE
+    ELSEIF p_access_type = 'delete' THEN
         UPDATE role_permission
         SET delete_access = p_access,
             last_log_by = p_last_log_by
         WHERE role_permission_id = p_role_permission_id;
+    ELSEIF p_access_type = 'import' THEN
+        UPDATE role_permission
+        SET import_access = p_access,
+            last_log_by = p_last_log_by
+        WHERE role_permission_id = p_role_permission_id;
+    ELSEIF p_access_type = 'export' THEN
+        UPDATE role_permission
+        SET export_access = p_access,
+            last_log_by = p_last_log_by
+        WHERE role_permission_id = p_role_permission_id;
+    ELSE
+        UPDATE role_permission
+        SET log_notes_access = p_access,
+            last_log_by = p_last_log_by
+        WHERE role_permission_id = p_role_permission_id;
     END IF;
+
+    COMMIT;
 END //
 
 CREATE PROCEDURE updateRoleSystemActionPermission(IN p_role_system_action_permission_id INT, IN p_system_action_access TINYINT(1), IN p_last_log_by INT)

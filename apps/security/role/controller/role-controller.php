@@ -7,26 +7,29 @@ require_once '../../../../components/model/security-model.php';
 require_once '../../../../components/model/system-model.php';
 require_once '../../authentication/model/authentication-model.php';
 require_once '../../security-setting/model/security-setting-model.php';
-require_once '../../app-module/model/app-module-model.php';
-require_once '../../menu-group/model/menu-group-model.php';
+require_once '../../role/model/role-model.php';
+require_once '../../menu-item/model/menu-item-model.php';
+require_once '../../system-action/model/system-action-model.php';
 
 require_once '../../../../assets/libs/PhpSpreadsheet/autoload.php';
 
-$controller = new MenuGroupController(new MenuGroupModel(new DatabaseModel), new AuthenticationModel(new DatabaseModel, new SecurityModel), new AppModuleModel(new DatabaseModel), new SecurityModel(), new SystemModel());
+$controller = new RoleController(new RoleModel(new DatabaseModel), new AuthenticationModel(new DatabaseModel, new SecurityModel), new MenuItemModel(new DatabaseModel), new SystemActionModel(new DatabaseModel), new SecurityModel(), new SystemModel());
 $controller->handleRequest();
 
 # -------------------------------------------------------------
-class MenuGroupController {
-    private $menuGroupModel;
-    private $appModuleModel;
+class RoleController {
+    private $roleModel;
+    private $menuItemModel;
+    private $systemAction;
     private $authenticationModel;
     private $securityModel;
     private $systemModel;
 
     # -------------------------------------------------------------
-    public function __construct(MenuGroupModel $menuGroupModel, AuthenticationModel $authenticationModel, AppModuleModel $appModuleModel, SecurityModel $securityModel, SystemModel $systemModel) {
-        $this->menuGroupModel = $menuGroupModel;
-        $this->appModuleModel = $appModuleModel;
+    public function __construct(RoleModel $roleModel, AuthenticationModel $authenticationModel, MenuItemModel $menuItemModel, SystemActionModel $systemActionModel, SecurityModel $securityModel, SystemModel $systemModel) {
+        $this->roleModel = $roleModel;
+        $this->menuItemModel = $menuItemModel;
+        $this->systemActionModel = $systemActionModel;
         $this->authenticationModel = $authenticationModel;
         $this->securityModel = $securityModel;
         $this->systemModel = $systemModel;
@@ -103,20 +106,8 @@ class MenuGroupController {
             $transaction = isset($_POST['transaction']) ? $_POST['transaction'] : null;
 
             switch ($transaction) {
-                case 'add menu group':
-                    $this->addMenuGroup();
-                    break;
-                case 'update menu group':
-                    $this->updateMenuGroup();
-                    break;
-                case 'get menu group details':
-                    $this->getMenuGroupDetails();
-                    break;
-                case 'delete menu group':
-                    $this->deleteMenuGroup();
-                    break;
-                case 'delete multiple menu group':
-                    $this->deleteMultipleMenuGroup();
+                case 'update role permission':
+                    $this->updateRolePermission();
                     break;
                 case 'export data':
                     $this->exportData();
@@ -137,63 +128,29 @@ class MenuGroupController {
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
-    #   Add methods
-    # -------------------------------------------------------------
-
-    # -------------------------------------------------------------
-    public function addMenuGroup() {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            return;
-        }
-
-        $userID = $_SESSION['user_account_id'];
-        $menuGroupName = filter_input(INPUT_POST, 'menu_group_name', FILTER_SANITIZE_STRING);
-        $appModuleID = filter_input(INPUT_POST, 'app_module_id', FILTER_VALIDATE_INT);
-        $orderSequence = filter_input(INPUT_POST, 'order_sequence', FILTER_VALIDATE_INT);
-
-        $appModuleDetails = $this->appModuleModel->getAppModule($appModuleID);
-        $appModuleName = $appModuleDetails['app_module_name'] ?? '';
-        
-        $menuGroupID = $this->menuGroupModel->saveMenuGroup(null, $menuGroupName, $appModuleID, $appModuleName, $orderSequence, $userID);
-    
-        $response = [
-            'success' => true,
-            'menuGroupID' => $this->securityModel->encryptData($menuGroupID),
-            'title' => 'Save Menu Group',
-            'message' => 'The menu group has been saved successfully.',
-            'messageType' => 'success'
-        ];
-            
-        echo json_encode($response);
-        exit;
-    }
-    # -------------------------------------------------------------
-
-    # -------------------------------------------------------------
     #   Update methods
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
-    public function updateMenuGroup() {
+    public function updateRolePermission() {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             return;
         }
-        
+
         $userID = $_SESSION['user_account_id'];
-        $menuGroupID = filter_input(INPUT_POST, 'menu_group_id', FILTER_VALIDATE_INT);
-        $menuGroupName = filter_input(INPUT_POST, 'menu_group_name', FILTER_SANITIZE_STRING);
-        $appModuleID = filter_input(INPUT_POST, 'app_module_id', FILTER_VALIDATE_INT);
-        $orderSequence = filter_input(INPUT_POST, 'order_sequence', FILTER_VALIDATE_INT);
+        $rolePermissionID = filter_input(INPUT_POST, 'role_permission_id', FILTER_VALIDATE_INT);
+        $accessType = filter_input(INPUT_POST, 'access_type', FILTER_SANITIZE_STRING);
+        $access = filter_input(INPUT_POST, 'access', FILTER_VALIDATE_INT);
     
-        $checkMenuGroupExist = $this->menuGroupModel->checkMenuGroupExist($menuGroupID);
-        $total = $checkMenuGroupExist['total'] ?? 0;
+        $checkRolePermissionExist = $this->roleModel->checkRolePermissionExist($rolePermissionID);
+        $total = $checkRolePermissionExist['total'] ?? 0;
 
         if($total === 0){
             $response = [
                 'success' => false,
                 'notExist' => true,
-                'title' => 'Save Menu Group',
-                'message' => 'The menu group does not exist.',
+                'title' => 'Update Role Permission',
+                'message' => 'The role permission does not exist.',
                 'messageType' => 'error'
             ];
             
@@ -201,104 +158,17 @@ class MenuGroupController {
             exit;
         }
 
-        $appModuleDetails = $this->appModuleModel->getAppModule($appModuleID);
-        $appModuleName = $appModuleDetails['app_module_name'] ?? '';
-
-        $this->menuGroupModel->saveMenuGroup($menuGroupID, $menuGroupName, $appModuleID, $appModuleName, $orderSequence, $userID);
+        $this->roleModel->updateRolePermission($rolePermissionID, $accessType, $access, $userID);
             
         $response = [
             'success' => true,
-            'title' => 'Save Menu Group',
-            'message' => 'The menu group has been saved successfully.',
+            'title' => 'Update Role Permission',
+            'message' => 'The role permission has been updated successfully.',
             'messageType' => 'success'
         ];
         
         echo json_encode($response);
         exit;
-    }
-    # -------------------------------------------------------------
-
-    # -------------------------------------------------------------
-    #   Delete methods
-    # -------------------------------------------------------------
-
-    # -------------------------------------------------------------
-    public function deleteMenuGroup() {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            return;
-        }
-
-        $menuGroupID = filter_input(INPUT_POST, 'menu_group_id', FILTER_VALIDATE_INT);
-        
-        $checkMenuGroupExist = $this->menuGroupModel->checkMenuGroupExist($menuGroupID);
-        $total = $checkMenuGroupExist['total'] ?? 0;
-
-        if($total === 0){
-            $response = [
-                'success' => false,
-                'notExist' => true,
-                'title' => 'Delete Menu Group',
-                'message' => 'The menu group does not exist.',
-                'messageType' => 'error'
-            ];
-                
-            echo json_encode($response);
-            exit;
-        }
-
-        $this->menuGroupModel->deleteMenuGroup($menuGroupID);
-                
-        $response = [
-            'success' => true,
-            'title' => 'Delete Menu Group',
-            'message' => 'The menu group has been deleted successfully.',
-            'messageType' => 'success'
-        ];
-            
-        echo json_encode($response);
-        exit;
-    }
-    # -------------------------------------------------------------
-
-    # -------------------------------------------------------------
-    public function deleteMultipleMenuGroup() {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            return;
-        }
-
-        if (isset($_POST['menu_group_id']) && !empty($_POST['menu_group_id'])) {
-            $menuGroupIDs = $_POST['menu_group_id'];
-    
-            foreach($menuGroupIDs as $menuGroupID){
-                $checkMenuGroupExist = $this->menuGroupModel->checkMenuGroupExist($menuGroupID);
-                $total = $checkMenuGroupExist['total'] ?? 0;
-
-                if($total > 0){
-                    $this->menuGroupModel->deleteMenuGroup($menuGroupID);
-                }
-            }
-                
-            $response = [
-                'success' => true,
-                'title' => 'Delete Multiple Menu Group',
-                'message' => 'The selected menu groups have been deleted successfully.',
-                'messageType' => 'success'
-            ];
-            
-            echo json_encode($response);
-            exit;
-        }
-        else{
-            $response = [
-                'success' => false,
-                'title' => 'Error: Transaction Failed',
-                'message' => 'An error occurred while processing your transaction. Please try again or contact our support team for assistance.',
-                'messageType' => 'error'
-            ];
-            
-            echo json_encode($response);
-            exit;
-        }
     }
     # -------------------------------------------------------------
 
@@ -318,7 +188,7 @@ class MenuGroupController {
             $tableColumns = $_POST['table_column'];
             
             if ($exportTo == 'csv') {
-                $filename = "menu_group_export_" . date('Y-m-d_H-i-s') . ".csv";
+                $filename = "role_export_" . date('Y-m-d_H-i-s') . ".csv";
             
                 header('Content-Type: text/csv');
                 header('Content-Disposition: attachment; filename="' . $filename . '"');
@@ -330,10 +200,10 @@ class MenuGroupController {
                 $columns = implode(", ", $tableColumns);
                 
                 $ids = implode(",", array_map('intval', $exportIDs));
-                $menuGroupDetails = $this->menuGroupModel->exportMenuGroup($columns, $ids);
+                $menuItemDetails = $this->menuItemModel->exportMenuItem($columns, $ids);
 
-                foreach ($menuGroupDetails as $menuGroupDetail) {
-                    fputcsv($output, $menuGroupDetail);
+                foreach ($menuItemDetails as $menuItemDetail) {
+                    fputcsv($output, $menuItemDetail);
                 }
 
                 fclose($output);
@@ -341,7 +211,7 @@ class MenuGroupController {
             }
             else {
                 ob_start();
-                $filename = "menu_group_export_" . date('Y-m-d_H-i-s') . ".xlsx";
+                $filename = "role_export_" . date('Y-m-d_H-i-s') . ".xlsx";
 
                 $spreadsheet = new Spreadsheet();
                 $sheet = $spreadsheet->getActiveSheet();
@@ -355,13 +225,13 @@ class MenuGroupController {
                 $columns = implode(", ", $tableColumns);
                 
                 $ids = implode(",", array_map('intval', $exportIDs));
-                $menuGroupDetails = $this->menuGroupModel->exportMenuGroup($columns, $ids);
+                $menuItemDetails = $this->menuItemModel->exportMenuItem($columns, $ids);
 
                 $rowNumber = 2;
-                foreach ($menuGroupDetails as $menuGroupDetail) {
+                foreach ($menuItemDetails as $menuItemDetail) {
                     $colIndex = 'A';
                     foreach ($tableColumns as $column) {
-                        $sheet->setCellValue($colIndex . $rowNumber, $menuGroupDetail[$column]);
+                        $sheet->setCellValue($colIndex . $rowNumber, $menuItemDetail[$column]);
                         $colIndex++;
                     }
                     $rowNumber++;
@@ -397,23 +267,23 @@ class MenuGroupController {
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
-    public function getMenuGroupDetails() {
+    public function getMenuItemDetails() {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             return;
         }
     
         $userID = $_SESSION['user_account_id'];
-        $menuGroupID = filter_input(INPUT_POST, 'menu_group_id', FILTER_VALIDATE_INT);
+        $menuItemID = filter_input(INPUT_POST, 'menu_item_id', FILTER_VALIDATE_INT);
 
-        $checkMenuGroupExist = $this->menuGroupModel->checkMenuGroupExist($menuGroupID);
-        $total = $checkMenuGroupExist['total'] ?? 0;
+        $checkMenuItemExist = $this->menuItemModel->checkMenuItemExist($menuItemID);
+        $total = $checkMenuItemExist['total'] ?? 0;
 
         if($total === 0){
             $response = [
                 'success' => false,
                 'notExist' => true,
-                'title' => 'Get Menu Group Details',
-                'message' => 'The menu group does not exist.',
+                'title' => 'Get Menu Item Details',
+                'message' => 'The menu item does not exist.',
                 'messageType' => 'error'
             ];
             
@@ -421,14 +291,18 @@ class MenuGroupController {
             exit;
         }
 
-        $menuGroupDetails = $this->menuGroupModel->getMenuGroup($menuGroupID);
+        $menuItemDetails = $this->menuItemModel->getMenuItem($menuItemID);
 
         $response = [
             'success' => true,
-            'menuGroupName' => $menuGroupDetails['menu_group_name'] ?? null,
-            'appModuleID' => $menuGroupDetails['app_module_id'] ?? null,
-            'appModuleName' => $menuGroupDetails['app_module_name'] ?? null,
-            'orderSequence' => $menuGroupDetails['order_sequence'] ?? null
+            'menuItemName' => $menuItemDetails['menu_item_name'] ?? null,
+            'menuItemURL' => $menuItemDetails['menu_item_url'] ?? null,
+            'menuItemIcon' => $menuItemDetails['menu_item_icon'] ?? null,
+            'menuGroupID' => $menuItemDetails['menu_group_id'] ?? null,
+            'menuGroupName' => $menuItemDetails['menu_group_name'] ?? null,
+            'parentID' => $menuItemDetails['parent_id'] ?? null,
+            'parentName' => $menuItemDetails['parent_name'] ?? null,
+            'orderSequence' => $menuItemDetails['order_sequence'] ?? null
         ];
 
         echo json_encode($response);

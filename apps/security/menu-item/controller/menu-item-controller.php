@@ -112,9 +112,6 @@ class MenuItemController {
                 case 'update menu item':
                     $this->updateMenuItem();
                     break;
-                case 'update app logo':
-                    $this->updateAppLogo();
-                    break;
                 case 'get menu item details':
                     $this->getMenuItemDetails();
                     break;

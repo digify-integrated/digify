@@ -104,9 +104,9 @@ if(isset($_POST['type']) && !empty($_POST['type'])){
                 }
 
                 if(empty($logNote)){
-                    $logNote = '<div class="text-center">
-                                No log notes found.
-                            </div>';
+                    $logNote = '<div class="p-4 rounded-4 text-bg-light mb-0 text-center">
+                                    No log notes found.
+                                </div>';
                 }
 
                 $response[] = [

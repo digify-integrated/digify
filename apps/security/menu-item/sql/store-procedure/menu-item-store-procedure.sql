@@ -160,6 +160,14 @@ BEGIN
     DEALLOCATE PREPARE stmt;
 END //
 
+DROP PROCEDURE IF EXISTS generateMenuItemAssignedRoleTable//
+CREATE PROCEDURE generateMenuItemAssignedRoleTable(IN p_menu_item_id INT)
+BEGIN
+    SELECT role_permission_id, role_name, read_access, write_access, create_access, delete_access, import_access, export_access, log_notes_access 
+    FROM role_permission
+    WHERE menu_item_id = p_menu_item_id;
+END //
+
 DROP PROCEDURE IF EXISTS generateMenuItemOptions//
 CREATE PROCEDURE generateMenuItemOptions(IN p_menu_item_id INT)
 BEGIN
