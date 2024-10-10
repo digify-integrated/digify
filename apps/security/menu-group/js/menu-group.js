@@ -173,10 +173,10 @@ function menuGroupTable(datatable_name) {
     ];
 
     const columnDefs = [
-        { width: '1%', bSortable: false, targets: 0 },
-        { width: 'auto', targets: 1 },
-        { width: 'auto', targets: 2 },
-        { width: 'auto', targets: 3 }
+        { width: '1%', bSortable: false, targets: 0, responsivePriority: 1 }, // Checkbox, always visible
+        { width: 'auto', targets: 1, responsivePriority: 2 }, // Menu Group
+        { width: 'auto', targets: 2, responsivePriority: 3 }, // App Module
+        { width: 'auto', targets: 3, responsivePriority: 4 }  // Order Sequence
     ];
 
     const lengthMenu = [[10, 5, 25, 50, 100, -1], [10, 5, 25, 50, 100, 'All']];
@@ -203,6 +203,19 @@ function menuGroupTable(datatable_name) {
         columns: columns,
         columnDefs: columnDefs,
         lengthMenu: lengthMenu,
+        responsive: {
+            details: {
+                type: 'inline', // Ensures the plus icon is displayed in the first column
+                display: $.fn.dataTable.Responsive.display.childRow, // Show hidden columns when user clicks the plus icon
+                renderer: function (api, rowIdx, columns) {
+                    let data = $.map(columns, function (col) {
+                        return col.hidden ? `<tr><td>${col.title}:</td><td>${col.data}</td></tr>` : '';
+                    }).join('');
+                    return data ? $('<table/>').append(data) : false;
+                }
+            }
+        },
+        autoWidth: false,
         language: {
             emptyTable: 'No data found',
             sLengthMenu: '_MENU_',
@@ -211,7 +224,7 @@ function menuGroupTable(datatable_name) {
         },
         fnDrawCallback: function(oSettings) {
             readjustDatatableColumn();
-            
+
             $(`${datatable_name} tbody`).on('click', 'tr td:nth-child(n+2)', function () {
                 const rowData = $(datatable_name).DataTable().row($(this).closest('tr')).data();
                 if (rowData && rowData.LINK) {
@@ -220,7 +233,7 @@ function menuGroupTable(datatable_name) {
             });
         }
     };
-    
+
     destroyDatatable(datatable_name);
     $(datatable_name).dataTable(settings);
 }

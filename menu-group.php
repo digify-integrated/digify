@@ -8,6 +8,7 @@
     <?php require_once('components/view/_head_meta_tags.php'); ?>
     <?php require_once('components/view/_head_stylesheet.php'); ?>
     <link rel="stylesheet" href="./assets/libs/datatables.net-bs5/css/dataTables.bootstrap5.min.css" />
+    <link rel="stylesheet" href="./assets/libs/datatables.net-bs5/css/responsive.dataTables.min.css" />
     <link rel="stylesheet" href="./assets/libs/select2/dist/css/select2.min.css">
 </head>
 <body>
@@ -48,6 +49,7 @@
 
     <script src="./assets/libs/max-length/bootstrap-maxlength.min.js"></script>
     <script src="./assets/libs/datatables.net/js/jquery.dataTables.min.js"></script>
+    <script src="./assets/libs/datatables.net/js/dataTables.responsive.min.js"></script>
     <script src="./assets/libs/select2/dist/js/select2.full.min.js"></script>
     <script src="./assets/libs/select2/dist/js/select2.min.js"></script>
 
