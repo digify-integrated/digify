@@ -2,27 +2,27 @@
     'use strict';
 
     $(function() {
-        if($('#system-action-form').length){
-            systemActionForm();
+        if($('#role-form').length){
+            roleForm();
         }
     });
 })(jQuery);
 
-function systemActionForm(){
-    $('#system-action-form').validate({
+function roleForm(){
+    $('#role-form').validate({
         rules: {
-            system_action_name: {
+            role_name: {
                 required: true
             },
-            system_action_description: {
+            role_description: {
                 required: true
             }
         },
         messages: {
-            system_action_name: {
+            role_name: {
                 required: 'Enter the display name'
             },
-            system_action_description: {
+            role_description: {
                 required: 'Ether the description'
             }
         },
@@ -40,12 +40,12 @@ function systemActionForm(){
             $target.removeClass('is-invalid');
         },
         submitHandler: function(form) {
-            const transaction = 'add system action';
+            const transaction = 'add role';
             const page_link = document.getElementById('page-link').getAttribute('href');
           
             $.ajax({
                 type: 'POST',
-                url: 'apps/security/system-action/controller/system-action-controller.php',
+                url: 'apps/security/role/controller/role-controller.php',
                 data: $(form).serialize() + '&transaction=' + transaction,
                 dataType: 'json',
                 beforeSend: function() {
@@ -54,7 +54,7 @@ function systemActionForm(){
                 success: function (response) {
                     if (response.success) {
                         setNotification(response.title, response.message, response.messageType);
-                        window.location = page_link + '&id=' + response.systemActionID;
+                        window.location = page_link + '&id=' + response.roleID;
                     }
                     else {
                         if (response.isInactive || response.notExist || response.userInactive || response.userLocked || response.sessionExpired) {

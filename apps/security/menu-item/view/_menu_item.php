@@ -27,10 +27,10 @@
                         echo $action;
                     }
 
-                    echo $importAccess['total'] > 0 ? '<a href="' . $pageLink . '&import='. $securityModel->encryptData('menu_item') .'" class="btn btn-secondary d-flex align-items-center mb-0">Import</a>' : '';
-                    echo $createAccess['total'] > 0 ? '<a href="' . $pageLink . '&new" class="btn btn-success d-flex align-items-center mb-0">Create</a>' : '';
+                    echo $importAccess['total'] > 0 ? '<a href="' . $pageLink . '&import='. $securityModel->encryptData('menu_item') .'" class="btn btn-secondary d-flex align-items-center mb-0"><i class="ti ti-download fs-4 me-1"></i>Import</a>' : '';
+                    echo $createAccess['total'] > 0 ? '<a href="' . $pageLink . '&new" class="btn btn-success d-flex align-items-center mb-0"><i class="ti ti-plus fs-4 me-1"></i>New</a>' : '';
                 ?>
-                <button type="button" class="btn btn-warning mb-0 px-4" data-bs-toggle="offcanvas" data-bs-target="#filter-offcanvas" aria-controls="filter-offcanvas">Filter</a>
+                <a class="btn btn-warning mb-0 px-4 me-0" data-bs-toggle="offcanvas" data-bs-target="#filter-offcanvas" aria-controls="filter-offcanvas"><i class="ti ti-filter fs-4 me-1"></i>Filter</a>
             </div>
         </div>
     </div>

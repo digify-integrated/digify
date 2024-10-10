@@ -110,4 +110,14 @@ BEGIN
     ORDER BY system_action_name;
 END //
 
+DROP PROCEDURE IF EXISTS generateSystemActionAssignedRoleTable//
+CREATE PROCEDURE generateSystemActionAssignedRoleTable(
+    IN p_system_action_id INT
+)
+BEGIN
+    SELECT role_system_action_permission_id, role_name, system_action_access 
+    FROM role_system_action_permission
+    WHERE system_action_id = p_system_action_id;
+END //
+
 /* ----------------------------------------------------------------------------------------------------------------------------- */

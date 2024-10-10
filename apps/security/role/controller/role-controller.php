@@ -20,7 +20,7 @@ $controller->handleRequest();
 class RoleController {
     private $roleModel;
     private $menuItemModel;
-    private $systemAction;
+    private $systemActionModel;
     private $authenticationModel;
     private $securityModel;
     private $systemModel;
@@ -106,8 +106,38 @@ class RoleController {
             $transaction = isset($_POST['transaction']) ? $_POST['transaction'] : null;
 
             switch ($transaction) {
+                case 'add role':
+                    $this->addRole();
+                    break;
+                case 'update role':
+                    $this->updateRole();
+                    break;
                 case 'update role permission':
                     $this->updateRolePermission();
+                    break;
+                case 'update role system action permission':
+                    $this->updateRoleSystemActionPermission();
+                    break;
+                case 'assign menu item role permission':
+                    $this->assignMenuItemRolePermission();
+                    break;
+                case 'assign system action role permission':
+                    $this->assignSystemActionRolePermission();
+                    break;
+                case 'get role details':
+                    $this->getRoleDetails();
+                    break;
+                case 'delete role':
+                    $this->deleteRole();
+                    break;
+                case 'delete multiple role':
+                    $this->deleteMultipleRole();
+                    break;
+                case 'delete role permission':
+                    $this->deleteRolePermission();
+                    break;
+                case 'delete role system action permission':
+                    $this->deleteRoleSystemActionPermission();
                     break;
                 case 'export data':
                     $this->exportData();
@@ -128,7 +158,77 @@ class RoleController {
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #   Add methods
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    public function addRole() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            return;
+        }
+
+        $userID = $_SESSION['user_account_id'];
+        $roleName = filter_input(INPUT_POST, 'role_name', FILTER_SANITIZE_STRING);
+        $roleDescription = filter_input(INPUT_POST, 'role_description', FILTER_SANITIZE_STRING);
+        
+        $roleID = $this->roleModel->saveRole(null, $roleName, $roleDescription, $userID);
+    
+        $response = [
+            'success' => true,
+            'roleID' => $this->securityModel->encryptData($roleID),
+            'title' => 'Save Role',
+            'message' => 'The role has been saved successfully.',
+            'messageType' => 'success'
+        ];
+            
+        echo json_encode($response);
+        exit;
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Update methods
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    public function updateRole() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            return;
+        }
+        
+        $userID = $_SESSION['user_account_id'];
+        $roleID = filter_input(INPUT_POST, 'role_id', FILTER_VALIDATE_INT);
+        $roleName = filter_input(INPUT_POST, 'role_name', FILTER_SANITIZE_STRING);
+        $roleDescription = filter_input(INPUT_POST, 'role_description', FILTER_SANITIZE_STRING);
+    
+        $checkRoleExist = $this->roleModel->checkRoleExist($roleID);
+        $total = $checkRoleExist['total'] ?? 0;
+
+        if($total === 0){
+            $response = [
+                'success' => false,
+                'notExist' => true,
+                'title' => 'Save Role',
+                'message' => 'The role does not exist.',
+                'messageType' => 'error'
+            ];
+            
+            echo json_encode($response);
+            exit;
+        }
+
+        $roleID = $this->roleModel->saveRole($roleID, $roleName, $roleDescription, $userID);
+            
+        $response = [
+            'success' => true,
+            'title' => 'Save Role',
+            'message' => 'The role has been saved successfully.',
+            'messageType' => 'success'
+        ];
+        
+        echo json_encode($response);
+        exit;
+    }
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
@@ -173,6 +273,324 @@ class RoleController {
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    public function updateRoleSystemActionPermission() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            return;
+        }
+
+        $userID = $_SESSION['user_account_id'];
+        $rolePermissionID = filter_input(INPUT_POST, 'role_permission_id', FILTER_VALIDATE_INT);
+        $access = filter_input(INPUT_POST, 'access', FILTER_VALIDATE_INT);
+    
+        $checkRolePermissionExist = $this->roleModel->checkRolePermissionExist($rolePermissionID);
+        $total = $checkRolePermissionExist['total'] ?? 0;
+
+        if($total === 0){
+            $response = [
+                'success' => false,
+                'notExist' => true,
+                'title' => 'Update Role Permission',
+                'message' => 'The role permission does not exist.',
+                'messageType' => 'error'
+            ];
+            
+            echo json_encode($response);
+            exit;
+        }
+
+        $this->roleModel->updateRoleSystemActionPermission($rolePermissionID, $access, $userID);
+            
+        $response = [
+            'success' => true,
+            'title' => 'Update Role Permission',
+            'message' => 'The role permission has been updated successfully.',
+            'messageType' => 'success'
+        ];
+        
+        echo json_encode($response);
+        exit;
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #   Assign methods
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    public function assignMenuItemRolePermission() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            return;
+        }
+
+        if (isset($_POST['menu_item_id']) && !empty($_POST['menu_item_id'])) {
+            if(!isset($_POST['role_id']) || empty($_POST['role_id'])){
+                $response = [
+                    'success' => false,
+                    'title' => 'Permission Selection Required',
+                    'message' => 'Please select the role(s) you wish to assign to the menu item.',
+                    'messageType' => 'error'
+                ];
+                
+                echo json_encode($response);
+                exit;
+            }
+
+            $userID = $_SESSION['user_account_id'];
+            $menuItemID = filter_input(INPUT_POST, 'menu_item_id', FILTER_VALIDATE_INT);
+            $roleIDs = $_POST['role_id'];
+
+            $menuItemDetails = $this->menuItemModel->getMenuItem($menuItemID);
+            $menuItemName = $menuItemDetails['menu_item_name'] ?? null;
+
+            foreach ($roleIDs as $roleID) {
+                $roleDetails = $this->roleModel->getRole($roleID);
+                $roleName = $roleDetails['role_name'] ?? null;
+
+                $this->roleModel->insertRolePermission($roleID, $roleName, $menuItemID, $menuItemName, $userID);
+            }
+    
+            $response = [
+                'success' => true,
+                'title' => 'Assign Role Success',
+                'message' => 'The role has been assigned successfully.',
+                'messageType' => 'success'
+            ];
+            
+            echo json_encode($response);
+            exit;
+        }
+        else{
+            $response = [
+                'success' => false,
+                'title' => 'Error: Transaction Failed',
+                'message' => 'An error occurred while processing your transaction. Please try again or contact our support team for assistance.',
+                'messageType' => 'error'
+            ];
+            
+            echo json_encode($response);
+            exit;
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    public function assignSystemActionRolePermission() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            return;
+        }
+
+        if (isset($_POST['system_action_id']) && !empty($_POST['system_action_id'])) {
+            if(!isset($_POST['role_id']) || empty($_POST['role_id'])){
+                $response = [
+                    'success' => false,
+                    'title' => 'Permission Selection Required',
+                    'message' => 'Please select the role(s) you wish to assign to the menu item.',
+                    'messageType' => 'error'
+                ];
+                
+                echo json_encode($response);
+                exit;
+            }
+
+            $userID = $_SESSION['user_account_id'];
+            $systemActionID = filter_input(INPUT_POST, 'system_action_id', FILTER_VALIDATE_INT);
+            $roleIDs = $_POST['role_id'];
+
+            $systemActionDetails = $this->systemActionModel->getSystemAction($systemActionID);
+            $systemActionName = $systemActionDetails['system_action_name'] ?? null;
+
+            foreach ($roleIDs as $roleID) {
+                $roleDetails = $this->roleModel->getRole($roleID);
+                $roleName = $roleDetails['role_name'] ?? null;
+
+                $this->roleModel->insertRoleSystemActionPermission($roleID, $roleName, $systemActionID, $systemActionName, $userID);
+            }
+    
+            $response = [
+                'success' => true,
+                'title' => 'Assign Role Success',
+                'message' => 'The role has been assigned successfully.',
+                'messageType' => 'success'
+            ];
+            
+            echo json_encode($response);
+            exit;
+        }
+        else{
+            $response = [
+                'success' => false,
+                'title' => 'Error: Transaction Failed',
+                'message' => 'An error occurred while processing your transaction. Please try again or contact our support team for assistance.',
+                'messageType' => 'error'
+            ];
+            
+            echo json_encode($response);
+            exit;
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #   Delete methods
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    public function deleteRole() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            return;
+        }
+
+        $roleID = filter_input(INPUT_POST, 'role_id', FILTER_VALIDATE_INT);
+        
+        $checkRoleExist = $this->roleModel->checkRoleExist($roleID);
+        $total = $checkRoleExist['total'] ?? 0;
+
+        if($total === 0){
+            $response = [
+                'success' => false,
+                'notExist' => true,
+                'title' => 'Delete Role',
+                'message' => 'The role does not exist.',
+                'messageType' => 'error'
+            ];
+                
+            echo json_encode($response);
+            exit;
+        }
+
+        $this->roleModel->deleteRole($roleID);
+                
+        $response = [
+            'success' => true,
+            'title' => 'Delete Role',
+            'message' => 'The role has been deleted successfully.',
+            'messageType' => 'success'
+        ];
+            
+        echo json_encode($response);
+        exit;
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    public function deleteMultipleRole() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            return;
+        }
+
+        if (isset($_POST['role_id']) && !empty($_POST['role_id'])) {
+            $roleIDs = $_POST['role_id'];
+    
+            foreach($roleIDs as $roleID){
+                $checkRoleExist = $this->roleModel->checkRoleExist($roleID);
+                $total = $checkRoleExist['total'] ?? 0;
+
+                if($total > 0){
+                    $this->roleModel->deleteRole($roleID);
+                }
+            }
+                
+            $response = [
+                'success' => true,
+                'title' => 'Delete Multiple Role',
+                'message' => 'The selected roles have been deleted successfully.',
+                'messageType' => 'success'
+            ];
+            
+            echo json_encode($response);
+            exit;
+        }
+        else{
+            $response = [
+                'success' => false,
+                'title' => 'Error: Transaction Failed',
+                'message' => 'An error occurred while processing your transaction. Please try again or contact our support team for assistance.',
+                'messageType' => 'error'
+            ];
+            
+            echo json_encode($response);
+            exit;
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    public function deleteRolePermission() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            return;
+        }
+
+        $rolePermissionID = filter_input(INPUT_POST, 'role_permission_id', FILTER_VALIDATE_INT);
+        
+        $checkRolePermissionExist = $this->roleModel->checkRolePermissionExist($rolePermissionID);
+        $total = $checkRolePermissionExist['total'] ?? 0;
+
+        if($total === 0){
+            $response = [
+                'success' => false,
+                'notExist' => true,
+                'title' => 'Delete Role Permission Error',
+                'message' => 'The role permission does not exist.',
+                'messageType' => 'error'
+            ];
+                
+            echo json_encode($response);
+            exit;
+        }
+
+        $this->roleModel->deleteRolePermission($rolePermissionID);
+                
+        $response = [
+            'success' => true,
+            'title' => 'Delete Role Permission Success',
+            'message' => 'The role permission has been deleted successfully.',
+            'messageType' => 'success'
+        ];
+            
+        echo json_encode($response);
+        exit;
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    public function deleteRoleSystemActionPermission() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            return;
+        }
+
+        $rolePermissionID = filter_input(INPUT_POST, 'role_permission_id', FILTER_VALIDATE_INT);
+        
+        $checkRoleSystemActionPermissionExist = $this->roleModel->checkRoleSystemActionPermissionExist($rolePermissionID);
+        $total = $checkRoleSystemActionPermissionExist['total'] ?? 0;
+
+        if($total === 0){
+            $response = [
+                'success' => false,
+                'notExist' => true,
+                'title' => 'Delete Role Permission Error',
+                'message' => 'The role permission does not exist.',
+                'messageType' => 'error'
+            ];
+                
+            echo json_encode($response);
+            exit;
+        }
+
+        $this->roleModel->deleteRoleSystemActionPermission($rolePermissionID);
+                
+        $response = [
+            'success' => true,
+            'title' => 'Delete Role Permission Success',
+            'message' => 'The role permission has been deleted successfully.',
+            'messageType' => 'success'
+        ];
+            
+        echo json_encode($response);
+        exit;
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Export methods
     # -------------------------------------------------------------
 
@@ -200,10 +618,10 @@ class RoleController {
                 $columns = implode(", ", $tableColumns);
                 
                 $ids = implode(",", array_map('intval', $exportIDs));
-                $menuItemDetails = $this->menuItemModel->exportMenuItem($columns, $ids);
+                $roleDetails = $this->roleModel->exportRole($columns, $ids);
 
-                foreach ($menuItemDetails as $menuItemDetail) {
-                    fputcsv($output, $menuItemDetail);
+                foreach ($roleDetails as $roleDetail) {
+                    fputcsv($output, $roleDetail);
                 }
 
                 fclose($output);
@@ -225,13 +643,13 @@ class RoleController {
                 $columns = implode(", ", $tableColumns);
                 
                 $ids = implode(",", array_map('intval', $exportIDs));
-                $menuItemDetails = $this->menuItemModel->exportMenuItem($columns, $ids);
+                $roleDetails = $this->roleModel->exportRole($columns, $ids);
 
                 $rowNumber = 2;
-                foreach ($menuItemDetails as $menuItemDetail) {
+                foreach ($roleDetails as $roleDetail) {
                     $colIndex = 'A';
                     foreach ($tableColumns as $column) {
-                        $sheet->setCellValue($colIndex . $rowNumber, $menuItemDetail[$column]);
+                        $sheet->setCellValue($colIndex . $rowNumber, $roleDetail[$column]);
                         $colIndex++;
                     }
                     $rowNumber++;
@@ -267,23 +685,23 @@ class RoleController {
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
-    public function getMenuItemDetails() {
+    public function getRoleDetails() {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             return;
         }
     
         $userID = $_SESSION['user_account_id'];
-        $menuItemID = filter_input(INPUT_POST, 'menu_item_id', FILTER_VALIDATE_INT);
+        $roleID = filter_input(INPUT_POST, 'role_id', FILTER_VALIDATE_INT);
 
-        $checkMenuItemExist = $this->menuItemModel->checkMenuItemExist($menuItemID);
-        $total = $checkMenuItemExist['total'] ?? 0;
+        $checkRoleExist = $this->roleModel->checkRoleExist($roleID);
+        $total = $checkRoleExist['total'] ?? 0;
 
         if($total === 0){
             $response = [
                 'success' => false,
                 'notExist' => true,
-                'title' => 'Get Menu Item Details',
-                'message' => 'The menu item does not exist.',
+                'title' => 'Get Role Details',
+                'message' => 'The role does not exist.',
                 'messageType' => 'error'
             ];
             
@@ -291,18 +709,12 @@ class RoleController {
             exit;
         }
 
-        $menuItemDetails = $this->menuItemModel->getMenuItem($menuItemID);
+        $roleDetails = $this->roleModel->getRole($roleID);
 
         $response = [
             'success' => true,
-            'menuItemName' => $menuItemDetails['menu_item_name'] ?? null,
-            'menuItemURL' => $menuItemDetails['menu_item_url'] ?? null,
-            'menuItemIcon' => $menuItemDetails['menu_item_icon'] ?? null,
-            'menuGroupID' => $menuItemDetails['menu_group_id'] ?? null,
-            'menuGroupName' => $menuItemDetails['menu_group_name'] ?? null,
-            'parentID' => $menuItemDetails['parent_id'] ?? null,
-            'parentName' => $menuItemDetails['parent_name'] ?? null,
-            'orderSequence' => $menuItemDetails['order_sequence'] ?? null
+            'roleName' => $roleDetails['role_name'] ?? null,
+            'roleDescription' => $roleDetails['role_description'] ?? null
         ];
 
         echo json_encode($response);

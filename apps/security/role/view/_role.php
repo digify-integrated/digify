@@ -19,7 +19,7 @@
                     
                         if ($deleteAccess['total'] > 0) {
                             $action .= '
-                            <li><button class="dropdown-item" type="button" id="delete-menu-group">Delete</button></li>';
+                            <li><button class="dropdown-item" type="button" id="delete-role">Delete</button></li>';
                         }
                     
                         $action .= '</ul>';
@@ -27,10 +27,9 @@
                         echo $action;
                     }
 
-                    echo $importAccess['total'] > 0 ? '<a href="' . $pageLink . '&import='. $securityModel->encryptData('menu_group') .'" class="btn btn-secondary d-flex align-items-center mb-0"><i class="ti ti-download fs-4 me-1"></i>Import</a>' : '';
+                    echo $importAccess['total'] > 0 ? '<a href="' . $pageLink . '&import='. $securityModel->encryptData('role') .'" class="btn btn-secondary d-flex align-items-center mb-0"><i class="ti ti-download fs-4 me-1"></i>Import</a>' : '';
                     echo $createAccess['total'] > 0 ? '<a href="' . $pageLink . '&new" class="btn btn-success d-flex align-items-center mb-0"><i class="ti ti-plus fs-4 me-1"></i>New</a>' : '';
                 ?>
-                <a class="btn btn-warning mb-0 px-4 me-0" data-bs-toggle="offcanvas" data-bs-target="#filter-offcanvas" aria-controls="filter-offcanvas"><i class="ti ti-filter fs-4 me-1"></i>Filter</a>
             </div>
         </div>
     </div>
@@ -42,7 +41,7 @@
             <div class="card mb-0">
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table id="menu-group-table" class="table w-100 table-hover display text-nowrap dataTable">
+                        <table id="role-table" class="table w-100 table-hover display text-nowrap dataTable">
                             <thead class="text-dark">
                                 <tr>
                                     <th class="all">
@@ -50,9 +49,7 @@
                                             <input class="form-check-input" id="datatable-checkbox" type="checkbox">
                                         </div>
                                     </th>
-                                    <th>Menu Group</th>
-                                    <th>App Module</th>
-                                    <th>Order Sequence</th>
+                                    <th>Role</th>
                                 </tr>
                             </thead>
                             <tbody></tbody>
@@ -60,24 +57,6 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
-
-<div class="offcanvas offcanvas-start" tabindex="-1" id="filter-offcanvas" aria-labelledby="filter-offcanvas-label">
-    <div class="offcanvas-header">
-        <h5 class="offcanvas-title" id="filter-offcanvas-label">Filter</h5>
-        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-    </div>
-    <div class="offcanvas-body p-0">
-        <div class="border-bottom rounded-0">
-            <h6 class="mt-4 mb-3 mx-4 fw-semibold">By App Module</h6>
-            <div class="pb-4 px-4 text-dark" id="app-module-filter">
-                <select id="app_module_filter" name="app_module_filter" multiple="multiple" class="form-control"></select>
-            </div>
-        </div>
-        <div class="p-4">
-            <button type="button" class="btn btn-warning w-100" id="apply-filter">Apply Filter</button>
         </div>
     </div>
 </div>

@@ -106,9 +106,6 @@ class SystemActionController {
                 case 'update system action':
                     $this->updateSystemAction();
                     break;
-                case 'update app logo':
-                    $this->updateAppLogo();
-                    break;
                 case 'get system action details':
                     $this->getSystemActionDetails();
                     break;

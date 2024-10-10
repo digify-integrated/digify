@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 09, 2024 at 11:33 AM
+-- Generation Time: Oct 10, 2024 at 11:31 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -139,11 +139,32 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `checkMenuItemExist` (IN `p_menu_ite
     WHERE menu_item_id = p_menu_item_id;
 END$$
 
+DROP PROCEDURE IF EXISTS `checkRoleExist`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `checkRoleExist` (IN `p_role_id` INT)   BEGIN
+	SELECT COUNT(*) AS total
+    FROM role
+    WHERE role_id = p_role_id;
+END$$
+
 DROP PROCEDURE IF EXISTS `checkRolePermissionExist`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `checkRolePermissionExist` (IN `p_role_permission_id` INT)   BEGIN
 	SELECT COUNT(*) AS total
     FROM role_permission
     WHERE role_permission_id = p_role_permission_id;
+END$$
+
+DROP PROCEDURE IF EXISTS `checkRoleSystemActionPermissionExist`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `checkRoleSystemActionPermissionExist` (IN `p_role_system_action_permission_id` INT)   BEGIN
+	SELECT COUNT(*) AS total
+    FROM role_system_action_permission
+    WHERE role_system_action_permission_id = p_role_system_action_permission_id;
+END$$
+
+DROP PROCEDURE IF EXISTS `checkRoleUserAccountExist`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `checkRoleUserAccountExist` (IN `p_role_user_account_id` INT)   BEGIN
+	SELECT COUNT(*) AS total
+    FROM role_user_account
+    WHERE role_user_account_id = p_role_user_account_id;
 END$$
 
 DROP PROCEDURE IF EXISTS `checkSystemActionExist`$$
@@ -192,6 +213,65 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `deleteMenuItem` (IN `p_menu_item_id
 
     DELETE FROM role_permission WHERE menu_item_id = p_menu_item_id;
     DELETE FROM menu_item WHERE menu_item_id = p_menu_item_id;
+
+    COMMIT;
+END$$
+
+DROP PROCEDURE IF EXISTS `deleteRole`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `deleteRole` (IN `p_role_id` INT)   BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    DELETE FROM role_permission WHERE role_id = p_role_id;
+    DELETE FROM role_system_action_permission WHERE role_id = p_role_id;
+    DELETE FROM role_user_account WHERE role_id = p_role_id;
+    DELETE FROM role WHERE role_id = p_role_id;
+
+    COMMIT;
+END$$
+
+DROP PROCEDURE IF EXISTS `deleteRolePermission`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `deleteRolePermission` (IN `p_role_permission_id` INT)   BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    DELETE FROM role_permission WHERE role_permission_id = p_role_permission_id;
+
+    COMMIT;
+END$$
+
+DROP PROCEDURE IF EXISTS `deleteRoleSystemActionPermission`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `deleteRoleSystemActionPermission` (IN `p_role_system_action_permission_id` INT)   BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    DELETE FROM role_system_action_permission WHERE role_system_action_permission_id = p_role_system_action_permission_id;
+
+    COMMIT;
+END$$
+
+DROP PROCEDURE IF EXISTS `deleteRoleUserAccount`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `deleteRoleUserAccount` (IN `p_role_user_account_id` INT)   BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    DELETE FROM role_user_account WHERE role_user_account_id = p_role_user_account_id;
 
     COMMIT;
 END$$
@@ -308,6 +388,22 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `generateMenuItemOptions` (IN `p_men
     END IF;
 END$$
 
+DROP PROCEDURE IF EXISTS `generateMenuItemRoleDualListBoxOptions`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `generateMenuItemRoleDualListBoxOptions` (IN `p_menu_item_id` INT)   BEGIN
+	SELECT role_id, role_name 
+    FROM role 
+    WHERE role_id NOT IN (SELECT role_id FROM role_permission WHERE menu_item_id = p_menu_item_id)
+    ORDER BY role_name;
+END$$
+
+DROP PROCEDURE IF EXISTS `generateMenuItemRolePermissionTable`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `generateMenuItemRolePermissionTable` (IN `p_menu_item_id` INT)   BEGIN
+	SELECT role_permission_id, role_name, read_access, write_access, create_access, delete_access 
+    FROM role_permission
+    WHERE menu_item_id = p_menu_item_id
+    ORDER BY role_name;
+END$$
+
 DROP PROCEDURE IF EXISTS `generateMenuItemTable`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `generateMenuItemTable` (IN `p_filter_by_app_module` TEXT, IN `p_filter_by_menu_group` TEXT, IN `p_filter_by_parent_id` TEXT)   BEGIN
     DECLARE query TEXT;
@@ -352,6 +448,101 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `generateMenuItemTable` (IN `p_filte
     DEALLOCATE PREPARE stmt;
 END$$
 
+DROP PROCEDURE IF EXISTS `generateProductTable`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `generateProductTable` (IN `p_search` VARCHAR(500), IN `p_product_category` VARCHAR(500), IN `p_product_subcategory` VARCHAR(500), IN `p_company` VARCHAR(500), IN `p_warehouse` VARCHAR(500), IN `p_body_type` VARCHAR(500), IN `p_color` VARCHAR(500), IN `p_product_cost_min` DOUBLE, IN `p_product_cost_max` DOUBLE, IN `p_product_price_min` DOUBLE, IN `p_product_price_max` DOUBLE)   BEGIN
+    DECLARE sql_query VARCHAR(5000);
+
+    SET sql_query = 'SELECT *
+    FROM product
+    WHERE 1';
+
+    IF p_search IS NOT NULL AND p_search <> '' THEN
+        SET sql_query = CONCAT(sql_query, ' AND (
+            stock_number LIKE ?
+            OR description LIKE ?
+        )');
+    END IF;
+
+    IF p_product_category IS NOT NULL AND p_product_category <> '' THEN
+        SET sql_query = CONCAT(sql_query, ' AND product_category_id IN (', p_product_category, ')');
+    END IF;
+
+    IF p_product_subcategory IS NOT NULL AND p_product_subcategory <> '' THEN
+        SET sql_query = CONCAT(sql_query, ' AND product_subcategory_id IN (', p_product_subcategory, ')');
+    END IF;
+
+    IF p_company IS NOT NULL AND p_company <> '' THEN
+        SET sql_query = CONCAT(sql_query, ' AND company_id IN (', p_company, ')');
+    END IF;
+
+    IF p_warehouse IS NOT NULL AND p_warehouse <> '' THEN
+        SET sql_query = CONCAT(sql_query, ' AND warehouse_id IN (', p_warehouse, ')');
+    END IF;
+
+    IF p_body_type IS NOT NULL AND p_body_type <> '' THEN
+        SET sql_query = CONCAT(sql_query, ' AND body_type_id IN (', p_body_type, ')');
+    END IF;
+
+    IF p_color IS NOT NULL AND p_color <> '' THEN
+        SET sql_query = CONCAT(sql_query, ' AND color_id IN (', p_color, ')');
+    END IF;
+
+    IF p_product_cost_min IS NOT NULL AND p_product_cost_min <> '' AND p_product_cost_max IS NOT NULL AND p_product_cost_max <> '' THEN
+        SET sql_query = CONCAT(sql_query, ' AND product_cost BETWEEN ', p_product_cost_min, ' AND ', p_product_cost_max);
+    END IF;
+
+    IF p_product_price_min IS NOT NULL AND p_product_price_min <> '' AND p_product_price_max IS NOT NULL AND p_product_price_max <> '' THEN
+        SET sql_query = CONCAT(sql_query, ' AND product_price BETWEEN ', p_product_price_min, ' AND ', p_product_price_max);
+    END IF;
+
+    SET sql_query = CONCAT(sql_query, ' ORDER BY stock_number;');
+
+    PREPARE stmt FROM sql_query;
+    IF p_search IS NOT NULL AND p_search <> '' THEN
+        EXECUTE stmt USING CONCAT("%", p_search, "%"), CONCAT("%", p_search, "%");    
+    END IF;
+
+    DEALLOCATE PREPARE stmt;
+END$$
+
+DROP PROCEDURE IF EXISTS `generateRoleMenuItemPermissionTable`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `generateRoleMenuItemPermissionTable` (IN `p_role_id` INT)   BEGIN
+	SELECT role_permission_id, menu_item_name, read_access, write_access, create_access, delete_access 
+    FROM role_permission
+    WHERE role_id = p_role_id
+    ORDER BY menu_item_name;
+END$$
+
+DROP PROCEDURE IF EXISTS `generateRoleSystemActionPermissionTable`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `generateRoleSystemActionPermissionTable` (IN `p_role_id` INT)   BEGIN
+	SELECT role_system_action_permission_id, system_action_name, system_action_access 
+    FROM role_system_action_permission
+    WHERE role_id = p_role_id
+    ORDER BY system_action_name;
+END$$
+
+DROP PROCEDURE IF EXISTS `generateRoleTable`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `generateRoleTable` ()   BEGIN
+	SELECT role_id, role_name, role_description
+    FROM role 
+    ORDER BY role_id;
+END$$
+
+DROP PROCEDURE IF EXISTS `generateRoleUserAccountTable`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `generateRoleUserAccountTable` (IN `p_role_id` INT)   BEGIN
+	SELECT role_user_account_id, user_account_id, file_as 
+    FROM role_user_account
+    WHERE role_id = p_role_id
+    ORDER BY file_as;
+END$$
+
+DROP PROCEDURE IF EXISTS `generateSystemActionAssignedRoleTable`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `generateSystemActionAssignedRoleTable` (IN `p_system_action_id` INT)   BEGIN
+    SELECT role_system_action_permission_id, role_name, system_action_access 
+    FROM role_system_action_permission
+    WHERE system_action_id = p_system_action_id;
+END$$
+
 DROP PROCEDURE IF EXISTS `generateSystemActionOptions`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `generateSystemActionOptions` ()   BEGIN
     SELECT system_action_id, system_action_name 
@@ -359,11 +550,43 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `generateSystemActionOptions` ()   B
     ORDER BY system_action_name;
 END$$
 
+DROP PROCEDURE IF EXISTS `generateSystemActionRoleDualListBoxOptions`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `generateSystemActionRoleDualListBoxOptions` (IN `p_system_action_id` INT)   BEGIN
+	SELECT role_id, role_name 
+    FROM role 
+    WHERE role_id NOT IN (SELECT role_id FROM role_system_action_permission WHERE system_action_id = p_system_action_id)
+    ORDER BY role_name;
+END$$
+
+DROP PROCEDURE IF EXISTS `generateSystemActionRolePermissionTable`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `generateSystemActionRolePermissionTable` (IN `p_system_action_id` INT)   BEGIN
+	SELECT role_system_action_permission_id, role_name, system_action_access 
+    FROM role_system_action_permission
+    WHERE system_action_id = p_system_action_id
+    ORDER BY role_name;
+END$$
+
 DROP PROCEDURE IF EXISTS `generateSystemActionTable`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `generateSystemActionTable` ()   BEGIN
     SELECT system_action_id, system_action_name, system_action_description 
     FROM system_action
     ORDER BY system_action_id;
+END$$
+
+DROP PROCEDURE IF EXISTS `generateUserAccountRoleDualListBoxOptions`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `generateUserAccountRoleDualListBoxOptions` (IN `p_user_account_id` INT)   BEGIN
+	SELECT role_id, role_name 
+    FROM role 
+    WHERE role_id NOT IN (SELECT role_id FROM role_user_account WHERE user_account_id = p_user_account_id)
+    ORDER BY role_name;
+END$$
+
+DROP PROCEDURE IF EXISTS `generateUserAccountRoleList`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `generateUserAccountRoleList` (IN `p_user_account_id` INT)   BEGIN
+	SELECT role_user_account_id, role_name, date_assigned
+    FROM role_user_account
+    WHERE user_account_id = p_user_account_id
+    ORDER BY role_name;
 END$$
 
 DROP PROCEDURE IF EXISTS `getAppModule`$$
@@ -412,6 +635,12 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getPasswordHistory` (IN `p_user_acc
     WHERE user_account_id = p_user_account_id;
 END$$
 
+DROP PROCEDURE IF EXISTS `getRole`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getRole` (IN `p_role_id` INT)   BEGIN
+	SELECT * FROM role
+    WHERE role_id = p_role_id;
+END$$
+
 DROP PROCEDURE IF EXISTS `getSecuritySetting`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getSecuritySetting` (IN `p_security_setting_id` INT)   BEGIN
 	SELECT * FROM security_setting
@@ -448,6 +677,51 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `insertProduct` (IN `p_product_categ
 	VALUES(p_product_category_id, p_product_subcategory_id, p_company_id, p_stock_number, p_engine_number, p_chassis_number, p_plate_number, p_description, p_warehouse_id, p_body_type_id, p_length, p_length_unit, p_running_hours, p_mileage, p_color_id, p_product_cost, p_product_price, p_remarks, p_orcr_no, p_orcr_date, p_orcr_expiry_date, p_received_from, p_received_from_address, p_received_from_id_type, p_received_from_id_number, p_unit_description, p_rr_date, p_rr_no, p_supplier_id, p_ref_no, p_brand_id, p_cabin_id, p_model_id, p_make_id, p_class_id, p_mode_of_acquisition_id, p_broker, p_registered_owner, p_mode_of_registration, p_year_model, p_arrival_date, p_checklist_date, p_fx_rate, p_unit_cost, p_package_deal, p_taxes_duties, p_freight, p_lto_registration, p_royalties, p_conversion, p_arrastre, p_wharrfage, p_insurance, p_aircon, p_import_permit, p_others, p_sub_total, p_total_landed_cost, p_with_cr, p_with_plate, p_returned_to_supplier, p_last_log_by);
 	
     SET p_product_id = LAST_INSERT_ID();
+END$$
+
+DROP PROCEDURE IF EXISTS `insertRolePermission`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `insertRolePermission` (IN `p_role_id` INT, IN `p_role_name` VARCHAR(100), IN `p_menu_item_id` INT, IN `p_menu_item_name` VARCHAR(100), IN `p_last_log_by` INT)   BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    INSERT INTO role_permission (role_id, role_name, menu_item_id, menu_item_name, last_log_by) 
+	VALUES(p_role_id, p_role_name, p_menu_item_id, p_menu_item_name, p_last_log_by);
+
+    COMMIT;
+END$$
+
+DROP PROCEDURE IF EXISTS `insertRoleSystemActionPermission`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `insertRoleSystemActionPermission` (IN `p_role_id` INT, IN `p_role_name` VARCHAR(100), IN `p_system_action_id` INT, IN `p_system_action_name` VARCHAR(100), IN `p_last_log_by` INT)   BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    INSERT INTO role_system_action_permission (role_id, role_name, system_action_id, system_action_name, last_log_by) 
+	VALUES(p_role_id, p_role_name, p_system_action_id, p_system_action_name, p_last_log_by);
+
+    COMMIT;
+END$$
+
+DROP PROCEDURE IF EXISTS `insertRoleUserAccount`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `insertRoleUserAccount` (IN `p_role_id` INT, IN `p_role_name` VARCHAR(100), IN `p_user_account_id` INT, IN `p_file_as` VARCHAR(100), IN `p_last_log_by` INT)   BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    INSERT INTO role_user_account (role_id, role_name, user_account_id, file_as, last_log_by) 
+	VALUES(p_role_id, p_role_name, p_user_account_id, p_file_as, p_last_log_by);
+
+    COMMIT;
 END$$
 
 DROP PROCEDURE IF EXISTS `saveAppModule`$$
@@ -579,6 +853,49 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `saveMenuItem` (IN `p_menu_item_id` 
         WHERE menu_item_id = p_menu_item_id;
 
         SET p_new_menu_item_id = p_menu_item_id;
+    END IF;
+
+    COMMIT;
+END$$
+
+DROP PROCEDURE IF EXISTS `saveRole`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `saveRole` (IN `p_role_id` INT, IN `p_role_name` VARCHAR(100), IN `p_role_description` VARCHAR(200), IN `p_last_log_by` INT, OUT `p_new_role_id` INT)   BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    IF p_role_id IS NULL OR NOT EXISTS (SELECT 1 FROM role WHERE role_id = p_role_id) THEN
+        INSERT INTO role (role_name, role_description, last_log_by) 
+	    VALUES(p_role_name, p_role_description, p_last_log_by);
+        
+        SET p_new_role_id = LAST_INSERT_ID();
+    ELSE
+        UPDATE role_permission
+        SET role_name = p_role_name,
+            last_log_by = p_last_log_by
+        WHERE role_id = p_role_id;
+
+        UPDATE role_system_action_permission
+        SET role_name = p_role_name,
+            last_log_by = p_last_log_by
+        WHERE role_id = p_role_id;
+
+        UPDATE role_user_account
+        SET role_name = p_role_name,
+            last_log_by = p_last_log_by
+        WHERE role_id = p_role_id;
+
+        UPDATE role
+        SET role_name = p_role_name,
+        role_name = p_role_name,
+        role_description = p_role_description,
+        last_log_by = p_last_log_by
+        WHERE role_id = p_role_id;
+
+        SET p_new_role_id = p_role_id;
     END IF;
 
     COMMIT;
@@ -807,6 +1124,23 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `updateRolePermission` (IN `p_role_p
     COMMIT;
 END$$
 
+DROP PROCEDURE IF EXISTS `updateRoleSystemActionPermission`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `updateRoleSystemActionPermission` (IN `p_role_system_action_permission_id` INT, IN `p_system_action_access` TINYINT(1), IN `p_last_log_by` INT)   BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    UPDATE role_system_action_permission
+    SET system_action_access = p_system_action_access,
+        last_log_by = p_last_log_by
+    WHERE role_system_action_permission_id = p_role_system_action_permission_id;
+
+    COMMIT;
+END$$
+
 DROP PROCEDURE IF EXISTS `updateUserPassword`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `updateUserPassword` (IN `p_user_account_id` INT, IN `p_password` VARCHAR(255), IN `p_password_expiry_date` VARCHAR(255), IN `p_locked` VARCHAR(255), IN `p_failed_login_attempts` VARCHAR(255), IN `p_account_lock_duration` VARCHAR(255))   BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
@@ -1026,7 +1360,59 @@ INSERT INTO `audit_log` (`audit_log_id`, `table_name`, `reference_id`, `log`, `c
 (97, 'user_account', 2, 'User account changed.<br/>', 2, '2024-10-09 11:54:25', '2024-10-09 11:54:25'),
 (98, 'user_account', 2, 'User account changed.<br/>Last Connection Date: 2024-10-08 14:45:44 -> 2024-10-09 11:54:50<br/>', 2, '2024-10-09 11:54:50', '2024-10-09 11:54:50'),
 (99, 'system_action', 1, 'System action created.', 2, '2024-10-09 12:15:52', '2024-10-09 12:15:52'),
-(100, 'system_action', 1, 'System action changed. <br/>System Action Name: asd -> asdasd<br/>System Action Description: asd -> asdasd<br/>', 2, '2024-10-09 12:16:19', '2024-10-09 12:16:19');
+(100, 'system_action', 1, 'System action changed. <br/>System Action Name: asd -> asdasd<br/>System Action Description: asd -> asdasd<br/>', 2, '2024-10-09 12:16:19', '2024-10-09 12:16:19'),
+(101, 'user_account', 2, 'User account changed.<br/>', 2, '2024-10-10 11:41:44', '2024-10-10 11:41:44'),
+(102, 'user_account', 2, 'User account changed.<br/>', 2, '2024-10-10 11:41:44', '2024-10-10 11:41:44'),
+(103, 'user_account', 2, 'User account changed.<br/>Last Connection Date: 2024-10-09 11:54:50 -> 2024-10-10 11:42:00<br/>', 2, '2024-10-10 11:42:00', '2024-10-10 11:42:00'),
+(104, 'role_permission', 1, 'Role permission changed.<br/><br/>Log Notes Access: 1 -> 0<br/>', 2, '2024-10-10 11:48:46', '2024-10-10 11:48:46'),
+(105, 'role_permission', 1, 'Role permission changed.<br/><br/>Log Notes Access: 0 -> 1<br/>', 2, '2024-10-10 11:48:47', '2024-10-10 11:48:47'),
+(106, 'role_permission', 1, 'Role permission changed.<br/><br/>Log Notes Access: 1 -> 0<br/>', 2, '2024-10-10 11:48:50', '2024-10-10 11:48:50'),
+(107, 'role_permission', 1, 'Role permission changed.<br/><br/>Log Notes Access: 0 -> 1<br/>', 2, '2024-10-10 11:48:50', '2024-10-10 11:48:50'),
+(108, 'role_permission', 1, 'Role permission changed.<br/><br/>Log Notes Access: 1 -> 0<br/>', 2, '2024-10-10 11:48:54', '2024-10-10 11:48:54'),
+(109, 'role_permission', 1, 'Role permission changed.<br/><br/>Log Notes Access: 0 -> 1<br/>', 2, '2024-10-10 11:48:54', '2024-10-10 11:48:54'),
+(110, 'role_permission', 1, 'Role permission changed.<br/><br/>Role Name: Administrator -> Administrators<br/>', 2, '2024-10-10 13:45:02', '2024-10-10 13:45:02'),
+(111, 'role_permission', 2, 'Role permission changed.<br/><br/>Role Name: Administrator -> Administrators<br/>', 2, '2024-10-10 13:45:02', '2024-10-10 13:45:02'),
+(112, 'role_permission', 3, 'Role permission changed.<br/><br/>Role Name: Administrator -> Administrators<br/>', 2, '2024-10-10 13:45:02', '2024-10-10 13:45:02'),
+(113, 'role_permission', 4, 'Role permission changed.<br/><br/>Role Name: Administrator -> Administrators<br/>', 2, '2024-10-10 13:45:02', '2024-10-10 13:45:02'),
+(114, 'role_permission', 5, 'Role permission changed.<br/><br/>Role Name: Administrator -> Administrators<br/>', 2, '2024-10-10 13:45:02', '2024-10-10 13:45:02'),
+(115, 'role_permission', 6, 'Role permission changed.<br/><br/>Role Name: Administrator -> Administrators<br/>', 2, '2024-10-10 13:45:02', '2024-10-10 13:45:02'),
+(116, 'role_permission', 7, 'Role permission changed.<br/><br/>Role Name: Administrator -> Administrators<br/>', 2, '2024-10-10 13:45:02', '2024-10-10 13:45:02'),
+(117, 'role_permission', 8, 'Role permission changed.<br/><br/>Role Name: Administrator -> Administrators<br/>', 2, '2024-10-10 13:45:02', '2024-10-10 13:45:02'),
+(118, 'role_permission', 9, 'Role permission changed.<br/><br/>Role Name: Administrator -> Administrators<br/>', 2, '2024-10-10 13:45:02', '2024-10-10 13:45:02'),
+(119, 'role_permission', 10, 'Role permission changed.<br/><br/>Role Name: Administrator -> Administrators<br/>', 2, '2024-10-10 13:45:02', '2024-10-10 13:45:02'),
+(120, 'role_permission', 1, 'Role permission changed.<br/><br/>Role Name: Administrators -> Administrator<br/>', 2, '2024-10-10 13:45:06', '2024-10-10 13:45:06'),
+(121, 'role_permission', 2, 'Role permission changed.<br/><br/>Role Name: Administrators -> Administrator<br/>', 2, '2024-10-10 13:45:06', '2024-10-10 13:45:06'),
+(122, 'role_permission', 3, 'Role permission changed.<br/><br/>Role Name: Administrators -> Administrator<br/>', 2, '2024-10-10 13:45:06', '2024-10-10 13:45:06'),
+(123, 'role_permission', 4, 'Role permission changed.<br/><br/>Role Name: Administrators -> Administrator<br/>', 2, '2024-10-10 13:45:06', '2024-10-10 13:45:06'),
+(124, 'role_permission', 5, 'Role permission changed.<br/><br/>Role Name: Administrators -> Administrator<br/>', 2, '2024-10-10 13:45:06', '2024-10-10 13:45:06'),
+(125, 'role_permission', 6, 'Role permission changed.<br/><br/>Role Name: Administrators -> Administrator<br/>', 2, '2024-10-10 13:45:06', '2024-10-10 13:45:06'),
+(126, 'role_permission', 7, 'Role permission changed.<br/><br/>Role Name: Administrators -> Administrator<br/>', 2, '2024-10-10 13:45:06', '2024-10-10 13:45:06'),
+(127, 'role_permission', 8, 'Role permission changed.<br/><br/>Role Name: Administrators -> Administrator<br/>', 2, '2024-10-10 13:45:06', '2024-10-10 13:45:06'),
+(128, 'role_permission', 9, 'Role permission changed.<br/><br/>Role Name: Administrators -> Administrator<br/>', 2, '2024-10-10 13:45:06', '2024-10-10 13:45:06'),
+(129, 'role_permission', 10, 'Role permission changed.<br/><br/>Role Name: Administrators -> Administrator<br/>', 2, '2024-10-10 13:45:06', '2024-10-10 13:45:06'),
+(130, 'role_permission', 11, 'Role permission created.', 2, '2024-10-10 14:48:20', '2024-10-10 14:48:20'),
+(131, 'role_permission', 12, 'Role permission created.', 2, '2024-10-10 14:58:06', '2024-10-10 14:58:06'),
+(132, 'role_permission', 12, 'Role permission changed.<br/><br/>Read Access: 0 -> 1<br/>', 2, '2024-10-10 14:59:21', '2024-10-10 14:59:21'),
+(133, 'role_permission', 12, 'Role permission changed.<br/><br/>Write Access: 0 -> 1<br/>', 2, '2024-10-10 14:59:23', '2024-10-10 14:59:23'),
+(134, 'role_permission', 12, 'Role permission changed.<br/><br/>Read Access: 1 -> 0<br/>', 2, '2024-10-10 14:59:24', '2024-10-10 14:59:24'),
+(135, 'role_permission', 12, 'Role permission changed.<br/><br/>Write Access: 1 -> 0<br/>', 2, '2024-10-10 14:59:25', '2024-10-10 14:59:25'),
+(136, 'role_permission', 13, 'Role permission created.', 2, '2024-10-10 15:09:40', '2024-10-10 15:09:40'),
+(137, 'system_action', 2, 'System action created.', 2, '2024-10-10 15:24:31', '2024-10-10 15:24:31'),
+(138, 'role_system_action_permission', 1, 'Role system action permission changed.<br/><br/>System Action Access: 1 -> 0<br/>', 2, '2024-10-10 16:24:43', '2024-10-10 16:24:43'),
+(139, 'role_system_action_permission', 1, 'Role system action permission changed.<br/><br/>System Action Access: 0 -> 1<br/>', 2, '2024-10-10 16:24:45', '2024-10-10 16:24:45'),
+(140, 'role_system_action_permission', 1, 'Role system action permission changed.<br/><br/>System Action Access: 1 -> 0<br/>', 2, '2024-10-10 16:25:40', '2024-10-10 16:25:40'),
+(141, 'role_system_action_permission', 2, 'Role system action permission created.', 2, '2024-10-10 16:30:35', '2024-10-10 16:30:35'),
+(142, 'role_system_action_permission', 3, 'Role system action permission created.', 2, '2024-10-10 16:30:35', '2024-10-10 16:30:35'),
+(143, 'role_system_action_permission', 2, 'Role system action permission changed.<br/><br/>System Action Access: 0 -> 1<br/>', 2, '2024-10-10 16:30:36', '2024-10-10 16:30:36'),
+(144, 'role_system_action_permission', 3, 'Role system action permission changed.<br/><br/>System Action Access: 0 -> 1<br/>', 2, '2024-10-10 16:30:37', '2024-10-10 16:30:37'),
+(145, 'role_system_action_permission', 4, 'Role system action permission created.', 2, '2024-10-10 16:46:34', '2024-10-10 16:46:34'),
+(146, 'role_system_action_permission', 5, 'Role system action permission created.', 2, '2024-10-10 16:46:34', '2024-10-10 16:46:34'),
+(147, 'role_system_action_permission', 4, 'Role system action permission changed.<br/><br/>System Action Access: 0 -> 1<br/>', 2, '2024-10-10 16:46:35', '2024-10-10 16:46:35'),
+(148, 'role_system_action_permission', 5, 'Role system action permission changed.<br/><br/>System Action Access: 0 -> 1<br/>', 2, '2024-10-10 16:46:36', '2024-10-10 16:46:36'),
+(149, 'role_system_action_permission', 4, 'Role system action permission changed.<br/><br/>System Action Access: 1 -> 0<br/>', 2, '2024-10-10 16:46:36', '2024-10-10 16:46:36'),
+(150, 'role_system_action_permission', 5, 'Role system action permission changed.<br/><br/>System Action Access: 1 -> 0<br/>', 2, '2024-10-10 16:46:37', '2024-10-10 16:46:37'),
+(151, 'role_permission', 3, 'Role permission changed.<br/><br/>Write Access: 0 -> 1<br/>', 2, '2024-10-10 16:55:43', '2024-10-10 16:55:43'),
+(152, 'role_permission', 3, 'Role permission changed.<br/><br/>Write Access: 1 -> 0<br/>', 2, '2024-10-10 16:55:58', '2024-10-10 16:55:58');
 
 -- --------------------------------------------------------
 
@@ -1591,7 +1977,8 @@ CREATE TABLE `role` (
 --
 
 INSERT INTO `role` (`role_id`, `role_name`, `role_description`, `created_date`, `last_log_by`) VALUES
-(1, 'Administrator', 'Full access to all features and data within the system. This role have similar access levels to the Admin but is not as powerful as the Super Admin.', '2024-09-27 16:42:19', 1);
+(1, 'Administrator', 'Full access to all features and data within the system. This role have similar access levels to the Admin but is not as powerful as the Super Admin.', '2024-09-27 16:42:19', 2),
+(2, 'test', 'test', '2024-10-10 13:55:46', 2);
 
 -- --------------------------------------------------------
 
@@ -1623,16 +2010,78 @@ CREATE TABLE `role_permission` (
 --
 
 INSERT INTO `role_permission` (`role_permission_id`, `role_id`, `role_name`, `menu_item_id`, `menu_item_name`, `read_access`, `write_access`, `create_access`, `delete_access`, `import_access`, `export_access`, `log_notes_access`, `date_assigned`, `created_date`, `last_log_by`) VALUES
-(1, 1, 'Administrator', 1, 'App Module', 1, 1, 1, 1, 1, 1, 1, '2024-09-27 16:45:02', '2024-09-27 16:45:02', 1),
-(2, 1, 'Administrator', 2, 'General Settings', 1, 1, 1, 1, 1, 1, 1, '2024-09-27 16:45:02', '2024-09-27 16:45:02', 1),
+(1, 1, 'Administrator', 1, 'App Module', 1, 1, 1, 1, 1, 1, 1, '2024-09-27 16:45:02', '2024-09-27 16:45:02', 2),
+(2, 1, 'Administrator', 2, 'General Settings', 1, 1, 1, 1, 1, 1, 1, '2024-09-27 16:45:02', '2024-09-27 16:45:02', 2),
 (3, 1, 'Administrator', 3, 'Users & Companies', 1, 0, 0, 0, 0, 0, 0, '2024-09-27 16:45:02', '2024-09-27 16:45:02', 2),
-(4, 1, 'Administrator', 4, 'User Account', 1, 1, 1, 1, 1, 1, 1, '2024-09-27 16:45:02', '2024-09-27 16:45:02', 1),
-(5, 1, 'Administrator', 5, 'Company', 1, 1, 1, 1, 1, 1, 1, '2024-09-27 16:45:02', '2024-09-27 16:45:02', 1),
-(6, 1, 'Administrator', 6, 'Role', 1, 1, 1, 1, 1, 1, 1, '2024-09-27 16:45:02', '2024-09-27 16:45:02', 1),
-(7, 1, 'Administrator', 7, 'User Interface', 1, 0, 0, 0, 0, 0, 0, '2024-09-27 16:45:02', '2024-09-27 16:45:02', 1),
-(8, 1, 'Administrator', 8, 'Menu Group', 1, 1, 1, 1, 1, 1, 1, '2024-09-27 16:45:02', '2024-09-27 16:45:02', 1),
-(9, 1, 'Administrator', 9, 'Menu Item', 1, 1, 1, 1, 1, 1, 1, '2024-09-27 16:45:02', '2024-09-27 16:45:02', 1),
-(10, 1, 'Administrator', 10, 'System Action', 1, 1, 1, 1, 1, 1, 1, '2024-09-27 16:45:02', '2024-09-27 16:45:02', 1);
+(4, 1, 'Administrator', 4, 'User Account', 1, 1, 1, 1, 1, 1, 1, '2024-09-27 16:45:02', '2024-09-27 16:45:02', 2),
+(5, 1, 'Administrator', 5, 'Company', 1, 1, 1, 1, 1, 1, 1, '2024-09-27 16:45:02', '2024-09-27 16:45:02', 2),
+(6, 1, 'Administrator', 6, 'Role', 1, 1, 1, 1, 1, 1, 1, '2024-09-27 16:45:02', '2024-09-27 16:45:02', 2),
+(7, 1, 'Administrator', 7, 'User Interface', 1, 0, 0, 0, 0, 0, 0, '2024-09-27 16:45:02', '2024-09-27 16:45:02', 2),
+(8, 1, 'Administrator', 8, 'Menu Group', 1, 1, 1, 1, 1, 1, 1, '2024-09-27 16:45:02', '2024-09-27 16:45:02', 2),
+(9, 1, 'Administrator', 9, 'Menu Item', 1, 1, 1, 1, 1, 1, 1, '2024-09-27 16:45:02', '2024-09-27 16:45:02', 2),
+(10, 1, 'Administrator', 10, 'System Action', 1, 1, 1, 1, 1, 1, 1, '2024-09-27 16:45:02', '2024-09-27 16:45:02', 2);
+
+--
+-- Triggers `role_permission`
+--
+DROP TRIGGER IF EXISTS `role_permission_trigger_insert`;
+DELIMITER $$
+CREATE TRIGGER `role_permission_trigger_insert` AFTER INSERT ON `role_permission` FOR EACH ROW BEGIN
+    DECLARE audit_log TEXT DEFAULT 'Role permission created.';
+
+    INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
+    VALUES ('role_permission', NEW.role_permission_id, audit_log, NEW.last_log_by, NOW());
+END
+$$
+DELIMITER ;
+DROP TRIGGER IF EXISTS `role_permission_trigger_update`;
+DELIMITER $$
+CREATE TRIGGER `role_permission_trigger_update` AFTER UPDATE ON `role_permission` FOR EACH ROW BEGIN
+    DECLARE audit_log TEXT DEFAULT 'Role permission changed.<br/><br/>';
+
+    IF NEW.role_name <> OLD.role_name THEN
+        SET audit_log = CONCAT(audit_log, "Role Name: ", OLD.role_name, " -> ", NEW.role_name, "<br/>");
+    END IF;
+
+    IF NEW.menu_item_name <> OLD.menu_item_name THEN
+        SET audit_log = CONCAT(audit_log, "Menu Item: ", OLD.menu_item_name, " -> ", NEW.menu_item_name, "<br/>");
+    END IF;
+
+    IF NEW.read_access <> OLD.read_access THEN
+        SET audit_log = CONCAT(audit_log, "Read Access: ", OLD.read_access, " -> ", NEW.read_access, "<br/>");
+    END IF;
+
+    IF NEW.write_access <> OLD.write_access THEN
+        SET audit_log = CONCAT(audit_log, "Write Access: ", OLD.write_access, " -> ", NEW.write_access, "<br/>");
+    END IF;
+
+    IF NEW.create_access <> OLD.create_access THEN
+        SET audit_log = CONCAT(audit_log, "Create Access: ", OLD.create_access, " -> ", NEW.create_access, "<br/>");
+    END IF;
+
+    IF NEW.delete_access <> OLD.delete_access THEN
+        SET audit_log = CONCAT(audit_log, "Delete Access: ", OLD.delete_access, " -> ", NEW.delete_access, "<br/>");
+    END IF;
+
+    IF NEW.import_access <> OLD.import_access THEN
+        SET audit_log = CONCAT(audit_log, "Import Access: ", OLD.import_access, " -> ", NEW.import_access, "<br/>");
+    END IF;
+
+    IF NEW.export_access <> OLD.export_access THEN
+        SET audit_log = CONCAT(audit_log, "Export Access: ", OLD.export_access, " -> ", NEW.export_access, "<br/>");
+    END IF;
+
+    IF NEW.log_notes_access <> OLD.log_notes_access THEN
+        SET audit_log = CONCAT(audit_log, "Log Notes Access: ", OLD.log_notes_access, " -> ", NEW.log_notes_access, "<br/>");
+    END IF;
+    
+    IF audit_log <> 'Role permission changed.<br/><br/>' THEN
+        INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
+        VALUES ('role_permission', NEW.role_permission_id, audit_log, NEW.last_log_by, NOW());
+    END IF;
+END
+$$
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -1652,6 +2101,44 @@ CREATE TABLE `role_system_action_permission` (
   `created_date` datetime DEFAULT current_timestamp(),
   `last_log_by` int(10) UNSIGNED DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Triggers `role_system_action_permission`
+--
+DROP TRIGGER IF EXISTS `role_system_action_permission_trigger_insert`;
+DELIMITER $$
+CREATE TRIGGER `role_system_action_permission_trigger_insert` AFTER INSERT ON `role_system_action_permission` FOR EACH ROW BEGIN
+    DECLARE audit_log TEXT DEFAULT 'Role system action permission created.';
+
+    INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
+    VALUES ('role_system_action_permission', NEW.role_system_action_permission_id, audit_log, NEW.last_log_by, NOW());
+END
+$$
+DELIMITER ;
+DROP TRIGGER IF EXISTS `role_system_action_permission_trigger_update`;
+DELIMITER $$
+CREATE TRIGGER `role_system_action_permission_trigger_update` AFTER UPDATE ON `role_system_action_permission` FOR EACH ROW BEGIN
+    DECLARE audit_log TEXT DEFAULT 'Role system action permission changed.<br/><br/>';
+
+    IF NEW.role_name <> OLD.role_name THEN
+        SET audit_log = CONCAT(audit_log, "Role Name: ", OLD.role_name, " -> ", NEW.role_name, "<br/>");
+    END IF;
+
+    IF NEW.system_action_name <> OLD.system_action_name THEN
+        SET audit_log = CONCAT(audit_log, "System Action: ", OLD.system_action_name, " -> ", NEW.system_action_name, "<br/>");
+    END IF;
+
+    IF NEW.system_action_access <> OLD.system_action_access THEN
+        SET audit_log = CONCAT(audit_log, "System Action Access: ", OLD.system_action_access, " -> ", NEW.system_action_access, "<br/>");
+    END IF;
+    
+    IF audit_log <> 'Role system action permission changed.<br/><br/>' THEN
+        INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
+        VALUES ('role_system_action_permission', NEW.role_system_action_permission_id, audit_log, NEW.last_log_by, NOW());
+    END IF;
+END
+$$
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -1676,7 +2163,7 @@ CREATE TABLE `role_user_account` (
 --
 
 INSERT INTO `role_user_account` (`role_user_account_id`, `role_id`, `role_name`, `user_account_id`, `file_as`, `date_assigned`, `created_date`, `last_log_by`) VALUES
-(1, 1, 'Administrator', 2, 'Administrator', '2024-09-27 16:42:19', '2024-09-27 16:42:19', 1);
+(1, 1, 'Administrator', 2, 'Administrator', '2024-09-27 16:42:19', '2024-09-27 16:42:19', 2);
 
 -- --------------------------------------------------------
 
@@ -1763,6 +2250,13 @@ CREATE TABLE `system_action` (
   `created_date` datetime DEFAULT current_timestamp(),
   `last_log_by` int(10) UNSIGNED DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `system_action`
+--
+
+INSERT INTO `system_action` (`system_action_id`, `system_action_name`, `system_action_description`, `created_date`, `last_log_by`) VALUES
+(2, 'test', 'test', '2024-10-10 15:24:31', 2);
 
 --
 -- Triggers `system_action`
@@ -1958,7 +2452,7 @@ CREATE TABLE `user_account` (
 
 INSERT INTO `user_account` (`user_account_id`, `file_as`, `email`, `username`, `password`, `profile_picture`, `locked`, `active`, `last_failed_login_attempt`, `failed_login_attempts`, `last_connection_date`, `password_expiry_date`, `reset_token`, `reset_token_expiry_date`, `receive_notification`, `two_factor_auth`, `otp`, `otp_expiry_date`, `failed_otp_attempts`, `last_password_change`, `account_lock_duration`, `last_password_reset`, `multiple_session`, `session_token`, `linked_id`, `created_date`, `last_log_by`) VALUES
 (1, 'Digify Bot', 'digifybot@gmail.com', 'digifybot', 'Lu%2Be%2BRZfTv%2F3T0GR%2Fwes8QPJvE3Etx1p7tmryi74LNk%3D', NULL, 'WkgqlkcpSeEd7eWC8gl3iPwksfGbJYGy3VcisSyDeQ0', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20', NULL, NULL, NULL, 'aUIRg2jhRcYVcr0%2BiRDl98xjv81aR4Ux63bP%2BF2hQbE%3D', NULL, NULL, 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'WkgqlkcpSeEd7eWC8gl3iPwksfGbJYGy3VcisSyDeQ0', NULL, NULL, NULL, NULL, NULL, NULL, 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', NULL, NULL, '2024-09-27 11:49:59', 1),
-(2, 'Administrator', 'lawrenceagulto.317@gmail.com', 'ldagulto', 'ZW2SGXn0B41ZvY7Nl92uFaBW1LRhTxwaem5sgn8clRE%3D', NULL, '9lZtEofygdjMs3EsZV1V38KQF%2FPjp7btRHLFnck7DpM%3D', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20', '0000-00-00 00:00:00', '', '2024-10-09 11:54:50', 'j3TPQ%2FkOvrVcj0dMsNNs%2BicQ3gQo7W812x4%2BN2Q72oM%3D', 'wWt3OtHh0FKAhB31glK%2FdLfDTWMQdhqvZ%2FtRgmWl8EU%3D', 'P4tR005eyn3kNWp4tUtAQ17HIhZPD2zHiMAUfRmlAiAM6qi4fe8MjMopfWWK3xk9', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'C5lE%2BSaPOkNz3m%2B627Q248figN7I0qExBdDjiOb2H6k%3D', 'ZGcB4c0ilbqAXtUA70A3BWeXY2S1fx1WLZx0KQOfyZ8SsCclRc4dqumEHTinVPGn', '', '2024-09-27 12:27:47', '', NULL, 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', '%2FlIJ2gfKc6KtY5YhYbCfZKf4AoSmkN1yGa4Nej%2BkubM%3D', NULL, '2024-09-27 11:49:59', 2);
+(2, 'Administrator', 'lawrenceagulto.317@gmail.com', 'ldagulto', 'ZW2SGXn0B41ZvY7Nl92uFaBW1LRhTxwaem5sgn8clRE%3D', NULL, '9lZtEofygdjMs3EsZV1V38KQF%2FPjp7btRHLFnck7DpM%3D', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20', '0000-00-00 00:00:00', '', '2024-10-10 11:42:00', 'j3TPQ%2FkOvrVcj0dMsNNs%2BicQ3gQo7W812x4%2BN2Q72oM%3D', 'wWt3OtHh0FKAhB31glK%2FdLfDTWMQdhqvZ%2FtRgmWl8EU%3D', 'P4tR005eyn3kNWp4tUtAQ17HIhZPD2zHiMAUfRmlAiAM6qi4fe8MjMopfWWK3xk9', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'Fo7HKHnI5hqKsDftOZZMCpSTb10%2Fp8dwvv%2BKdWGE1wI%3D', 'KuLtirvIXNe0QJuCjmR1g38nI%2F9tiDHL5nXPXfmYENR0XEY4kWoPOQ1mhkv4SMLm', '', '2024-09-27 12:27:47', '', NULL, 'aVWoyO3aKYhOnVA8MwXfCaL4WrujDqvAPCHV3dY8F20%3D', 'zoZ%2FQ%2BwrabY8wIRqVfceFt4zJlu%2B8wc7rNxGiqTTtvk%3D', NULL, '2024-09-27 11:49:59', 2);
 
 --
 -- Triggers `user_account`
@@ -2221,7 +2715,7 @@ ALTER TABLE `app_module`
 -- AUTO_INCREMENT for table `audit_log`
 --
 ALTER TABLE `audit_log`
-  MODIFY `audit_log_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=101;
+  MODIFY `audit_log_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=153;
 
 --
 -- AUTO_INCREMENT for table `email_setting`
@@ -2287,19 +2781,19 @@ ALTER TABLE `password_history`
 -- AUTO_INCREMENT for table `role`
 --
 ALTER TABLE `role`
-  MODIFY `role_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `role_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `role_permission`
 --
 ALTER TABLE `role_permission`
-  MODIFY `role_permission_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `role_permission_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `role_system_action_permission`
 --
 ALTER TABLE `role_system_action_permission`
-  MODIFY `role_system_action_permission_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `role_system_action_permission_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `role_user_account`
@@ -2317,7 +2811,7 @@ ALTER TABLE `security_setting`
 -- AUTO_INCREMENT for table `system_action`
 --
 ALTER TABLE `system_action`
-  MODIFY `system_action_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `system_action_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `upload_setting`

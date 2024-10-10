@@ -54,29 +54,19 @@
     </div>
 </div>
 
-<div class="card card-body">
-    <div class="row">
-        <div class="col-md-3 text-left mt-2">
-            <div class="card-actions ms-auto d-flex button-group">
-                <h5 class="card-title mb-0">Role Permission</h5>
-            </div>
-        </div>
-        <?php require_once('components/view/_datatable_search.php'); ?>
-        <div class="col-md-3 text-end d-flex justify-content-md-end justify-content-center mt-3 mt-md-0">
-            <div class="card-actions cursor-pointer ms-auto d-flex button-group">
-                <button type="button" class="btn btn-success mb-0 px-4" data-bs-toggle="offcanvas" data-bs-target="#filter-offcanvas" aria-controls="filter-offcanvas">Assign</a>
-            </div>
-        </div>
-    </div>
-</div>
-
 <div class="datatables">
     <div class="row">
         <div class="col-12">
             <div class="card">
+                <div class="card-header d-flex align-items-center">
+                    <h5 class="card-title mb-0">Role Permission</h5>
+                    <div class="card-actions cursor-pointer ms-auto d-flex button-group">
+                        <button class="btn btn-success d-flex align-items-center mb-0" data-bs-toggle="modal" data-bs-target="#role-permission-assignment-modal" id="assign-role-permission">Assign</button>
+                    </div>
+                </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table id="role-permission-table" class="table w-100 table-hover display text-nowrap dataTable">
+                        <table id="role-permission-table" class="table w-100 text-nowrap dataTable">
                             <thead class="text-dark">
                                 <tr>
                                     <th>Role</th>
@@ -155,6 +145,30 @@
             <div class="modal-footer border-top">
                 <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">Close</button>
                 <button type="submit" form="menu-item-form" class="btn btn-success" id="submit-data">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="role-permission-assignment-modal" class="modal fade" tabindex="-1" aria-labelledby="role-permission-assignment-modal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <div class="modal-header border-bottom">
+                <h5 class="modal-title fw-8">Assign Role Permission</h5>
+                <button type="button" class="btn-close fs-2" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="role-permission-assignment-form" method="post" action="#">
+                    <div class="row">
+                        <div class="col-12">
+                            <select multiple="multiple" size="20" id="role_id" name="role_id[]"></select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-top">
+                <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">Close</button>
+                <button type="submit" form="role-permission-assignment-form" class="btn btn-success" id="submit-assignment">Save changes</button>
             </div>
         </div>
     </div>

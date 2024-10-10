@@ -116,7 +116,11 @@ END //
 /* Generate Stored Procedure */
 
 DROP PROCEDURE IF EXISTS generateMenuItemTable//
-CREATE PROCEDURE generateMenuItemTable(IN p_filter_by_app_module TEXT, IN p_filter_by_menu_group TEXT, IN p_filter_by_parent_id TEXT)
+CREATE PROCEDURE generateMenuItemTable(
+    IN p_filter_by_app_module TEXT,
+    IN p_filter_by_menu_group TEXT,
+    IN p_filter_by_parent_id TEXT
+)
 BEGIN
     DECLARE query TEXT;
     DECLARE filter_conditions TEXT DEFAULT '';
@@ -161,7 +165,9 @@ BEGIN
 END //
 
 DROP PROCEDURE IF EXISTS generateMenuItemAssignedRoleTable//
-CREATE PROCEDURE generateMenuItemAssignedRoleTable(IN p_menu_item_id INT)
+CREATE PROCEDURE generateMenuItemAssignedRoleTable(
+    IN p_menu_item_id INT
+)
 BEGIN
     SELECT role_permission_id, role_name, read_access, write_access, create_access, delete_access, import_access, export_access, log_notes_access 
     FROM role_permission
@@ -169,7 +175,9 @@ BEGIN
 END //
 
 DROP PROCEDURE IF EXISTS generateMenuItemOptions//
-CREATE PROCEDURE generateMenuItemOptions(IN p_menu_item_id INT)
+CREATE PROCEDURE generateMenuItemOptions(
+    IN p_menu_item_id INT
+)
 BEGIN
     IF p_menu_item_id IS NOT NULL AND p_menu_item_id != '' THEN
         SELECT menu_item_id, menu_item_name 

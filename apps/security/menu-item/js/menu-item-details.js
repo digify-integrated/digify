@@ -11,6 +11,10 @@
             menuItemForm();
         }
 
+        if($('#role-permission-assignment-form').length){
+            rolePermissionAssignmentForm();
+        }
+
         if($('#role-permission-table').length){
             rolePermissionTable('#role-permission-table');
         }
@@ -168,6 +172,10 @@
                 }
             });
         });
+
+        $(document).on('click','#assign-role-permission',function() {
+            generateDropdownOptions('menu item role dual listbox options');
+        });
         
         if($('#log-notes-modal').length){
             $(document).on('click','.view-role-permission-log-notes',function() {
@@ -281,9 +289,67 @@ function menuItemForm(){
     });
 }
 
-function rolePermissionTable(datatable_name) {
-    toggleHideActionDropdown();
+function rolePermissionAssignmentForm(){
+    $('#role-permission-assignment-form').validate({
+        errorPlacement: function(error, element) {
+            showNotification('Action Needed: Issue Detected', error, 'error', 2500);
+        },
+        highlight: function(element) {
+            const $element = $(element);
+            const $target = $element.hasClass('select2-hidden-accessible') ? $element.next().find('.select2-selection') : $element;
+            $target.addClass('is-invalid');
+        },
+        unhighlight: function(element) {
+            const $element = $(element);
+            const $target = $element.hasClass('select2-hidden-accessible') ? $element.next().find('.select2-selection') : $element;
+            $target.removeClass('is-invalid');
+        },
+        submitHandler: function(form) {
+            const menu_item_id = $('#details-id').text();
+            const transaction = 'assign menu item role permission';
+          
+            $.ajax({
+                type: 'POST',
+                url: 'apps/security/role/controller/role-controller.php',
+                data: $(form).serialize() + '&transaction=' + transaction + '&menu_item_id=' + menu_item_id,
+                dataType: 'json',
+                beforeSend: function() {
+                    disableFormSubmitButton('submit-assignment');
+                },
+                success: function (response) {
+                    if (response.success) {
+                        showNotification(response.title, response.message, response.messageType);
+                        reloadDatatable('#role-permission-table');
+                        $('#role-permission-assignment-modal').modal('hide');
+                    }
+                    else {
+                        if (response.isInactive || response.userNotExist || response.userInactive || response.userLocked || response.sessionExpired) {
+                            setNotification(response.title, response.message, response.messageType);
+                            window.location = 'logout.php?logout';
+                        }
+                        else if (response.notExist) {
+                            setNotification(response.title, response.message, response.messageType);
+                            window.location = 'role.php';
+                        }
+                        else {
+                            showNotification(response.title, response.message, response.messageType);
+                        }
+                    }
+                },
+                error: function(xhr, status, error) {
+                    handleSystemError(xhr, status, error);
+                },
+                complete: function() {
+                    enableFormSubmitButton('submit-assignment');
+                }
+            });
+        
+            return false;
+        }
+    });
+}
 
+function rolePermissionTable(datatable_name) {
     const type = 'menu item assigned role table';
     const page_id = $('#page-id').val();
     const page_link = document.getElementById('page-link').getAttribute('href');
@@ -313,7 +379,7 @@ function rolePermissionTable(datatable_name) {
         { width: 'auto', bSortable: false, targets: 8 }
     ];
 
-    const lengthMenu = [[10, 5, 25, 50, 100, -1], [10, 5, 25, 50, 100, 'All']];
+    const lengthMenu = [[5, 10, 25, 50, 100, -1], [5, 10, 25, 50, 100, 'All']];
 
     const settings = {
         ajax: { 
@@ -331,8 +397,7 @@ function rolePermissionTable(datatable_name) {
                 handleSystemError(xhr, status, error);
             }
         },
-        dom: 'Brtip',
-        lengthChange: false,
+        lengthChange: true,
         order: [[0, 'asc']],
         columns: columns,
         columnDefs: columnDefs,
@@ -453,6 +518,47 @@ function generateDropdownOptions(type){
                 },
                 error: function(xhr, status, error) {
                     handleSystemError(xhr, status, error);
+                }
+            });
+            break;
+        case 'menu item role dual listbox options':
+            var menu_item_id = $('#details-id').text();
+        
+            $.ajax({
+                url: 'apps/security/role/view/_role_generation.php',
+                method: 'POST',
+                dataType: 'json',
+                data: {
+                    type : type,
+                    menu_item_id : menu_item_id
+                },
+                success: function(response) {
+                    var select = document.getElementById('role_id');
+        
+                    select.options.length = 0;
+        
+                    response.forEach(function(opt) {
+                        var option = new Option(opt.text, opt.id);
+                        select.appendChild(option);
+                    });
+                },
+                error: function(xhr, status, error) {
+                    handleSystemError(xhr, status, error);
+                },
+                complete: function(){
+                    if($('#role_id').length){
+                        $('#role_id').bootstrapDualListbox({
+                            nonSelectedListLabel: 'Non-selected',
+                            selectedListLabel: 'Selected',
+                            preserveSelectionOnMove: 'moved',
+                            moveOnSelect: false,
+                            helperSelectNamePostfix: false
+                        });
+        
+                        $('#role_id').bootstrapDualListbox('refresh', true);
+        
+                        initializeDualListBoxIcon();
+                    }
                 }
             });
             break;
