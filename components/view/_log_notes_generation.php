@@ -29,18 +29,21 @@ if(isset($_POST['type']) && !empty($_POST['type'])){
                 $sql->bindValue(':referenceID', $referenceID, PDO::PARAM_INT);
                 $sql->execute();
                 $options = $sql->fetchAll(PDO::FETCH_ASSOC);
+                $count = count($options);
                 $sql->closeCursor();
 
-                foreach ($options as $row) {
+                foreach ($options as $index => $row) {
                     $log = $row['log'];
                     $changedBy = $row['changed_by'];
                     $timeElapsed = $systemModel->timeElapsedString($row['changed_at']);
-
+                
                     $userDetails = $authenticationModel->getLoginCredentials($changedBy, null);
                     $fileAs = $userDetails['file_as'];
                     $profilePicture = $systemModel->checkImage($userDetails['profile_picture'] ?? null, 'profile');
-
-                    $logNote .= '<div class="p-4 rounded-4 text-bg-light mb-3">
+                
+                    $marginClass = ($index === $count - 1) ? 'mb-0' : 'mb-3';
+                
+                    $logNote .= '<div class="p-4 rounded-4 text-bg-light ' . $marginClass . '">
                                     <div class="d-flex align-items-center gap-6 flex-wrap">
                                         <img src="'. $profilePicture .'" alt="user" class="rounded-circle" width="33" height="33">
                                         <h6 class="mb-0">'. $fileAs .'</h6>
@@ -80,18 +83,21 @@ if(isset($_POST['type']) && !empty($_POST['type'])){
                 $sql->bindValue(':referenceID', $referenceID, PDO::PARAM_INT);
                 $sql->execute();
                 $options = $sql->fetchAll(PDO::FETCH_ASSOC);
+                $count = count($options);
                 $sql->closeCursor();
 
-                foreach ($options as $row) {
+                foreach ($options as $index => $row) {
                     $log = $row['log'];
                     $changedBy = $row['changed_by'];
                     $timeElapsed = $systemModel->timeElapsedString($row['changed_at']);
-
+                
                     $userDetails = $authenticationModel->getLoginCredentials($changedBy, null);
                     $fileAs = $userDetails['file_as'];
                     $profilePicture = $systemModel->checkImage($userDetails['profile_picture'] ?? null, 'profile');
-                    
-                    $logNote .= '<div class="p-4 rounded-4 text-bg-light mb-3">
+                
+                    $marginClass = ($index === $count - 1) ? 'mb-0' : 'mb-3';
+                
+                    $logNote .= '<div class="p-4 rounded-4 text-bg-light ' . $marginClass . '">
                                     <div class="d-flex align-items-center gap-6 flex-wrap">
                                         <img src="'. $profilePicture .'" alt="user" class="rounded-circle" width="33" height="33">
                                         <h6 class="mb-0">'. $fileAs .'</h6>

@@ -89,6 +89,19 @@ class AuthenticationModel {
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    public function checkSystemActionAccessRights($p_user_account_id, $p_system_action_id) {
+        $stmt = $this->db->getConnection()->prepare('CALL checkSystemActionAccessRights(:p_user_account_id, :p_system_action_id)');
+        $stmt->bindValue(':p_user_account_id', $p_user_account_id, PDO::PARAM_INT);
+        $stmt->bindValue(':p_system_action_id', $p_system_action_id, PDO::PARAM_INT);
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt->closeCursor();
+        return $result;
+    }
+    # -------------------------------------------------------------
+
+
+    # -------------------------------------------------------------
     #   Update methods
     # -------------------------------------------------------------
 
@@ -255,12 +268,12 @@ class AuthenticationModel {
     # -------------------------------------------------------------
     public function buildMenuItemHTML($menuItemDetails, $level = 1) {
         $html = '';
-        $menuItemID = $this->securityModel->encryptData($menuItemDetails['MENU_ITEM_ID']);
-        $appModuleID = $this->securityModel->encryptData($menuItemDetails['APP_MODULE_ID']);
-        $menuItemName = $menuItemDetails['MENU_ITEM_NAME'];
-        $menuItemIcon = $menuItemDetails['MENU_ITEM_ICON'];
-        $menuItemURL = $menuItemDetails['MENU_ITEM_URL'];
-        $children = $menuItemDetails['CHILDREN'];
+        $menuItemID = $this->securityModel->encryptData($menuItemDetails['MENU_ITEM_ID'] ?? null);
+        $appModuleID = $this->securityModel->encryptData($menuItemDetails['APP_MODULE_ID'] ?? null);
+        $menuItemName = $menuItemDetails['MENU_ITEM_NAME'] ?? null;
+        $menuItemIcon = $menuItemDetails['MENU_ITEM_ICON'] ?? null;
+        $menuItemURL = $menuItemDetails['MENU_ITEM_URL'] ?? null;
+        $children = $menuItemDetails['CHILDREN'] ?? null;
     
         $menuItemURL = !empty($menuItemURL) ? (strpos($menuItemURL, '?page_id=') !== false ? $menuItemURL : $menuItemURL . '?app_module_id=' . $appModuleID . '&page_id=' . $menuItemID) : 'javascript:void(0)';
     

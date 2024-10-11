@@ -1,12 +1,12 @@
-<div class="col-md-4 mt-3 mt-md-0">
+<div class="col-md-4 mt-0">
             <div class="position-relative">
                 <input type="text" class="form-control product-search ps-5" id="datatable-search" placeholder="Search..." />
                 <i class="ti ti-search position-absolute top-50 start-0 translate-middle-y fs-6 text-dark ms-3"></i>
             </div>
         </div>
-        <div class="col-md-2 mt-3 mt-md-0">
+        <div class="col-md-1 mt-0">
             <div class="position-relative">
-                <select id="datatable-length" class="form-control">
+                <select id="datatable-length" class="form-select w-auto">
                     <option value="-1">All</option>
                     <option value="5">5</option>
                     <option value="10" selected>10</option>

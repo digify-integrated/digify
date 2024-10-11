@@ -90,7 +90,7 @@ if(isset($_POST['type']) && !empty($_POST['type'])){
                 }
 
                 if(empty($internalNoteList)){
-                    $internalNoteList = '<div class="p-4 rounded-4 text-bg-light mb-3 text-center">
+                    $internalNoteList = '<div class="p-4 rounded-4 text-bg-light mb-0 text-center">
                                 No internal notes found.
                             </div>';
                 }

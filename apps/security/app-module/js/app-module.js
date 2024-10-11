@@ -163,8 +163,8 @@ function appModuleTable(datatable_name) {
     ];
 
     const columnDefs = [
-        { width: '1%', bSortable: false, targets: 0 },
-        { width: 'auto', targets: 1 }
+        { width: '1%', bSortable: false, targets: 0, responsivePriority: 1 },
+        { width: 'auto', targets: 1, responsivePriority: 2 }
     ];
 
     const lengthMenu = [[10, 5, 25, 50, 100, -1], [10, 5, 25, 50, 100, 'All']];
@@ -190,6 +190,19 @@ function appModuleTable(datatable_name) {
         columns: columns,
         columnDefs: columnDefs,
         lengthMenu: lengthMenu,
+        responsive: {
+            details: {
+                type: 'inline',
+                display: $.fn.dataTable.Responsive.display.childRow,
+                renderer: function (api, rowIdx, columns) {
+                    let data = $.map(columns, function (col) {
+                        return col.hidden ? `<tr><td>${col.title}:</td><td>${col.data}</td></tr>` : '';
+                    }).join('');
+                    return data ? $('<table/>').append(data) : false;
+                }
+            }
+        },
+        autoWidth: false,
         language: {
             emptyTable: 'No data found',
             sLengthMenu: '_MENU_',
@@ -198,7 +211,7 @@ function appModuleTable(datatable_name) {
         },
         fnDrawCallback: function(oSettings) {
             readjustDatatableColumn();
-            
+
             $(`${datatable_name} tbody`).on('click', 'tr td:nth-child(n+2)', function () {
                 const rowData = $(datatable_name).DataTable().row($(this).closest('tr')).data();
                 if (rowData && rowData.LINK) {

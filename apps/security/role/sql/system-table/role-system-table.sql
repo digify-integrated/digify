@@ -81,6 +81,24 @@ CREATE INDEX role_system_action_permission_index_system_action_permission_id ON 
 CREATE INDEX role_system_action_permission_index_system_action_id ON role_system_action_permission(system_action_id);
 CREATE INDEX role_system_action_permissionn_index_role_id ON role_system_action_permission(role_id);
 
+INSERT INTO `role_system_action_permission` (`role_system_action_permission_id`, `role_id`, `role_name`, `system_action_id`, `system_action_name`, `system_action_access`) VALUES
+(1, 1, 'Administrator', 1, 'Update System Settings', 1),
+(2, 1, 'Administrator', 2, 'Update Security Settings', 1),
+(3, 1, 'Administrator', 3, 'Activate User Account', 1),
+(4, 1, 'Administrator', 4, 'Deactivate User Account', 1),
+(5, 1, 'Administrator', 5, 'Lock User Account', 1),
+(6, 1, 'Administrator', 6, 'Unlock User Account', 1),
+(7, 1, 'Administrator', 7, 'Add Role User Account', 1),
+(8, 1, 'Administrator', 8, 'Delete Role User Account', 1),
+(9, 1, 'Administrator', 9, 'Add Role Access', 1),
+(10, 1, 'Administrator', 10, 'Update Role Access', 1),
+(11, 1, 'Administrator', 11, 'Delete Role Access', 1),
+(12, 1, 'Administrator', 12, 'Add Role System Action Access', 1),
+(13, 1, 'Administrator', 13, 'Update Role System Action Access', 1),
+(14, 1, 'Administrator', 14, 'Delete Role System Action Access', 1),
+(15, 1, 'Administrator', 15, 'Add File Extension Access', 1),
+(16, 1, 'Administrator', 16, 'Delete File Extension Access', 1);
+
 /* ----------------------------------------------------------------------------------------------------------------------------- */
 
 /* Role User Account Table */

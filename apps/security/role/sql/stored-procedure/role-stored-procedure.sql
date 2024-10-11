@@ -391,26 +391,24 @@ BEGIN
     ORDER BY role_name;
 END //
 
-DROP PROCEDURE IF EXISTS generateMenuItemRolePermissionTable//
-CREATE PROCEDURE generateMenuItemRolePermissionTable(
-    IN p_menu_item_id INT
+DROP PROCEDURE IF EXISTS generateRoleAssignedMenuItemTable//
+CREATE PROCEDURE generateRoleAssignedMenuItemTable(
+    IN p_role_id INT
 )
 BEGIN
-	SELECT role_permission_id, role_name, read_access, write_access, create_access, delete_access 
+    SELECT role_permission_id, menu_item_name, read_access, write_access, create_access, delete_access, import_access, export_access, log_notes_access 
     FROM role_permission
-    WHERE menu_item_id = p_menu_item_id
-    ORDER BY role_name;
+    WHERE role_id = p_role_id;
 END //
 
-DROP PROCEDURE IF EXISTS generateSystemActionRolePermissionTable//
-CREATE PROCEDURE generateSystemActionRolePermissionTable(
-    IN p_system_action_id INT
+DROP PROCEDURE IF EXISTS generateRoleAssignedSystemActionTable//
+CREATE PROCEDURE generateRoleAssignedSystemActionTable(
+    IN p_role_id INT
 )
 BEGIN
-	SELECT role_system_action_permission_id, role_name, system_action_access 
+    SELECT role_system_action_permission_id, system_action_name, system_action_access 
     FROM role_system_action_permission
-    WHERE system_action_id = p_system_action_id
-    ORDER BY role_name;
+    WHERE role_id = p_role_id;
 END //
 
 DROP PROCEDURE IF EXISTS generateUserAccountRoleDualListBoxOptions//
@@ -444,6 +442,28 @@ BEGIN
     FROM role 
     WHERE role_id NOT IN (SELECT role_id FROM role_system_action_permission WHERE system_action_id = p_system_action_id)
     ORDER BY role_name;
+END //
+
+DROP PROCEDURE IF EXISTS generateRoleMenuItemDualListBoxOptions//
+CREATE PROCEDURE generateRoleMenuItemDualListBoxOptions(
+    IN p_role_id INT
+)
+BEGIN
+	SELECT menu_item_id, menu_item_name 
+    FROM menu_item 
+    WHERE menu_item_id NOT IN (SELECT menu_item_id FROM role_permission WHERE role_id = p_role_id)
+    ORDER BY menu_item_name;
+END //
+
+DROP PROCEDURE IF EXISTS generateRoleSystemActionDualListBoxOptions//
+CREATE PROCEDURE generateRoleSystemActionDualListBoxOptions(
+    IN p_role_id INT
+)
+BEGIN
+	SELECT system_action_id, system_action_name 
+    FROM system_action
+    WHERE system_action_id NOT IN (SELECT system_action_id FROM role_system_action_permission WHERE role_id = p_role_id)
+    ORDER BY system_action_name;
 END //
 
 /* ----------------------------------------------------------------------------------------------------------------------------- */

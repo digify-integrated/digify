@@ -173,10 +173,10 @@ function menuGroupTable(datatable_name) {
     ];
 
     const columnDefs = [
-        { width: '1%', bSortable: false, targets: 0, responsivePriority: 1 }, // Checkbox, always visible
-        { width: 'auto', targets: 1, responsivePriority: 2 }, // Menu Group
-        { width: 'auto', targets: 2, responsivePriority: 3 }, // App Module
-        { width: 'auto', targets: 3, responsivePriority: 4 }  // Order Sequence
+        { width: '1%', bSortable: false, targets: 0, responsivePriority: 1 },
+        { width: 'auto', targets: 1, responsivePriority: 2 },
+        { width: 'auto', targets: 2, responsivePriority: 3 },
+        { width: 'auto', targets: 3, responsivePriority: 4 }
     ];
 
     const lengthMenu = [[10, 5, 25, 50, 100, -1], [10, 5, 25, 50, 100, 'All']];
@@ -205,8 +205,8 @@ function menuGroupTable(datatable_name) {
         lengthMenu: lengthMenu,
         responsive: {
             details: {
-                type: 'inline', // Ensures the plus icon is displayed in the first column
-                display: $.fn.dataTable.Responsive.display.childRow, // Show hidden columns when user clicks the plus icon
+                type: 'inline',
+                display: $.fn.dataTable.Responsive.display.childRow,
                 renderer: function (api, rowIdx, columns) {
                     let data = $.map(columns, function (col) {
                         return col.hidden ? `<tr><td>${col.title}:</td><td>${col.data}</td></tr>` : '';

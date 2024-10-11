@@ -75,11 +75,10 @@ if(isset($_POST['type']) && !empty($_POST['type'])){
             $options = $sql->fetchAll(PDO::FETCH_ASSOC);
             $sql->closeCursor();
 
-            #$deleteRoleAccess = $globalModel->checkSystemActionAccessRights($userID, 9);
-            $deleteRoleAccess = 1;
-            $updateRoleAccess = 1;
+            $updateRoleAccess = $authenticationModel->checkSystemActionAccessRights($userID, 10);
+            $deleteRoleAccess = $authenticationModel->checkSystemActionAccessRights($userID, 11);
 
-            $disabled = ($updateRoleAccess == 0) ? 'disabled' : '';
+            $disabled = ($updateRoleAccess['total'] == 0) ? 'disabled' : '';
             $deleteButton = '';
 
             foreach ($options as $row) {
@@ -101,8 +100,7 @@ if(isset($_POST['type']) && !empty($_POST['type'])){
                 $exportAccessChecked = $exportAccessRights ? 'checked' : '';
                 $logNotesAccessChecked = $logNotesAccessRights ? 'checked' : '';
 
-                #if($deleteRoleAccess['total'] > 0){
-                if($deleteRoleAccess > 0){
+                if($deleteRoleAccess['total'] > 0){
                     $deleteButton = '<a href="javascript:void(0);" class="text-danger ms-3 delete-role-permission" data-role-permission-id="' . $rolePermissionID . '" title="Delete Role Permission">
                                         <i class="ti ti-trash fs-5"></i>
                                     </a>';

@@ -97,7 +97,6 @@
                 success: function (response) {
                     if (response.success) {
                         showNotification(response.title, response.message, response.messageType);
-                        reloadDatatable('#role-permission-table');
                     }
                     else {
                         if (response.isInactive || response.userNotExist || response.userInactive || response.userLocked || response.sessionExpired) {
@@ -368,15 +367,15 @@ function rolePermissionTable(datatable_name) {
     ];
 
     const columnDefs = [
-        { width: 'auto', targets: 0 },
-        { width: 'auto', bSortable: false, targets: 1 },
-        { width: 'auto', bSortable: false, targets: 2 },
-        { width: 'auto', bSortable: false, targets: 3 },
-        { width: 'auto', bSortable: false, targets: 4 },
-        { width: 'auto', bSortable: false, targets: 5 },
-        { width: 'auto', bSortable: false, targets: 6 },
-        { width: 'auto', bSortable: false, targets: 7 },
-        { width: 'auto', bSortable: false, targets: 8 }
+        { width: 'auto', targets: 0, responsivePriority: 1 },
+        { width: 'auto', bSortable: false, targets: 1, responsivePriority: 2 },
+        { width: 'auto', bSortable: false, targets: 2, responsivePriority: 3 },
+        { width: 'auto', bSortable: false, targets: 3, responsivePriority: 4 },
+        { width: 'auto', bSortable: false, targets: 4, responsivePriority: 5 },
+        { width: 'auto', bSortable: false, targets: 5, responsivePriority: 6 },
+        { width: 'auto', bSortable: false, targets: 6, responsivePriority: 7 },
+        { width: 'auto', bSortable: false, targets: 7, responsivePriority: 8 },
+        { width: 'auto', bSortable: false, targets: 8, responsivePriority: 1 }
     ];
 
     const lengthMenu = [[5, 10, 25, 50, 100, -1], [5, 10, 25, 50, 100, 'All']];
@@ -397,11 +396,25 @@ function rolePermissionTable(datatable_name) {
                 handleSystemError(xhr, status, error);
             }
         },
-        lengthChange: true,
+        dom: 'Brtip',
+        lengthChange: false,
         order: [[0, 'asc']],
         columns: columns,
         columnDefs: columnDefs,
         lengthMenu: lengthMenu,
+        responsive: {
+            details: {
+                type: 'inline',
+                display: $.fn.dataTable.Responsive.display.childRow,
+                renderer: function (api, rowIdx, columns) {
+                    let data = $.map(columns, function (col) {
+                        return col.hidden ? `<tr><td>${col.title}:</td><td>${col.data}</td></tr>` : '';
+                    }).join('');
+                    return data ? $('<table/>').append(data) : false;
+                }
+            }
+        },
+        autoWidth: false,
         language: {
             emptyTable: 'No data found',
             sLengthMenu: '_MENU_',
@@ -410,9 +423,16 @@ function rolePermissionTable(datatable_name) {
         },
         fnDrawCallback: function(oSettings) {
             readjustDatatableColumn();
+
+            $(`${datatable_name} tbody`).on('click', 'tr td:nth-child(n+2)', function () {
+                const rowData = $(datatable_name).DataTable().row($(this).closest('tr')).data();
+                if (rowData && rowData.LINK) {
+                    window.location.href = rowData.LINK;
+                }
+            });
         }
     };
-    
+
     destroyDatatable(datatable_name);
     $(datatable_name).dataTable(settings);
 }

@@ -36,12 +36,8 @@ if(isset($_POST['type']) && !empty($_POST['type'])){
 
                 $response[] = [
                     'CHECK_BOX' => '<input class="form-check-input datatable-checkbox-children" type="checkbox" value="'. $systemActionID .'">',
-                    'SYSTEM_ACTION_NAME' => '<div class="ms-3">
-                                                <div class="user-meta-info">
-                                                    <h6 class="user-name mb-0">'. $systemActionName .'</h6>
-                                                    <small>'. $systemActionDescription .'</small>
-                                                </div>
-                                            </div>',
+                    'SYSTEM_ACTION_NAME' => $systemActionName,
+                    'SYSTEM_ACTION_DESCRIPTION' => $systemActionDescription,
                     'LINK' => $pageLink .'&id='. $systemActionIDEncrypted
                 ];
             }
@@ -60,11 +56,10 @@ if(isset($_POST['type']) && !empty($_POST['type'])){
             $options = $sql->fetchAll(PDO::FETCH_ASSOC);
             $sql->closeCursor();
 
-            #$deleteRoleSystemActionAccess = $globalModel->checkSystemActionAccessRights($userID, 9);
-            $deleteRoleSystemActionAccess = 1;
-            $updateRoleAccess = 1;
+            $updateRoleAccess = $authenticationModel->checkSystemActionAccessRights($userID, 13);
+            $deleteRoleAccess = $authenticationModel->checkSystemActionAccessRights($userID, 14);
 
-            $disabled = ($updateRoleAccess == 0) ? 'disabled' : '';
+            $disabled = ($updateRoleAccess['total'] == 0) ? 'disabled' : '';
             $deleteButton = '';
 
             foreach ($options as $row) {
@@ -74,8 +69,7 @@ if(isset($_POST['type']) && !empty($_POST['type'])){
 
                 $roleAccessChecked = $roleAccess ? 'checked' : '';
 
-                #if($deleteRoleAccess['total'] > 0){
-                if($deleteRoleSystemActionAccess > 0){
+                if($deleteRoleAccess['total'] > 0){
                     $deleteButton = '<a href="javascript:void(0);" class="text-danger ms-3 delete-role-permission" data-role-system-action-permission-id="' . $roleSystemActionPermissionID . '" title="Delete Role Permission">
                                         <i class="ti ti-trash fs-5"></i>
                                     </a>';
