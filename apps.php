@@ -36,7 +36,7 @@
                                     $appLogo = $systemModel->checkImage($row['app_logo'], 'app module logo');
 
                                     $menuItemDetails = $menuItemModel->getMenuItem($menuItemID);
-                                    $menuItemURL = $menuItemDetails['menu_item_url'];
+                                    $menuItemURL = $menuItemDetails['menu_item_url'] ?? null;
                                             
                                     $apps .= ' <div class="col-lg-3">
                                                 <a class="mb-3 hover-img" href="'. $menuItemURL .'?app_module_id='. $securityModel->encryptData($appModuleID) .'&page_id='. $securityModel->encryptData($menuItemID) .'">

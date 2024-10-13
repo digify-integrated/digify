@@ -100,7 +100,9 @@ END //
 /* Generate Stored Procedure */
 
 DROP PROCEDURE IF EXISTS generateMenuGroupTable//
-CREATE PROCEDURE generateMenuGroupTable(IN p_filter_by_app_module TEXT)
+CREATE PROCEDURE generateMenuGroupTable(
+    IN p_filter_by_app_module TEXT
+)
 BEGIN
     DECLARE query TEXT;
 
@@ -115,7 +117,7 @@ BEGIN
     PREPARE stmt FROM query;
     EXECUTE stmt;
     DEALLOCATE PREPARE stmt;
-END;
+END//
 
 DROP PROCEDURE IF EXISTS generateMenuGroupOptions//
 CREATE PROCEDURE generateMenuGroupOptions()

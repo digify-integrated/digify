@@ -291,8 +291,33 @@ END //
 
 /* Build Stored Procedure */
 
+DROP PROCEDURE IF EXISTS buildAppModuleStack//
+CREATE PROCEDURE buildAppModuleStack(
+    IN p_user_account_id INT
+)
+BEGIN
+    SELECT DISTINCT(am.app_module_id) as app_module_id, am.app_module_name, am.menu_item_id, app_logo, app_module_description
+    FROM app_module am
+    JOIN menu_item mi ON mi.app_module_id = am.app_module_id
+    WHERE EXISTS (
+        SELECT 1
+        FROM role_permission mar
+        WHERE mar.menu_item_id = mi.menu_item_id
+        AND mar.read_access = 1
+        AND mar.role_id IN (
+            SELECT role_id
+            FROM role_user_account
+            WHERE user_account_id = p_user_account_id
+        )
+    )
+    ORDER BY am.order_sequence, am.app_module_name;
+END //
+
 DROP PROCEDURE IF EXISTS buildMenuGroup//
-CREATE PROCEDURE buildMenuGroup(IN p_user_account_id INT, IN p_app_module_id INT)
+CREATE PROCEDURE buildMenuGroup(
+    IN p_user_account_id INT,
+    IN p_app_module_id INT
+)
 BEGIN
     SELECT DISTINCT(mg.menu_group_id) as menu_group_id, mg.menu_group_name as menu_group_name
     FROM menu_group mg
@@ -313,7 +338,10 @@ BEGIN
 END //
 
 DROP PROCEDURE IF EXISTS buildMenuItem//
-CREATE PROCEDURE buildMenuItem(IN p_user_account_id INT, IN p_menu_group_id INT)
+CREATE PROCEDURE buildMenuItem(
+    IN p_user_account_id INT,
+    IN p_menu_group_id INT
+)
 BEGIN
     SELECT mi.menu_item_id, mi.menu_item_name, mi.menu_group_id, mi.menu_item_url, mi.parent_id, mi.app_module_id, mi.menu_item_icon
     FROM menu_item AS mi
@@ -326,7 +354,10 @@ END //
 /* ----------------------------------------------------------------------------------------------------------------------------- */
 
 DROP PROCEDURE IF EXISTS generateLogNotes//
-CREATE PROCEDURE generateLogNotes(IN p_table_name VARCHAR(255), IN p_reference_id INT)
+CREATE PROCEDURE generateLogNotes(
+    IN p_table_name VARCHAR(255),
+    IN p_reference_id INT
+)
 BEGIN
 	SELECT log, changed_by, changed_at
     FROM audit_log
@@ -335,7 +366,10 @@ BEGIN
 END //
 
 DROP PROCEDURE IF EXISTS generateInternalNotes//
-CREATE PROCEDURE generateInternalNotes(IN p_table_name VARCHAR(255), IN p_reference_id INT)
+CREATE PROCEDURE generateInternalNotes(
+    IN p_table_name VARCHAR(255),
+    IN p_reference_id INT
+)
 BEGIN
 	SELECT internal_notes_id, internal_note, internal_note_by, internal_note_date
     FROM internal_notes
