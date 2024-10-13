@@ -212,17 +212,17 @@ class AuthenticationModel {
     # -------------------------------------------------------------
     public function buildMenuItem($p_user_account_id, $p_menu_group_id) {
         $menuItems = [];
-
+    
         $stmt = $this->db->getConnection()->prepare('CALL buildMenuItem(:p_user_account_id, :p_menu_group_id)');
         $stmt->bindValue(':p_user_account_id', $p_user_account_id, PDO::PARAM_INT);
         $stmt->bindValue(':p_menu_group_id', $p_menu_group_id, PDO::PARAM_INT);
         $stmt->execute();
         $count = $stmt->rowCount();
-
-        if($count > 0){
+    
+        if ($count > 0) {
             $options = $stmt->fetchAll(PDO::FETCH_ASSOC);
             $stmt->closeCursor();
-
+    
             foreach ($options as $row) {
                 $menuItemID = $row['menu_item_id'];
                 $menuItemName = $row['menu_item_name'];
@@ -230,7 +230,7 @@ class AuthenticationModel {
                 $parentID = $row['parent_id'];
                 $appModuleID = $row['app_module_id'];
                 $menuItemIcon = !empty($row['menu_item_icon']) ? $row['menu_item_icon'] : null;
-
+    
                 $menuItem = [
                     'MENU_ITEM_ID' => $menuItemID,
                     'MENU_ITEM_NAME' => $menuItemName,
@@ -240,29 +240,34 @@ class AuthenticationModel {
                     'APP_MODULE_ID' => $appModuleID,
                     'CHILDREN' => []
                 ];
-
+    
                 $menuItems[$menuItemID] = $menuItem;
             }
-
+    
             foreach ($menuItems as $menuItem) {
                 if (!empty($menuItem['PARENT_ID'])) {
-                    $menuItems[$menuItem['PARENT_ID']]['CHILDREN'][] = &$menuItems[$menuItem['MENU_ITEM_ID']];
+                    if ($this->checkAccessRights($p_user_account_id, $menuItem['PARENT_ID'], 'read')['total'] > 0) {
+                        $menuItems[$menuItem['PARENT_ID']]['CHILDREN'][] = &$menuItems[$menuItem['MENU_ITEM_ID']];
+                    }
                 }
             }
-
+    
             $rootMenuItems = array_filter($menuItems, function ($item) {
                 return empty($item['PARENT_ID']);
             });
-
+    
             $html = '';
-
+    
             foreach ($rootMenuItems as $rootMenuItem) {
                 $html .= $this->buildMenuItemHTML($rootMenuItem);
             }
-
+    
             return $html;
         }
+    
+        return ''; // Return empty if no items are found
     }
+    
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
