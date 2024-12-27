@@ -1,6 +1,8 @@
 <?php
 namespace App\Controllers;
 
+session_start();
+
 require_once '../../config/config.php';
 require_once '../../autoload.php';
 
@@ -22,6 +24,7 @@ $controller = new AuthenticationController(
     new Security(),
     new SystemHelper()
 );
+
 $controller->handleRequest();
 
 class AuthenticationController{
@@ -98,7 +101,6 @@ class AuthenticationController{
         $email = $loginCredentialsDetails['email'] ?? '';
         $active = $this->security->decryptData($loginCredentialsDetails['active'] ?? '');
         $userPassword = $this->security->decryptData($loginCredentialsDetails['password'] ?? '');
-        $locked = $this->security->decryptData($loginCredentialsDetails['locked'] ?? '');
         $failedLoginAttempts = $this->security->decryptData($loginCredentialsDetails['failed_login_attempts'] ?? '');
         $passwordExpiryDate = $this->security->decryptData($loginCredentialsDetails['password_expiry_date'] ?? '');
         $accountLockDuration = $this->security->decryptData($loginCredentialsDetails['account_lock_duration'] ?? '');
@@ -131,7 +133,9 @@ class AuthenticationController{
         $this->authentication->insertLoginSession($userAccountID, $location, 'Ok', $deviceInfo, $ipAddress);
 
         $_SESSION['user_account_id'] = $userAccountID;
-        $_SESSION['session_token'] = $sessionToken;
+        $_SESSION['session_token'] = $encryptedSessionToken;
+
+        $this->systemHelper->sendSuccessResponse('', '',  ['redirectLink' => 'apps.php']);
     }
 
     # -------------------------------------------------------------
@@ -342,7 +346,7 @@ class AuthenticationController{
         $this->authentication->insertLoginSession($userAccountID, $location, 'Ok', $deviceInfo, $ipAddress);
         
         $_SESSION['user_account_id'] = $userAccountID;
-        $_SESSION['session_token'] = $sessionToken;
+        $_SESSION['session_token'] = $encryptedSessionToken;
 
         $this->systemHelper->sendSuccessResponse('', '',  ['redirectLink' => 'apps.php']);
     }
@@ -449,6 +453,7 @@ class AuthenticationController{
         $this->authentication->updateOTP($userAccountID, $encryptedOTP, $otpExpiryDate, $failedLoginAttempts);
         $this->sendOTP($email, $otp, 1);
     }
+
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
@@ -476,7 +481,7 @@ class AuthenticationController{
         $message = str_replace('{EMAIL_CONTENT}', $emailBody, $message);
     
         $mailer = new PHPMailer();
-        $this->configureSMTP(1, $mailer);
+        $this->configureSMTP($emailSettingID, $mailer);
         
         $mailer->setFrom($mailFromEmail, $mailFromName);
         $mailer->addAddress($email);
@@ -512,7 +517,7 @@ class AuthenticationController{
         $message = str_replace('{EMAIL_CONTENT}', $emailBody, $message);
     
         $mailer = new PHPMailer();
-        $this->configureSMTP(1, $mailer);
+        $this->configureSMTP($emailSettingID, $mailer);
         
         $mailer->setFrom($mailFromEmail, $mailFromName);
         $mailer->addAddress($email);

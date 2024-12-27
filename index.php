@@ -2,6 +2,8 @@
     require_once './config/config.php'; 
 
     $pageTitle = APP_NAME;
+
+    require_once './app/Views/Includes/session-check.php'; 
 ?>
 <!DOCTYPE html>
 <html lang="en">

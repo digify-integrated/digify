@@ -29,6 +29,8 @@
         header('Location: index.php');
         exit;
     }
+    
+    require_once './app/Views/Includes/session-check.php'; 
 ?>
 <!DOCTYPE html>
 <html lang="en">

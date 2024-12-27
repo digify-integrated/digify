@@ -53,7 +53,7 @@ define('MAX_FILE_SIZE', 10485760);                      // Maximum file upload s
 # -------------------------------------------------------------
 
 define('MAIL_SMTP_SERVER', 'smtp.hostinger.com');                   // SMTP server
-define('MAIL_SMTP_PORT', value: 465);                                      // SMTP port (usually 587 for TLS)
+define('MAIL_SMTP_PORT',  465);                                      // SMTP port (usually 587 for TLS)
 define('MAIL_USERNAME', 'cgmi-noreply@christianmotors.ph');         // SMTP username
 define('MAIL_PASSWORD', 'P@ssw0rd');                                // SMTP password
 define('MAIL_FROM_EMAIL', 'cgmi-noreply@christianmotors.ph');       // Email "from" address
